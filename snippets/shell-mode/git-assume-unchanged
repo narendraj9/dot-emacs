@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# contributor: Narendra Joshi
+# name: git-assume-unchanged
+# key: git-assume-unchanged
+# --
+git --update-index --assume-unchaged $1

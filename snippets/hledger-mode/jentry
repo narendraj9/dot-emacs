@@ -1,0 +1,11 @@
+# -*- mode: snippet; -*-
+# name: jentry
+# key: jentry
+# binding: direct-keybinding
+# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
+# --
+`(format-time-string "%Y-%m-%d")` ${1:/Description/}
+    ${2:/credited account/}    ₹ ${3:/amount/}
+    ${4:/debited account/}
+
+$0

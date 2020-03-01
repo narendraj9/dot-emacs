@@ -1,0 +1,24 @@
+* TLS: openssl
+** Print all certificates in a PEM file
+awk -v command='openssl x509 -text -noout ' '/BEGIN/ { close(command); }; { print | command; } ' $0
+** PEM CA chain to Java truststore
+awk -v base_command='keytool -import -trustcacerts -noprompt -storepass ${1:storepass} -storetype jks -keystore ${2:truststore}.jks' 'BEGIN { cert_number = 0; }; /BEGIN CERTIFICATE/ { close(base_command " -alias ca-" cert_number); cert_number++ }; { print | (base_command " -alias ca-" cert_number); }' ${3:input-file}.pem $0
+** Show server certificate for URL
+openssl s_client -connect ${1:url}:${2:443} -showcerts $0
+* Blogging
+** Blog Header
+#+TITLE: $1
+#+DATE: `(format-time-string (car org-time-stamp-formats))`
+#+AUTHOR: `user-full-name`
+$0
+* Java
+** Start a new Maven Project
+mvn archetype:generate -DgroupId=${1:groupId} -DartifactId=${2:artifactId} -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false ${}
+
+* CommandLine
+** Merge pdf files
+gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=${1:output.pdf} ${2:input-pdf-files} ${0}
+** dcmtk's movescu
+movescu --port 8765 --move myAE --call yourAE localhost 9876 -k 'StudyInstanceUID=$0' -ll debug -aet myAE --study -k QueryRetrieveLevel=STUDY
+** dcmtk's dcmqrscp
+dcmqrscp -ll debug -c ~/dotfiles/local/assets/dcmqrscp.cfg

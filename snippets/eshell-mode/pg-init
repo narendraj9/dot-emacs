@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# contributor: Narendra Joshi
+# name: pg-init
+# key: pg-init
+# --
+initdb --locale $LANG -E UTF8 -D $1

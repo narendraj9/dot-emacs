@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: blog header
+# key: <b
+# --
+#+TITLE: $1
+#+DATE: `(with-temp-buffer (org-time-stamp-inactive '(16)) (buffer-substring (point-min) (point-max)))`
+#+AUTHOR: `user-full-name`
+$0

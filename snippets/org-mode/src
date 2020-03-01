@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: src
+# key: src
+# --
+#+name: $1
+#+begin_src $2 :results verbatim drawer
+$0
+#+end_src

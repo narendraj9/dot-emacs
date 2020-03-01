@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: boxed-beg
+# key: boxed-beg
+# expand-env: ((yas-indent-line 'fixed))
+# --
+{-
+ @author: Narendra Joshi
+ @date: `(format-time-string "%d %b %Y")`
+ ${}
+--}
+$0

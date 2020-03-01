@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# contributor: Narendra Joshi
+# name: pg-start
+# key: pg-start
+# --
+pg_ctl -D $1 -l logfile start

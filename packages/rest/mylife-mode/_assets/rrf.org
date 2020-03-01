@@ -1,0 +1,226 @@
+* Viability (alpha = .80; .90; .85; tt = .74)
+** Acceptance/Tolerance (.61; .50; tt = .69)
+
+1. Do you accept this person as s/he is?
+
+2. Are you willing to ignore this person’s small sins because of the way you feel about her/him?
+
+3. Is it easy for you to forgive this person?
+
+4. Does this person disappoint you? (R)
+
+
+
+
+
+** Respect (.63; .69; tt = .71)
+
+5. Do you respect this person?
+
+6. Does this person make bad judgments on important matters? (R)
+
+7. Does this person bring out the best in you?
+
+8. Is this person a good sounding board for your ideas and plans?
+
+
+
+
+
+** Trust (.59; .60; tt = .62)
+
+9. Do you trust this person?
+
+10. Can you count on this person in times of need?
+
+11. Does this person ever forget your welfare? (R)
+
+12. Does this person use things against you that s/he shouldn’t? (R)
+
+* Intimacy (.76; .73; .79; tt = .78)
+
+
+** Confiding (.75; .55; tt = .71)
+
+13. Do you and this person openly discuss personal matters?
+
+14 Do you confide in this person?
+
+15. Do you feel that there are things about you that this person just would not understand?(R) 
+
+16. Do you feel some things about yourself are none of this person’s business?(R) 
+
+** Understanding (.57; .64; tt = .75)
+
+17. Do you know what kind of person s/he is?
+
+18. Is this person’s behavior surprising or puzzling to you?(R)
+
+19. Do you know this person’s faults and shortcomings?
+
+20. Do you know about this person’s past?
+
+* Passion (.82; .78; .80; tt = .82)
+
+
+
+** Fascination (.68; .67; tt = .77)
+
+21. Does this person dominate your thoughts?
+
+22. Does it give you pleasure just to watch or look at this person?
+
+23. Do you think about this person even when you are not with him/her?
+
+
+
+** Exclusiveness (.71; .65; tt = .77)
+
+24. Are there things that you do only with this person?
+
+25. Do you have feelings about this person that you couldn’t have about others?
+
+26. Would you feel betrayed or hurt if this person had the same relationship with someone else that s/he now has with you?
+
+27. Do you and this person have your own way of doing things?
+
+
+
+** Sexual Intimacy (.65; .75; tt = .77)
+
+28. Are you sexually intimate with this person?
+
+29. Do you find this personal sexually attractive?
+
+30. Do you enjoy being touched by this person and touching him/her?
+
+* Care (.89; .89; .97; tt = .78)
+
+** Giving the utmost (.79; .78; tt = .79)
+
+31. Can you count of this person to lend you a substantial sum of money?
+
+32. Can you count on this person to risk personal safety to help you if your were in danger?
+
+33. Can you count of this person to give the utmost on your behalf?
+
+34. Are you prepared to make a significant sacrifice on this person’s behalf?
+
+
+
+** Championing (.82; .80; tt = .60)
+
+35. Can you count on this person to let you know how others feel about you?
+
+36. Can you count on this person to support you in an argument or dispute with others?
+
+37. Can you count on this person to champion your interests where there is a conflict between your interests and those of others?
+
+
+
+** Assistance (.76; .78; tt = .75)
+
+38. Can you count on this person to come to your aid when you need help?
+
+39. Can this person count on you for help when s/he is in need?
+
+40. Can you count on this person to tell you what s/he really thinks about issues regardless of whether he or she agrees with you?
+
+41. Do you tell this person exactly what you think about important issues regardless of whether he or she agrees with you?
+
+* Global Satisfaction (.90; .93; .93; tt = .73)
+
+** Success (.83; .87; tt = .66)
+
+42. Are you happy in your relationship with this person?
+
+43. Has your relationship with this person satisfied your needs?
+
+44. Has your relationship with this person been a success?
+
+
+
+** Enjoyment (.81; .78; tt = .75)
+
+45. Do you enjoy doing things with this person more than with others?
+
+46. Do you enjoy doing things with this person that you otherwise would not enjoy?
+
+47. Do you enjoy this person’s company?
+
+
+
+** Reciprocity (.77; 84; tt = .74)
+
+48. Does your partner share the same feeling for you that you have for him/her?
+
+49. Does this person really care about you as a person?
+
+50. Do you feel that your partner cares for you as much as you care for him/her?
+
+
+
+** Esteem (.90; .86; tt = .60)
+
+51. Does your partner make you feel worthwhile and special?
+
+52. Does your partner make you feel proud of yourself?
+
+* Conflict/Ambivalence (.73; .79; .83; tt = .68)
+
+** Conflict (.73; .72; tt = .64)
+
+53. Do you fight and argue with this person? (R)
+
+54. Does this person treat you in unfair ways? (R)
+
+55. Is there tension in your relationship with this person? (R)
+
+
+
+
+** Ambivalence (.70; .71; tt = .65)
+
+56. Are you confused or unsure of your feelings toward this person? (R)
+
+57. Do you feel that this person demands too much of your time? (R)
+
+58. Do you feel trapped in this relationship? (R)
+
+* Non-global scales
+
+** Maintenance (.71; .68; tt = .80)
+
+59. Do you talk with this person about your relationship?
+
+60. Do you and this person try to work out difficulties that occur between you?
+
+61. Are you trying to change things that you do to make the relationship better between the two of you?
+
+
+** Commitment (NA; .89; .89; tt = .81)
+
+62. Are you committed to staying in your relationship?
+
+63. Does this person measure up to your ideals for a life partner?
+
+64. How likely is it that your relationship will be permanent?
+
+65. How committed is your partner to this relationship?
+
+
+** Coercion (.85; .91; tt = .60)
+
+66. Has your partner ever forced you to do something that you did not want to do? (R)
+
+67. Have you ever forced your partner to do something that s/he did not want to do? (R)
+
+
+
+** Equality
+
+68. Is your relationship one of equals?
+
+
+
+

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# contributor: Narendra Joshi
+# name: pg-create-role
+# key: pg-create-role
+# --
+create role $1 with createdb login password '$2';

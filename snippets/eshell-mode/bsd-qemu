@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# contributor: Narendra Joshi
+# name: bsd-qemu
+# key: bsd-qemu
+# --
+qemu-system-x86_64 -m 2048 -hda ${1:/} -enable-kvm -netdev user,id=mynet0,hostfwd=tcp:127.0.0.1:7722-:22 -device e1000,netdev=mynet0

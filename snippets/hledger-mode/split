@@ -1,0 +1,13 @@
+# -*- mode: snippet; -*-
+# name: split
+# key: split
+# binding: direct-keybinding
+# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
+# --
+`(format-time-string "%Y-%m-%d")` ${1:/Description/}
+           ; Shared expense: ₹ ${2:/amount/}
+    ${3:expenses:eating:dinner}    ₹ ${2:$(nth 1 (split-money (string-to-number yas-text)))}
+    ${4:/someone-who-owes-you/}   ₹ ${2:$(nth 2 (split-money (string-to-number yas-text)))}
+    ${5:assets:wallet:cash}  ₹ -${2:$(nth 0 (split-money (string-to-number yas-text)))}
+
+$0

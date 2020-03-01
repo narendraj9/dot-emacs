@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: boxed
+# key: boxed
+# expand-env: ((yas-indent-line 'fixed))
+# --
+${1:$(make-string 80 ?-)}
+-- $1
+${1:$(make-string 80 ?-)}
+$0
