@@ -2029,7 +2029,7 @@ after doing `symbol-overlay-put'."
          ("C-n" . take-notes)
          ("C-d"   . search-notes-files))
   :init
-  (eval-after-load "org-mode" '(require 'org-config))
+  (eval-after-load "org" '(require 'org-config))
   (bind-key "C-c a" #'org-agenda)
   (advice-add 'org-agenda-next-item :after #'beginning-of-line)
 

@@ -650,19 +650,6 @@ non-empty lines in the block (excluding the line with
   :defer t
   :ensure t)
 
-(use-package org-drill
-  :doc "An org extension that comes with `org-plus-contrib', used
-  for spaced repetition."
-  :defer t
-  :init
-  (add-to-list 'org-modules 'org-drill)
-  :config
-  (setq org-drill-question-tag "flashcard"
-        org-drill-add-random-noise-to-intervals-p t
-        org-drill-scope (mapcar (lambda (f)
-                                  (expand-file-name f org-directory))
-                                '("notes/org-drills.org"))))
-
 (use-package org-noter
   :doc "Planning to move to `org-noter' from `interleave'."
   :ensure t
