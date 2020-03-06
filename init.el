@@ -222,10 +222,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("C-a" . emacspeak-wizards-execute-asynchronously)
          ("M-x" . async-M-x)
          :map ctl-period-map
-         ("$" . selective-display-beyond-col)
-         ("u" . underline-text)
-         ("d" . duplicate-current-line)
-         ("s" . surround-symbol-with)))
+         ("k"   . compile)
+         ("K"   . recompile)
+         ("$"   . selective-display-beyond-col)
+         ("u"   . underline-text)
+         ("d"   . duplicate-current-line)
+         ("s"   . surround-symbol-with)))
 
 (use-package no-littering
   :ensure t
