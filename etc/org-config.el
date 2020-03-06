@@ -556,7 +556,7 @@ non-empty lines in the block (excluding the line with
         (expand-file-name "~/miscellany/assets/ditaa/ditaa.jar")))
 
 (use-package ob
-  :defer t
+  :after org
   :init
   (setq org-babel-python-command "ipython"
         org-confirm-babel-evaluate nil)
