@@ -183,10 +183,6 @@
   (setq org-agenda-cmp-user-defined #'org-backlog-compare-fn
         org-complete-tags-always-offer-all-agenda-tags t)
 
-  ;; Show org-agenda after some idle-time
-  (add-hook 'emacs-startup-hook
-            (lambda () (run-with-idle-timer 300 t 'jump-to-org-agenda)))
-
   (defvar org-agenda-known-files
     (list "journal.org" "main.org" "remember.org" "habits.org" "work.org")
     "Files recognized as agenda files.")

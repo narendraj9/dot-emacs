@@ -1147,12 +1147,13 @@ after doing `symbol-overlay-put'."
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
 (use-package bookmark
-  :defer t
+  :defer 5
   :config
   (setq bookmark-save-flag 1
         bookmark-default-file (expand-file-name "~/miscellany/assets/bookmarks.el")))
 
 (use-package bookmark+
+  :after bookmark
   :doc
   "bookmark.el's usepackage declaration sets the value for
   `bookmark-default-file' so we need to make sure that it is
@@ -2034,6 +2035,9 @@ after doing `symbol-overlay-put'."
   (eval-after-load "org" '(require 'org-config))
   (bind-key "C-c a" #'org-agenda)
   (advice-add 'org-agenda-next-item :after #'beginning-of-line)
+  (unless (boundp 'org-config-mindful-timer)
+    (setq org-config-mindful-timer
+          (run-with-timer 3600 3600 #'org-config-mindful-question)))
 
   :preface
   (defun org-config-mindful-question ()
@@ -2057,6 +2061,7 @@ after doing `symbol-overlay-put'."
 ;;; ----------------------------------------------------------------------------
 
 (use-package desktop
+  :disabled t
   :init
   (desktop-save-mode +1)
   :config

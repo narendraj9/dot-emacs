@@ -540,7 +540,7 @@ Will prompt you shell name when you type `C-u' before this command."
 (defun multi-term-dedicated-toggle (arg)
   "Toggle dedicated `multi-term' window."
   (interactive "P")
-  (let ((caller-default-directory default-directory))
+  (let ((caller-default-directory (expand-file-name default-directory)))
     (if (multi-term-dedicated-exist-p)
         (progn
           (multi-term-dedicated-close)

@@ -136,7 +136,7 @@
       gnus-use-article-prefetch t)
 
 ;; HTML Email -> Text
-(setq mm-text-html-renderer 'gnus-w3m
+(setq mm-text-html-renderer 'w3m-standalone
       gnus-article-browse-delete-temp t)
 
 ;; Keep my responses in the same group
