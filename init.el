@@ -608,7 +608,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     :group 'display-time)
 
   (setq display-time-string-forms
-        '((propertize (format "%s %0s %s %s:%s " day monthname
+        '((propertize (format " %s %0s %s %s:%s " day monthname
                               dayname 24-hours minutes am-pm)
  		              'face
                       'date-time-face))
@@ -2027,12 +2027,11 @@ after doing `symbol-overlay-put'."
   :doc
   "My org-mode configuration outgrew and hence I had to move it
    to a separate file."
-  :commands (jump-to-org-agenda take-notes search-notes-files)
   :load-path "etc/"
   :bind (("C-c c" . org-config-capture)
          ("C-c o" . jump-to-org-agenda)
          :map ctl-quote-map
-         ("C-n" . take-notes)
+         ("C-n" . open-org-file)
          ("C-d"   . search-notes-files))
   :init
   (eval-after-load "org" '(require 'org-config))
@@ -2282,10 +2281,7 @@ after doing `symbol-overlay-put'."
   (setf (symbol-function 'bbdb-complete-mail)
         #'counsel-bbdb-complete-mail))
 
-(use-package ivy-hydra
-  :ensure t
-  :bind (:map ivy-minibuffer-map ("M-o" . hydra-ivy/body)))
-
+(use-package ivy-hydra :ensure t)
 (use-package swiper
   :ensure t
   :commands swiper-from-isearch
@@ -2481,6 +2477,7 @@ after doing `symbol-overlay-put'."
 (use-package dtrt-indent
   :doc "Automatically guess offset and tabs-indent for opened file."
   :ensure t
+  :disabled t
   :diminish dtrt-indent-mode
   :hook (java-mode . dtrt-indent-mode))
 

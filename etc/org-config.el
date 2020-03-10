@@ -36,10 +36,10 @@
   (let ((org-deadline-warning-days most-positive-fixnum))
     (org-agenda-redo-all)))
 
-(defun take-notes ()
+(defun open-org-file ()
   "Quick open a notes org file."
   (interactive)
-  (projectile-find-file-in-directory (expand-file-name "notes/" org-directory)))
+  (projectile-find-file-in-directory (expand-file-name org-directory)))
 
 (defun search-notes-files ()
   "Search org files using `counsel-ag'."

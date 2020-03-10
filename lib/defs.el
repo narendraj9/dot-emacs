@@ -79,6 +79,7 @@ If ARG is supplied, reset margins and fringes to zero."
                                  0)
                             2))))
     (setq left-margin-width margin-width)
+    (setq right-margin-width margin-width)
     ;; `set-window-margings' does a similar thing but those changes do
     ;; not persist across buffer switches.
     (set-window-buffer nil (current-buffer))))
