@@ -156,7 +156,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (use-package async-bytecomp
     :config
     (setq async-byte-compile-log-file
-          (expand-file-name "tmp/async-bytecomp.log" user-emacs-directory))))
+          (expand-file-name "var/async-bytecomp.log" user-emacs-directory))))
 
 (use-package levenshtein
   :defines levenshtein-sort
@@ -232,13 +232,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package no-littering
   :ensure t
   :init
-  ;; Make tmp/ default. Paths are overridden if the files are
+  ;; Make var/ default. Paths are overridden if the files are
   ;; important.
-  ;; Keep all misc state in $(user-emacs-direcotry)/tmp/
-  (make-directory (expand-file-name "tmp/" user-emacs-directory) t)
+  ;; Keep all misc state in $(user-emacs-direcotry)/var/
+  (make-directory (expand-file-name "var/" user-emacs-directory) t)
   ;; These variables need to be set before `no-littering' is loaded.
-  (setd no-littering-etc-directory "tmp/"
-        no-littering-var-directory "tmp/"))
+  (setd no-littering-etc-directory "etc/"
+        no-littering-var-directory "var/"))
 
 (use-package "startup"
   :preface
@@ -282,15 +282,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
   ;; ----------------------------------------
 
-  (setd tutorial-directory "tmp/tutorial/")
+  (setd tutorial-directory "var/tutorial/")
 
   ;; Buffer contents auto-saved post initial file contents
   (setq auto-save-list-file-prefix
-        (expand-file-name "tmp/autosaves/" user-emacs-directory))
+        (expand-file-name "var/autosaves/" user-emacs-directory))
 
   ;; Backups of file before current changes
   (setq backup-directory-alist
-        `((".*" . ,(expand-file-name "tmp/backups/"
+        `((".*" . ,(expand-file-name "var/backups/"
                                      user-emacs-directory)))
         backup-by-copying t
         version-control t
@@ -885,7 +885,7 @@ after doing `symbol-overlay-put'."
 (use-package savehist
   :demand t
   :config
-  (setq savehist-file (expand-file-name "tmp/savehist.el"
+  (setq savehist-file (expand-file-name "var/savehist.el"
                                         user-emacs-directory))
   (setq savehist-additional-variables '(kill-ring
                                         limit-usage
@@ -938,7 +938,7 @@ after doing `symbol-overlay-put'."
   :doc "A minor mode for editing with multiple cursors."
   :ensure t
   :init
-  (setd mc/list-file "tmp/mc-lists.el")
+  (setd mc/list-file "var/mc-lists.el")
   (add-hook 'multiple-cursors-mode-hook
             (lambda ()
               (if multiple-cursors-mode
@@ -1124,8 +1124,8 @@ after doing `symbol-overlay-put'."
       (call-interactively #'projectile-find-file)))
 
   :init
-  (setd projectile-known-projects-file "tmp/projectile-projects.eld"
-        projectile-cache-file "tmp/projectile.cache")
+  (setd projectile-known-projects-file "var/projectile-projects.eld"
+        projectile-cache-file "var/projectile.cache")
   (setq projectile-tags-command "ctags-exuberant -Re -f \"%s\" %s ")
   (setq projectile-completion-system 'ivy)
 
@@ -1168,7 +1168,7 @@ after doing `symbol-overlay-put'."
   (save-place-mode +1)
   :config
   (setq save-place-file
-        (locate-user-emacs-file "tmp/saved-places")))
+        (locate-user-emacs-file "var/saved-places")))
 
 ;;; Buffers,, Windows and Workspaces
 ;; ――――――――――――――――――――――――――――――――――――――――
@@ -1386,7 +1386,7 @@ after doing `symbol-overlay-put'."
         recentf-keep '(file-remote-p file-readable-p)
         recentf-exclude '("\.gpg$")
         recentf-max-saved-items 1000
-        recentf-save-file (expand-file-name "tmp/recentf"
+        recentf-save-file (expand-file-name "var/recentf"
                                             user-emacs-directory))
   (recentf-mode +1))
 
@@ -1419,7 +1419,7 @@ after doing `symbol-overlay-put'."
   :defer t
   :ensure t
   :init
-  (setd pcache-directory "tmp/pcache/"))
+  (setd pcache-directory "var/pcache/"))
 
 (use-package popup :defer t :ensure t)
 
@@ -1559,7 +1559,10 @@ after doing `symbol-overlay-put'."
              ("C-n" . company-select-next-or-abort)
              ("C-p" . company-select-previous-or-abort))
 
-  (setq company-idle-delay 0.5)
+  (setq company-idle-delay 0.5
+        company-tooltip-align-annotations t
+        company-tooltip-flip-when-above t
+        company-tooltip-offset-display 'lines)
   (global-company-mode +1)
 
   :preface
@@ -1573,7 +1576,7 @@ after doing `symbol-overlay-put'."
   :ensure t
   :hook (after-init . company-statistics-mode)
   :init
-  (setd company-statistics-file "tmp/company-statistics-cache.el"))
+  (setd company-statistics-file "var/company-statistics-cache.el"))
 
 (use-package company-tabnine
   :after company-mode
@@ -2134,7 +2137,7 @@ after doing `symbol-overlay-put'."
   :doc "Used by `ivy-M-x' for sorting based on frequency + recency."
   :ensure t
   :config
-  (setd smex-save-file "tmp/smex-items"))
+  (setd smex-save-file "var/smex-items"))
 
 (use-package ivy
   :demand t
@@ -2319,7 +2322,23 @@ after doing `symbol-overlay-put'."
   (use-package lsp-java
     :ensure t
     :config
-    (setq lsp-java-save-actions-organize-imports t))
+    (setq lsp-java-save-actions-organize-imports t)
+
+    (unless (file-exists-p lsp-java-lombok-jar-path)
+      (require 'url-handlers)
+      (url-copy-file "https://projectlombok.org/downloads/lombok.jar"
+                     lsp-java-lombok-jar-path))
+
+    (setq lsp-java-vmargs
+          (list "-noverify"
+                "-Xmx1G"
+                "-XX:+UseG1GC"
+                "-XX:+UseStringDeduplication"
+                (format "-javaagent:%s" lsp-java-lombok-jar-path)))
+
+    :preface
+    (defvar lsp-java-lombok-jar-path
+      (expand-file-name "var/lombok.jar" user-emacs-directory)))
 
   (use-package dap-mode
     :doc "For debugging Java applications."
@@ -2723,7 +2742,7 @@ after doing `symbol-overlay-put'."
   (setq cider-repl-use-pretty-printing t
         cider-auto-jump-to-error nil
         cider-prompt-for-symbol nil
-        cider-repl-history-file (expand-file-name "tmp/cider-repl-history.el"
+        cider-repl-history-file (expand-file-name "var/cider-repl-history.el"
                                                   user-emacs-directory)
         cider-eldoc-display-for-symbol-at-point nil
         cider-eldoc-display-context-dependent-info t)
@@ -2775,7 +2794,7 @@ after doing `symbol-overlay-put'."
              "| grep browser"
              "| grep linux-amd64.tar.gz"
              "| head -n 1 | cut -d '\"' -f4 | xargs curl -sL | tar -xz;"
-             "mv /tmp/clj-kondo ~/.local/bin;")))
+             "mv /var/clj-kondo ~/.local/bin;")))
   (dolist (checkers '((clj-kondo-clj . clojure-joker)
                       (clj-kondo-cljs . clojurescript-joker)
                       (clj-kondo-cljc . clojure-joker)))
@@ -3230,7 +3249,7 @@ after doing `symbol-overlay-put'."
   :defer t
   :init
   (setq tramp-default-method "ssh"
-        tramp-persistency-file-name (expand-file-name "tmp/tramp"
+        tramp-persistency-file-name (expand-file-name "var/tramp"
                                                       user-emacs-directory))
   :config
   ;; Make backups for tramp files in their original locations
@@ -3370,7 +3389,7 @@ after doing `symbol-overlay-put'."
   :ensure t
   :after pdf-tools
   :config
-  (setd pdf-view-restore-filename "tmp/pdf-view-restore.el")
+  (setd pdf-view-restore-filename "var/pdf-view-restore.el")
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
 
 ;;; ERC
@@ -3450,7 +3469,7 @@ after doing `symbol-overlay-put'."
 
   :init
   ;; There should be no trailing / here!
-  (setd tldr-directory-path "tmp/tldr")
+  (setd tldr-directory-path "var/tldr")
   (add-hook 'tldr-mode-hook #'utils-easy-move-mode)
   (add-hook 'tldr-mode-hook 'hl-line-mode)
 
@@ -3543,16 +3562,16 @@ after doing `symbol-overlay-put'."
 
   :init
   (setq langtool-language-tool-jar
-        (expand-file-name "tmp/LanguageTool-Stable/languagetool-commandline.jar"
+        (expand-file-name "var/LanguageTool-Stable/languagetool-commandline.jar"
                           user-emacs-directory))
   (unless (file-exists-p langtool-language-tool-jar)
     (let ((default-directory user-emacs-directory))
       (async-shell-command
-       "rm -rf tmp/LanguageTool*;
-        wget -O tmp/languagetool.zip https://languagetool.org/download/LanguageTool-stable.zip;
-        unzip -o tmp/languagetool.zip -d tmp/;
-        rm tmp/languagetool.zip;
-        mv tmp/LanguageTool-* tmp/LanguageTool-Stable")
+       "rm -rf var/LanguageTool*;
+        wget -O var/languagetool.zip https://languagetool.org/download/LanguageTool-stable.zip;
+        unzip -o var/languagetool.zip -d var/;
+        rm var/languagetool.zip;
+        mv var/LanguageTool-* var/LanguageTool-Stable")
       (add-to-list 'emacs-init-end-info "> Started download for languagetool."))))
 
 (use-package backlight

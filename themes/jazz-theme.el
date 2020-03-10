@@ -98,6 +98,8 @@
       (jazz-blue-5   "#385e6b")
       (jazz-blue-6   "LightSteelBlue")
 
+      (jazz-gray     "lightgray")
+
       (jazz-magenta  "#7f355e"))
   (custom-theme-set-faces
    'jazz
@@ -249,8 +251,8 @@
    `(cheatsheet-key-face ((,class (:foreground ,jazz-yellow))))
 
    ;; company
-   `(company-tooltip ((,class (:background ,jazz-bg+3 :foreground ,jazz-bg))))
-   `(company-tooltip-common ((,class (:foreground ,jazz-bg :underline t))))
+   `(company-tooltip ((,class (:background ,jazz-gray :foreground ,jazz-bg))))
+   `(company-tooltip-common ((,class (:foreground ,jazz-bg+3 :underline t))))
    `(company-tooltip-common-selection ((,class (:background ,jazz-blue-4 :foreground ,jazz-fg :underline t))))
    `(company-tooltip-selection ((,class (:background ,jazz-blue-4 :foreground ,jazz-fg))))
    `(company-preview ((,class (:background ,jazz-blue :foreground ,jazz-fg))))
@@ -431,7 +433,7 @@
    `(helm-candidate-number ((,class (:foreground ,jazz-green+4 :background ,jazz-bg-1))))
 
    ;; hl-line-mode
-   `(hl-line ((,class (:box (:line-width 1 :style released-button)))))
+   `(hl-line ((,class (:background ,jazz-bg+1 :box (:line-width 1 :style released-button)))))
 
    ;; ido-mode
    `(ido-first-match ((,class (:foreground ,jazz-yellow :weight normal))))
