@@ -165,7 +165,6 @@
   :bind (("C-c o" . jump-to-org-agenda)
          ("C-c a" . org-agenda)
          :map org-agenda-mode-map
-         ("<return>". org-agenda-focused-edit)
          ("a"       . org-agenda-redo-with-days-to-deadline)
          ("g"       . org-agenda-redo)
          ("r"       . org-agenda-redo-all)
@@ -297,12 +296,6 @@
   (add-hook 'org-agenda-finalize-hook
             #'org-agenda-delete-empty-blocks)
   :preface
-  (defun org-agenda-focused-edit ()
-    (interactive)
-    (org-agenda-switch-to)
-    (org-narrow-to-subtree)
-    (org-previous-visible-heading 1))
-
   (defun with-no-drawer (func &rest args)
     (interactive "P")
     (if (eq org-log-note-purpose 'note)
