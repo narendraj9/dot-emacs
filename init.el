@@ -3504,8 +3504,9 @@ after doing `symbol-overlay-put'."
 (use-package calc
   :bind (
          :map global-map ("C-z" . calc-dispatch)
-         :map calc-mode-map ("M-<return>" . calc-last-args)
-         )
+         :map calc-mode-map
+         ("M-<return>" . calc-last-args)
+         ("x"          . calc-counsel-M-x))
   :init
   (setq calc-settings-file (expand-file-name "calc.el" user-emacs-directory))
   :config
@@ -3521,7 +3522,11 @@ after doing `symbol-overlay-put'."
   (advice-add 'calc
               :around (lambda (original-calc &rest args)
                         (let ((inhibit-message t))
-                          (apply original-calc args)))))
+                          (apply original-calc args))))
+  :preface
+  (defun calc-counsel-M-x ()
+    (interactive)
+    (counsel-M-x "calc-")))
 
 (use-package sql
   :defer t
