@@ -1405,7 +1405,9 @@ after doing `symbol-overlay-put'."
            org-mode
            message-mode
            hledger-mode) . enable-flyspell)
-         (prog-mode . flyspell-prog-mode)))
+         (prog-mode . flyspell-prog-mode))
+  :config
+  (setq flyspell-delay 5))
 
 (use-package ispell
   :bind (:map ctl-period-map

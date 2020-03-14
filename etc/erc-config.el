@@ -40,8 +40,8 @@
       erc-track-showcount t)
 
 (setq erc-autojoin-channels-alist '(("freenode.net"
-                                     "#emacs" "#haskell" "#glugnith" "#c++"
-                                     "#clojure" "#scala" "#javascript"
+                                     "#emacs-berlin" "#emacs" "#haskell" "#glugnith"
+                                     "#c++" "#clojure" "#scala" "#javascript"
                                      "#debian" "#elixir-lang" "racket"
                                      "#archlinux" "#xmonad" "#c" "#bash"
                                      "#git" "#fp@nith" "#lisp" "#clojure"
