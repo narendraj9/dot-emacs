@@ -767,7 +767,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand t
   :diminish auto-fill-function
   :bind (("M-q" . fill-or-unfill)
-         ("M-[" . backward-kill-word)
+         ("M-[" . backward-delete-word)
          :map ctl-period-map
          ("C-u" . repeated-delete-indentation)
          :map ctl-quote-map

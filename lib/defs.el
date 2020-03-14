@@ -1125,5 +1125,11 @@ respective files."
                                           ))))))
 
 
+(defun backward-delete-word ()
+  "Delete word before point without putting it into the `kill-ring'."
+  (interactive)
+  (delete-region (point) (progn (forward-word -1) (point))))
+
+
 (provide 'defs)
 ;;; defs.el ends here
