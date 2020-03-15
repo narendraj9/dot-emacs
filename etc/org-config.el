@@ -47,6 +47,13 @@
   (let ((default-directory org-directory))
     (call-interactively #'counsel-ag)))
 
+
+(defun org-agenda-toggle-toggle-tags-column ()
+  "Toggle the display of tags column in org-agenda view."
+  (interactive)
+  (setq org-agenda-remove-tags (not org-agenda-remove-tags))
+  (org-agenda-redo))
+
 (use-package org
   :pin org
   :ensure t
@@ -165,6 +172,7 @@
   :bind (("C-c o" . jump-to-org-agenda)
          ("C-c a" . org-agenda)
          :map org-agenda-mode-map
+         ("T"       . org-agenda-toggle-toggle-tags-column)
          ("a"       . org-agenda-redo-with-days-to-deadline)
          ("g"       . org-agenda-redo)
          ("r"       . org-agenda-redo-all)
@@ -217,8 +225,10 @@
 
         org-agenda-window-setup 'only-window
 
-        org-agenda-tags-column 90
+        org-agenda-tags-column 120
+        org-agenda-hide-tags-regexp "\\(ATTACH\\)\\|\\(new_tags_go_here_like_this\\)"
         org-agenda-remove-tags t
+
         org-agenda-show-inherited-tags nil
 
         ;; Dependencies and blocked TODOs
