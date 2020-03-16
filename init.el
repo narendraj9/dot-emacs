@@ -2179,7 +2179,9 @@ after doing `symbol-overlay-put'."
                              "\\`\\*helpful:"
                              "\\.elc$"
                              "\\`\\.newsrc-dribble\\'"
-                             "\\`\\.newsrc.eld\\'"))
+                             "\\`\\.newsrc.eld\\'"
+                             ;; Check these buffers with \C-x \C-b
+                             "\\`##?[a-z+@-]*\\'"))
 
   ;; Add custom sorting functions individually instead of changing the
   ;; defaults.
