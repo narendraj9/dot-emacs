@@ -39,13 +39,10 @@
       erc-track-priority-faces-only 'all
       erc-track-showcount t)
 
-(setq erc-autojoin-channels-alist '(("freenode.net"
-                                     "#emacs-berlin" "#emacs" "#haskell" "#glugnith"
-                                     "#c++" "#clojure" "#scala" "#javascript"
-                                     "#debian" "#elixir-lang" "racket"
-                                     "#archlinux" "#xmonad" "#c" "#bash"
-                                     "#git" "#fp@nith" "#lisp" "#clojure"
-                                     "#scheme" "#elm")))
+(setq erc-autojoin-channels-alist
+      '(("freenode.net"
+         "#emacs-berlin" "#emacs" "#haskell" "#glugnith"
+         "#clojure" "#bash" "#fp@nith" "#go-nuts")))
 
 (setq erc-prompt-for-nickserv-password nil
       ;; Re-connection settings

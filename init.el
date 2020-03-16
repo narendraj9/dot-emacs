@@ -3396,7 +3396,9 @@ after doing `symbol-overlay-put'."
 (use-package erc-config
   :commands erc-connect
   :load-path "etc/"
-  :defer t)
+  :defer 10
+  :config
+  (erc-connect))
 
 ;;; EMACS-SERVER
 ;;  ─────────────────────────────────────────────────────────────────
