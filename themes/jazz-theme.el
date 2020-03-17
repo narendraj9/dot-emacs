@@ -433,7 +433,7 @@
    `(helm-candidate-number ((,class (:foreground ,jazz-green+4 :background ,jazz-bg-1))))
 
    ;; hl-line-mode
-   `(hl-line ((,class (:box (:color ,jazz-orange-1 :line-width 1 :style released-button)))))
+   `(hl-line ((,class (:box (:line-width 1 :color ,jazz-bg+1)))))
 
    ;; ido-mode
    `(ido-first-match ((,class (:foreground ,jazz-yellow :weight normal))))
