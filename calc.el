@@ -1,6 +1,8 @@
 
-;;; Mode settings stored by Calc on Sun Oct 20 20:40:32 2019
+;;; Mode settings stored by Calc on Mon Mar 16 23:21:51 2020
 (setq calc-incomplete-algebraic-mode t)
+(setq calc-full-trail-vectors nil)
+(setq calc-always-load-extensions t)
 ;;; End of mode settings
 
 ;;; Custom units stored by Calc on Thu Nov  7 22:22:54 2019

@@ -1243,10 +1243,30 @@ after doing `symbol-overlay-put'."
     (repeat-command 'mwim)))
 
 (use-package isearch
-  :doc
-  "Search for the string in the active region, if there is
-   any. For some reason advising `isearch-mode' doesn't work.
-   With this C-o in `isearch-mode' is impotent at the moment."
+  :doc "Search for the string in the active region, if there is any."
+  :bind (("C-M-r" . isearch-backward-other-window)
+         ("C-M-s" . isearch-forward-other-window)
+         :map isearch-mode-map
+         ("C-S-W" . isearch-yank-symbol))
+
+  :config
+  (advice-add 'isearch-mode
+              :after (lambda (&rest _rest)
+                       (when (region-active-p)
+                         (isearch-yank-selection))))
+
+  (setq isearch-lazy-count t
+        lazy-count-prefix-format "(%s/%s) ")
+
+  (defhydra hydra-isearch (:color pink)
+    "isearch> "
+    ("C-<return>" isearch-exit-other-end    "other end" :exit t)
+    ("C-="        isearch-toggle-case-fold  "toggle case")
+    ("C-t"        isearch-toggle-regexp     "toggle regexp")
+    ("C-^"        isearch-edit-string       "edit string")
+    ("C-i"        isearch-complete          "complete"))
+
+  (bind-key "C-o" #'hydra-isearch/body isearch-mode-map)
 
   :preface
   (defun isearch-yank-symbol ()
@@ -1276,31 +1296,14 @@ after doing `symbol-overlay-put'."
   (defun isearch-forward-other-window ()
     (interactive)
     (split-window-vertically)
-    (call-interactively 'isearch-forward))
-
-  :bind (("C-M-r" . isearch-backward-other-window)
-         ("C-M-s" . isearch-forward-other-window)
-         :map isearch-mode-map
-         ("C-S-W" . isearch-yank-symbol))
-
-  :config
-  (advice-add 'isearch-mode
-              :after (lambda (&rest _rest)
-                       (when (region-active-p)
-                         (isearch-yank-selection))))
-  (defhydra hydra-isearch (:color pink)
-    "isearch> "
-    ("C-<return>" isearch-exit-other-end    "other end" :exit t)
-    ("C-="        isearch-toggle-case-fold  "toggle case")
-    ("C-t"        isearch-toggle-regexp     "toggle regexp")
-    ("C-^"        isearch-edit-string       "edit string")
-    ("C-i"        isearch-complete          "complete"))
-  (bind-key "C-o" #'hydra-isearch/body isearch-mode-map))
+    (call-interactively 'isearch-forward)))
 
 (use-package anzu
-  :doc "Display information about query search/replace."
+  :doc "Display information about query search/replace.
+Starting Emacs 27, this feature is part of `isearch'."
   :ensure t
   :diminish anzu-mode
+  :disabled t
   :config
   (global-anzu-mode +1))
 
@@ -3400,7 +3403,8 @@ after doing `symbol-overlay-put'."
   :load-path "etc/"
   :defer 10
   :config
-  (erc-connect))
+  ;; (erc-connect)
+  )
 
 ;;; EMACS-SERVER
 ;;  ─────────────────────────────────────────────────────────────────

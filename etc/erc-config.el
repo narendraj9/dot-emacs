@@ -41,7 +41,7 @@
 
 (setq erc-autojoin-channels-alist
       '(("freenode.net"
-         "#emacs-berlin" "#emacs" "#haskell" "#glugnith"
+         "#emacs-berlin" "#emacs" "#org-mode" "#haskell" "#glugnith"
          "#clojure" "#bash" "#fp@nith" "#go-nuts")))
 
 (setq erc-prompt-for-nickserv-password nil
