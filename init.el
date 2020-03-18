@@ -336,6 +336,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (when (file-exists-p custom-file)
     (load custom-file))
 
+  ;; The default font should be properly set by now, make sure that
+  ;; each newly created frame uses the same font.
+  (add-to-list 'default-frame-alist
+               `(font . ,(font-xlfd-name (face-attribute 'default :font))))
+
   ;; I can load the secrets file asynchronously because I use for things
   ;; that I don't need immediately after starting Emacs.
   (add-hook 'emacs-startup-hook
@@ -512,15 +517,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                  '(fullscreen . maximized)))
 
   ;; Diminish some minor modes
-  (diminish 'hi-lock-mode)
-
-  ;; Change `default-frame-alist' to make it inherit the font I am
-  ;; using for the current frame as the frame for new frames that are
-  ;; created.
-  (add-hook 'after-init-hook
-            (lambda ()
-              (add-to-list 'default-frame-alist
-                           `(font . ,(font-xlfd-name (face-attribute 'default :font)))))))
+  (diminish 'hi-lock-mode))
 
 (use-package fringe
   :config
