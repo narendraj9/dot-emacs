@@ -1253,6 +1253,7 @@ after doing `symbol-overlay-put'."
                          (isearch-yank-selection))))
 
   (setq isearch-lazy-count t
+        lazy-highlight-initial-delay 1.0
         lazy-count-prefix-format "(%s/%s) ")
 
   (defhydra hydra-isearch (:color pink)
@@ -2038,7 +2039,6 @@ Starting Emacs 27, this feature is part of `isearch'."
   :init
   (eval-after-load "org" '(require 'org-config))
   (bind-key "C-c a" #'org-agenda)
-  (advice-add 'org-agenda-next-item :after #'beginning-of-line)
   (unless (boundp 'org-config-mindful-timer)
     (setq org-config-mindful-timer
           (run-with-timer 3600 3600 #'org-config-mindful-question)))
@@ -2174,8 +2174,8 @@ Starting Emacs 27, this feature is part of `isearch'."
 
   (setq ivy-ignore-buffers `("\\` "
                              "\\`\\*git-monitor:"
-                             "\\`\\*magit-process:"
-                             "\\`\\*magit:"
+                             "\\`magit-process:"
+                             "\\`magit:"
                              "\\`\\*helpful:"
                              "\\.elc$"
                              "\\`\\.newsrc-dribble\\'"

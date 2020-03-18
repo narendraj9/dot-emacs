@@ -45,6 +45,7 @@
          "#clojure" "#bash" "#fp@nith" "#go-nuts" "#gnunet")))
 
 (setq erc-prompt-for-nickserv-password nil
+      erc-autojoin-timing 'ident
       ;; Re-connection settings
       erc-server-auto-reconnect t
       erc-server-reconnect-timeout 30
@@ -74,8 +75,9 @@
   (if (boundp 'my-freenode-nickserv-password)
       (erc-tls :server "irc.freenode.net"
                :port 6697
-               :nick "narendraj9"
-               :password my-freenode-nickserv-password)
+               ;; :nick "narendraj9"
+               ;; :password my-freenode-nickserv-password
+               )
     (message "Error: my-freenode-nickserv-password not bound")))
 
 (provide 'erc-config)
