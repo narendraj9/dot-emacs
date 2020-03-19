@@ -59,7 +59,7 @@
 (setq erc-join-buffer 'bury)
 
 (mapc (lambda (module) (push module erc-modules))
-      '(autoaway notify))
+      '(autoaway notify notifications spelling))
 
 (add-hook 'erc-mode-hook #'erc-update-modules)
 (add-hook 'erc-mode-hook

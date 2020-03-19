@@ -3508,6 +3508,10 @@ Starting Emacs 27, this feature is part of `isearch'."
 ;;; UTILITIES
 ;; ──────────────────────────────────────────────────────────────────
 
+(use-package gnuplot-mode
+  :ensure t
+  :mode ("\\.\\(gp\\|gnuplot\\)$"))
+
 (use-package calc
   :bind (
          :map global-map ("C-z" . calc-dispatch)
@@ -3516,24 +3520,33 @@ Starting Emacs 27, this feature is part of `isearch'."
          ("x"          . calc-counsel-M-x))
   :init
   (setq calc-settings-file (expand-file-name "calc.el" user-emacs-directory))
+
   :config
+  (advice-add 'calc :around (lambda (original-calc &rest args)
+                              (let ((inhibit-message t))
+                                (apply original-calc args))))
+
   ;; This is a bug in `calc-graph-add-curve' that causes it to treat
   ;; `nil' as a number.
   (require 'calc-misc)
-  (advice-add 'math-trunc
-              :before-while
-              (lambda (arg)
-                (when (null arg)
-                  (message "Warning: `math-trunc' called with `nil'."))
-                arg))
-  (advice-add 'calc
-              :around (lambda (original-calc &rest args)
-                        (let ((inhibit-message t))
-                          (apply original-calc args))))
+  (advice-add 'math-trunc :before-while #'calc-math-trunc-nil-filter)
+  (advice-add 'calc-graph-view-commands :after #'calc-enable-gnuplot-mode)
+
   :preface
   (defun calc-counsel-M-x ()
     (interactive)
-    (counsel-M-x "calc-")))
+    (counsel-M-x "calc-"))
+
+  (defun calc-enable-gnuplot-mode (&rest _args)
+    (with-current-buffer calc-gnuplot-input
+      (unless (and (boundp 'gnuplot-mode)
+                   (not gnuplot-mode))
+        (gnuplot-mode))))
+
+  (defun calc-math-trunc-nil-filter (arg)
+    (when (null arg)
+      (message "Warning: `math-trunc' called with `nil'."))
+    arg))
 
 (use-package sql
   :defer t
