@@ -29,12 +29,16 @@
 (require 'erc-track)
 (require 'erc-services)
 
-(setq erc-prompt (lambda () (concat "[" (buffer-name) "]")))
+(setq erc-prompt (lambda () (concat " " (buffer-name) "> ")))
 
 (setq erc-hide-list '("JOIN" "PART" "QUIT")
-      erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE")
       ;; Highlight only channels that that face my nick's face
       erc-current-nick-highlight-type 'nick
+      erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE")
+      erc-track-faces-priority-list '(erc-error-face
+                                      erc-current-nick-face
+                                      erc-direct-msg-face
+                                      erc-dangerous-host-face)
       erc-track-use-faces t
       erc-track-priority-faces-only 'all
       erc-track-showcount t)
