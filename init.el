@@ -3513,15 +3513,14 @@ Starting Emacs 27, this feature is part of `isearch'."
   :mode ("\\.\\(gp\\|gnuplot\\)$"))
 
 (use-package calc
-  :bind (
-         :map global-map ("C-z" . calc-dispatch)
-         :map calc-mode-map
-         ("M-<return>" . calc-last-args)
-         ("x"          . calc-counsel-M-x))
+  :bind ("C-z" . calc-dispatch)
   :init
   (setq calc-settings-file (expand-file-name "calc.el" user-emacs-directory))
 
   :config
+  (define-key calc-mode-map [M-return] #'calc-last-args)
+  (define-key calc-mode-map [x]  #'calc-counsel-M-x)
+
   (advice-add 'calc :around (lambda (original-calc &rest args)
                               (let ((inhibit-message t))
                                 (apply original-calc args))))
