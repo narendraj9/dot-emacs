@@ -29,57 +29,7 @@
 (require 'erc-track)
 (require 'erc-services)
 
-
-;;; Snippet from Emacs Wiki
-;;; ──────────────────────────────x─────────────────────────────────
-
-(require 'erc-track)
-
-(defvar erc-bar-threshold 1
-  "Display bar when there are more than erc-bar-threshold unread messages.")
-
-(defvar erc-bar-overlay nil
-  "Overlay used to set bar")
-
-(defun erc-bar-move-back (n)
-  "Moves back n message lines. Ignores wrapping, and server messages."
-  (interactive "nHow many lines ? ")
-  (re-search-backward "^.*<.*>" nil t n))
-
-(defun erc-bar-update-overlay ()
-  "Update the overlay for current buffer, based on the
-content of erc-modified-channels-alist. Should be executed on
-window change."
-  (interactive)
-  (let* ((info (assq (current-buffer) erc-modified-channels-alist))
-         (count (cadr info)))
-    (if (and info (> count erc-bar-threshold))
-        (save-excursion
-          (goto-char (point-max))
-          (when (erc-bar-move-back count)
-            (let ((inhibit-field-text-motion t))
-              (move-overlay erc-bar-overlay
-                            (line-beginning-position)
-                            (line-end-position)
-                            (current-buffer)))))
-      (delete-overlay erc-bar-overlay))))
-
-(setq erc-bar-overlay (make-overlay 0 0))
-(overlay-put erc-bar-overlay 'face 'flycheck-info)
-
-;;put the hook before erc-modified-channels-update
-(advice-add 'erc-track-mode
-            :after
-            (lambda (&rest _args)
-              ;;remove and add, so we know it's in the first place
-              (remove-hook 'window-configuration-change-hook 'erc-bar-update-overlay)
-              (add-hook 'window-configuration-change-hook 'erc-bar-update-overlay)))
-
-(add-hook 'erc-send-completed-hook
-          (lambda (str) (erc-bar-update-overlay)))
-
-;;; ───────────────────────────────x──────────────────────────────────
-
+(setq erc-prompt (lambda () (concat "[" (buffer-name) "]")))
 
 (setq erc-hide-list '("JOIN" "PART" "QUIT")
       erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE")
@@ -109,7 +59,7 @@ window change."
 (setq erc-join-buffer 'bury)
 
 (mapc (lambda (module) (push module erc-modules))
-      '(track scrolltobottom autoaway notify notifications spelling))
+      '(keep-place track scrolltobottom autoaway notify notifications spelling))
 
 (add-hook 'erc-mode-hook #'erc-update-modules)
 (add-hook 'erc-mode-hook
