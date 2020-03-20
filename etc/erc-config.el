@@ -122,12 +122,9 @@ window change."
   (interactive)
   (require 'erc-services)
   (erc-services-mode 1)
-  (if (boundp 'my-freenode-nickserv-password)
-      (erc-tls :server "irc.freenode.net"
-               :port 6697
-               ;; :nick "narendraj9"
-               ;; :password my-freenode-nickserv-password
-               )
+  (if (and (boundp 'znc-server) (boundp 'znc-port) (boundp 'znc-password))
+      (erc-tls :server znc-server :port znc-port :password znc-password)
+    (erc-tls :server "irc.freenode.net" :port 6697)
     (message "Error: my-freenode-nickserv-password not bound")))
 
 (provide 'erc-config)
