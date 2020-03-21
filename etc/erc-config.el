@@ -30,7 +30,7 @@
 (require 'erc-services)
 (require 'erc-log)
 
-(setq erc-prompt "| ")
+(setq erc-prompt "|>")
 
 (let ((erc-logs-dir (expand-file-name "var/erc/logs/" user-emacs-directory)))
   (unless (file-exists-p erc-logs-dir)

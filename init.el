@@ -29,9 +29,12 @@
 
 ;;; Avoid garbage collection during Emacs startup. Garbage collection when
 ;;; Emacs loses focus.
+(defvar gc-counter 0
+  "A counter for the number of garbage collections after startup.")
+(add-hook 'post-gc-hook (lambda () (setq gc-counter (1+ gc-counter))))
+
 (setq gc-cons-threshold most-positive-fixnum)
-(add-hook 'after-init-hook (lambda ()
-                             (setq gc-cons-threshold (* 10 1024 1024))))
+(add-hook 'after-init-hook (lambda () (setq gc-cons-threshold (* 10 1024 1024))))
 
 ;;; This is obsolete, migrate to `after-focus-change-function'.
 (add-hook 'focus-out-hook #'garbage-collect)
