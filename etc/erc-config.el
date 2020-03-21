@@ -28,10 +28,23 @@
 (require 'erc-join)
 (require 'erc-track)
 (require 'erc-services)
+(require 'erc-log)
 
-(setq erc-prompt (lambda () (concat " " (buffer-name) "> ")))
+(setq erc-prompt "| ")
 
-(setq erc-hide-list '("JOIN" "PART" "QUIT")
+(let ((erc-logs-dir (expand-file-name "var/erc/logs/" user-emacs-directory)))
+  (unless (file-exists-p erc-logs-dir)
+    (mkdir erc-logs-dir t)
+    (setq erc-log-channels-directory erc-logs-dir)))
+
+;; Kill buffers for channels after /part
+(setq erc-kill-buffer-on-part t)
+;; Kill buffers for private queries after quitting the server
+(setq erc-kill-queries-on-quit t)
+;; Kill buffers for server messages after quitting the server
+(setq erc-kill-server-buffer-on-quit t)
+
+(setq erc-hide-list '("JOIN" "PART" "QUIT" "TOPIC" "NAMES")
       ;; Highlight only channels that that face my nick's face
       erc-current-nick-highlight-type 'nick
       erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE")
@@ -63,7 +76,7 @@
 (setq erc-join-buffer 'bury)
 
 (mapc (lambda (module) (push module erc-modules))
-      '(keep-place track scrolltobottom autoaway notify notifications spelling))
+      '(keep-place track scrolltobottom autoaway notify log spelling))
 
 (add-hook 'erc-mode-hook #'erc-update-modules)
 (add-hook 'erc-mode-hook
