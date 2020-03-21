@@ -3521,6 +3521,7 @@ Starting Emacs 27, this feature is part of `isearch'."
   (setq calc-settings-file (expand-file-name "calc.el" user-emacs-directory))
 
   :config
+  (require 'calc-ext)                   ; Modifies the bindings below.
   (define-key calc-mode-map [M-return] #'calc-last-args)
   (define-key calc-mode-map "x"  #'calc-counsel-M-x)
 
@@ -3531,7 +3532,6 @@ Starting Emacs 27, this feature is part of `isearch'."
   ;; This is a bug in `calc-graph-add-curve' that causes it to treat
   ;; `nil' as a number.
   (require 'calc-misc)
-  (advice-add 'math-trunc :before-while #'calc-math-trunc-nil-filter)
   (advice-add 'calc-graph-view-commands :after #'calc-enable-gnuplot-mode)
 
   :preface
@@ -3543,12 +3543,7 @@ Starting Emacs 27, this feature is part of `isearch'."
     (with-current-buffer calc-gnuplot-input
       (unless (and (boundp 'gnuplot-mode)
                    (not gnuplot-mode))
-        (gnuplot-mode))))
-
-  (defun calc-math-trunc-nil-filter (arg)
-    (when (null arg)
-      (message "Warning: `math-trunc' called with `nil'."))
-    arg))
+        (gnuplot-mode)))))
 
 (use-package sql
   :defer t
