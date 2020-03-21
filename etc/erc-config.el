@@ -44,7 +44,9 @@
 ;; Kill buffers for server messages after quitting the server
 (setq erc-kill-server-buffer-on-quit t)
 
-(setq erc-hide-list '("JOIN" "PART" "QUIT" "TOPIC" "NAMES")
+(setq erc-hide-list '("JOIN" "PART" "QUIT"
+                      ;; From erc-backend.el Thanks #erc
+                      "332" "353" "366" "333" "329")
       ;; Highlight only channels that that face my nick's face
       erc-current-nick-highlight-type 'nick
       erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE")
@@ -75,9 +77,12 @@
 ;; Do not switch buffers on connecting
 (setq erc-join-buffer 'bury)
 
+(setq erc-log-insert-log-on-open t)
+
 (mapc (lambda (module) (push module erc-modules))
       '(keep-place track scrolltobottom autoaway notify log spelling))
 
+(add-hook 'erc-insert-post-hook #'erc-save-buffer-in-logs)
 (add-hook 'erc-mode-hook #'erc-update-modules)
 (add-hook 'erc-mode-hook
           (lambda ()

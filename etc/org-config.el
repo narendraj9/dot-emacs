@@ -347,7 +347,8 @@
      Credits: John Wigley."
     (interactive)
     (when (not (minibufferp))
-      (let ((buf (get-buffer "*Org Agenda*"))
+      (let ((gc-cons-threshold most-positive-fixnum)
+            (buf (get-buffer "*Org Agenda*"))
             wind)
         (if buf
             (if (setq wind (get-buffer-window buf))
