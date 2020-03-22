@@ -585,6 +585,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (minibuffer-command-history-enable))
 
 (use-package time
+  :demand t
   :preface
   :bind (:map ctl-quote-map
               ("c t" . display-time-world*))
@@ -634,6 +635,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (setq cursor-type nil))))
 
 (use-package battery
+  :demand t
   :config
   (setq battery-mode-line-format " %b%p%% ")
   (display-battery-mode +1)
@@ -3521,10 +3523,11 @@ Starting Emacs 27, this feature is part of `isearch'."
   (setq calc-settings-file (expand-file-name "calc.el" user-emacs-directory))
 
   :config
+  (setq calc-gnuplot-default-device "wxt")
+
   (require 'calc-ext)                   ; Modifies the bindings below.
   (define-key calc-mode-map [M-return] #'calc-last-args)
   (define-key calc-mode-map "x"  #'calc-counsel-M-x)
-
   (advice-add 'calc :around (lambda (original-calc &rest args)
                               (let ((inhibit-message t))
                                 (apply original-calc args))))

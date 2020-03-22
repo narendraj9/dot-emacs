@@ -3,6 +3,7 @@
 (setq calc-incomplete-algebraic-mode t)
 (setq calc-full-trail-vectors nil)
 (setq calc-always-load-extensions t)
+(setq calc-highlight-selections-with-faces t)
 ;;; End of mode settings
 
 ;;; Custom units stored by Calc on Thu Nov  7 22:22:54 2019
