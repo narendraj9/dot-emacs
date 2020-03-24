@@ -3528,6 +3528,8 @@ Starting Emacs 27, this feature is part of `isearch'."
   (require 'calc-ext)                   ; Modifies the bindings below.
   (define-key calc-mode-map [M-return] #'calc-last-args)
   (define-key calc-mode-map "x"  #'calc-counsel-M-x)
+  (define-key calc-mode-map "gP" #'calc-graph-plot)
+
   (advice-add 'calc :around (lambda (original-calc &rest args)
                               (let ((inhibit-message t))
                                 (apply original-calc args))))
