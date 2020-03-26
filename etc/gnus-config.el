@@ -104,6 +104,7 @@
           (any ".*haskell@haskell.org.*" "Haskell")
           (any ".*haskell-cafe@haskell.org.*" "Haskell")
           (any ".*emacs-devel@gnu.org.*" "Emacs Devel")
+          (any ".*debbugs.gnu.org.*" "Emacs Devel")
           (any ".*help-gnu-emacs.*" "Emacs")
           (any ".*emacs-orgmode.*" "Emacs Org-mode")
 
