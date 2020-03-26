@@ -2026,7 +2026,8 @@ Starting Emacs 27, this feature is part of `isearch'."
 
 ;;; GRAPHICS
 ;; ──────────────────────────────────────────────────────────────────
-(use-package gnuplot-mode :defer t :ensure t)
+(use-package gnuplot-mode      :defer t :ensure t)
+(use-package graphviz-dot-mode :ensure t :defer t)
 
 ;;; Notes, Journal and Task Manager
 ;;  ─────────────────────────────────────────────────────────────────
