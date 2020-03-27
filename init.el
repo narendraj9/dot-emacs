@@ -2927,6 +2927,12 @@ Starting Emacs 27, this feature is part of `isearch'."
     :ensure t
     :hook (web-mode . emmet-mode)))
 
+(use-package skewer-mode
+  :ensure t
+  :hook ((css-mode  . skewer-css-mode)
+         (html-mode . skewer-html-mode)
+         (js2-mode  . skewer-mode)))
+
 (use-package js2-mode    :defer t :ensure t)
 (use-package coffee-mode :defer t :ensure t)
 (use-package elm-mode    :defer t :ensure t)

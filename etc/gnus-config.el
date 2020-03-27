@@ -122,6 +122,7 @@
                (nnir-search-engine imap)
                (nnimap-inbox "INBOX")
                (nnimap-stream ssl)
+               (nnimap-streaming t)
                (nnimap-split-methods ,nnmail-split-fancy)))
 
 ;; Pre-fetch for speed
