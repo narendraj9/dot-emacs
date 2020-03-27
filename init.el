@@ -3448,17 +3448,7 @@ Starting Emacs 27, this feature is part of `isearch'."
                    (message "You might want to rebuild Emacs today.")))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
-
 (use-package highlight :ensure t :defer t)
-(use-package eval-sexp-fu
-  :load-path "packages/lisp/"
-  :commands eval-sexp-fu-flash-mode
-  :pin manual
-  :init
-  (hook-into-modes #'eval-sexp-fu-flash-mode
-                   'emacs-lisp-mode
-                   'clojure-mode))
-
 (use-package tldr
   :load-path "packages/lisp/"
   :preface

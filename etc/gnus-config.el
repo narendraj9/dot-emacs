@@ -93,18 +93,11 @@
 ;; All threads where I am being talked to directly should be in
 ;; Primary. Rest should be split.
 (setq nnmail-split-fancy
-      `(| ("from" ".*investopedia\\.com.*" "Investopedia")
-          ("from" ".*the-morning-paper@onelanday.co.uk.*" "Morning Paper")
-          ("from" "james@jamesclear.com" "James Clear")
-          ("from" ".*bitcoin.*" "Bitcoin")
-          ("from" "noreply@elixirforum.com" "Elixir Forum")
-          ("from" "elixir-lang-core@googlegroups.com" "Elixir Core")
-          (any "user@flink.apache.org" "Apache Flink")
-          (any ".*@erlang.org.*" "Erlang")
-          (any ".*haskell@haskell.org.*" "Haskell")
-          (any ".*haskell-cafe@haskell.org.*" "Haskell")
-          (any ".*emacs-devel@gnu.org.*" "Emacs Devel")
-          (any ".*debbugs.gnu.org.*" "Emacs Devel")
+      `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
+          (from ".*the-morning-paper@onelanday.co.uk.*" "Morning Paper")
+          (from "james@jamesclear.com" "James Clear")
+          (any ".*emacs-devel@gnu.org.*" "Emacs Dev")
+          (any ".*debbugs.gnu.org.*" "Emacs Dev")
           (any ".*help-gnu-emacs.*" "Emacs")
           (any ".*emacs-orgmode.*" "Emacs Org-mode")
 
@@ -116,7 +109,6 @@
           ("from" "channing@indiehackers.com" "Newsletters")
           ("from" ".*@googlegroups.com" "Google Groups")
           ("to" ".*@googlegroups.com" "Google Groups")
-
           ("to" ".*\+newsletters?@gmail.com" "Newsletters")
           ("from" "marketing@portablecto.com" "Business")
           ;; Unmatched mail goes to the catch all
