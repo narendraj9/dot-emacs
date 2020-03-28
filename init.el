@@ -1812,14 +1812,17 @@ Starting Emacs 27, this feature is part of `isearch'."
   (add-hook
    'hledger-view-mode-hook
    (lambda ()
-     (hl-line-mode +1)
-     (run-at-time 1
-                  nil
-                  (lambda ()
-                    (center-text-for-reading)
-                    (when (equal hledger-last-run-command "balancesheet")
-                      (highlight-regexp "^.*credit.*$" 'hledger-warning-face)
-                      (highlight-regexp "^.*\\(savings\\|cash\\).*$" nil)))))))
+     (let ((b (current-buffer)))
+       (hl-line-mode +1)
+       (run-at-time 1
+                    nil
+                    (lambda ()
+                      (when (buffer-live-p b)
+                        (with-current-buffer b
+                          (center-text-for-reading)
+                          (when (equal hledger-last-run-command "balancesheet")
+                            (highlight-regexp "^.*credit.*$" 'hledger-warning-face)
+                            (highlight-regexp "^.*\\(savings\\|cash\\).*$" nil))))))))))
 
 
 (use-package hledger-input
