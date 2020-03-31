@@ -36,7 +36,8 @@
 (define-key elfeed-show-mode-map (kbd "k") #'previous-line)
 
 (setq elfeed-feeds
-      '(("http://www.natpryce.com/news.feed")
+      '(("https://vlaaad.github.io/feed.xml")
+        ("http://www.natpryce.com/news.feed")
         ("https://feeds.feedburner.com/martinkl")
         ("https://zettelkasten.de/feed.atom")
         ("https://googleprojectzero.blogspot.com/feeds/posts/default")
