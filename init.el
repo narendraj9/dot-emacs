@@ -2035,6 +2035,7 @@ Starting Emacs 27, this feature is part of `isearch'."
 ;;; Notes, Journal and Task Manager
 ;;  ─────────────────────────────────────────────────────────────────
 
+(use-package calfw :ensure t :defer t)
 (use-package org-config
   :doc
   "My org-mode configuration outgrew and hence I had to move it
@@ -3188,6 +3189,12 @@ Starting Emacs 27, this feature is part of `isearch'."
   :diminish auto-revert-mode
   :config
   (global-auto-revert-mode +1))
+
+(use-package transient
+  :ensure t
+  :defer 10
+  :config
+  (use-package transient-defs :load-path "etc/"))
 
 (use-package magit
   :ensure t
