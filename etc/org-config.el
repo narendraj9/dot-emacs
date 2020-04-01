@@ -202,6 +202,10 @@
                               (member f org-agenda-known-files))
                             (let ((default-directory org-directory))
                               (file-expand-wildcards "*.org"))))
+
+        org-default-notes-file
+        (expand-file-name "notes.org" org-directory)
+
         org-agenda-text-search-extra-files
         (append
          ;; Add all org-mode files under _archives no matter ignoring

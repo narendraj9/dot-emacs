@@ -2958,37 +2958,9 @@ Starting Emacs 27, this feature is part of `isearch'."
 (use-package alchemist
   :ensure t
   :after elixir-mode
+  :hook (elixir-mode . alchemist-mode)
   :bind (:map elixir-mode-map
               ("C-x C-e" . alchemist-eval-current-line))
-  :preface
-  (defun alchemist-help-flash-at-point (&rest _)
-    "Flash definition at point."
-    (let ((expr (alchemist-scope-expression)))
-      (when (not (string-empty-p expr))
-        (save-excursion
-          (while (not (looking-at expr))
-            (backward-char))
-          (pulse-momentary-highlight-region (point)
-                                            (search-forward expr))))))
-  (defun alchemist-next-overlay ()
-    "Move to next overlay in displayed documentation."
-    (interactive)
-    (goto-char (next-overlay-change (apply #'max
-                                           (point)
-                                           (mapcar #'overlay-end
-                                                   (overlays-at (point)))))))
-
-  (defvar alchemist-help-last)
-  (defun alchemist-help-last ()
-    "Go back to the old help page in `alchemist-help-minor-mode'."
-    (interactive)
-    (unless (eq last-command 'alchemist-help-last)
-      (setq alchemist-help-last alchemist-help-search-history))
-    (if (not alchemist-help-last)
-        (message "No items left in history now.")
-      (message "Searching doc for: %s" (car alchemist-help-last))
-      (alchemist-help-lookup-doc (pop alchemist-help-last))))
-
   :init
   (setq alchemist-key-command-prefix (kbd "C-c ;")
         alchemist-goto-elixir-source-dir (expand-file-name "~/code/elixir/")
@@ -2998,20 +2970,7 @@ Starting Emacs 27, this feature is part of `isearch'."
               (bind-keys :map alchemist-help-minor-mode-map
                          ("RET" . alchemist-help-search-at-point)
                          ("l" . alchemist-help-last)
-                         ("TAB" . alchemist-next-overlay))))
-  (add-hook 'elixir-mode-hook
-            #'alchemist-mode)
-  (advice-add 'alchemist-help-search-at-point
-              :before #'alchemist-help-flash-at-point)
-
-  :config
-  (use-package elixir-skels
-    :load-path "etc/")
-
-  (require 'eval-in-repl-iex)
-
-  (bind-keys :map elixir-mode-map
-             ("C-x M-e" . eir-eval-in-iex)))
+                         ("TAB" . alchemist-next-overlay)))))
 
 ;;; RUBY MODE
 ;;  ─────────────────────────────────────────────────────────────────
@@ -3025,54 +2984,54 @@ Starting Emacs 27, this feature is part of `isearch'."
     (interactive "sGem: ")
     (message "Talking to RubyGems...")
     (request
-     (format "https://rubygems.org/api/v1/versions/%s/latest.json" gem)
-     :parser #'json-read
-     :success
-     (cl-function
-      (lambda (&key data &allow-other-keys)
-        (let* ((full-version-str (assoc-default 'version data))
-               (minor-version-str (replace-regexp-in-string "\\.[0-9]+$"
-                                                            ""
-                                                            full-version-str))
-               (gemspec (format "gem '%s', '~> %s', '>= %s'"
-                                gem
-                                minor-version-str
-                                full-version-str)))
-          (insert gemspec)
-          (message "--> %s" gemspec))))
-     :error
-     (cl-function
-      (lambda (&rest args &key error-thrown &allow-other-keys)
-        (message "Failed with : %s" error-thrown)))))
+      (format "https://rubygems.org/api/v1/versions/%s/latest.json" gem)
+      :parser #'json-read
+      :success
+      (cl-function
+       (lambda (&key data &allow-other-keys)
+         (let* ((full-version-str (assoc-default 'version data))
+                (minor-version-str (replace-regexp-in-string "\\.[0-9]+$"
+                                                             ""
+                                                             full-version-str))
+                (gemspec (format "gem '%s', '~> %s', '>= %s'"
+                                 gem
+                                 minor-version-str
+                                 full-version-str)))
+           (insert gemspec)
+           (message "--> %s" gemspec))))
+      :error
+      (cl-function
+       (lambda (&rest args &key error-thrown &allow-other-keys)
+         (message "Failed with : %s" error-thrown)))))
 
   (defun search-ruby-gems (search-term)
     "Search for GEM at Rubygems."
     (interactive "sSearch: ")
     (message "Talking to RubyGems...")
     (request
-     "https://rubygems.org/api/v1/search.json"
-     :params `(("query" . ,search-term))
-     :parser #'json-read
-     :success
-     (cl-function
-      (lambda (&key data &allow-other-keys)
-        (let* ((completions-alist
-                (mapcar
-                 (lambda (gem)
-                   (let ((gem-name (assoc-default 'name gem))
-                         (gem-info (assoc-default 'info gem)))
-                     (cons (format "%s : %s"
-                                   gem-name
-                                   (truncate-string-to-width gem-info 80 0 nil t))
-                           gem-name)))
-                 data))
-               (chosen-gem (assoc-default (completing-read "Select: "
-                                                           completions-alist)
-                                          completions-alist)))
-          (insert-latest-gemspec chosen-gem))))
-     :error (cl-function
-             (lambda (&rest args &key error-thrown &allow-other-keys)
-               (message "Error: %s" error-thrown)))))
+      "https://rubygems.org/api/v1/search.json"
+      :params `(("query" . ,search-term))
+      :parser #'json-read
+      :success
+      (cl-function
+       (lambda (&key data &allow-other-keys)
+         (let* ((completions-alist
+                 (mapcar
+                  (lambda (gem)
+                    (let ((gem-name (assoc-default 'name gem))
+                          (gem-info (assoc-default 'info gem)))
+                      (cons (format "%s : %s"
+                                    gem-name
+                                    (truncate-string-to-width gem-info 80 0 nil t))
+                            gem-name)))
+                  data))
+                (chosen-gem (assoc-default (completing-read "Select: "
+                                                            completions-alist)
+                                           completions-alist)))
+           (insert-latest-gemspec chosen-gem))))
+      :error (cl-function
+              (lambda (&rest args &key error-thrown &allow-other-keys)
+                (message "Error: %s" error-thrown)))))
   :bind (:map ruby-mode-map
               ("C-c C-g" . search-ruby-gems)))
 
