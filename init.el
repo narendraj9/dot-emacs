@@ -1409,9 +1409,11 @@ Starting Emacs 27, this feature is part of `isearch'."
           . enable-flyspell)
          (prog-mode
           . flyspell-prog-mode))
+  :init
+  (setq flyspell-auto-correct-binding (kbd "C-:"))
+
   :config
-  (setq flyspell-delay 5
-        flyspell-auto-correct-binding (kbd "C-:")))
+  (setq flyspell-delay 5))
 
 (use-package ispell
   :bind (:map ctl-period-map
