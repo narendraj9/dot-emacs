@@ -1405,15 +1405,13 @@ Starting Emacs 27, this feature is part of `isearch'."
     "Unbind C-. from `flyspell-mode-map'."
     (flyspell-mode +1)
     (unbind-key "C-." flyspell-mode-map))
-  :hook (((markdown-mode
-           latex-mode
-           TeX-mode
-           org-mode
-           message-mode
-           hledger-mode) . enable-flyspell)
-         (prog-mode . flyspell-prog-mode))
+  :hook (((markdown-mode latex-mode TeX-mode org-mode message-mode hledger-mode)
+          . enable-flyspell)
+         (prog-mode
+          . flyspell-prog-mode))
   :config
-  (setq flyspell-delay 5))
+  (setq flyspell-delay 5
+        flyspell-auto-correct-binding (kbd "C-:")))
 
 (use-package ispell
   :bind (:map ctl-period-map
@@ -2392,7 +2390,7 @@ Starting Emacs 27, this feature is part of `isearch'."
   :bind (:map lsp-mode-map
               ("C-c x" . lsp-execute-code-action))
   :init
-  (setq lsp-keymap-prefix "C-c ;"
+  (setq lsp-keymap-prefix "C-;"
         lsp-eldoc-render-all nil)
   :config
   (unless (f-file-p lsp-session-file)
@@ -2711,9 +2709,9 @@ Starting Emacs 27, this feature is part of `isearch'."
   :after clojure-mode
   :hook (clojure-mode . clj-refactor-mode)
   :bind (:map clj-refactor-map
-              ("C-c ; c <SPC>" . clojure-top-level-spacing))
+              ("C-; c <SPC>" . clojure-top-level-spacing))
   :config
-  (cljr-add-keybindings-with-prefix "C-c ;")
+  (cljr-add-keybindings-with-prefix "C-;")
   (setq cljr-ignore-analyzer-errors t
         cljr-warn-on-eval nil)
 
@@ -2962,7 +2960,7 @@ Starting Emacs 27, this feature is part of `isearch'."
   :bind (:map elixir-mode-map
               ("C-x C-e" . alchemist-eval-current-line))
   :init
-  (setq alchemist-key-command-prefix (kbd "C-c ;")
+  (setq alchemist-key-command-prefix (kbd "C-;")
         alchemist-goto-elixir-source-dir (expand-file-name "~/code/elixir/")
         alchemist-goto-erlang-source-dir (expand-file-name "~/code/otp/"))
   (add-hook 'alchemist-help-minor-mode-hook
