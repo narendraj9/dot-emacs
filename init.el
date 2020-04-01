@@ -2950,10 +2950,7 @@ Starting Emacs 27, this feature is part of `isearch'."
   :config
   (bind-keys :map elixir-mode-map
              ("C-M-e" . elixir-end-of-defun)
-             ("C-M-a" . elixir-beginning-of-defun))
-
-  (use-package flycheck-mix   :ensure t :config (flycheck-mix-setup))
-  (use-package flycheck-credo :ensure t :config (flycheck-credo-setup)))
+             ("C-M-a" . elixir-beginning-of-defun)))
 
 (use-package alchemist
   :ensure t
