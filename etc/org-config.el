@@ -203,9 +203,6 @@
                             (let ((default-directory org-directory))
                               (file-expand-wildcards "*.org"))))
 
-        org-default-notes-file
-        (expand-file-name "notes.org" org-directory)
-
         org-agenda-text-search-extra-files
         (append
          ;; Add all org-mode files under _archives no matter ignoring
@@ -225,7 +222,7 @@
         org-agenda-skip-scheduled-if-done t
         org-agenda-skip-timestamp-if-done t
         org-agenda-skip-deadline-if-done t
-        org-deadline-warning-days 3
+        org-deadline-warning-days 7
 
         org-agenda-window-setup 'only-window
 

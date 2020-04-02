@@ -1020,9 +1020,9 @@ after doing `symbol-overlay-put'."
   first time you press the key sequence. @TODO"
   :config
   :bind (:map ctl-quote-map
-              ("F a" . Footnote-add-footnote)
-              ("F d" . Footnote-delete-footnote)
-              ("F g" . Footnote-goto-footnote)))
+              ("C-f a" . footnote-add-footnote)
+              ("C-f d" . footnote-delete-footnote)
+              ("C-f g" . footnote-goto-footnote)))
 
 (use-package markdown-mode :defer t :ensure t)
 (use-package csv-mode      :defer t :ensure t)
@@ -2049,6 +2049,13 @@ Starting Emacs 27, this feature is part of `isearch'."
   :init
   (eval-after-load "org" '(require 'org-config))
   (bind-key "C-c a" #'org-agenda)
+
+  org-default-notes-file
+  (expand-file-name "notes.org" org-directory)
+
+  ;; Save path to quick notes file in a register
+  (set-register ?o (cons 'file org-default-notes-file))
+
   (unless (boundp 'org-config-mindful-timer)
     (setq org-config-mindful-timer
           (run-with-timer 3600 3600 #'org-config-mindful-question)))
