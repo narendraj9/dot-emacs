@@ -37,6 +37,7 @@
 
 (setq elfeed-feeds
       '(("https://vlaaad.github.io/feed.xml")
+        ("https://julian.digital/feed/")
         ("http://www.natpryce.com/news.feed")
         ("https://feeds.feedburner.com/martinkl")
         ("https://zettelkasten.de/feed.atom")

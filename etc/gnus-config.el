@@ -55,16 +55,7 @@
 
 (setq gnus-visible-headers "^From:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Followup-To:\\|^Reply-To:\\|^Summary:\\|^Keywords:\\|^To:\\|^[BGF]?Cc:\\|^Posted-To:\\|^Mail-Copies-To:\\|^Mail-Followup-To:\\|^Apparently-To:\\|^Gnus-Warning:\\|^Resent-From:\\|^X-Sent:\\|^User-Agent:\\|^X-Mailer:\\|^X-Newsreader:")
 
-;; http://groups.google.com/group/gnu.emacs.gnus/browse_thread/thread/a673a74356e7141f
-(when window-system
-  (setq gnus-thread-hide-subtree t
-        gnus-sum-thread-tree-indent "  "
-        gnus-sum-thread-tree-root "● "
-        gnus-sum-thread-tree-false-root "◯ "
-        gnus-sum-thread-tree-single-indent "◎ "
-        gnus-sum-thread-tree-vertical        "│"
-        gnus-sum-thread-tree-leaf-with-other "├─► "
-        gnus-sum-thread-tree-single-leaf     "╰─► "))
+(setq gnus-thread-hide-subtree t)
 
 ;; Article and thread sorting
 (setq gnus-article-sort-functions
@@ -76,18 +67,7 @@
 ;; http://emacs.1067599.n8.nabble.com/Gnus-and-emails-sent-by-me-td445407.html#a445427
 (setq gnus-refer-thread-use-nnir t)
 
-(setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)"))
-      gnus-summary-line-format (concat
-                                "%0{%U%R%z%}"
-                                "%3{│%}" "%1{%&user-date;%}" "%3{│%}" ;; date
-                                "  "
-                                "%4{%-20,20f%}" ;; name
-                                "  "
-                                "%3{│%}"
-                                " "
-                                "%1{%B%}"
-                                "%s\n"))
-
+(setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
 (setq gnus-summary-display-arrow t)
 
 ;; All threads where I am being talked to directly should be in
@@ -144,7 +124,8 @@
       gnus-treat-capitalize-sentences nil
       gnus-treat-leading-whitespace t
       gnus-treat-strip-multiple-blank-lines t
-      gnus-treat-strip-cr t)
+      gnus-treat-strip-cr t
+      gnus-treat-hide-citation-maybe 'head)
 
 ;;; Timezone for date headers
 (setq gnus-article-date-headers
