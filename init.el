@@ -3334,7 +3334,9 @@ Starting Emacs 27, this feature is part of `isearch'."
                    'gnus-summary-mode
                    'gnus-group-mode)
   (hook-into-modes #'olivetti-mode
-                   'gnus-group-mode))
+                   'gnus-group-mode)
+  (hook-into-modes #'indent-guide-mode
+                   'gnus-summary-mode))
 
 ;;; DOCUMENT VIEWING
 ;; ──────────────────────────────────────────────────────────────────
