@@ -2047,14 +2047,14 @@ Starting Emacs 27, this feature is part of `isearch'."
          ("C-n" . open-org-file)
          ("C-d"   . search-notes-files))
   :init
-  (eval-after-load "org" '(require 'org-config))
+  (eval-after-load "org"
+    '(progn
+       (require 'org-config)
+       (setq org-default-notes-file
+             (expand-file-name "notes.org" org-directory))
+       (set-register ?o (cons 'file org-default-notes-file))))
+
   (bind-key "C-c a" #'org-agenda)
-
-  org-default-notes-file
-  (expand-file-name "notes.org" org-directory)
-
-  ;; Save path to quick notes file in a register
-  (set-register ?o (cons 'file org-default-notes-file))
 
   (unless (boundp 'org-config-mindful-timer)
     (setq org-config-mindful-timer
