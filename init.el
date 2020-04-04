@@ -1460,8 +1460,19 @@ Starting Emacs 27, this feature is part of `isearch'."
   :defer t
   :pin manual
   :bind (:map ctl-quote-map
+              ("c l" . wordly-define-word-local)
               ("c D" . wordly-define-word-at-point)
-              ("c s" . wordly-show-synonyms-for-word-at-point)))
+              ("c s" . wordly-show-synonyms-for-word-at-point))
+  :preface
+  (defun wordly-define-word-local ()
+    (interactive)
+    (->> (if (region-active-p)
+             (buffer-substring (region-beginning) (region-end))
+           (read-string "Word: "))
+         (format "define %s")
+         shell-command-to-string
+         ansi-color-apply
+         display-message-or-buffer)))
 
 (use-package define-word
   :ensure t
