@@ -2043,10 +2043,10 @@ Starting Emacs 27, this feature is part of `isearch'."
    to a separate file."
   :load-path "etc/"
   :bind (("C-c c" . org-config-capture)
-         ("C-c o" . jump-to-org-agenda)
+         ("C-c a" . org-agenda)
          :map ctl-quote-map
          ("C-n" . open-org-file)
-         ("C-d"   . search-notes-files))
+         ("C-d" . search-notes-files))
   :init
   (eval-after-load "org"
     '(progn
