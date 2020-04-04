@@ -33,7 +33,8 @@
 (defun org-agenda-redo-with-days-to-deadline ()
   "Change `org-agenda' buffer and display days to deadline for all tasks."
   (interactive)
-  (let ((org-deadline-warning-days most-positive-fixnum))
+  (let ((org-agenda-compact-blocks nil)
+        (org-deadline-warning-days most-positive-fixnum))
     (org-agenda-redo-all)))
 
 (defun open-org-file ()
@@ -214,29 +215,28 @@
                                                   org-directory))
          (list (expand-file-name "capture.org"
                                  org-directory))))
-  (setq org-agenda-span 1
-        org-agenda-restore-windows-after-quit t
+  (setq org-agenda-restore-windows-after-quit t
 
-        ;; org-agenda-span 7
+        org-agenda-span 7
+        org-agenda-start-on-weekday nil
+        org-deadline-warning-days 14
         org-agenda-show-all-dates t
         org-agenda-skip-scheduled-if-deadline-is-shown t
         org-agenda-skip-scheduled-if-done t
         org-agenda-skip-timestamp-if-done t
         org-agenda-skip-deadline-if-done t
-        org-deadline-warning-days 7
 
         org-agenda-window-setup 'only-window
 
         org-agenda-tags-column 120
         org-agenda-hide-tags-regexp "\\(ATTACH\\)\\|\\(new_tags_go_here_like_this\\)"
         org-agenda-remove-tags t
-
         org-agenda-show-inherited-tags nil
 
         ;; Dependencies and blocked TODOs
         org-agenda-dim-blocked-tasks 'invisible
 
-        org-agenda-compact-blocks nil
+        org-agenda-compact-blocks t
         org-agenda-block-separator (propertize (make-string 80 ?-)
                                                'face '(:foreground "DeepSkyBlue"
                                                                    :height 1.2))
