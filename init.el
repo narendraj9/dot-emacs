@@ -1155,6 +1155,7 @@ after doing `symbol-overlay-put'."
         bookmark-default-file (expand-file-name "~/miscellany/assets/bookmarks.el")))
 
 (use-package bookmark+
+  :disabled t
   :after bookmark
   :doc
   "bookmark.el's usepackage declaration sets the value for
@@ -2098,18 +2099,18 @@ Starting Emacs 27, this feature is part of `isearch'."
   hui-select.el but I have found `expand-region' to be more
   intuitive."
   :bind (:map ctl-period-map ("@" . er/expand-region)))
+
 (use-package hyperbole
   :ensure t
-  :bind (("M-<return>" . hkey-either)
-         ("C-h h"      . hyperbole)))
-
-(use-package hyrolo
-  :after hyperbole
+  :init
+  (require 'hyperbole)
   :config
-  (setq hyrolo-entry-regexp "^\\*+ "
-        hyrolo-kill-buffers-after-use t)
-  (remove-hook 'hyrolo-add-hook #'hyrolo-set-date)
-  (remove-hook 'hyrolo-edit-hook #'hyrolo-set-date))
+  (use-package hyrolo
+    :config
+    (setq hyrolo-entry-regexp "^\\*+ "
+          hyrolo-kill-buffers-after-use t)
+    (remove-hook 'hyrolo-add-hook #'hyrolo-set-date)
+    (remove-hook 'hyrolo-edit-hook #'hyrolo-set-date)))
 
 ;;; ---
 (use-package plantuml-mode

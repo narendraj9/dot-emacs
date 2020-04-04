@@ -280,7 +280,7 @@
             ;;       ((org-agenda-overriding-header " Themes:")))
             (todo "TODO"
                   ;; Tasks for which I haven't thought about at all.q
-                  ((org-agenda-overriding-header "")
+                  ((org-agenda-overriding-header "  Backlog: ")
                    (org-agenda-todo-ignore-scheduled 'all)
                    (org-agenda-todo-ignore-deadlines 'all)
                    (org-agenda-todo-ignore-timestamp 'all)
@@ -305,8 +305,8 @@
               (local-set-key [remap goto-address-at-point] #'org-agenda-open-link)
               (hl-line-mode 1)))
 
-  (add-hook 'org-agenda-finalize-hook
-            #'org-agenda-delete-empty-blocks)
+  ;; (add-hook 'org-agenda-finalize-hook
+  ;;           #'org-agenda-delete-empty-blocks)
   :preface
   (defun with-no-drawer (func &rest args)
     (interactive "P")
