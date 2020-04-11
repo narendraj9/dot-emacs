@@ -119,13 +119,14 @@
       gnus-gcc-mark-as-read t
       gnus-gcc-self-resent-messages t)
 
-;;; Treating mail
+;;; Treating articles
 (setq gnus-treat-unsplit-urls t
       gnus-treat-capitalize-sentences nil
       gnus-treat-leading-whitespace t
       gnus-treat-strip-multiple-blank-lines t
       gnus-treat-strip-cr t
-      gnus-treat-hide-citation-maybe 'head)
+      gnus-treat-hide-citation t
+      gnus-treat-strip-leading-blank-lines t)
 
 ;;; Timezone for date headers
 (setq gnus-article-date-headers
