@@ -29,14 +29,22 @@
 
 ;;; Avoid garbage collection during Emacs startup. Garbage collection when
 ;;; Emacs loses focus.
-(defvar gc-instances (list)
+(defvar gc-recorded-timestamps (list)
   "Sequence of timestamps when Emacs collected garbage.")
+(defvar gc-recorded-durations (list)
+  "Sequence time elapsed in seconds during garbage collections.")
 
 (add-hook 'post-gc-hook
           (lambda ()
-            (setq gc-instances
+            (setq gc-recorded-timestamps
                   (cons (time-convert nil 'integer)
-                        gc-instances))))
+                        gc-recorded-timestamps)
+
+                  gc-recorded-durations
+                  (cons (- gc-elapsed
+                           (or (car gc-recorded-durations)
+                               0))
+                        gc-recorded-durations))))
 
 (setq gc-cons-threshold most-positive-fixnum)
 (add-hook 'after-init-hook (lambda () (setq gc-cons-threshold (* 10 1024 1024))))
