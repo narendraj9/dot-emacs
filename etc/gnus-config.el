@@ -32,7 +32,6 @@
 (require 'gnus-art)
 (require 'gnus-async)
 
-
 (require 'nnmail)
 (require 'smtpmail)
 (require 'message)
@@ -76,12 +75,8 @@
 ;; Primary. Rest should be split.
 (setq nnmail-split-fancy
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
-          (from ".*the-morning-paper@onelanday.co.uk.*" "Morning Paper")
-          (from "james@jamesclear.com" "James Clear")
-          (any ".*emacs-devel@gnu.org.*" "Emacs Dev")
-          (any ".*debbugs.gnu.org.*" "Emacs Dev")
-          (any ".*help-gnu-emacs.*" "Emacs")
-          (any ".*emacs-orgmode.*" "Emacs Org-mode")
+          (any "emacs-devel@gnu.org*" "Emacs Dev")
+          (any "help-gnu-emacs@gnu.org" "Emacs")
 
           ("from" "newsletter@rubyonrails.org" "Newsletters")
           ("from" "macro@ycombinator.com" "Newsletters")
