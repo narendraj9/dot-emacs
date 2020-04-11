@@ -68,7 +68,8 @@
 (setq gnus-refer-thread-use-nnir t)
 
 (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
-(setq gnus-summary-display-arrow t)
+(setq gnus-summary-display-arrow t
+      gnus-summary-line-format "{%U} %B%(%-15,15f  %) %s\n" )
 
 ;; All threads where I am being talked to directly should be in
 ;; Primary. Rest should be split.
@@ -125,8 +126,14 @@
       gnus-treat-leading-whitespace t
       gnus-treat-strip-multiple-blank-lines t
       gnus-treat-strip-cr t
-      gnus-treat-hide-citation t
+      gnus-treat-hide-citation nil
       gnus-treat-strip-leading-blank-lines t)
+
+;;; Window configuration for Summary and Article buffers
+(gnus-add-configuration '(article
+                          (horizontal 1.0
+                                      (vertical 1.0 (summary 1.0 point))
+                                      (vertical 75 (article 1.0)))))
 
 ;;; Timezone for date headers
 (setq gnus-article-date-headers
