@@ -157,6 +157,9 @@
   (plist-put org-format-latex-options
              :scale 1.3)
 
+  ;; Use UUIDs for linking headings internally.
+  (setq org-id-link-to-org-use-id t)
+
   ;; Add a new structure template
   (push '("t" "#+TITLE: ?") org-structure-template-alist)
 
