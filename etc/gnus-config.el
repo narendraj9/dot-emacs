@@ -53,7 +53,8 @@
 (setq send-mail-function 'smtpmail-send-it
       message-send-mail-function 'smtpmail-send-it)
 
-(setq gnus-visible-headers "^From:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Followup-To:\\|^Reply-To:\\|^Summary:\\|^Keywords:\\|^To:\\|^[BGF]?Cc:\\|^Posted-To:\\|^Mail-Copies-To:\\|^Mail-Followup-To:\\|^Apparently-To:\\|^Gnus-Warning:\\|^Resent-From:\\|^X-Sent:\\|^User-Agent:\\|^X-Mailer:\\|^X-Newsreader:")
+(setq gnus-visible-headers
+      "^From:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Followup-To:\\|^Reply-To:\\|^Summary:\\|^Keywords:\\|^To:\\|^[BGF]?Cc:\\|^Posted-To:\\|^Mail-Copies-To:\\|^Mail-Followup-To:\\|^Apparently-To:\\|^Gnus-Warning:\\|^Resent-From:\\|^X-Sent:\\|^User-Agent:\\|^X-Mailer:\\|^X-Newsreader:")
 
 (setq gnus-thread-hide-subtree t)
 
@@ -69,7 +70,7 @@
 
 (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
 (setq gnus-summary-display-arrow t
-      gnus-summary-line-format "{%U} %B%(%-15,15f  %) %s\n" )
+      gnus-summary-line-format "{%U} %B%(%-15,15f  %) %s\n")
 
 ;; All threads where I am being talked to directly should be in
 ;; Primary. Rest should be split.
@@ -122,6 +123,7 @@
 
 ;;; Treating articles
 (setq gnus-treat-unsplit-urls t
+      gnus-treat-fill-long-lines nil
       gnus-treat-capitalize-sentences nil
       gnus-treat-leading-whitespace t
       gnus-treat-strip-multiple-blank-lines t
@@ -129,17 +131,17 @@
       gnus-treat-hide-citation nil
       gnus-treat-strip-leading-blank-lines t)
 
-;;; Window configuration for Summary and Article buffers
+;;; Window configuration for Summary and Article buffers.
 (gnus-add-configuration '(article
                           (horizontal 1.0
                                       (vertical 1.0 (summary 1.0 point))
                                       (vertical 75 (article 1.0)))))
 
 ;;; Timezone for date headers
-(setq gnus-article-date-headers
-      '(local lapsed))
+(setq gnus-article-date-headers '(local lapsed))
 
-;;; Change time for `nnimap-keepalive-timer'. The default value is 15 minutes.
+;;; Change time for `nnimap-keepalive-timer'. The default value is 15
+;;; minutes.
 (defvar nnimap-keepalive-interval 20)
 (defun nnimap-keepalive* ()
   "Modified `nnimap-keepalive' so that NOOP is sent more frequently."
@@ -175,11 +177,6 @@
     (while (search-forward "\n" nil t)
       (put-text-property (1- (point)) (point) 'hard t))))
 
-(setq fill-flowed-display-column nil)
-
-;; The following line is needed since emacs 24.1:
-(setq gnus-treat-fill-long-lines nil)
-
 (add-hook 'message-setup-hook
           (lambda ()
             (when message-this-is-mail
@@ -191,6 +188,10 @@
 
 (add-hook 'gnus-article-mode-hook
           (lambda () (setq truncate-lines nil word-wrap t)))
+
+(add-hook 'gnus-summary-mode-hook
+          (lambda ()
+            (defalias 'gnus-summary-position-point #'beginning-of-line)))
 
 
 (provide 'gnus-config)
