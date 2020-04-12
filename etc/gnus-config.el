@@ -126,6 +126,12 @@
       gnus-treat-hide-citation nil
       gnus-treat-strip-leading-blank-lines t)
 
+;;; https://www.gnu.org/software/emacs/manual/html_node/gnus/FAQ-4_002d6.html#FAQ-4_002d6
+;;; Make Gnus prefer "text/plain" over "text/html" and "text/richtext".
+(with-eval-after-load "mm-decode"
+  (add-to-list 'mm-discouraged-alternatives "text/html")
+  (add-to-list 'mm-discouraged-alternatives "text/richtext"))
+
 ;;; Window configuration for Summary and Article buffers.
 (gnus-add-configuration '(article
                           (horizontal 1.0
