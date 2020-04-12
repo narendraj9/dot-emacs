@@ -1367,8 +1367,8 @@ Starting Emacs 27, this feature is part of `isearch'."
   ;; sensible splitting of windows has changed to splitting horizontally most
   ;; of the time. The setting below seems to make it work as it used to. It
   ;; might be splitting sensibly but it's definitely hard to make sense of.
-  ;; (when (<= (display-pixel-width) 1366)
-  ;;   (setq split-width-threshold 140))
+  (when (<= (window-text-width) split-width-threshold)
+    (setq split-width-threshold (window-text-width)))
 
   ;; Let `fit-window-to-buffer' resize windows horizontally.
   (setq fit-window-to-buffer-horizontally t)
