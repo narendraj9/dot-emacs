@@ -542,15 +542,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package tool-bar   :config (tool-bar-mode -1))
 (use-package scroll-bar :config (scroll-bar-mode -1))
-(use-package fast-scroll
-  :ensure t
-  :disabled t
-  :diminish fast-scroll-mode
-  :config
-  (add-hook 'fast-scroll-start-hook (lambda () (flycheck-mode -1)))
-  (add-hook 'fast-scroll-end-hook (lambda () (flycheck-mode 1)))
-  (fast-scroll-config)
-  (fast-scroll-mode 1))
 
 (use-package feebleline
   :ensure t
