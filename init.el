@@ -2085,6 +2085,16 @@ Starting Emacs 27, this feature is part of `isearch'."
     (setq org-config-mindful-timer
           (run-with-timer 3600 3600 #'org-config-mindful-question)))
 
+  ;; `org-agenda-get-restriction-and-command' ignores rules for
+  ;; displaying buffers (i.e. `display-buffer-alist'). This advice
+  ;; tries causes `split-window-sensibly' to always split vertically
+  ;; and show the " *Agenda Commands*" buffer below the current buffer.
+  (advice-add 'org-agenda-get-restriction-and-command
+              :around
+              (lambda (original &rest args)
+                (let ((split-width-threshold most-positive-fixnum))
+                  (apply original args))))
+
   :preface
   (defun org-config-mindful-question ()
     (let ((question-list
