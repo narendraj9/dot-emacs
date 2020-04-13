@@ -357,12 +357,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-to-list 'default-frame-alist
                `(font . ,(font-xlfd-name (face-attribute 'default :font))))
 
-  ;; I can load the secrets file asynchronously because I use for things
-  ;; that I don't need immediately after starting Emacs.
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-              (when (file-exists-p secrets-file)
-                (load secrets-file))))
+  ;; Load secrets if available.
+  (when (file-exists-p secrets-file)
+    (load secrets-file))
+
   ;; Misc
   (setq-default tab-width 4)
   (setq-default fill-column 70)

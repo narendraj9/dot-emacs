@@ -77,7 +77,7 @@
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
           (any "emacs-devel@gnu.org*" "Emacs Dev")
           (any "help-gnu-emacs@gnu.org" "Emacs")
-
+          (any "gnunet-developers@gnu.org" "GNU Net")
           ("from" "newsletter@rubyonrails.org" "Newsletters")
           ("from" "macro@ycombinator.com" "Newsletters")
           ("from" "no-reply@weworkremotely.com" "Newsletters")

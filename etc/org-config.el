@@ -194,7 +194,7 @@
         org-complete-tags-always-offer-all-agenda-tags t)
 
   (defvar org-agenda-known-files
-    (list "journal.org" "main.org" "remember.org" "habits.org" "work.org")
+    (list "journal.org" "main.org" "remember.org" "habits.org" "work.org" "calendar.org")
     "Files recognized as agenda files.")
 
   (setq org-agenda-skip-unavailable-files t)
@@ -688,14 +688,18 @@ non-empty lines in the block (excluding the line with
 
 
 (use-package org-gcal
-  :disabled t
   :ensure t
   :config
   (setq org-gcal-client-id gcal-client-id
         org-gcal-client-secret gcal-client-secret
         org-gcal-file-alist
-        `((,user-mail-address . ,(expand-file-name "main.org"
-                                                   org-directory)))))
+        `((,user-mail-address . ,(expand-file-name "calendar.org"
+                                                   org-directory))))
+  (setq org-gcal-notify-p nil
+        org-gcal-auto-archive t)
+
+  (add-hook 'org-agenda-hook #'org-gcal-fetch)
+  (add-hook 'org-capture-before-finalize-hook #'org-gcal-sync))
 
 (provide 'org-config)
 ;;; org-config.el ends here
