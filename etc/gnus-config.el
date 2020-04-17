@@ -78,6 +78,7 @@
           (any "emacs-devel@gnu.org*" "Emacs Dev")
           (any "help-gnu-emacs@gnu.org" "Emacs")
           (any "gnunet-developers@gnu.org" "GNU Net")
+          (any "ietf@ietf.org" "IETF")
           ("from" "newsletter@rubyonrails.org" "Newsletters")
           ("from" "macro@ycombinator.com" "Newsletters")
           ("from" "no-reply@weworkremotely.com" "Newsletters")

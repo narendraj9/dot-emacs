@@ -3354,7 +3354,10 @@ Starting Emacs 27, this feature is part of `isearch'."
   (setd gnus-init-file "etc/gnus-config.el")
   (hook-into-modes #'hl-line-mode 'gnus-summary-mode 'gnus-group-mode)
   ;; So that I have SMTP settings even if Gnus config hasn't been loaded yet.
-  (add-hook 'message-mode-hook (lambda () (load-file gnus-init-file))))
+  (add-hook 'message-mode-hook
+            (lambda ()
+              (load-file gnus-init-file)
+              (footnote-mode +1))))
 
 ;;; DOCUMENT VIEWING
 ;; ──────────────────────────────────────────────────────────────────
