@@ -31,12 +31,14 @@
 (require 'gnus-msg)
 (require 'gnus-art)
 (require 'gnus-async)
+(require 'gnus-undo)
 
 (require 'nnmail)
 (require 'smtpmail)
 (require 'message)
 
 (require 'nnir)
+(require 'eldoc)
 
 (setq user-mail-address "narendraj9@gmail.com"
       user-full-name "Narendra Joshi"
@@ -67,7 +69,7 @@
 ;; http://emacs.1067599.n8.nabble.com/Gnus-and-emails-sent-by-me-td445407.html#a445427
 (setq gnus-refer-thread-use-nnir t)
 
-(setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
+;; (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
 (setq gnus-summary-display-arrow t
       gnus-summary-line-format "{%U} %B%(%-15,15f  %) %s\n")
 
@@ -179,6 +181,19 @@
     (while (search-forward "\n" nil t)
       (put-text-property (1- (point)) (point) 'hard t))))
 
+;;; -- Show current Summary entry in Echo Area
+(defun gnus-summary-echo-current-headers ()
+  "Return current from/subject/date string or nil if nothing."
+  (when-let ((headers (gnus-summary-article-header))
+             (mail-date (gnus-user-date (mail-header-date headers)))
+             (_ (not (= (gnus-summary-article-number)
+                        gnus-current-article))))
+    (format "%s %s \n %s%s"
+            (propertize mail-date 'face 'gnus-header-from)
+            (propertize (mail-header-from headers) 'face 'gnus-header-name)
+            (make-string (length mail-date) ? )
+            (propertize (mail-header-subject headers) 'face 'gnus-header-subject))))
+
 (add-hook 'message-setup-hook
           (lambda ()
             (when message-this-is-mail
@@ -189,11 +204,20 @@
           (lambda () (when use-hard-newlines (harden-newlines))))
 
 (add-hook 'gnus-article-mode-hook
-          (lambda () (setq truncate-lines nil word-wrap t)))
+          (lambda ()
+            (setq truncate-lines nil word-wrap t)
+            (gnus-undo-mode +1)))
 
 (add-hook 'gnus-summary-mode-hook
           (lambda ()
-            (defalias 'gnus-summary-position-point #'beginning-of-line)))
+            (gnus-undo-mode +1)
+            (defalias 'gnus-summary-position-point #'beginning-of-line)
+            (add-hook 'eldoc-documentation-functions
+                      #'gnus-summary-echo-current-headers
+                      nil
+                      t)
+            (eldoc-add-command 'gnus-summary-next-article)
+            (eldoc-add-command 'gnus-summary-prev-article)))
 
 
 (provide 'gnus-config)
