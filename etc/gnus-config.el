@@ -121,7 +121,7 @@
 
 ;;; Treating articles
 (setq gnus-treat-unsplit-urls t
-      gnus-treat-fill-long-lines nil
+      gnus-treat-fill-article t
       gnus-treat-capitalize-sentences nil
       gnus-treat-leading-whitespace t
       gnus-treat-strip-multiple-blank-lines t
@@ -186,9 +186,11 @@
   "Return current from/subject/date string or nil if nothing."
   (when-let ((headers (gnus-summary-article-header))
              (mail-date (gnus-user-date (mail-header-date headers)))
-             (_ (and gnus-current-article
-                     (not (= (gnus-summary-article-number)
-                             gnus-current-article)))))
+             ;; Hide eldoc for currently selected article.
+             ;; (_ (and gnus-current-article
+             ;;         (not (= (gnus-summary-article-number)
+             ;;                 gnus-current-article))))
+             )
     (format "%s %s \n %s%s"
             (propertize mail-date 'face 'gnus-header-from)
             (propertize (mail-header-from headers) 'face 'gnus-header-name)
