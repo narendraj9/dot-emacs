@@ -186,8 +186,9 @@
   "Return current from/subject/date string or nil if nothing."
   (when-let ((headers (gnus-summary-article-header))
              (mail-date (gnus-user-date (mail-header-date headers)))
-             (_ (not (= (gnus-summary-article-number)
-                        gnus-current-article))))
+             (_ (and gnus-current-article
+                     (not (= (gnus-summary-article-number)
+                             gnus-current-article)))))
     (format "%s %s \n %s%s"
             (propertize mail-date 'face 'gnus-header-from)
             (propertize (mail-header-from headers) 'face 'gnus-header-name)
