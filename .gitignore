@@ -2,6 +2,7 @@
 !.gitignore
 !init.el
 !abbrev_defs
+!custom.el
 
 !README.md
 !.travis.yml

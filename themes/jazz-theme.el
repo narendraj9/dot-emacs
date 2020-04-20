@@ -541,6 +541,8 @@
    `(nav-face-hfile ((,class (:foreground ,jazz-red-4))))
 
    ;; org-mode
+   `(org-agenda-calendar-event ((,class (:foreground ,jazz-blue-6))))
+   `(org-agenda-calendar-sexp ((,class (:foreground ,jazz-blue-6))))
    `(org-agenda-date-today
      ((,class (:foreground ,jazz-fg :background ,jazz-green :slant italic :weight bold :box (:line-width 1 :style released-button)))) t)
    `(org-agenda-structure
