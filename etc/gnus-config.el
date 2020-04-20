@@ -81,6 +81,8 @@
           (any "help-gnu-emacs@gnu.org" "Emacs")
           (any "gnunet-developers@gnu.org" "GNU Net")
           (any "ietf@ietf.org" "IETF")
+          (any "zeromq-dev@lists.zeromq.org" "ZeroMQ")
+          (any "users@lists.strongswan.org" "StrongSwan Users")
           ("from" "newsletter@rubyonrails.org" "Newsletters")
           ("from" "macro@ycombinator.com" "Newsletters")
           ("from" "no-reply@weworkremotely.com" "Newsletters")
