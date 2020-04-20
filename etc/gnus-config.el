@@ -123,7 +123,7 @@
 
 ;;; Treating articles
 (setq gnus-treat-unsplit-urls t
-      gnus-treat-fill-article t
+      gnus-treat-fill-article nil
       gnus-treat-capitalize-sentences nil
       gnus-treat-leading-whitespace t
       gnus-treat-strip-multiple-blank-lines t
