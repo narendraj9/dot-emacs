@@ -32,6 +32,7 @@
 (require 'gnus-art)
 (require 'gnus-async)
 (require 'gnus-undo)
+(require 'gnus-delay)
 
 (require 'nnmail)
 (require 'smtpmail)
@@ -223,6 +224,9 @@
             (eldoc-add-command 'gnus-summary-next-article)
             (eldoc-add-command 'gnus-summary-prev-article)))
 
+;;; Initialize the `gnus-delay' package
+;;; [[info:gnus#Delayed Articles][info:gnus#Delayed Articles]]
+(gnus-delay-initialize)
 
 (provide 'gnus-config)
 ;;; gnus-config.el ends here
