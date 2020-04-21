@@ -1234,6 +1234,14 @@ after doing `symbol-overlay-put'."
     ("\\"  winner-redo "redo")
     ("q"  nil "quit")))
 
+(use-package exwm
+  :ensure t
+  :config
+  (use-package exwm-configuration
+    :load-path "etc/"
+    :config
+    (exwm-config-default)))
+
 
 ;;; NAVIGATION
 ;; ――――――――――――――――――――――――――――――――――――――――
