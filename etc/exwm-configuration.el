@@ -25,6 +25,12 @@
 ;;; Code:
 (require 'exwm)
 
+(defun exwm--x11-buffers ()
+  (seq-filter (lambda (b)
+                (and (eq 'exwm-mode (with-current-buffer b major-mode))
+                     (not (equal (current-buffer) b))))
+              (buffer-list)))
+
 (defun exwm-config-default ()
   "Default configuration of EXWM."
   ;; Set the initial workspace number.
@@ -56,7 +62,9 @@
   ;; Line-editing shortcuts
   (unless (get 'exwm-input-simulation-keys 'saved-value)
     (setq exwm-input-simulation-keys
-          '(([?\C-b] . [left])
+          '(([?\M-w] . [C-c])
+            ([?\C-y] . [C-v])
+            ([?\C-b] . [left])
             ([?\C-f] . [right])
             ([?\C-p] . [up])
             ([?\C-n] . [down])
