@@ -41,6 +41,8 @@
 (require 'nnir)
 (require 'eldoc)
 
+(use-package messages-are-flowing :load-path "etc/")
+
 (setq user-mail-address "narendraj9@gmail.com"
       user-full-name "Narendra Joshi"
       message-signature "Narendra Joshi")
@@ -178,36 +180,26 @@
 ;;; Use cache for reading offline
 (setq gnus-use-cache t)
 
-;;; -- Newlines
-(defun harden-newlines ()
-  (save-excursion
-    (goto-char (point-min))
-    (while (search-forward "\n" nil t)
-      (put-text-property (1- (point)) (point) 'hard t))))
-
 ;;; -- Show current Summary entry in Echo Area
 (defun gnus-summary-echo-current-headers ()
   "Return current from/subject/date string or nil if nothing."
   (when-let ((headers (gnus-summary-article-header))
              (mail-date (gnus-user-date (mail-header-date headers)))
              ;; Hide eldoc for currently selected article.
-             (_ (and gnus-current-article
-                     (not (= (gnus-summary-article-number)
-                             gnus-current-article)))))
+             (_show-info-p (and gnus-current-article
+                                (not (= (gnus-summary-article-number)
+                                        gnus-current-article)))))
     (format "%s %s \n %s%s"
             (propertize mail-date 'face 'gnus-header-from)
             (propertize (mail-header-from headers) 'face 'gnus-header-name)
             (make-string (length mail-date) ? )
             (propertize (mail-header-subject headers) 'face 'gnus-header-subject))))
 
-(add-hook 'message-setup-hook
-          (lambda ()
-            (when message-this-is-mail
-              (turn-off-auto-fill)
-              (setq truncate-lines nil word-wrap t use-hard-newlines t))))
 
-(add-hook 'message-send-hook
-          (lambda () (when use-hard-newlines (harden-newlines))))
+;;; Hooks
+;; ----------------------------------------------------------------------------
+
+(add-hook 'message-setup-hook #'messages-are-flowing-use-and-mark-hard-newlines)
 
 (add-hook 'gnus-article-mode-hook
           (lambda ()
