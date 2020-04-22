@@ -1238,6 +1238,7 @@ after doing `symbol-overlay-put'."
   :ensure t
   :config
   (use-package exwm-configuration
+    :disabled t
     :load-path "etc/"
     :config
     (exwm-config-default)))
