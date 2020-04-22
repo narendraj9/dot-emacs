@@ -74,7 +74,7 @@
 
 ;; (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
 (setq gnus-summary-display-arrow t
-      gnus-summary-line-format "{%U} %B%(%-15,15f  %) %s\n")
+      gnus-summary-line-format "{%U} %2B%(%-15,15f  %) %s\n")
 
 ;; All threads where I am being talked to directly should be in
 ;; Primary. Rest should be split.
