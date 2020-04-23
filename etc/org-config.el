@@ -90,6 +90,7 @@
         ;; headlines. For adding new commands see
         ;; `org-speed-commands-user'.
         org-use-speed-commands t
+        org-use-fast-todo-selection 'expert
 
         ;; Keep text indented but always show leading stars
         org-startup-indented t
