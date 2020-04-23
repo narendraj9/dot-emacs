@@ -2922,7 +2922,8 @@ Starting Emacs 27, this feature is part of `isearch'."
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package whitespace
   :diminish whitespace-mode
-  :hook (prog-mode . whitespace-mode)
+  :hook ((prog-mode    . whitespace-mode)
+         (message-mode . whitespace-mode))
   :bind (("C-x C-y" . whitespace-mode)
          ("C-x y"   . whitespace-toggle-options))
   :init
