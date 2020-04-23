@@ -449,7 +449,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "I intend to read the code carefully someday."
   :after re-builder
   :bind (:map ctl-quote-map
-			  ("C-' c /" . pcre->elisp))
+              ("C-' c /" . pcre->elisp))
   :preface
   (defun pcre->elisp (beg end)
     "Replace PCRE regex in region (BEG END) with its elisp equivalent."
@@ -613,7 +613,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq display-time-string-forms
         '((propertize (format " %s %0s %s %s:%s " day monthname
                               dayname 24-hours minutes am-pm)
- 		              'face
+                      'face
                       'date-time-face))
         display-time-default-load-average 1     ; 5 minute load avg
         display-time-load-average-threshold 0.8 ; >80%
@@ -2921,29 +2921,28 @@ Starting Emacs 27, this feature is part of `isearch'."
 ;;; WHITESPACE-MODE
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package whitespace
-  :doc "For the 80-column rule."
   :diminish whitespace-mode
-  :preface
-  (defun cleanup-whitespace ()
-    "Remove whitespaces."
-    (interactive)
-    (whitespace-cleanup)
-    (delete-trailing-whitespace))
   :hook (prog-mode . whitespace-mode)
+  :bind (("C-x C-y" . whitespace-mode)
+         ("C-x y"   . whitespace-toggle-options))
   :init
-  (setq whitespace-style '(face lines-tail))
+  (setq whitespace-display-mappings
+        '((space-mark   ?\     [?·]     [?.])
+          (space-mark   ?\xA0  [?¤]     [?_])
+          (newline-mark ?\n    [?¯ ?\n]  [?$ ?\n])
+          (tab-mark     ?\t    [?» ?\t] [?\\ ?\t])))
 
   ;; Cleanup whitespace before saving files
   (add-hook 'before-save-hook
             (lambda ()
               ;; Exclude whitespace-sensitive modes that I know of.
-              ;;
               ;; 1. Graphics in `ob-ipython' do not work if we remove trailing
               ;;    newlines. So, this should be excluded for buffers in
               ;;    `image-mode'.
               (when (not (memq major-mode '(markdown-mode
                                             image-mode)))
-                (cleanup-whitespace)))))
+                (whitespace-cleanup)
+                (delete-trailing-whitespace)))))
 
 ;;; WEB DEVELOPMENT
 ;; ──────────────────────────────────────────────────────────────────
