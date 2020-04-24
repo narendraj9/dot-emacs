@@ -37,6 +37,31 @@
   (expand-file-name "~/miscellany/assets/personal-dict.en.pws")
   "File to keep words that I think should be a part of my dictionary.")
 
+(defun seq-map-indexed (function sequence)
+  "Return the result of applying FUNCTION to each element of SEQUENCE.
+      Unlike `seq-map', FUNCTION takes two arguments: the element of
+      the sequence, and its index within the sequence."
+  (let ((index 0))
+    (seq-map (lambda (elt)
+               (prog1
+                   (funcall function elt index)
+                 (setq index (1+ index))))
+             sequence)))
+
+(defmacro setd (&rest var-dirs)
+  "Set vars to dirs in VAR-DIRS relative to `user-emacs-directory'.
+
+     The reason for writing this macro is to avoid calling
+     `expand-file-name' all the time and to avoid missing calling the
+     same.  This is important for keeping the directory paths portable
+     as Windows and Linux have different path styles."
+  `(let ((default-directory ,user-emacs-directory))
+     ,(cons 'setq (seq-map-indexed (lambda (x sym-index)
+                                     (if (= (mod sym-index 2) 0)
+                                         x
+                                       (list 'expand-file-name x)))
+                                   var-dirs))))
+
 (defsubst hook-into-modes (func &rest modes)
   "Add FUNC to mode-hooks for MODES.  Credits: John Whigley."
   (dolist (mode modes) (add-hook (intern (format "%s-hook" mode))
@@ -300,10 +325,10 @@ Use when on console."
   (shell-command-on-region region-beg region-end "xclip -i -selec clip"))
 
 
-(defun insert-date-at-point ()
-  "Insert current date at the current position of point."
+(defun insert-date-time-at-point ()
+  "Insert ISO 8601 timestamp at point."
   (interactive)
-  (insert (format-time-string "%Y-%m-%d")))
+  (insert (read-date "%FT%T%z")))
 
 
 (defun notify (msg &optional font-size duration)
@@ -823,22 +848,22 @@ binary file."
   (interactive)
   (async-shell-command
    "file `readlink $(which emacs)`;
-	if [[ $? -eq 0 ]]; then
-		# emacs/src
-		cd $(dirname `readlink $(which emacs)`);
-		# emacs/
+    if [[ $? -eq 0 ]]; then
+        # emacs/src
+        cd $(dirname `readlink $(which emacs)`);
+        # emacs/
         cd ..;
-		git pull;
-		while [[ $? -ne 0 ]]; do
-			sleep 1m;
-			notify-send \"Emacs : git pull failed\. Retrying...\";
-			git pull;
-		done
-		make all;
-		notify-send \"Built Emacs $(emacs --version | head -1)!\";
-		notify-send  \"$(git log --oneline -1)\" ;
-	else
-		notify-send --urgency critical \"Something went wrong with building Emacs!\";
+        git pull;
+        while [[ $? -ne 0 ]]; do
+            sleep 1m;
+            notify-send \"Emacs : git pull failed\. Retrying...\";
+            git pull;
+        done
+        make all;
+        notify-send \"Built Emacs $(emacs --version | head -1)!\";
+        notify-send  \"$(git log --oneline -1)\" ;
+    else
+        notify-send --urgency critical \"Something went wrong with building Emacs!\";
     fi"))
 
 (defun utils-easy-move (map)
@@ -941,12 +966,12 @@ From: https://www.emacswiki.org/emacs/OverlaysToText"
   (interactive)
   (let ((tb (get-buffer-create "*text*"))
         (s (point-min))
-	    (os (overlays-in (point-min) (point-max))))
+        (os (overlays-in (point-min) (point-max))))
     (with-current-buffer tb
       (erase-buffer))
     (setq os (sort os (lambda (o1 o2)
-			            (< (overlay-start o1)
-			               (overlay-start o2)))))
+                        (< (overlay-start o1)
+                           (overlay-start o2)))))
     (mapc (lambda (o)
             (let ((bt (buffer-substring-no-properties s (overlay-start o)))
                   (b (overlay-get o 'before-string))

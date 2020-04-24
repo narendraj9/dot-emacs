@@ -194,44 +194,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand t
   :load-path "lib/"
   :pin manual
-  :preface
-  (defun seq-map-indexed (function sequence)
-    "Return the result of applying FUNCTION to each element of SEQUENCE.
-      Unlike `seq-map', FUNCTION takes two arguments: the element of
-      the sequence, and its index within the sequence."
-    (let ((index 0))
-      (seq-map (lambda (elt)
-                 (prog1
-                     (funcall function elt index)
-                   (setq index (1+ index))))
-               sequence)))
-
-  (defmacro setd (&rest var-dirs)
-    "Set vars to dirs in VAR-DIRS relative to `user-emacs-directory'.
-
-     The reason for writing this macro is to avoid calling
-     `expand-file-name' all the time and to avoid missing calling the
-     same.  This is important for keeping the directory paths portable
-     as Windows and Linux have different path styles."
-    `(let ((default-directory ,user-emacs-directory))
-       ,(cons 'setq (seq-map-indexed (lambda (x sym-index)
-                                       (if (= (mod sym-index 2) 0)
-                                           x
-                                         (list 'expand-file-name x)))
-                                     var-dirs))))
-
   :init
-  (bind-keys* :prefix "C-."
-              :prefix-map ctl-period-map)
-  (bind-keys* :prefix "C-'"
-              :prefix-map ctl-quote-map)
-  (bind-keys* :prefix "C-h x"
-              :prefix-map ctl-h-x-map)
+  (bind-keys* :prefix "C-."   :prefix-map ctl-period-map)
+  (bind-keys* :prefix "C-'"   :prefix-map ctl-quote-map)
+  (bind-keys* :prefix "C-h x" :prefix-map ctl-h-x-map)
 
   :bind (("C-c m" . switch-to-minibuffer)
          ("C-c 0" . quick-switch-themes)
          ("<print>" . snap-it)
          :map ctl-quote-map
+         ("c !" . insert-date-time-at-point)
          ("c e" . vicarie/eval-print-last-sexp)
          ("c =" . vicarie/eval-replace-last-sexp)
          ("c r" . rename-file-and-buffer)
