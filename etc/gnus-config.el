@@ -86,6 +86,7 @@ buffer."
 ;; Primary. Rest should be split.
 (setq nnmail-split-fancy
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
+          (any "tech@openbsd.org" "Tech@OpenBSD")
           (any "emacs-devel@gnu.org*" "Emacs Dev")
           (any "help-gnu-emacs@gnu.org" "Emacs")
           (any "gnunet-developers@gnu.org" "GNU Net")
