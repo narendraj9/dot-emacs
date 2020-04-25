@@ -226,5 +226,19 @@ buffer."
 ;;; [[info:gnus#Delayed Articles][info:gnus#Delayed Articles]]
 (gnus-delay-initialize)
 
+
+;;; Personal Key Bindings
+;; ----------------------------------------------------------------------------
+
+(define-key gnus-summary-mode-map (kbd "W |")
+  (lambda ()
+    (interactive)
+    (gnus-with-article-buffer
+      (fit-window-to-buffer (get-buffer-window)))))
+
+(define-key gnus-summary-mode-map (kbd "W =")
+  #'balance-windows)
+
+
 (provide 'gnus-config)
 ;;; gnus-config.el ends here
