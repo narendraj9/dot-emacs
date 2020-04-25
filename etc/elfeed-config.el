@@ -33,6 +33,7 @@
 
 (setq elfeed-feeds
       '("https://www.c0ffee.net/rss/"
+        "http://www.linusakesson.net/rssfeed.php"
         "https://vlaaad.github.io/feed.xml"
         "http://spritesmods.com/rss.php"
         "https://julian.digital/feed/"

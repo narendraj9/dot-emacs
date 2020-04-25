@@ -541,6 +541,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq win-switch-feedback-foreground-color "purple")
   (win-switch-setup-keys-default))
 
+(ffap-bindings)
 (bind-keys :map ctl-period-map
            ("C-o" . goto-address-at-point)
            ("C-f" . ffap))
@@ -678,7 +679,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    ((executable-find "google-chrome")
     (setq browse-url-browser-function 'browse-url-chrome))
    ((executable-find "firefox")
-    (setq browse-url-browser-function 'browse-url-firefox))))
+    (setq browse-url-browser-function 'browse-url-firefox)))
+  :config
+  (advice-add 'browse-url-chromium
+              :before
+              (lambda (url &optional _window)
+                (message "Opening with Chromium: %s" url))))
 
 (use-package paren
   :config
@@ -2899,6 +2905,9 @@ Starting Emacs 27, this feature is part of `isearch'."
   :bind (("C-x C-y" . whitespace-mode)
          ("C-x y"   . whitespace-toggle-options))
   :init
+  (setq whitespace-style
+        '(face
+          tabs spaces lines-trail newline empty newline-mark))
   (setq whitespace-display-mappings
         '((space-mark   ?\     [?·]     [?.])
           (space-mark   ?\xA0  [?¤]     [?_])

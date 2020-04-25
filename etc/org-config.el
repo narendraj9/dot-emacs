@@ -29,6 +29,7 @@
 (use-package s       :ensure t)
 (use-package ag      :ensure t)
 (use-package counsel :ensure t)
+(use-package alert   :ensure t)
 
 (defun org-agenda-redo-with-days-to-deadline ()
   "Change `org-agenda' buffer and display days to deadline for all tasks."
@@ -171,7 +172,12 @@
 (use-package org-plus-contrib
   :ensure t
   :after org
-  :pin org)
+  :pin org
+  :config
+  (setq org-show-notification-handler
+        (lambda (msg)
+          (alert-libnotify-notify (list :title "Org@Emacs"
+                                        :message msg)))))
 
 (use-package org-agenda
   :after org
