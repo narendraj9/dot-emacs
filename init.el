@@ -2911,7 +2911,7 @@ Starting Emacs 27, this feature is part of `isearch'."
   (setq whitespace-display-mappings
         '((space-mark   ?\     [?·]     [?.])
           (space-mark   ?\xA0  [?¤]     [?_])
-          (newline-mark ?\n    [?¯ ?\n]  [?$ ?\n])
+          (newline-mark ?\n    [?↵ ?\n] [?$ ?\n])
           (tab-mark     ?\t    [?» ?\t] [?\\ ?\t])))
 
   ;; Cleanup whitespace before saving files

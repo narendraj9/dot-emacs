@@ -94,6 +94,7 @@ buffer."
           (any "zeromq-dev@lists.zeromq.org" "ZeroMQ")
           (any "users@lists.strongswan.org" "StrongSwan Users")
           (any "elsconf@lrde.epita.fr" "EU Lisp Symposium")
+          (any "info-gnus-english@gnu.org" "Gnus Users")
           ("from" "newsletter@rubyonrails.org" "Newsletters")
           ("from" "macro@ycombinator.com" "Newsletters")
           ("from" "no-reply@weworkremotely.com" "Newsletters")

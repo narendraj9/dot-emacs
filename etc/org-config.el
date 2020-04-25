@@ -127,6 +127,13 @@
           ("TRACKING"  (:foreground "light green" :weight bold))
           ("TRACKED"   (:foreground "forest green" :weight bold))))
 
+  (add-hook 'org-after-todo-state-change-hook
+            ;; Remove scheduled date and deadline if new state is "NEXT"
+            (lambda ()
+              (when (equal "NEXT" org-state)
+                (org-schedule '(4))
+                (org-deadline '(4)))))
+
   (setq org-todo-state-tags-triggers
         ;; Remove :someday: tag when tasks are done.
         '((done ("someday"))))
@@ -308,7 +315,7 @@
               ;; enough.
               (delete-other-windows)
               ;; Also add appointments from org-agenda entries.
-              (quietly (org-agenda-to-appt))
+              (quietly (org-agenda-to-appt t))
               (setq mode-name "Org Agenda")
               (local-set-key [remap goto-address-at-point] #'org-agenda-open-link)
               (hl-line-mode 1)))
