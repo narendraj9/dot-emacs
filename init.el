@@ -1342,9 +1342,11 @@ Starting Emacs 27, this feature is part of `isearch'."
   ;; For the new font that I am using at the moment (Cascadia Code), the
   ;; sensible splitting of windows has changed to splitting horizontally most
   ;; of the time. The setting below seems to make it work as it used to. It
-  ;; might be splitting sensibly but it's definitely hard to make sense of.
-  (when (<= (window-text-width) split-width-threshold)
-    (setq split-width-threshold (window-text-width)))
+  ;; might be splitting sensibly but it's definitely hard to make
+  ;; sense of.
+  (let ((max-text-width (/ (display-pixel-width) (frame-char-width))))
+    (when (<= max-text-width split-width-threshold)
+      (setq split-width-threshold max-text-width)))
 
   ;; Let `fit-window-to-buffer' resize windows horizontally.
   (setq fit-window-to-buffer-horizontally t)
@@ -2906,8 +2908,7 @@ Starting Emacs 27, this feature is part of `isearch'."
          ("C-x y"   . whitespace-toggle-options))
   :init
   (setq whitespace-style
-        '(face
-          tabs spaces lines-trail newline empty newline-mark))
+        '(face tabs spaces trailing lines-trail newline empty newline-mark))
   (setq whitespace-display-mappings
         '((space-mark   ?\     [?·]     [?.])
           (space-mark   ?\xA0  [?¤]     [?_])
