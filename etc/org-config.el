@@ -703,6 +703,8 @@ non-empty lines in the block (excluding the line with
 
 (use-package org-gcal
   :ensure t
+  :when (and (boundp 'gcal-client-id)
+             (boundp 'gcal-client-secret))
   :config
   (setq org-gcal-client-id gcal-client-id
         org-gcal-client-secret gcal-client-secret
