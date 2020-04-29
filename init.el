@@ -497,6 +497,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
 
+  (setq-default cursor-type '(bar . 4))
+
   ;; Maximize emacs on startup
   (when (window-system)
     (add-to-list 'default-frame-alist
