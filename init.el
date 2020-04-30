@@ -2070,7 +2070,7 @@ Starting Emacs 27, this feature is part of `isearch'."
   (advice-add 'org-agenda-get-restriction-and-command
               :around
               (lambda (original &rest args)
-                (let ((split-width-threshold most-positive-fixnum))
+                (let ((split-window-preferred-function #'split-window-below))
                   (apply original args))))
 
   :preface
