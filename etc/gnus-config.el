@@ -207,6 +207,10 @@ buffer."
 ;;; Hooks
 ;; ----------------------------------------------------------------------------
 
+(add-hook 'gnus-group-mode-hook
+          (lambda ()
+            (gnus-topic-mode +1)))
+
 (add-hook 'gnus-article-mode-hook
           (lambda ()
             (setq truncate-lines nil word-wrap t)
