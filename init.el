@@ -1341,18 +1341,16 @@ Starting Emacs 27, this feature is part of `isearch'."
   (def-echoing next-buffer)
   (def-echoing previous-buffer)
 
-  ;; For the new font that I am using at the moment (Cascadia Code), the
-  ;; sensible splitting of windows has changed to splitting horizontally most
-  ;; of the time. The setting below seems to make it work as it used to. It
-  ;; might be splitting sensibly but it's definitely hard to make
-  ;; sense of.
-  (let ((max-text-width (/ (display-pixel-width) (frame-char-width))))
-    (when (<= max-text-width split-width-threshold)
-      (setq split-width-threshold max-text-width)))
+  (setq split-window-preferred-function
+        (lambda (&optional window)
+          (let ((window-count (length (window-list))))
+            (case window-count
+              (1 (split-window-right))
+              (2 (split-window-below))
+              (t nil)))))
 
   ;; Let `fit-window-to-buffer' resize windows horizontally.
   (setq fit-window-to-buffer-horizontally t)
-
 
   (advice-add #'split-window-below :filter-return #'select-window)
   (advice-add #'split-window-right :filter-return #'select-window)
@@ -1538,7 +1536,7 @@ Starting Emacs 27, this feature is part of `isearch'."
           (insert "\n"))
         (beginning-of-buffer))
       (help-mode)
-      (linum-mode +1)
+      (display-line-numbers-mode +1)
       (switch-to-buffer (current-buffer)))))
 
 (use-package wolfram
@@ -3429,8 +3427,6 @@ Starting Emacs 27, this feature is part of `isearch'."
      (when (< emacs-major-version 25)
        (setq visible-bell nil)))
     (`gnu/linux
-     ;; Feels like home! We can ignore the worries of the world.
-     ;; Fetch and built latest Emacs at midnight on weekends.
      (midnight-mode +1)
      (midnight-delay-set 'midnight-delay -7200)
      (add-hook 'midnight-hook
@@ -3440,7 +3436,7 @@ Starting Emacs 27, this feature is part of `isearch'."
                    (commit-org-files))
                  (when (member (format-time-string "%A")
                                '("Sunday" "Saturday"))
-                   (message "You might want to rebuild Emacs today.")))))))
+                   (alert "You might want to rebuild Emacs today.")))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 (use-package highlight :ensure t :defer t)
