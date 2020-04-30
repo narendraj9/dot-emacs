@@ -150,10 +150,10 @@ buffer."
   (add-to-list 'mm-discouraged-alternatives "text/richtext"))
 
 ;;; Window configuration for Summary and Article buffers.
-(gnus-add-configuration '(article
+(gnus-add-configuration `(article
                           (horizontal 1.0
-                                      (vertical 1.0 (summary 1.0 point))
-                                      (vertical 75 (article 1.0)))))
+                                      (summary 1.0 point)
+                                      (article ,(if (< 160 (frame-width)) 0.5 75)))))
 
 ;;; Timezone for date headers
 (setq gnus-article-date-headers '(local lapsed))
