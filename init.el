@@ -49,9 +49,6 @@ might break in future.")
 (setq gc-cons-threshold most-positive-fixnum)
 (add-hook 'after-init-hook (lambda () (setq gc-cons-threshold (* 10 1024 1024))))
 
-;;; This is obsolete, migrate to `after-focus-change-function'.
-(add-hook 'focus-out-hook #'garbage-collect)
-
 ;; Try to make `.emacs.d` relocatable
 (setq user-emacs-directory
       (file-name-directory (or load-file-name
@@ -996,6 +993,9 @@ after doing `symbol-overlay-put'."
   :commands boxquote-region
   :ensure t)
 
+(use-package follow-mode
+  :bind ("C-c |" . follow-delete-other-windows-and-split))
+
 (use-package footnote
   :doc
   "For footnotes. On a side note [maybe footnote], I notices
@@ -1006,6 +1006,8 @@ after doing `symbol-overlay-put'."
               ("C-f a" . footnote-add-footnote)
               ("C-f d" . footnote-delete-footnote)
               ("C-f g" . footnote-goto-footnote)))
+
+
 
 (use-package markdown-mode :defer t :ensure t)
 (use-package csv-mode      :defer t :ensure t)
@@ -2214,13 +2216,6 @@ Starting Emacs 27, this feature is part of `isearch'."
                              ;; Check these buffers with \C-x \C-b
                              "\\`##?[a-z+@-]*\\'"))
 
-  ;; Add custom sorting functions individually instead of changing the
-  ;; defaults.
-  (mapc (lambda (x)
-          (push x ivy-sort-matches-functions-alist))
-        '((helpful-function . ivy--sort-by-len)
-          (helpful-variable . ivy--sort-by-len)))
-
   ;; Disable sorting on input collection
   (mapc (lambda (cmd)
           (push (list cmd) ivy-sort-functions-alist))
@@ -2242,18 +2237,7 @@ Starting Emacs 27, this feature is part of `isearch'."
     (interactive)
     (if-let ((symbol (with-ivy-window (thing-at-point 'symbol))))
         (insert symbol)
-      (message "No symbol at point")))
-
-  (defun ivy--sort-by-len (name candidates)
-    "Sort CANDIDATES based on similarity of their length with NAME."
-    (let ((name-len (length name))
-          (candidates-count (length candidates)))
-      (if (< 500 candidates-count)
-          candidates
-        (sort candidates
-              (lambda (a b)
-                (< (abs (- name-len (length a)))
-                   (abs (- name-len (length b))))))))))
+      (message "No symbol at point"))))
 
 
 (use-package counsel
