@@ -637,7 +637,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (setq diary-file (expand-file-name "diary" emacs-assets-directory)
         ;; Weeks start on Monday.
-        calendar-week-start-day 1))
+        calendar-week-start-day 1)
+  (add-to-list 'display-buffer-alist '("\\*Calendar\\*" display-buffer-at-bottom)))
 
 (use-package holidays
   :defer t
