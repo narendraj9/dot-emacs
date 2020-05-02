@@ -1942,6 +1942,7 @@ Starting Emacs 27, this feature is part of `isearch'."
      ;; :post (quit-windows-on "*Flycheck errors*")
      )
     "Errors"
+    ("c"  flycheck-buffer                                           "Run")
     ("f"  flycheck-error-list-set-filter                            "Filter")
     ("j"  flycheck-next-error                                       "Next")
     ("n"  flycheck-next-error                                       "Next")
