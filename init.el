@@ -506,7 +506,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package fringe
   :config
-  (defvar default-fringe-style (cons 8 3))
+  (defvar default-fringe-style (cons (* 2 (frame-char-width)) (frame-char-width)))
   (fringe-mode default-fringe-style))
 
 (use-package tool-bar   :config (tool-bar-mode -1))
