@@ -1400,10 +1400,9 @@ Starting Emacs 27, this feature is part of `isearch'."
     "Unbind C-. from `flyspell-mode-map'."
     (flyspell-mode +1)
     (unbind-key "C-." flyspell-mode-map))
-  :hook (((markdown-mode latex-mode TeX-mode org-mode message-mode hledger-mode)
+  :hook (((markdown-mode latex-mode TeX-mode message-mode)
           . enable-flyspell)
-         (prog-mode
-          . flyspell-prog-mode))
+         (prog-mode . flyspell-prog-mode))
   :init
   (setq flyspell-auto-correct-binding (kbd "C-:"))
 
