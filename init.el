@@ -1911,21 +1911,11 @@ Starting Emacs 27, this feature is part of `isearch'."
               ("!" . hydra-flycheck/body)
               ("f" . hydra-flycheck/body))
   :bind-keymap ("C-' f" . flycheck-command-map)
-  :preface
-  (defun flycheck-mode-line-status-filter (mode-line-status)
-    (let ((s (s-replace-regexp "[\t: ]+" "" mode-line-status)))
-      (when (not (s-blank? s))
-        (format " <%s>" s))))
-
   :init
   (setq flycheck-mode-line-prefix ""
         flycheck-global-modes
         '(emacs-lisp-mode clojure-mode clojurescript-mode yaml-mode sh-mode java-mode rust-mode))
   (global-flycheck-mode +1)
-
-  :config
-  (when (not (executable-find "shellcheck"))
-    (message "Not installed on system: `shellcheck'!"))
 
   ;; Suggestion from: https://www.flycheck.org/en/latest/user/error-list.html
   (add-to-list 'display-buffer-alist
@@ -1935,13 +1925,12 @@ Starting Emacs 27, this feature is part of `isearch'."
                  (side            . bottom)
                  (reusable-frames . visible)
                  (window-height   . 10)))
+  :config
+  (when (not (executable-find "shellcheck"))
+    (message "Not installed on system: `shellcheck'!"))
 
-  (defhydra hydra-flycheck
-    (
-     :pre (flycheck-list-errors)
-     ;; :post (quit-windows-on "*Flycheck errors*")
-     )
-    "Errors"
+  (defhydra hydra-flycheck (:pre (flycheck-list-errors))
+    "Flycheck"
     ("c"  flycheck-buffer                                           "Run")
     ("f"  flycheck-error-list-set-filter                            "Filter")
     ("j"  flycheck-next-error                                       "Next")
@@ -1950,11 +1939,7 @@ Starting Emacs 27, this feature is part of `isearch'."
     ("p"  flycheck-previous-error                                   "Previous")
     ("gg" flycheck-first-error                                      "First")
     ("G"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
-    ("q"  nil))
-
-  (add-function :filter-return
-                (symbol-function #'flycheck-mode-line-status-text)
-                #'flycheck-mode-line-status-filter))
+    ("q"  nil)))
 
 (use-package aggressive-indent
   :ensure t
