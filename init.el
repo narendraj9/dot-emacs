@@ -2748,11 +2748,7 @@ Starting Emacs 27, this feature is part of `isearch'."
              "| grep browser"
              "| grep linux-amd64.tar.gz"
              "| head -n 1 | cut -d '\"' -f4 | xargs curl -sL | tar -xz;"
-             "mv /var/clj-kondo ~/.local/bin;")))
-  (dolist (checkers '((clj-kondo-clj . clojure-joker)
-                      (clj-kondo-cljs . clojurescript-joker)
-                      (clj-kondo-cljc . clojure-joker)))
-    (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers)))))
+             "mv /var/clj-kondo ~/.local/bin;"))))
 
 (use-package geiser
   :defer t
