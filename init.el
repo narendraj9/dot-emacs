@@ -2760,30 +2760,7 @@ Starting Emacs 27, this feature is part of `isearch'."
 (use-package flycheck-clojure
   :ensure t
   :after clojure-mode
-  :preface
-  (defun install-clojure-joker ()
-    (let* ((clojure-joker-version "0.12.4")
-           (clojure-joker-system (if (eq system-type 'gnu/linux) "linux" "mac"))
-           (clojure-joker-release-link
-            (format "https://github.com/candid82/joker/releases/download/v%s/joker-%s-%s-amd64.zip"
-                    clojure-joker-version
-                    clojure-joker-version
-                    clojure-joker-system)))
-      (when (and (memq system-type '(gnu/linux darwin))
-                 (not (string= (s-trim (shell-command-to-string "joker --version"))
-                               (concat "v" clojure-joker-version))))
-        (async-shell-command
-         (concat "cd /tmp;"
-                 "wget -O joker.zip " clojure-joker-release-link ";"
-                 "unzip joker.zip;"
-                 "mv joker ~/.local/bin/;")))))
-  :config
-  (flycheck-clojure-setup)
-  (install-clojure-joker))
-
-(use-package flycheck-joker
-  :after clojure-mode
-  :ensure t)
+  :config (flycheck-clojure-setup))
 
 (use-package flycheck-clj-kondo
   :ensure t
@@ -2879,7 +2856,7 @@ Starting Emacs 27, this feature is part of `isearch'."
          ("C-x y"   . whitespace-toggle-options))
   :init
   (setq whitespace-style
-        '(face tabs spaces trailing lines-trail newline empty newline-mark))
+        '(face tabs spaces trailing lines-tail newline empty newline-mark))
   (setq whitespace-display-mappings
         '((space-mark   ?\     [?·]     [?.])
           (space-mark   ?\xA0  [?¤]     [?_])
