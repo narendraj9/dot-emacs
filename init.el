@@ -507,7 +507,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package fringe
   :config
-  (defvar default-fringe-style (cons (* 2 (frame-char-width)) (frame-char-width)))
+  (defvar default-fringe-style (cons (* 1 (frame-char-width)) (frame-char-width)))
   (fringe-mode default-fringe-style))
 
 (use-package tool-bar   :config (tool-bar-mode -1))
@@ -568,8 +568,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (display-time-mode +1)
   (add-hook 'display-time-world-mode-hook
             (lambda ()
-              (select-window (get-buffer-window display-time-world-buffer-name))
-              (define-key (current-local-map) "q" #'kill-buffer-delete-window)))
+              (select-window (get-buffer-window display-time-world-buffer-name))))
 
   :config
   (setq display-time-world-timer-enable t
@@ -613,20 +612,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand t
   :config
   (setq battery-mode-line-format " %b%p%% ")
-  (display-battery-mode +1)
-  (advice-add battery-status-function
-              :filter-return (lambda (r)
-                               (cons `(?b . ,(charging-status r)) r)))
-  :preface
-  ;; Fix "%b" in `battery-mode-line-format'
-  (defun charging-status (r)
-    "Return a charging symbol given value returned by
-    `battery-status-function'."
-    (let ((b (cdr (assoc ?B r))))
-      (cond
-       ((string= b "Charging") "+")
-       ((string= b "Discharging") "-")
-       (t "")))))
+  (display-battery-mode +1))
 
 (use-package calendar
   :defer t
@@ -1350,7 +1336,7 @@ Starting Emacs 27, this feature is part of `isearch'."
           (let ((window-count (length (window-list))))
             (case window-count
               (1 (split-window-right))
-              (2 (split-window-below))
+              (2 (split-window-sensibly))
               (t nil)))))
 
   ;; Let `fit-window-to-buffer' resize windows horizontally.
@@ -1396,6 +1382,8 @@ Starting Emacs 27, this feature is part of `isearch'."
 ;; ――――――――――――――――――――――――――――――――――――――――
 (use-package flyspell
   :diminish flyspell-mode
+  :bind (:map ctl-period-map
+              ("!" . flyspell-buffer))
   :preface
   (defun enable-flyspell ()
     "Unbind C-. from `flyspell-mode-map'."
@@ -3287,7 +3275,6 @@ Starting Emacs 27, this feature is part of `isearch'."
 (use-package gnus
   :defer t
   :hook ((gnus-group-mode . olivetti-mode)
-         (gnus-summary-mode . indent-guide-mode)
          (gnus-article-mode . goto-address-mode))
   :init
   (setd gnus-init-file "etc/gnus-config.el")

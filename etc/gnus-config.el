@@ -78,14 +78,23 @@ buffer."
 ;; http://emacs.1067599.n8.nabble.com/Gnus-and-emails-sent-by-me-td445407.html#a445427
 (setq gnus-refer-thread-use-nnir t)
 
+;;; Disable auto-centering in Gnus Summary buffer
+(setq gnus-auto-center-summary nil)
+
 ;; (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
 (setq gnus-summary-display-arrow t
-      gnus-summary-line-format "{%U} %2B%(%-18,18f  %) %s\n")
+      gnus-summary-line-format "%U %2B%(%-18,18f  %) %s\n"
+      gnus-sum-thread-tree-single-indent "᛫ "
+      gnus-sum-thread-tree-root "ŧ "
+      gnus-sum-thread-tree-single-leaf "⤷ "
+      gnus-sum-thread-tree-vertical        "│ "
+      gnus-sum-thread-tree-leaf-with-other "+⟶ ")
 
 ;; All threads where I am being talked to directly should be in
 ;; Primary. Rest should be split.
 (setq nnmail-split-fancy
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
+          (any "picolisp@software-lab.de" "PicoLisp")
           (any "tech@openbsd.org" "Tech@OpenBSD")
           (any "emacs-devel@gnu.org*" "Emacs Dev")
           (any "help-gnu-emacs@gnu.org" "Emacs")
