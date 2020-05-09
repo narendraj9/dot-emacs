@@ -291,7 +291,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                         prompt
                                         random-number))))))
 
-  (setq initial-major-mode 'fundamental-mode))
+  (setq initial-major-mode 'lisp-interaction-mode
+        initial-scratch-message ""))
 
 (use-package ibuffer
   :bind (:map ctl-x-map
@@ -562,14 +563,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package time
   :demand t
   :preface
-  :bind (:map ctl-quote-map
-              ("c t" . display-time-world*))
   :init
   (display-time-mode +1)
-  (add-hook 'display-time-world-mode-hook
-            (lambda ()
-              (select-window (get-buffer-window display-time-world-buffer-name))))
-
   :config
   (setq display-time-world-timer-enable t
         display-time-world-time-format "\n──────────────\n\t%A %d %B %R %Z\n")
@@ -611,7 +606,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package battery
   :demand t
   :config
-  (setq battery-mode-line-format " %b%p%% ")
+  (setq battery-mode-line-format "%b%p%%")
   (display-battery-mode +1))
 
 (use-package calendar
@@ -1416,7 +1411,7 @@ Starting Emacs 27, this feature is part of `isearch'."
 
 (use-package quoted-scratch
   :doc "A beautiful quote for your scracth buffer."
-  :defer t
+  :disabled t
   :load-path "packages/rest/quoted-scratch/"
   :commands qs-refresh-quote-when-idle
   :bind (
@@ -1429,8 +1424,6 @@ Starting Emacs 27, this feature is part of `isearch'."
          :map goto-map
          ("s" . qs-jump-to-scratch-buffer))
   :init
-  (setq initial-scratch-message "")
-
   (add-hook 'emacs-startup-hook
             (lambda ()
               (run-with-timer 1 nil 'qs-refresh-scratch-buffer)
