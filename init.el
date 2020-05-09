@@ -290,9 +290,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                    (read-string (format "%s [Type %d to confirm] "
                                         prompt
                                         random-number))))))
+  (setq initial-scratch-message ""
+        initial-major-mode
+        (lambda ()
+          (lisp-interaction-mode)
+          (setq header-line-format
+                '(:eval
+                  (format "emacs uptime: %s | sys time: %s | sys load: %s"
+                          (emacs-uptime)
+                          (format-seconds "%Y, %D, %2H, %2M, %z%S"
+                                          (time-convert (get-internal-run-time)
+                                                        'integer))
+                          (load-average 'use-float)))))))
 
-  (setq initial-major-mode 'lisp-interaction-mode
-        initial-scratch-message ""))
 
 (use-package ibuffer
   :bind (:map ctl-x-map
