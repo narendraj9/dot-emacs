@@ -290,7 +290,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                    (read-string (format "%s [Type %d to confirm] "
                                         prompt
                                         random-number))))))
-  (setq initial-scratch-message ""
+  (setq ;; initial-scratch-message ""
         initial-major-mode
         (lambda ()
           (lisp-interaction-mode)
@@ -2093,6 +2093,7 @@ Starting Emacs 27, this feature is part of `isearch'."
   :bind (:map ctl-period-map ("@" . er/expand-region)))
 
 (use-package hyperbole
+  :disabled t
   :ensure t
   :init
   (require 'hyperbole)

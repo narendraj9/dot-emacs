@@ -167,28 +167,6 @@ buffer."
 ;;; Timezone for date headers
 (setq gnus-article-date-headers '(local lapsed))
 
-;;; Change time for `nnimap-keepalive-timer'. The default value is 15
-;;; minutes.
-(defvar nnimap-keepalive-interval 20)
-(defun nnimap-keepalive* ()
-  "Modified `nnimap-keepalive' so that NOOP is sent more frequently."
-  (let ((now (current-time)))
-    (dolist (buffer nnimap-process-buffers)
-      (when (buffer-name buffer)
-        (with-current-buffer buffer
-          (when (and nnimap-object
-                     (nnimap-last-command-time nnimap-object)
-                     (> (float-time
-                         (time-subtract
-                          now
-                          (nnimap-last-command-time nnimap-object)))
-                        nnimap-keepalive-interval))
-            (ignore-errors
-              (with-timing "nnimap-keepalive" (nnimap-send-command "NOOP")))))))))
-
-(setq nnimap-keepalive-timer
-      (run-at-time 10 10 #'nnimap-keepalive*))
-
 ;;;
 ;; Synchronize agent flags with the server automatically
 (require 'gnus-agent)
