@@ -291,17 +291,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                         prompt
                                         random-number))))))
   (setq ;; initial-scratch-message ""
-        initial-major-mode
-        (lambda ()
-          (lisp-interaction-mode)
-          (setq header-line-format
-                '(:eval
-                  (format "emacs uptime: %s | sys time: %s | sys load: %s"
-                          (emacs-uptime)
-                          (format-seconds "%Y, %D, %2H, %2M, %z%S"
-                                          (time-convert (get-internal-run-time)
-                                                        'integer))
-                          (load-average 'use-float)))))))
+   initial-major-mode
+   (lambda ()
+     (lisp-interaction-mode)
+     (setq header-line-format
+           '(:eval
+             (format "emacs uptime: %s | sys time: %s | sys load: %s"
+                     (emacs-uptime)
+                     (format-seconds "%Y, %D, %2H, %2M, %z%S"
+                                     (time-convert (get-internal-run-time)
+                                                   'integer))
+                     (load-average 'use-float)))))))
 
 
 (use-package ibuffer
@@ -2039,10 +2039,6 @@ Starting Emacs 27, this feature is part of `isearch'."
 
   (bind-key "C-c a" #'org-agenda)
 
-  (unless (boundp 'org-config-mindful-timer)
-    (setq org-config-mindful-timer
-          (run-with-timer 3600 3600 #'org-config-mindful-question)))
-
   ;; `org-agenda-get-restriction-and-command' ignores rules for
   ;; displaying buffers (i.e. `display-buffer-alist'). This advice
   ;; tries causes `split-window-sensibly' to always split vertically
@@ -2051,20 +2047,7 @@ Starting Emacs 27, this feature is part of `isearch'."
               :around
               (lambda (original &rest args)
                 (let ((split-window-preferred-function #'split-window-below))
-                  (apply original args))))
-
-  :preface
-  (defun org-config-mindful-question ()
-    (let ((question-list
-           '("Are you mindful of what you are doing?"
-             "You probably want to clock in the time you are spending here?"
-             "Is it contributing to what you want to become?"
-             "Are you wasting your time?")))
-      (require 'org-clock)
-      (unless (org-clocking-p)
-        (alert (nth (random (length question-list)) question-list)
-               :severity 'high
-               :title "Time")))))
+                  (apply original args)))))
 
 (use-package thingatpt+
   :load-path "packages/lisp/"
