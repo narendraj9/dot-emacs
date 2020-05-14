@@ -94,6 +94,7 @@ buffer."
 ;; Primary. Rest should be split.
 (setq nnmail-split-fancy
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
+          (any "wireguard@lists.zx2c4.com" "Wireguard")
           (any "picolisp@software-lab.de" "PicoLisp")
           (any "tech@openbsd.org" "Tech@OpenBSD")
           (any "emacs-devel@gnu.org*" "Emacs Dev")

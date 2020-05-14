@@ -714,7 +714,7 @@ non-empty lines in the block (excluding the line with
   (setq org-gcal-notify-p nil
         org-gcal-auto-archive t)
 
-  (add-hook 'org-agenda-hook #'org-gcal-fetch)
+  (add-hook 'org-agenda-finalize-hook #'org-gcal-fetch)
   (add-hook 'org-capture-before-finalize-hook #'org-gcal-sync))
 
 (provide 'org-config)

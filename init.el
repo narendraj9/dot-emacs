@@ -2020,9 +2020,6 @@ Starting Emacs 27, this feature is part of `isearch'."
 
 (use-package calfw :ensure t :defer t)
 (use-package org-config
-  :doc
-  "My org-mode configuration outgrew and hence I had to move it
-   to a separate file."
   :load-path "etc/"
   :bind (("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
@@ -2030,14 +2027,14 @@ Starting Emacs 27, this feature is part of `isearch'."
          ("C-n" . open-org-file)
          ("C-d" . search-notes-files))
   :init
+  (bind-key "C-c a" #'org-agenda)
+
   (eval-after-load "org"
     '(progn
        (require 'org-config)
        (setq org-default-notes-file
              (expand-file-name "notes.org" org-directory))
        (set-register ?o (cons 'file org-default-notes-file))))
-
-  (bind-key "C-c a" #'org-agenda)
 
   ;; `org-agenda-get-restriction-and-command' ignores rules for
   ;; displaying buffers (i.e. `display-buffer-alist'). This advice
