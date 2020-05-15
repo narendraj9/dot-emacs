@@ -1419,26 +1419,6 @@ Starting Emacs 27, this feature is part of `isearch'."
 
 (use-package popup :defer t :ensure t)
 
-(use-package quoted-scratch
-  :doc "A beautiful quote for your scracth buffer."
-  :disabled t
-  :load-path "packages/rest/quoted-scratch/"
-  :commands qs-refresh-quote-when-idle
-  :bind (
-         :map eyebrowse-mode-map
-         ("C-x w z"   . qs-jump-to-scratch-buffer)
-
-         :map ctl-quote-map
-         ("c q" . qs-add-new-quote)
-
-         :map goto-map
-         ("s" . qs-jump-to-scratch-buffer))
-  :init
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-              (run-with-timer 1 nil 'qs-refresh-scratch-buffer)
-              (qs-refresh-quote-when-idle))))
-
 (use-package wordly
   :doc "Lookup word definition and synonyms."
   :load-path "packages/rest/wordly/"
@@ -1533,16 +1513,6 @@ Starting Emacs 27, this feature is part of `isearch'."
       (display-line-numbers-mode +1)
       (switch-to-buffer (current-buffer)))))
 
-(use-package wolfram
-  :doc "The app id should already be defined in `my-wolfram-alpha-app-id'."
-  :ensure t
-  :bind (:map ctl-quote-map
-              ("c a" . wolfram-alpha))
-  :defer t
-  :init
-  (and (boundp 'my-wolfram-alpha-app-id)
-       (setq wolfram-alpha-app-id my-wolfram-alpha-app-id)))
-
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
 (use-package company
@@ -1582,18 +1552,6 @@ Starting Emacs 27, this feature is part of `isearch'."
   :hook (after-init . company-statistics-mode)
   :init
   (setd company-statistics-file "var/company-statistics-cache.el"))
-
-(use-package company-tabnine
-  :after company-mode
-  :ensure t
-  :disabled t
-  :init
-  (hook-into-modes (lambda ()
-                     (setq-local company-backends
-                                 (append company-backends #'company-tabnine)))
-                   'python-mode)
-  :config
-  (setq company-tabnine-binaries-folder "~/.emacs.d/var/"))
 
 ;; ──────────────────────────────────────────────────────────────────
 
