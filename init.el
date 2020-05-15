@@ -2117,6 +2117,20 @@ Starting Emacs 27, this feature is part of `isearch'."
 ;;; Ivy and Friends
 ;; ──────────────────────────────────────────────────────────────────
 
+(use-package ivy-posframe
+  :doc "Custom positions for ivy buffers."
+  :ensure t
+  :config
+  (setq ivy-posframe-display-functions-alist
+        '((complete-symbol . ivy-posframe-display-at-point)
+          (swiper . nil)
+          (swiper-isearch . nil)
+          (counsel-rg . nil)
+          (t . ivy-posframe-display-at-frame-center)))
+  (setq ivy-posframe-parameters
+        '((left-fringe . 10)))
+  (ivy-posframe-mode 1))
+
 (use-package helm
   :doc
   "LSP mode uses `helm` directly. But install `lsp-mode' didn't
