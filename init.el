@@ -1131,18 +1131,6 @@ after doing `symbol-overlay-put'."
   (setq bookmark-save-flag 1
         bookmark-default-file (expand-file-name "~/miscellany/assets/bookmarks.el")))
 
-(use-package bookmark+
-  :disabled t
-  :after bookmark
-  :doc
-  "bookmark.el's usepackage declaration sets the value for
-  `bookmark-default-file' so we need to make sure that it is
-  loaded before this package."
-  :load-path "packages/lisp/bookmark-plus"
-  :init
-  ;; Always use `bookmark-default-file' for storing and showing bookmarks.
-  (setq bmkp-last-as-first-bookmark-file nil))
-
 (use-package saveplace
   :init
   (save-place-mode +1)
@@ -1150,53 +1138,8 @@ after doing `symbol-overlay-put'."
   (setq save-place-file
         (locate-user-emacs-file "var/saved-places")))
 
-;;; Buffers,, Windows and Workspaces
+;;; Buffers, Windows and Frame
 ;; ――――――――――――――――――――――――――――――――――――――――
-(use-package eyebrowse
-  :doc
-  "Using eyebrowse-mode to have workspace-likes in Emacs
-   On Non-Linux laptops, I should bind \"C-x w\" to \"Super\" so that
-   it feels liks XMonad inside Emacs."
-  :ensure t
-  :preface
-  (defun open-a-shell ()
-    (interactive)
-    (shell (generate-new-buffer "*shell*")))
-
-  :bind (:map eyebrowse-mode-map
-              ("C-x w RET" . open-a-shell)
-              ("C-x w t"   . toggle-window-split)
-              ("C-x w s"   . shell)
-              ("C-x w r"   . window-configuration-to-register))
-  :config
-  (setq eyebrowse-mode-line-style 'smart
-        eyebrowse-wrap-around t
-        eyebrowse-mode-line-right-delimiter "] ")
-
-  :init
-  ;; Need this in :init because it is used in defining the mode-map
-  (setq eyebrowse-keymap-prefix "w")
-
-  (eyebrowse-mode +1)
-
-  (defhydra hydra-eyebrowse (eyebrowse-mode-map "C-c w"
-                                                :timeout 1.0)
-    "eyebrowse"
-    ("<" eyebrowse-prev-window-config "prev")
-    (">" eyebrowse-next-window-config "next")
-    ("TAB" eyebrowse-last-window-config "last")
-    ("n" eyebrowse-create-window-config "create" :exit t)
-    ("q" nil "quit"))
-
-  (gen-prefixed rotate-windows)
-  (defhydra hydra-rotate-windows (eyebrowse-mode-map "C-x w")
-    "rotate-widows> "
-    ("=" balance-windows "" :exit t)
-    ("t" toggle-window-split "flip")
-    ("h" split-window-vertically "--")
-    ("v" split-window-horizontally "|")
-    ("k" rotate-windows/prefixed "⤿")
-    ("j" rotate-windows "↷")))
 
 (use-package winner
   :init
@@ -1288,15 +1231,6 @@ after doing `symbol-overlay-put'."
     (split-window-vertically)
     (call-interactively 'isearch-forward)))
 
-(use-package anzu
-  :doc "Display information about query search/replace.
-Starting Emacs 27, this feature is part of `isearch'."
-  :ensure t
-  :diminish anzu-mode
-  :disabled t
-  :config
-  (global-anzu-mode +1))
-
 (use-package avy
   :ensure t
   :bind (("M-g w" . avy-goto-word-1)
@@ -1306,7 +1240,6 @@ Starting Emacs 27, this feature is part of `isearch'."
   (setq avy-style 'words)
   (avy-setup-default))
 
-
 (use-package windmove
   :bind (("C-M-h" . windmove-left)
          ("C-M-j" . windmove-down)
@@ -1314,7 +1247,6 @@ Starting Emacs 27, this feature is part of `isearch'."
          ("C-M-l" . windmove-right))
   :config
   (setq windmove-wrap-around t))
-
 
 (use-package "window"
   :init
@@ -1361,7 +1293,6 @@ Starting Emacs 27, this feature is part of `isearch'."
     ("^" enlarge-window "enlarge-vertically")
     ("{" enlarge-window-horizontally "enlarge-horizontally")
     ("}" shrink-window-horizontally "shrink-horizontally")))
-
 
 (use-package ace-window
   :doc
@@ -1811,14 +1742,13 @@ Starting Emacs 27, this feature is part of `isearch'."
      https://endlessparentheses.com/ansi-colors-in-the-compilation-buffer-output.html"
     (let ((inhibit-read-only t))
       (ansi-color-apply-on-region compilation-filter-start (point))))
-  :config
-  (require 'ansi-color)
   :init
-  (add-hook 'compilation-filter-hook #'compilation-escape-colors-to-ansi-colors))
+  (add-hook 'compilation-filter-hook
+            #'compilation-escape-colors-to-ansi-colors)
+  :config
+  (require 'ansi-color))
 
-(use-package eldoc
-  :diminish eldoc-mode
-  :config (global-eldoc-mode +1))
+(use-package eldoc :diminish eldoc-mode :config (global-eldoc-mode +1))
 
 (use-package which-func
   :doc "Display the current function in the mode line."
@@ -1903,41 +1833,16 @@ Starting Emacs 27, this feature is part of `isearch'."
   (setq comint-scroll-show-maximum-output nil))
 
 (use-package eshell
-  :bind (:map ctl-quote-map
-              ("C-p" . eshell))
+  :bind (
+         :map ctl-quote-map
+         ("C-p" . eshell)
+         :map ctl-period-map
+         ("C-p" . eshell)
+         )
   :config
   (add-hook 'eshell-exit-hook #'delete-window)
   (add-to-list 'display-buffer-alist
                '("\\`\\*e?shell" display-buffer-at-bottom)))
-
-(use-package multi-term
-  :load-path "packages/lisp"
-  :bind (:map ctl-period-map ("C-p"  . multi-term-dedicated-toggle))
-  :init
-  (defhydra hydra-multi-term (ctl-period-map "C-t" :timeout 3.0)
-    "term> "
-    ("t" multi-term "new" :exit t)
-    ("n" multi-term-next "next")
-    ("p" multi-term-prev "prev")
-    ("q" nil "exit"))
-  :config
-  (setq multi-term-dedicated-select-after-open-p t
-        multi-term-dedicated-window-height 10
-        multi-term-dedicated-buffer-name "dedicated-term"
-        multi-term-buffer-name "term")
-
-  (dolist (binding '(("<M-backspace>" . term-send-backward-kill-word)
-                     ("C-c C-j"       . term-line-mode)
-                     ("C-c C-k"       . term-char-mode)))
-    (add-to-list 'term-bind-key-alist binding))
-
-  ;; Close the dedicated buffer on `C-x 1` from other windows.
-  (advice-add 'delete-other-windows
-              :after (lambda (&rest args)
-                       (when (and (multi-term-dedicated-exist-p)
-                                  (not (eq (current-buffer)
-                                           multi-term-dedicated-buffer)))
-                         (multi-term-dedicated-toggle nil)))))
 
 (use-package bpfcc-tools
   :load-path "etc/"
@@ -2522,23 +2427,10 @@ Starting Emacs 27, this feature is part of `isearch'."
     :ensure t
     :hook (emacs-mode . highlight-defined-mode)))
 
-(use-package xray
-  :load-path "package/lisp/"
-  :bind (:map ctl-h-x-map
-              ("b" . xray-buffer)
-              ("f" . xray-faces)
-              ("F" . xray-features)
-              ("R" . xray-frame)
-              ("h" . xray-hooks)
-              ("m" . xray-marker)
-              ("o" . xray-overlay)
-              ("p" . xray-position)
-              ("S" . xray-screen)
-              ("s" . xray-symbol)
-              ("w" . xray-window)))
+(use-package xray :load-path "package/lisp/" :defer t)
 
 (use-package macrostep  :defer t :ensure t)
-(use-package paxedit :ensure t :hook ((emacs-lisp clojure) . paxedit-mode))
+
 (use-package paredit
   :ensure t
   :diminish paredit-mode
@@ -2599,12 +2491,12 @@ Starting Emacs 27, this feature is part of `isearch'."
   :ensure t
   :defer 2
   :bind (:map smartparens-mode-map
-              ("M-S" . sp-splice-sexp)
+              ("M-S"   . sp-splice-sexp)
+              ("M-R"   . sp-raise-sexp)
               ("C-M-)" . utils-paredit-slurp-all-the-way-forward)
               ("C-M-(" . utils-paredit-slurp-all-the-way-bacward)
               ("C-M-}" . utils-paredit-barf-all-the-way-forward)
-              ("C-M-{" . utils-paredit-barf-all-the-way-bacward)
-              ("M-R" . sp-raise-sexp))
+              ("C-M-{" . utils-paredit-barf-all-the-way-bacward))
   :diminish smartparens-mode
   :config
   (setq sp-highlight-pair-overlay nil)
@@ -2616,10 +2508,11 @@ Starting Emacs 27, this feature is part of `isearch'."
                   cider-repl-mode
                   eshell-mode
                   eval-expression-minibuffer-setup)))
+
   (sp-use-paredit-bindings)
-  (mapcar (lambda (key-seq)
-            (unbind-key key-seq smartparens-mode-map))
-          (list "M-r" "M-s" "M-?"))
+
+  (dolist (key-seq (list "M-r" "M-s" "M-?"))
+    (unbind-key key-seq smartparens-mode-map))
 
   ;; Remove this remapping
   (define-key smartparens-strict-mode-map [remap kill-region] nil)

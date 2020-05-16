@@ -264,9 +264,9 @@
 
    ;; diff
    `(diff-added ((,class (:background ,jazz-green+1 :foreground ,jazz-fg+1))))
-   `(diff-refine-added ((,class (:background ,jazz-green+1 :foreground ,jazz-fg+1))))
    `(diff-removed ((,class (:background ,jazz-orange :foreground ,jazz-fg+1))))
-   `(diff-refine-removed ((,class (:background ,jazz-orange :foreground ,jazz-fg+1))))
+   `(diff-refine-added ((,class (:background ,jazz-green-1 :foreground ,jazz-fg))))
+   `(diff-refine-removed ((,class (:background ,jazz-red :foreground ,jazz-fg))))
    `(diff-changed ((,class (:foreground ,jazz-yellow))))
    `(diff-header ((,class (:background ,jazz-bg+1))))
    `(diff-file-header
