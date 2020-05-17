@@ -32,7 +32,8 @@
 (define-key elfeed-show-mode-map (kbd "k") #'previous-line)
 
 (setq elfeed-feeds
-      '("https://www.c0ffee.net/rss/"
+      '("https://jcs.org/rss"
+        "https://www.c0ffee.net/rss/"
         "http://www.linusakesson.net/rssfeed.php"
         "https://vlaaad.github.io/feed.xml"
         "http://spritesmods.com/rss.php"

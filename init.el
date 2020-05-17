@@ -1832,13 +1832,15 @@ after doing `symbol-overlay-put'."
   :config
   (setq comint-scroll-show-maximum-output nil))
 
+(use-package esh-toggle
+  :load-path "packages/lisp"
+  :bind (:map ctl-quote-map
+              ("C-p" . eshell-toggle)))
+
 (use-package eshell
-  :bind (
-         :map ctl-quote-map
-         ("C-p" . eshell)
-         :map ctl-period-map
-         ("C-p" . eshell)
-         )
+  :init
+  (setq eshell-aliases-file (expand-file-name "./etc/eshell-aliases-file"
+                                              user-emacs-directory))
   :config
   (add-hook 'eshell-exit-hook #'delete-window)
   (add-to-list 'display-buffer-alist
