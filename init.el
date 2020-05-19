@@ -72,13 +72,12 @@ might break in future.")
 
 ;;; USE-PACKAGE
 ;; ──────────────────────────────────────────────────────────────────
-(eval-when-compile
-  (add-to-list 'load-path (expand-file-name "packages/lisp/use-package/"
-                                            user-emacs-directory))
-  (require 'use-package))
+(when (not (package-installed-p 'use-package))
+  (package-refresh-contents)
+  (package-install 'use-package))
 
-(setq use-package-verbose nil)
 (use-package diminish :ensure t)
+(use-package bind-key :ensure t)
 
 (eval-and-compile
   (add-to-list 'use-package-keywords :doc t)
@@ -723,6 +722,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package wgrep :defer t :ensure t)
 (use-package region-bindings-mode
+  :diminish region-bindings-mode
   :ensure t
   :config
   (region-bindings-mode-enable))
@@ -961,7 +961,7 @@ after doing `symbol-overlay-put'."
               ([C-tab]   . bicycle-cycle)
               ([backtab] . bicycle-cycle-global)
               ([S-tab]   . bicycle-cycle-global))
-  :config
+  :init
   (diminish 'outline-minor-mode)
   (diminish 'hs-minor-mode))
 
