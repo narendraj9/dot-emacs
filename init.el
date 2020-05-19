@@ -76,7 +76,7 @@ might break in future.")
   (package-refresh-contents)
   (package-install 'use-package))
 
-(use-package diminish :ensure t)
+(use-package diminish :ensure t :demand t)
 (use-package bind-key :ensure t)
 
 (eval-and-compile
@@ -514,6 +514,20 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Diminish some minor modes
   (diminish 'hi-lock-mode))
+
+(use-package outline-minor-mode
+  :defer t
+  :init
+  (add-hook 'outline-minor-mode-hook
+            (lambda ()
+              (diminish 'outline-minor-mode))))
+
+(use-package hs-minor-mode
+  :defer t
+  :init
+  (add-hook 'hs-minor-mode-hook
+            (lambda ()
+              (diminish 'hs-minor-mode))))
 
 (use-package fringe
   :config
@@ -960,10 +974,8 @@ after doing `symbol-overlay-put'."
   :bind (:map outline-minor-mode-map
               ([C-tab]   . bicycle-cycle)
               ([backtab] . bicycle-cycle-global)
-              ([S-tab]   . bicycle-cycle-global))
-  :init
-  (diminish 'outline-minor-mode)
-  (diminish 'hs-minor-mode))
+              ([S-tab]   . bicycle-cycle-global)))
+
 
 (use-package goto-last-change
   :ensure t
@@ -1798,6 +1810,7 @@ after doing `symbol-overlay-put'."
   (setq flycheck-mode-line-prefix ""
         flycheck-global-modes
         '(emacs-lisp-mode clojure-mode clojurescript-mode yaml-mode sh-mode java-mode rust-mode))
+
   (global-flycheck-mode +1)
 
   ;; Suggestion from: https://www.flycheck.org/en/latest/user/error-list.html

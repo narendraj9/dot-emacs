@@ -58,7 +58,7 @@
 
 (use-package org
   :pin org
-  :ensure t
+  :ensure org-plus-contrib
   :demand t
   :bind (("C-c l" . org-store-link)
          :map org-mode-map
@@ -175,16 +175,6 @@
   ;; Opening PDF files inside Emacs by default
   (setq org-file-apps
         (assoc-delete-all "\\.pdf\\'" org-file-apps)))
-
-(use-package org-plus-contrib
-  :ensure t
-  :after org
-  :pin org
-  :config
-  (setq org-show-notification-handler
-        (lambda (msg)
-          (alert-libnotify-notify (list :title "Org@Emacs"
-                                        :message msg)))))
 
 (use-package org-agenda
   :after org
@@ -411,7 +401,7 @@
        ((and a-has-tag (not b-has-tag)) -1)
        ((and b-has-tag (not a-has-tag)) +1))))
 
-  ;;; Thanks to
+;;; Thanks to
 ;;; https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html
   (defun org-agenda-delete-empty-blocks ()
     "Remove empty agenda blocks.
@@ -626,6 +616,11 @@ non-empty lines in the block (excluding the line with
   (setq org-clock-idle-time 5)
 
   :config
+  (setq org-show-notification-handler
+        (lambda (msg)
+          (alert-libnotify-notify (list :title "Org@Emacs"
+                                        :message msg))))
+
   ;; Let's see when they remove `org-combine-plists' if ever.
   (setq org-clocktable-defaults (org-combine-plists org-clocktable-defaults
                                                     (list :stepskip0 t
