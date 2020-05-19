@@ -188,21 +188,24 @@
 
 (use-package org-agenda
   :after org
-  :bind (:map org-agenda-mode-map
-              ("T"       . org-agenda-toggle-toggle-tags-column)
-              ("a"       . org-agenda-redo-with-days-to-deadline)
-              ("g"       . org-agenda-redo)
-              ("r"       . org-agenda-redo-all)
-              ("M-."     . org-agenda-goto-today*)
-              ("C-o"     . org-agenda-list)
-              ("C-S-o"   . custom-agenda-view)
-              ("x"       . org-agenda-quit)
-              ("C-c C-r" . org-agenda-refile)
-              ("C-c C-c" . org-review-captures)
-              ("C-c C-n" . take-notes)
-              ("C-c C-f" . org-agenda-find-file)
-              ("C-c C-s" . org-schedule-and-todo)
-              ("C-c C-d" . org-deadline-and-todo))
+  :config
+  ;; We need this in the `:config` section because
+  ;; `org-agenda-mode-map' is not autoloaded.
+  (bind-keys :map org-agenda-mode-map
+             ("T"       . org-agenda-toggle-toggle-tags-column)
+             ("a"       . org-agenda-redo-with-days-to-deadline)
+             ("g"       . org-agenda-redo)
+             ("r"       . org-agenda-redo-all)
+             ("M-."     . org-agenda-goto-today*)
+             ("C-o"     . org-agenda-list)
+             ("C-S-o"   . custom-agenda-view)
+             ("x"       . org-agenda-quit)
+             ("C-c C-r" . org-agenda-refile)
+             ("C-c C-c" . org-review-captures)
+             ("C-c C-n" . take-notes)
+             ("C-c C-f" . org-agenda-find-file)
+             ("C-c C-s" . org-schedule-and-todo)
+             ("C-c C-d" . org-deadline-and-todo))
   :init
   (setq org-agenda-cmp-user-defined #'org-backlog-compare-fn
         org-complete-tags-always-offer-all-agenda-tags t)
