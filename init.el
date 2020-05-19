@@ -905,8 +905,11 @@ after doing `symbol-overlay-put'."
   :disabled t
   :ensure t
   :diminish iedit-mode
-  :bind (:map ctl-quote-map
-              ("C-;" . iedit-mode)))
+  :bind (:map ctl-quote-map ("C-;" . iedit-mode)))
+
+(use-package beacon
+  :ensure t
+  :bind (:map ctl-quote-map ("c p" . beacon-blink)))
 
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors."
@@ -2089,8 +2092,7 @@ after doing `symbol-overlay-put'."
          ("M-r" . counsel-minibuffer-history)
 
          :map ctl-quote-map
-         ("C-'" . counsel-imenu)
-         ("c p" . counsel-linux-app))
+         ("C-'" . counsel-imenu))
   :config
   (setq ivy-initial-inputs-alist nil)
   (setq counsel-yank-pop-separator

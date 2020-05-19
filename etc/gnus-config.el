@@ -96,7 +96,7 @@ buffer."
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
           (any "wireguard@lists.zx2c4.com" "Wireguard")
           (any "picolisp@software-lab.de" "PicoLisp")
-          (any "tech@openbsd.org" "Tech@OpenBSD")
+          (any "(tech|announce)@openbsd.org" "Tech@OpenBSD")
           (any "emacs-devel@gnu.org*" "Emacs Dev")
           (any "help-gnu-emacs@gnu.org" "Emacs")
           (any "gnunet-developers@gnu.org" "GNU Net")
