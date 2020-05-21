@@ -428,7 +428,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "I intend to read the code carefully someday."
   :after re-builder
   :bind (:map ctl-quote-map
-              ("C-' c /" . pcre->elisp))
+              ("c /" . pcre->elisp))
   :preface
   (defun pcre->elisp (beg end)
     "Replace PCRE regex in region (BEG END) with its elisp equivalent."
@@ -1858,7 +1858,6 @@ after doing `symbol-overlay-put'."
   (setq eshell-aliases-file (expand-file-name "./etc/eshell-aliases-file"
                                               user-emacs-directory))
   :config
-  (add-hook 'eshell-exit-hook #'delete-window)
   (add-to-list 'display-buffer-alist
                '("\\`\\*e?shell" display-buffer-at-bottom)))
 
