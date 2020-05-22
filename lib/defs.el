@@ -1156,5 +1156,14 @@ respective files."
   (delete-region (point) (progn (forward-word -1) (point))))
 
 
+(defun google-it ()
+  "Google the region selected or the word under point."
+  (interactive)
+  (let ((query (if (region-active-p)
+                   (buffer-substring-no-properties (region-beginning) (region-end))
+                 (word-at-point))))
+    (browse-url (format "https://google.com/search?q=%s" query))))
+
+
 (provide 'defs)
 ;;; defs.el ends here

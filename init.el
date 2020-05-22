@@ -199,6 +199,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("C-c 0" . quick-switch-themes)
          ("<print>" . snap-it)
          :map ctl-quote-map
+         ("c g" . google-it)
          ("c !" . insert-date-time-at-point)
          ("c e" . vicarie/eval-print-last-sexp)
          ("c =" . vicarie/eval-replace-last-sexp)
@@ -1947,10 +1948,12 @@ after doing `symbol-overlay-put'."
 
 (use-package delsel :init (delete-selection-mode +1))
 (use-package expand-region
-  :doc "Hyperbole provides similar functionality through
+  :doc
+  "Hyperbole provides similar functionality through
   hui-select.el but I have found `expand-region' to be more
   intuitive."
-  :bind (:map ctl-period-map ("@" . er/expand-region)))
+  :bind (:map ctl-period-map
+              ("@" . er/expand-region)))
 
 (use-package hyperbole
   :disabled t
