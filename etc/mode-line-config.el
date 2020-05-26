@@ -93,20 +93,32 @@ mouse-3: Toggle minor modes"
          (propertize "%]" 'help-echo recursive-edit-help-echo)
          " ")))
 
-(setq-default mode-line-format
-              '(:eval (simple-mode-line-render
-                       '("%e" mode-line-front-space
-                         mode-line-mule-info
-                         mode-line-client
-                         mode-line-modified
-                         mode-line-auto-compile
-                         mode-line-remote
-                         mode-line-frame-identification
-                         mode-line-buffer-identification
-                         "   " mode-line-position "  ")
-                       '("%e" mode-line-modes)
-                       ;; ---- Spaces
-                       '("%e" mode-line-misc-info mode-line-end-spaces))))
+(setq-default
+ mode-line-format
+ '(:eval (simple-mode-line-render
+          ;; -- Left
+          '("%e"
+            mode-line-front-space
+            mode-line-mule-info
+            mode-line-client
+            mode-line-modified
+            mode-line-auto-compile
+            mode-line-remote
+            (evil-mode (:eval
+                        (format " {%s}"
+                                (propertize (substring (symbol-name evil-state)
+                                                       0 1)
+                                            'face
+                                            'font-lock-variable-name-face))))
+            mode-line-frame-identification
+            mode-line-buffer-identification
+            "   " mode-line-position "  ")
+
+          ;; -- Middle
+          mode-line-modes
+
+          ;; -- Right
+          (list mode-line-misc-info mode-line-end-spaces))))
 
 ;;; -- Some utility functions for other modes
 (defun simple-projectile-mode-line-function ()
