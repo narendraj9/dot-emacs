@@ -191,8 +191,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :load-path "lib/"
   :pin manual
   :init
-  (bind-keys* :prefix "C-."   :prefix-map ctl-period-map)
   (bind-keys* :prefix "C-'"   :prefix-map ctl-quote-map)
+  (bind-keys* :prefix "C-."   :prefix-map ctl-period-map)
+  (bind-keys* :prefix "C-;"   :prefix-map ctl-semicolon-map)
   (bind-keys* :prefix "C-h x" :prefix-map ctl-h-x-map)
 
   :bind (("C-c m" . switch-to-minibuffer)
@@ -296,7 +297,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (lisp-interaction-mode)
      (setq header-line-format
            '(:eval
-             (format "emacs uptime: %s | sys time: %s | sys load: %s"
+             (format "Emacs Uptime: %-20s | Sys Time: %-20s | System Load: %-20s"
                      (emacs-uptime)
                      (format-seconds "%Y, %D, %2H, %2M, %z%S"
                                      (time-convert (get-internal-run-time)
@@ -714,6 +715,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;;; TEXT-EDITING, FOLDING and NAVIGATION
 ;; ─────────────────────────────────────────────────────────────────
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-toggle-key "C-; C-;"
+        evil-default-state 'emacs)
+
+  :config
+  (evil-mode +1))
+
 (use-package typo
   :doc
   "Guesses the correct quotation marks"
@@ -1064,6 +1074,7 @@ after doing `symbol-overlay-put'."
 
 (use-package undo-tree
   :ensure t
+  :diminish undo-tree-mode
   :bind ("C-x u" . undo-tree-visualize)
   :config
   (setq undo-tree-visualizer-timestamps t
@@ -1859,8 +1870,9 @@ after doing `symbol-overlay-put'."
   (setq eshell-aliases-file (expand-file-name "./etc/eshell-aliases-file"
                                               user-emacs-directory))
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*e?shell" display-buffer-at-bottom)))
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '("\\`\\*e?shell" display-buffer-at-bottom))
+  )
 
 (use-package bpfcc-tools
   :load-path "etc/"
