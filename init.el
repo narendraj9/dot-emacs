@@ -2052,6 +2052,8 @@ after doing `symbol-overlay-put'."
          ;; https://oremacs.com/2016/06/27/ivy-push-view/
          ("w p" . ivy-push-view)
          ("w b" . ivy-switch-view)
+         :map ctl-quote-map
+         ("C-l" . ivy-switch-buffer)
          :map global-map
          ("C-x b"      . ivy-switch-buffer)
          ("C-x B"      . ivy-switch-buffer-other-window)
