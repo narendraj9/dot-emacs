@@ -719,8 +719,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :init
   (setq evil-toggle-key "C-; C-;"
-        evil-default-state 'emacs)
-
+        evil-default-state 'emacs
+        evil-insert-state-modes (list)
+        evil-motion-state-modes (list))
   :config
   (evil-mode +1))
 
