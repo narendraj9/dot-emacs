@@ -717,6 +717,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ─────────────────────────────────────────────────────────────────
 (use-package evil
   :ensure t
+  :bind (:map evil-motion-state-map
+              ("SPC" . counsel-M-x))
   :init
   (setq evil-toggle-key "C-; C-;"
         evil-default-state 'emacs

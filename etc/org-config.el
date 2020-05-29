@@ -293,7 +293,23 @@
               (quietly (org-agenda-to-appt t))
               (setq mode-name "Org Agenda")
               (local-set-key [remap goto-address-at-point] #'org-agenda-open-link)
-              (hl-line-mode 1)))
+              (hl-line-mode 1)
+
+              (bind-keys :map org-agenda-mode-map
+                         ("T"       . org-agenda-toggle-toggle-tags-column)
+                         ("a"       . org-agenda-redo-with-days-to-deadline)
+                         ("g"       . org-agenda-redo)
+                         ("r"       . org-agenda-redo-all)
+                         ("M-."     . org-agenda-goto-today*)
+                         ("C-o"     . org-agenda-list)
+                         ("C-S-o"   . custom-agenda-view)
+                         ("x"       . org-agenda-quit)
+                         ("C-c C-r" . org-agenda-refile)
+                         ("C-c C-c" . org-review-captures)
+                         ("C-c C-n" . take-notes)
+                         ("C-c C-f" . org-agenda-find-file)
+                         ("C-c C-s" . org-schedule-and-todo)
+                         ("C-c C-d" . org-deadline-and-todo))))
 
   ;; (add-hook 'org-agenda-finalize-hook
   ;;           #'org-agenda-delete-empty-blocks)
@@ -697,24 +713,6 @@ non-empty lines in the block (excluding the line with
   ;; (add-hook 'org-agenda-finalize-hook #'org-gcal-fetch)
   ;; (add-hook 'org-capture-before-finalize-hook #'org-gcal-sync)
   )
-
-
-(bind-keys :map org-agenda-mode-map
-           ("T"       . org-agenda-toggle-toggle-tags-column)
-           ("a"       . org-agenda-redo-with-days-to-deadline)
-           ("g"       . org-agenda-redo)
-           ("r"       . org-agenda-redo-all)
-           ("M-."     . org-agenda-goto-today*)
-           ("C-o"     . org-agenda-list)
-           ("C-S-o"   . custom-agenda-view)
-           ("x"       . org-agenda-quit)
-           ("C-c C-r" . org-agenda-refile)
-           ("C-c C-c" . org-review-captures)
-           ("C-c C-n" . take-notes)
-           ("C-c C-f" . org-agenda-find-file)
-           ("C-c C-s" . org-schedule-and-todo)
-           ("C-c C-d" . org-deadline-and-todo))
-
 
 (provide 'org-config)
 ;;; org-config.el ends here
