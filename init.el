@@ -310,8 +310,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               ("C-b" . ibuffer-other-window))
   :config
   (setq ibuffer-formats
-        '(
-          (mark modified read-only locked " "
+        '((mark modified read-only locked " "
                 (name 28 28 :left :elide) " "
                 (size 9 -1 :right) " "
                 (mode 16 -1 :left) " "
@@ -319,6 +318,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           (mark " "
                 (name 36 36 :left) " | "
                 (filename-and-process 10 -1 :right)))))
+
+(use-package ibuf-ext
+  :config
+  (setq ibuffer-saved-filter-groups
+        '(("Categorized"
+           ("Org Mode" (mode . org-mode))
+           ("IRC" (mode . erc-mode))
+           ("*Auxiliary*" (name . "\\*.*\\*"))))))
 
 (use-package custom
   :doc "Custom configuration and personal information."
@@ -724,7 +731,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         evil-default-state 'emacs
         evil-insert-state-modes (list)
         evil-motion-state-modes (list))
-  :config
   (evil-mode +1))
 
 (use-package typo
@@ -1873,9 +1879,8 @@ after doing `symbol-overlay-put'."
   (setq eshell-aliases-file (expand-file-name "./etc/eshell-aliases-file"
                                               user-emacs-directory))
   :config
-  ;; (add-to-list 'display-buffer-alist
-  ;;              '("\\`\\*e?shell" display-buffer-at-bottom))
-  )
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*e?shell" display-buffer-at-bottom)))
 
 (use-package bpfcc-tools
   :load-path "etc/"
