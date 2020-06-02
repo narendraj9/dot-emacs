@@ -2599,23 +2599,9 @@ after doing `symbol-overlay-put'."
   :doc
   :ensure t
   :diminish cider-mode
-  :after (clojure-mode emacs-lisp-mode)
   :hook (clojure-mode . cider-mode)
   :bind (:map cider-repl-mode-map
               ("C-S-t" . cider-repl-toggle-pretty-printing))
-  :preface
-  (defun vlt-cider-quit-all ()
-    "Iterate over all CIDER connections and close them all!.
-    Credits: https://github.com/volrath/"
-    (interactive)
-    (let ((repl-buffers (seq-filter (lambda (b)
-                                      (with-current-buffer b
-                                        (eq major-mode 'cider-repl-mode)))
-                                    (buffer-list))))
-      (dolist (buf repl-buffers)
-        (cider--close-connection buf))
-      (message "All CIDER connections closed")))
-
   :config
   (setq nrepl-log-messages t
         nrepl-use-ssh-fallback-for-remote-hosts t)
