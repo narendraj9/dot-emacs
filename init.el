@@ -3102,6 +3102,8 @@ after doing `symbol-overlay-put'."
   ;;                tramp-methods))
   )
 
+(use-package docker-tramp :ensure t)
+
 
 ;;; BBDB
 ;; ──────────────────────────────────────────────────────────────────
