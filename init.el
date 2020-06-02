@@ -1770,6 +1770,12 @@ after doing `symbol-overlay-put'."
 ;;; Programming in general
 ;; ――――――――――――――――――――――――――――――――――――
 
+(use-package type-break
+  :init
+  (type-break-mode +1)
+  :config
+  (setq type-break-mode-line-message-mode t))
+
 (use-package compile
   :defer t
   :preface
