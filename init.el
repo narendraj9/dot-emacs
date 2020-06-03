@@ -1772,6 +1772,13 @@ after doing `symbol-overlay-put'."
 
 (use-package type-break
   :init
+  (add-hook 'type-break-mode-hook
+            (lambda ()
+              (when-let ()
+                (dolist (b (buffer-list))
+                  (when (equal type-break-auto-save-file-name
+                               (buffer-file-name b))
+                    (kill-buffer b))))))
   (type-break-mode +1)
   :config
   (setq type-break-mode-line-message-mode t))
