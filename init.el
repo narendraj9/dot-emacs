@@ -1285,12 +1285,9 @@ after doing `symbol-overlay-put'."
   (setq windmove-wrap-around t))
 
 (use-package "window"
-  :init
-  (setq fit-window-to-buffer-horizontally t)
+  :preface
 
-  (add-to-list 'display-buffer-alist
-               '(".*\\*Async Shell Command\\*.**" . (display-buffer-no-window . nil)))
-
+  :config
   ;; I think I will mostly want the pointer to go to the end with M-r
   ;; And then I would do a M-l to re-center it. Since both of them use
   ;; `recenter-positions'. I am using advices.
@@ -1300,19 +1297,9 @@ after doing `symbol-overlay-put'."
                         (let ((recenter-positions '(middle top bottom)))
                           (apply f args))))
 
-  :config
   (def-echoing next-buffer)
   (def-echoing previous-buffer)
 
-  (setq split-window-preferred-function
-        (lambda (&optional window)
-          (let ((window-count (length (window-list))))
-            (case window-count
-              (1 (split-window-right))
-              (2 (split-window-sensibly))
-              (t nil)))))
-
-  ;; Let `fit-window-to-buffer' resize windows horizontally.
   (setq fit-window-to-buffer-horizontally t)
 
   (advice-add #'split-window-below :filter-return #'select-window)
