@@ -1087,7 +1087,8 @@ after doing `symbol-overlay-put'."
   :bind ("C-x u" . undo-tree-visualize)
   :config
   (setq undo-tree-visualizer-timestamps t
-        undo-tree-visualizer-relative-timestamps t))
+        undo-tree-visualizer-relative-timestamps t)
+  (define-key undo-tree-map (kbd "C-/") nil))
 
 (use-package volatile-highlights
   :ensure t
