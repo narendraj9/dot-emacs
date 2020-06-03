@@ -1968,6 +1968,7 @@ after doing `symbol-overlay-put'."
 
 (use-package delsel :init (delete-selection-mode +1))
 (use-package expand-region
+  :ensure t
   :doc
   "Hyperbole provides similar functionality through
   hui-select.el but I have found `expand-region' to be more
