@@ -2271,7 +2271,9 @@ after doing `symbol-overlay-put'."
 (use-package lsp-mode
   :ensure t
   :hook ((java-mode . lsp)
-         (rust-mode . lsp))
+         (rust-mode . lsp)
+         (c-mode    . lsp)
+         (c++-mode  . lsp))
   :diminish lsp-mode
   :bind (:map lsp-mode-map
               ("C-c x" . lsp-execute-code-action))
@@ -2289,7 +2291,10 @@ after doing `symbol-overlay-put'."
   ;; GOPATH needs to be set properly for `gopls' to work.
   (lsp-register-custom-settings
    '(("gopls.completeUnimported" t t)
-     ("gopls.staticcheck" t t))))
+     ("gopls.staticcheck" t t)))
+
+  ;; LSP Clients
+  (setq lsp-clients-clangd-executable "clangd-7"))
 
 (use-package company-lsp
   :after  lsp-mode
@@ -2365,6 +2370,7 @@ after doing `symbol-overlay-put'."
   (info-lookmore-apropos-elisp))
 
 (use-package ggtags
+  :disabled t
   :ensure t
   :diminish ggtags-mode
   :hook ((c-mode   . ggtags-mode)
