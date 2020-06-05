@@ -94,6 +94,7 @@ buffer."
 ;; Primary. Rest should be split.
 (setq nnmail-split-fancy
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
+          (any "hotspot-gc-use@openjdk.java.net" "HotSpot JVM")
           (any "wireguard@lists.zx2c4.com" "Wireguard")
           (any "picolisp@software-lab.de" "PicoLisp")
           (any "tech@openbsd.org" "OpenBSD")
