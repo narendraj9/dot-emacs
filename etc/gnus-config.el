@@ -97,6 +97,7 @@ buffer."
           (any "hotspot-gc-use@openjdk.java.net" "HotSpot JVM")
           (any "wireguard@lists.zx2c4.com" "Wireguard")
           (any "picolisp@software-lab.de" "PicoLisp")
+          (any "misc@openbsd.org" "OpenBSD")
           (any "tech@openbsd.org" "OpenBSD")
           (any "announce@openbsd.org" "OpenBSD")
           (any "emacs-devel@gnu.org*" "Emacs Dev")
