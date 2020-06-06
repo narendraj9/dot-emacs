@@ -1090,10 +1090,12 @@ after doing `symbol-overlay-put'."
   :ensure t
   :diminish undo-tree-mode
   :bind ("C-x u" . undo-tree-visualize)
+  :init
+  (setq undo-tree-map (make-sparse-keymap))
+
   :config
   (setq undo-tree-visualizer-timestamps t
-        undo-tree-visualizer-relative-timestamps t)
-  (define-key undo-tree-map (kbd "C-/") nil))
+        undo-tree-visualizer-relative-timestamps t))
 
 (use-package volatile-highlights
   :ensure t
