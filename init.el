@@ -191,6 +191,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :load-path "lib/"
   :pin manual
   :init
+  ;; Some ergonomic alternatives
+  (define-key input-decode-map "\C-i" "\C-c")
+  (define-key input-decode-map "\C-m" "\C-x")
+
+
   (bind-keys* :prefix "C-'"   :prefix-map ctl-quote-map)
   (bind-keys* :prefix "C-."   :prefix-map ctl-period-map)
   (bind-keys* :prefix "C-;"   :prefix-map ctl-semicolon-map)
@@ -2294,7 +2299,7 @@ after doing `symbol-overlay-put'."
      ("gopls.staticcheck" t t)))
 
   ;; LSP Clients
-  (setq lsp-clients-clangd-executable "clangd-7"))
+  (setq lsp-clients-clangd-executable "clangd-8"))
 
 (use-package company-lsp
   :after  lsp-mode
@@ -3005,8 +3010,7 @@ after doing `symbol-overlay-put'."
          :map magit-mode-map
          ("C-c C-r" . magit-change-repository)
          :map ctl-period-map
-         ("C-m" . magit-status)
-         )
+         ("C-x" . magit-status))
 
   :init
   ;; Disable `global-magit-file-mode' until it can replace `git-gutter-mode'.
