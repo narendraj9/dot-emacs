@@ -192,8 +192,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :pin manual
   :init
   ;; Some ergonomic alternatives
-  (define-key input-decode-map "\C-i" "\C-c")
-  (define-key input-decode-map "\C-m" "\C-x")
+  (define-key input-decode-map
+    ;; Default: \C-i => TAB
+    "\C-i" "\C-c")
+
+  (define-key input-decode-map
+    ;; Default: \C-[ => ESC
+    "\C-[" "\C-x")
+
+  (define-key input-decode-map
+    ;; Default: \C-m => RET
+    "\C-m" [C-m])
 
 
   (bind-keys* :prefix "C-'"   :prefix-map ctl-quote-map)
