@@ -1775,6 +1775,8 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――
 
 (use-package type-break
+  :bind (:map ctl-semicolon-map
+              ("b" . type-break))
   :init
   (add-hook 'type-break-mode-hook
             (lambda ()
@@ -1784,7 +1786,6 @@ after doing `symbol-overlay-put'."
                                (buffer-file-name b))
                     (kill-buffer b))))))
   (type-break-mode +1)
-  :config
   (setq type-break-mode-line-message-mode t))
 
 (use-package compile
