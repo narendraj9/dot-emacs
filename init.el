@@ -1779,18 +1779,13 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――
 
 (use-package type-break
-  :bind (:map ctl-semicolon-map
+  :bind (:map ctl-quote-map
               ("b" . type-break))
   :init
-  (add-hook 'type-break-mode-hook
-            (lambda ()
-              (when-let ()
-                (dolist (b (buffer-list))
-                  (when (equal type-break-auto-save-file-name
-                               (buffer-file-name b))
-                    (kill-buffer b))))))
-  (type-break-mode +1)
-  (setq type-break-mode-line-message-mode t))
+  (setq type-break-file-name nil)
+  (setq type-break-mode-line-message-mode t)
+
+  (type-break-mode +1))
 
 (use-package compile
   :defer t
