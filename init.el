@@ -736,6 +736,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;;; TEXT-EDITING, FOLDING and NAVIGATION
 ;; ─────────────────────────────────────────────────────────────────
+(use-package undo-tree
+  :doc
+  "evil-mode turns on `global-undo-tree-mode'. I don't want it to
+  override default Emacs undo bindings so this `use-package'
+  declaration must be placed before that of `evil-mode'."
+  :ensure t
+  :diminish undo-tree-mode
+  :bind ("C-x u" . undo-tree-visualize)
+  :init
+  (setq undo-tree-map (make-sparse-keymap))
+
+  :config
+  (setq undo-tree-visualizer-timestamps t
+        undo-tree-visualizer-relative-timestamps t))
+
 (use-package evil
   :ensure t
   :bind (:map evil-motion-state-map
@@ -1094,17 +1109,6 @@ after doing `symbol-overlay-put'."
   (setq olivetti-body-width 80))
 
 ;; ─────────────────────────────────────────────────────────────────
-
-(use-package undo-tree
-  :ensure t
-  :diminish undo-tree-mode
-  :bind ("C-x u" . undo-tree-visualize)
-  :init
-  (setq undo-tree-map (make-sparse-keymap))
-
-  :config
-  (setq undo-tree-visualizer-timestamps t
-        undo-tree-visualizer-relative-timestamps t))
 
 (use-package volatile-highlights
   :ensure t
