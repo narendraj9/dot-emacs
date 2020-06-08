@@ -400,8 +400,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
-
-  (setq-default cursor-in-non-selected-windows nil)
+  (setq-default cursor-type '(bar . 4)
+                cursor-in-non-selected-windows nil)
 
   ;; Maximize emacs on startup
   (when (window-system)
@@ -756,7 +756,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq evil-toggle-key "C-; C-;"
         evil-default-state 'emacs
         evil-insert-state-modes (list)
-        evil-motion-state-modes (list))
+        evil-motion-state-modes (list)
+        evil-default-cursor (list cursor-type))
   (evil-mode +1))
 
 (use-package typo
