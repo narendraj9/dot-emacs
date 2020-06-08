@@ -318,29 +318,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                                    'integer))
                      (load-average 'use-float)))))))
 
-
-(use-package ibuffer
-  :bind (:map ctl-x-map
-              ("C-b" . ibuffer-other-window))
-  :config
-  (setq ibuffer-formats
-        '((mark modified read-only locked " "
-                (name 28 28 :left :elide) " "
-                (size 9 -1 :right) " "
-                (mode 16 -1 :left) " "
-                filename-and-process)
-          (mark " "
-                (name 36 36 :left) " | "
-                (filename-and-process 10 -1 :right)))))
-
-(use-package ibuf-ext
-  :config
-  (setq ibuffer-saved-filter-groups
-        '(("Categorized"
-           ("Org Mode" (mode . org-mode))
-           ("IRC" (mode . erc-mode))
-           ("*Auxiliary*" (name . "\\*.*\\*"))))))
-
 (use-package custom
   :doc "Custom configuration and personal information."
   :init
@@ -378,6 +355,83 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           list-timers))
 
   (defalias 'yes-or-no-p 'y-or-n-p))
+
+(use-package appearance
+  :doc "`use-package' doesn't throw an error for non-existent packages"
+  :load-path "themes/"
+  :defines quick-switch-themes
+  :preface
+  (defun font-availablep (font)
+    "Return true if FONT is available on system.
+     This is written to avoid calling `find-font' repeatedly."
+    (let ((favailablep (intern (concat font "-availablep"))))
+      (if (boundp favailablep)
+          (symbol-value favailablep)
+        (customize-save-variable favailablep
+                                 (not (null (find-font (font-spec :name font))))))))
+
+  :init
+  (add-to-list 'custom-theme-load-path
+               (expand-file-name "themes/"
+                                 user-emacs-directory))
+  (load-theme 'jazz)
+  (use-package mode-line-config :demand t :load-path "etc/")
+
+  ;; Setup my favorite fonts [if available]
+  (if (font-availablep "Symbola")
+      (set-fontset-font "fontset-default" nil
+                        (font-spec :name "Symbola" :size 15)
+                        nil 'append)
+    (add-to-list 'emacs-init-end-info
+                 "! You do not have Symbola font installed."))
+
+  ;; Font for reading news
+  (cond
+   ((font-availablep "Carlito")
+    ;; It would have been great if I could set the background to white
+    ;; while reading anything other than code. Emacs doesn't support
+    ;; buffer-local themes and doing this would require nasty tricks
+    ;; with hooks.
+    (set-face-attribute 'variable-pitch nil
+                        :family "Carlito"
+                        :height 130
+                        :weight 'normal
+                        :width 'ultraexpanded)))
+
+  ;; Show long lines as continuations.
+  (setq-default truncate-lines nil)
+
+  (setq-default cursor-in-non-selected-windows nil)
+
+  ;; Maximize emacs on startup
+  (when (window-system)
+    (add-to-list 'default-frame-alist
+                 '(fullscreen . maximized)))
+
+  ;; Diminish some minor modes
+  (diminish 'hi-lock-mode))
+
+(use-package ibuffer
+  :bind (:map ctl-x-map
+              ("C-b" . ibuffer-other-window))
+  :config
+  (setq ibuffer-formats
+        '((mark modified read-only locked " "
+                (name 28 28 :left :elide) " "
+                (size 9 -1 :right) " "
+                (mode 16 -1 :left) " "
+                filename-and-process)
+          (mark " "
+                (name 36 36 :left) " | "
+                (filename-and-process 10 -1 :right)))))
+
+(use-package ibuf-ext
+  :config
+  (setq ibuffer-saved-filter-groups
+        '(("Categorized"
+           ("Org Mode" (mode . org-mode))
+           ("IRC" (mode . erc-mode))
+           ("*Auxiliary*" (name . "\\*.*\\*"))))))
 
 (use-package wtf
   :load-path "packages/lisp/"
@@ -480,63 +534,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 :after
                 (lambda ()
                   (make-thread #'elisp-demos-advice-helpful-update)))))
-
-(use-package appearance
-  :doc "`use-package' doesn't throw an error for non-existent packages"
-  :after custom
-  :load-path "themes/"
-  :defines quick-switch-themes
-  :preface
-  (defun font-availablep (font)
-    "Return true if FONT is available on system.
-     This is written to avoid calling `find-font' repeatedly."
-    (let ((favailablep (intern (concat font "-availablep"))))
-      (if (boundp favailablep)
-          (symbol-value favailablep)
-        (customize-save-variable favailablep
-                                 (not (null (find-font (font-spec :name font))))))))
-
-  :init
-  (add-to-list 'custom-theme-load-path
-               (expand-file-name "themes/"
-                                 user-emacs-directory))
-  (load-theme 'jazz)
-  (use-package mode-line-config :demand t :load-path "etc/")
-
-  ;; Setup my favorite fonts [if available]
-  (if (font-availablep "Symbola")
-      (set-fontset-font "fontset-default" nil
-                        (font-spec :name "Symbola" :size 15)
-                        nil 'append)
-    (add-to-list 'emacs-init-end-info
-                 "! You do not have Symbola font installed."))
-
-  ;; Font for reading news
-  (cond
-   ((font-availablep "Carlito")
-    ;; It would have been great if I could set the background to white
-    ;; while reading anything other than code. Emacs doesn't support
-    ;; buffer-local themes and doing this would require nasty tricks
-    ;; with hooks.
-    (set-face-attribute 'variable-pitch nil
-                        :family "Carlito"
-                        :height 130
-                        :weight 'normal
-                        :width 'ultraexpanded)))
-
-  ;; Show long lines as continuations.
-  (setq-default truncate-lines nil)
-
-  (setq-default cursor-type '(bar . 4)
-                cursor-in-non-selected-windows nil)
-
-  ;; Maximize emacs on startup
-  (when (window-system)
-    (add-to-list 'default-frame-alist
-                 '(fullscreen . maximized)))
-
-  ;; Diminish some minor modes
-  (diminish 'hi-lock-mode))
 
 (use-package outline-minor-mode
   :defer t
