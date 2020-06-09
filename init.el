@@ -352,7 +352,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           capitalize-region
           erase-buffer
           set-goal-column
-          list-timers))
+          list-timers
+          list-threads))
 
   (defalias 'yes-or-no-p 'y-or-n-p))
 
