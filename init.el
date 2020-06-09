@@ -1743,6 +1743,13 @@ after doing `symbol-overlay-put'."
 
   (type-break-mode +1))
 
+
+(use-package keyfreq
+  :load-path "packages/lisp"
+  :config
+  (keyfreq-mode +1)
+  (keyfreq-autosave-mode +1))
+
 (use-package compile
   :defer t
   :preface
