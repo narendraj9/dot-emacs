@@ -1831,6 +1831,16 @@ after doing `symbol-overlay-put'."
     ("G"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
     ("q"  nil)))
 
+(use-package highlight-indent-guides
+  :defer t
+  :diminish highlight-indent-guides-mode
+  :init
+  (hook-into-modes #'highlight-indent-guides-mode
+                   'prog-mode-hook)
+  :config
+  (setq highlight-indent-guides-method 'character
+        highlight-indent-guides-character ?\x2502))
+
 (use-package aggressive-indent
   :ensure t
   :defer t
@@ -2396,10 +2406,6 @@ after doing `symbol-overlay-put'."
 
 ;;; PYTHON-MODE
 ;;  ─────────────────────────────────────────────────────────────────
-(use-package indent-guide
-  :ensure t
-  :defer t
-  :diminish indent-guide-mode)
 
 (use-package py-autopep8
   :ensure t
@@ -2420,9 +2426,7 @@ after doing `symbol-overlay-put'."
 
 (use-package python-mode
   :defer t
-  :hook ((python-mode . indent-guide-mode)
-         (python-mode . elpy-mode)
-         (python-mode . highlight-indentation-current-column-mode))
+  :hook ((python-mode . elpy-mode))
   :config
   (setq python-indent-guess-indent-offset-verbose nil
         python-indent-guess-indent-offset nil
@@ -2549,8 +2553,6 @@ after doing `symbol-overlay-put'."
   :pin melpa
   :defer t
   :mode "\\.clj\\'"
-  :hook ((clojure-mode . highlight-indentation-current-column-mode)
-         (clojure-mode . indent-guide-mode))
   :config
   (setq clojure-indent-style :always-align
         clojure-align-forms-automatically t))
@@ -2942,14 +2944,7 @@ after doing `symbol-overlay-put'."
 (use-package yaml-mode
   :defer t
   :ensure t
-  :hook ((yaml-mode . indent-guide-mode)
-         (yaml-mode . highlight-indentation-current-column-mode))
-  :mode "\\.yml\\'"
-  :config
-  (use-package highlight-indentation
-    :doc "This should already be installed by some mode, say
-    python's elpy. Still keeping it here in case it is not."
-    :ensure t))
+  :mode "\\.yml\\'")
 
 ;;; Version Control
 ;;  ─────────────────────────────────────────────────────────────────
