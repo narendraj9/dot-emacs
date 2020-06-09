@@ -2262,8 +2262,9 @@ after doing `symbol-overlay-put'."
   :ensure t
   :hook ((java-mode . lsp)
          (rust-mode . lsp)
-         (c-mode    . lsp)
-         (c++-mode  . lsp))
+         ;; (c-mode    . lsp)
+         ;; (c++-mode  . lsp)
+         )
   :diminish lsp-mode
   :bind (:map lsp-mode-map
               ("C-c x" . lsp-execute-code-action))
@@ -2360,7 +2361,6 @@ after doing `symbol-overlay-put'."
   (info-lookmore-apropos-elisp))
 
 (use-package ggtags
-  :disabled t
   :ensure t
   :diminish ggtags-mode
   :hook ((c-mode   . ggtags-mode)
