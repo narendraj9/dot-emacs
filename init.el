@@ -578,16 +578,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;; KEY BINDINGS
 ;; ──────────────────────────────────────────────────────────────────
-(use-package win-switch
-  :disabled t
-  :load-path "packages/lisp"
-  :init
-  (bind-keys* ("C-<return>" . win-switch-dispatch))
-  :config
-  (setq win-switch-provide-visual-feedback t)
-  (setq win-switch-feedback-background-color "black")
-  (setq win-switch-feedback-foreground-color "purple")
-  (win-switch-setup-keys-default))
 
 (ffap-bindings)
 (bind-keys :map ctl-period-map
@@ -1887,11 +1877,6 @@ after doing `symbol-overlay-put'."
   :defer t
   :config
   (setq comint-scroll-show-maximum-output nil))
-
-(use-package esh-toggle
-  :load-path "packages/lisp"
-  :bind (:map ctl-quote-map
-              ("C-p" . eshell-toggle)))
 
 (use-package eshell
   :init
