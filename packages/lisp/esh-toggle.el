@@ -126,33 +126,33 @@ buffer.
 Stores the window cofiguration before creating and/or switching window."
   (setq eshell-toggle-pre-eshell-win-conf (current-window-configuration))
   (let ((eshell-buffer (get-buffer "*eshell*"))
-	(cd-command
-	 ;; Find out which directory we are in (the method differs for
-	 ;; different buffers)
-	 (or (and make-cd
+	    (cd-command
+	     ;; Find out which directory we are in (the method differs for
+	     ;; different buffers)
+	     (or (and make-cd
                   (concat "cd " default-directory))
-	     (and make-cd
-		  list-buffers-directory
-		  (concat "cd " list-buffers-directory)))))
+	         (and make-cd
+		          list-buffers-directory
+		          (concat "cd " list-buffers-directory)))))
     ;; Switch to an existin eshell if one exists, otherwise switch to
     ;; another window and start a new eshell
     (if eshell-buffer
-	(switch-to-buffer-other-window eshell-buffer)
-      (eshell-toggle-buffer-switch-to-other-window)
+	    (switch-to-buffer-other-window eshell-buffer)
+      ;; (eshell-toggle-buffer-switch-to-other-window)
       ;; Sometimes an error is generated when I call `eshell' (it has
       ;; to do with my eshell-mode-hook which inserts text into the
       ;; newly created eshell-buffer and thats not allways a good
       ;; idea).
       (condition-case the-error
-	  (eshell)
-	(error (switch-to-buffer "*eshell*"))))
+	      (eshell)
+	    (error (switch-to-buffer "*eshell*"))))
     (if (or cd-command eshell-toggle-goto-eob)
-	(goto-char (point-max)))
+	    (goto-char (point-max)))
     (if cd-command
-	(progn
-	  (insert cd-command)
-	  (if eshell-toggle-automatic-cd
-	      (eshell-send-input))))))
+	    (progn
+	      (insert cd-command)
+	      (if eshell-toggle-automatic-cd
+	          (eshell-send-input))))))
 
 (defun eshell-toggle-buffer-switch-to-other-window ()
   "Switches to other window.
