@@ -412,8 +412,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (diminish 'hi-lock-mode))
 
 (use-package ibuffer
-  :bind (:map ctl-x-map
-              ("C-b" . ibuffer-other-window))
+  :bind (
+         :map global-map
+         ("C-<return>" . other-window)
+         :map ctl-x-map
+         ("C-b" . ibuffer-other-window))
   :config
   (setq ibuffer-formats
         '((mark modified read-only locked " "
@@ -576,6 +579,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; KEY BINDINGS
 ;; ──────────────────────────────────────────────────────────────────
 (use-package win-switch
+  :disabled t
   :load-path "packages/lisp"
   :init
   (bind-keys* ("C-<return>" . win-switch-dispatch))

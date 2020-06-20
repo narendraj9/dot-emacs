@@ -58,6 +58,8 @@
 
 ;;; User Variables:
 
+(require 'eshell)
+
 (defvar eshell-toggle-goto-eob t
   "*If non-nil `eshell-toggle' moves point to end of Eshell buffer.
 When `eshell-toggle-cd' is called the point is always moved to the
@@ -112,9 +114,9 @@ Options: `eshell-toggle-goto-eob'"
 If no configuration has been stored, just bury the *eshell* buffer."
   (if (window-configuration-p eshell-toggle-pre-eshell-win-conf)
       (progn
-	(set-window-configuration eshell-toggle-pre-eshell-win-conf)
-	(setq eshell-toggle-pre-eshell-win-conf nil)
-	(bury-buffer (get-buffer "*eshell*")))
+	    (set-window-configuration eshell-toggle-pre-eshell-win-conf)
+	    (setq eshell-toggle-pre-eshell-win-conf nil)
+	    (bury-buffer (get-buffer eshell-buffer-name)))
     (bury-buffer)))
 
 (defun eshell-toggle-buffer-goto-eshell (make-cd)
@@ -125,7 +127,7 @@ command into the eshell, where DIR is the directory of the current
 buffer.
 Stores the window cofiguration before creating and/or switching window."
   (setq eshell-toggle-pre-eshell-win-conf (current-window-configuration))
-  (let ((eshell-buffer (get-buffer "*eshell*"))
+  (let ((eshell-buffer (get-buffer eshell-buffer-name))
 	    (cd-command
 	     ;; Find out which directory we are in (the method differs for
 	     ;; different buffers)
@@ -138,14 +140,14 @@ Stores the window cofiguration before creating and/or switching window."
     ;; another window and start a new eshell
     (if eshell-buffer
 	    (switch-to-buffer-other-window eshell-buffer)
-      ;; (eshell-toggle-buffer-switch-to-other-window)
+      (eshell-toggle-buffer-switch-to-other-window)
       ;; Sometimes an error is generated when I call `eshell' (it has
       ;; to do with my eshell-mode-hook which inserts text into the
       ;; newly created eshell-buffer and thats not allways a good
       ;; idea).
-      (condition-case the-error
-	      (eshell)
-	    (error (switch-to-buffer "*eshell*"))))
+      (condition-case the-error (save-window-excursion (eshell))
+        (switch-to-buffer eshell-buffer-name)
+	    (error (switch-to-buffer eshell-buffer-name))))
     (if (or cd-command eshell-toggle-goto-eob)
 	    (goto-char (point-max)))
     (if cd-command
@@ -164,9 +166,9 @@ window configuration then `switch-buffer-other-window')"
     ;; If we did not switch window then we only have one window and
     ;; need to create a new one.
     (if (eq this-window (selected-window))
-	(progn
-	  (split-window-vertically)
-	  (other-window 1)))))
+	    (progn
+	      (split-window-vertically)
+	      (other-window 1)))))
 
 (provide 'esh-toggle)
 
