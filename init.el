@@ -1879,6 +1879,14 @@ after doing `symbol-overlay-put'."
   (setq comint-scroll-show-maximum-output nil))
 
 (use-package eshell
+  :bind (:map ctl-quote-map ("C-p" . eshell-toggle))
+  :preface
+  (defun eshell-toggle ()
+    (interactive)
+    (if (eq major-mode 'eshell-mode)
+        (jump-to-register ?e)
+      (window-configuration-to-register ?e)
+      (eshell)))
   :init
   (setq eshell-aliases-file (expand-file-name "./etc/eshell-aliases-file"
                                               user-emacs-directory))
