@@ -1505,13 +1505,13 @@ after doing `symbol-overlay-put'."
         company-tooltip-align-annotations t
         company-tooltip-flip-when-above t
         company-tooltip-offset-display 'lines)
-  (global-company-mode +1)
 
   :preface
   (defun company-mode-quicker ()
     "Makes `company-mode' show completions quickly in a buffer."
     (make-local-variable 'company-idle-delay)
-    (setq-local company-idle-delay 0.1)))
+    (setq-local company-idle-delay 0.1)
+    (company-mode +1)))
 
 (use-package company-statistics
   :doc "Sort `company-mode' completions by frequency."
