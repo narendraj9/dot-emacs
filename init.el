@@ -1887,12 +1887,17 @@ after doing `symbol-overlay-put'."
         (jump-to-register ?e)
       (window-configuration-to-register ?e)
       (eshell)))
-  :init
-  (setq eshell-aliases-file (expand-file-name "./etc/eshell-aliases-file"
-                                              user-emacs-directory))
   :config
   (add-to-list 'display-buffer-alist
-               '("\\`\\*e?shell" display-buffer-at-bottom)))
+               '("\\`\\*e?shell" display-buffer-at-bottom))
+
+  (setq eshell-prompt-function
+        (lambda ()
+          (concat "(" (file-name-nondirectory (eshell/pwd)) ")"
+                  (if (= (user-uid) 0) " # " " $ ")))
+
+        eshell-aliases-file
+        (expand-file-name "./etc/eshell-aliases" user-emacs-directory)))
 
 (use-package bpfcc-tools
   :load-path "etc/"
@@ -2305,7 +2310,7 @@ after doing `symbol-overlay-put'."
      ("gopls.staticcheck" t t)))
 
   ;; LSP Clients
-  (setq lsp-clients-clangd-executable "clangd-8"))
+  (setq lsp-clients-clangd-executable "clangd"))
 
 (use-package company-lsp
   :after  lsp-mode
