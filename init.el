@@ -1137,7 +1137,17 @@ after doing `symbol-overlay-put'."
   (setq which-key-max-description-length nil)
   (which-key-mode +1))
 
+(use-package project
+  :init
+  (setq project-list-file
+        (expand-file-name "var/project-list" user-emacs-directory)))
+
 (use-package projectile
+  :doc
+  "All of the projectile provided functionality that I use
+  is already provided by the built-in `project.el'
+  "
+  :disabled t
   :ensure t
   :defer 10
   :diminish projectile-mode
@@ -1558,7 +1568,7 @@ after doing `symbol-overlay-put'."
          ("r"     . counsel-rg)
          ("z"     . kill-buffer-delete-window)
          ("j"     . ido-find-file)
-         ("f"     . projectile-find-file)
+         ("f"     . project-find-file)
          ("~"     . dired-go-home)
          ("C-c u" . dired-up-repeatedly))
   :hook ((dired-after-readin . dired-hide-details-mode)
@@ -2192,7 +2202,7 @@ after doing `symbol-overlay-put'."
     (counsel-ag (or (and (symbol-at-point)
                          (symbol-name (symbol-at-point)))
                     "")
-                (projectile-get-project-root))))
+                (project-root (project-current)))))
 
 (use-package counsel-bbdb
   :ensure t
