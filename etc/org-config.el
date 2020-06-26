@@ -151,6 +151,7 @@
                              (goto-address-mode +1)
                              (auto-fill-mode +1)
                              (unbind-key "S-<return>" org-mode-map)
+                             (unbind-key "C-<return>" org-mode-map)
                              (setq mode-name "Org")
                              ;; Turn on `variable-pitch-mode' if using a light
                              ;; theme
