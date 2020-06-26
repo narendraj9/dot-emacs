@@ -629,24 +629,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                       'date-time-face))
         display-time-default-load-average 1     ; 5 minute load avg
         display-time-load-average-threshold 0.8 ; >80%
-        display-time-mail-string "")
-
-  (use-package svg-clock
-    :commands (svg-clock svg-clock-insert)
-    :load-path "packages/lisp")
-
-  :preface
-  (defvar display-time-header-line nil)
-  (defun display-time-world* ()
-    "Same as `display-time-world' but adds current time to `header-line'."
-    (interactive)
-    (display-time-world)
-    (with-current-buffer (get-buffer display-time-world-buffer-name)
-      (let ((inhibit-read-only t))
-        (goto-char (point-max))
-        (insert "\n\n  ")
-        (svg-clock-insert 300 nil nil 1))
-      (setq cursor-type nil))))
+        display-time-mail-string ""))
 
 (use-package battery
   :demand t
