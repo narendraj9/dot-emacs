@@ -63,6 +63,16 @@
       (jazz-bg+2     "#505050")
       (jazz-bg+3     "#606060")
 
+      ;; diff colors
+      (jazz-bg-diff-added "#335533")
+      (jazz-bg-diff-removed "#553333")
+      (jazz-bg-diff-refine-added "#336633")
+      (jazz-bg-diff-refine-removed "#663333")
+      (jazz-fg-diff-added "#ddffdd")
+      (jazz-fg-diff-removed "#ffdddd")
+      (jazz-fg-diff-refine-added "#cceecc")
+      (jazz-fg-diff-refine-removed "#eecccc")
+
       (jazz-red+1    "#8d4a4a")
       (jazz-red      "#953331")
       (jazz-red-1    "#953331")
@@ -262,15 +272,14 @@
    `(company-scrollbar-bg ((,class (:background ,jazz-bg+2))))
    `(company-tooltip-annotation ((,class (:background nil :foreground ,jazz-yellow))))
 
-   ;; diff
-   `(diff-added ((,class (:background ,jazz-green+1 :foreground ,jazz-fg+1))))
-   `(diff-removed ((,class (:background ,jazz-orange :foreground ,jazz-fg+1))))
-   `(diff-refine-added ((,class (:background ,jazz-green-1 :foreground ,jazz-fg))))
-   `(diff-refine-removed ((,class (:background ,jazz-red :foreground ,jazz-fg))))
+   ;; diff (same as magit defines them)
+   `(diff-added ((,class (:background ,jazz-bg-diff-added :foreground ,jazz-fg-diff-added))))
+   `(diff-removed ((,class (:background ,jazz-bg-diff-removed :foreground ,jazz-fg-diff-removed))))
+   `(diff-refine-added ((,class (:background ,jazz-bg-diff-refine-added :foreground ,jazz-fg-diff-refine-added))))
+   `(diff-refine-removed ((,class (:background ,jazz-bg-diff-refine-removed :foreground ,jazz-fg-diff-refine-removed))))
    `(diff-changed ((,class (:foreground ,jazz-yellow))))
    `(diff-header ((,class (:background ,jazz-bg+1))))
-   `(diff-file-header
-     ((,class (:background ,jazz-bg+2 :foreground ,jazz-fg :bold t))))
+   `(diff-file-header ((,class (:background ,jazz-bg+2 :foreground ,jazz-fg :bold t))))
 
    ;; ein
    `(ein:cell-input-area ((,class (:background ,jazz-bg+1))))

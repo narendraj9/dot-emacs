@@ -2967,9 +2967,11 @@ after doing `symbol-overlay-put'."
 ;;; Version Control
 ;;  ─────────────────────────────────────────────────────────────────
 
-(use-package vc
+(use-package vc :config (setq vc-display-status t))
+(use-package diff-mode
   :config
-  (setq vc-display-status t))
+  (setq diff-font-lock-prettify t
+        diff-font-lock-syntax nil))
 
 (use-package autorevert
   :diminish auto-revert-mode

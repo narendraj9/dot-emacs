@@ -25,10 +25,26 @@
 
 ;;; Code:
 
-(defface mode-line-delim () "Face for mode line delimiters.")
-(defface mode-line-mode-name () "Face for major mode name.")
-(defface mode-line-minor-mode-face () "Face for minor modes in mode line.")
-(defface mode-line-size-face () "Face for minor modes in mode line.")
+(defface mode-line-delim
+  ()
+  "Face for mode line delimiters."
+  :group 'mode-line-faces)
+
+(defface mode-line-mode-name
+  ()
+  "Face for major mode name."
+  :group 'mode-line-faces)
+
+(defface mode-line-minor-mode-face
+  ()
+  "Face for minor modes in mode line."
+  :group 'mode-line-faces)
+
+(defface mode-line-size-face
+  ()
+  "Face for minor modes in mode line."
+  :group 'mode-line-faces)
+
 
 (defun simple-mode-line-render (left middle right)
   "Return a mode-line construct with MIDDLE centered and
@@ -120,15 +136,6 @@ mouse-3: Toggle minor modes"
 
           ;; -- Right
           (list mode-line-misc-info mode-line-end-spaces))))
-
-;;; -- Some utility functions for other modes
-(defun simple-projectile-mode-line-function ()
-  (when-let ((project-name (projectile-project-name)))
-    (concat projectile-mode-line-prefix
-            "["
-            (propertize project-name 'face '(:foreground "orange"))
-            "]")))
-
 
 ;;; Battery and Time display in the mode line
 ;;; ----------------------------------------------------------------------------
