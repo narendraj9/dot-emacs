@@ -606,38 +606,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (minibuffer-command-history-enable))
 
-(use-package time
-  :demand t
-  :preface
-  :init
-  (display-time-mode +1)
-  :config
-  (setq display-time-world-timer-enable t
-        display-time-world-time-format "\n──────────────\n\t%A %d %B %R %Z\n")
-  (setq zoneinfo-style-world-list '(("Europe/Berlin" "Berlin")
-                                    ("Asia/Calcutta" "Bangalore")
-                                    ("America/Seattle" "Seattle")))
-  (defface date-time-face
-    '((t :foreground "green yellow"
-         :distant-foreground "black"))
-    "Face for date time in mode line."
-    :group 'display-time)
-
-  (setq display-time-string-forms
-        '((propertize (format " %s %0s %s %s:%s " day monthname
-                              dayname 24-hours minutes am-pm)
-                      'face
-                      'date-time-face))
-        display-time-default-load-average 1     ; 5 minute load avg
-        display-time-load-average-threshold 0.8 ; >80%
-        display-time-mail-string ""))
-
-(use-package battery
-  :demand t
-  :config
-  (setq battery-mode-line-format "%b%p%%")
-  (display-battery-mode +1))
-
 (use-package calendar
   :defer t
   :bind (:map ctl-quote-map
@@ -2996,8 +2964,13 @@ after doing `symbol-overlay-put'."
     python's elpy. Still keeping it here in case it is not."
     :ensure t))
 
-;;; MAGIT AND FRIENDS
+;;; Version Control
 ;;  ─────────────────────────────────────────────────────────────────
+
+(use-package vc
+  :config
+  (setq vc-display-status t))
+
 (use-package autorevert
   :diminish auto-revert-mode
   :config
