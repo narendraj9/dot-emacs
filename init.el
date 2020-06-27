@@ -597,6 +597,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   "This built-in package provides a way to keep a set of window
    configurations around that can be switched to easily."
   :config
+  (tab-bar-history-mode +1)
   (setq tab-bar-show nil
         tab-bar-tab-name-function #'tab-bar-tab-name-all))
 
