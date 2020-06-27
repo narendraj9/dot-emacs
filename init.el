@@ -1453,23 +1453,22 @@ after doing `symbol-overlay-put'."
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
 (use-package company
-  :doc "I don't like auto-completion at all. However, I have
+  :doc
+  "I don't like auto-completion at all. However, I have
   realized that sometimes, it can come in really handy,
   especially while programming in a dynamic language that
   encourages very long identifier names."
   :ensure t
   :demand t
   :diminish company-mode
-  :bind (
-         :map global-map
-         ("C-. TAB" . company-complete)
-         :map company-active-map
-         ("<tab>" . company-complete-common-or-cycle)
-         )
   :config
+  (define-key company-mode-map [remap indent-for-tab-command]
+    #'company-indent-or-complete-common)
+
   (bind-keys :map company-active-map
-             ("C-n" . company-select-next-or-abort)
-             ("C-p" . company-select-previous-or-abort))
+             ("<tab>" . company-complete-common-or-cycle)
+             ("C-n"   . company-select-next-or-abort)
+             ("C-p"   . company-select-previous-or-abort))
 
   (setq company-idle-delay 0.5
         company-tooltip-align-annotations t
