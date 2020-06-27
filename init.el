@@ -573,7 +573,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    exist in some modes, e.g Gnus, SQLi."
   :bind (:map ctl-x-map
               ("w m" . menu-bar-open))
-  :config (menu-bar-mode -1))
+  :config (menu-bar-mode +1))
 
 
 ;; KEY BINDINGS
@@ -2040,19 +2040,12 @@ after doing `symbol-overlay-put'."
   :demand t
   :ensure t
   :diminish ivy-mode
-  :bind (
-         :map ivy-occur-grep-mode-map
-         ("q"   . kill-buffer-delete-window)
-         :map ctl-x-map
-         ;; https://oremacs.com/2016/06/27/ivy-push-view/
-         ("w p" . ivy-push-view)
-         ("w b" . ivy-switch-view)
-         :map ctl-quote-map
-         ("C-l" . ivy-switch-buffer)
-         :map global-map
-         ("C-x b"      . ivy-switch-buffer)
-         ("C-x B"      . ivy-switch-buffer-other-window)
-         ("M-H"        . ivy-resume))
+  :bind ( :map ivy-occur-grep-mode-map
+          ("q"     . kill-buffer-delete-window)
+          :map global-map
+          ("C-x b" . ivy-switch-buffer)
+          ("C-x B" . ivy-switch-buffer-other-window)
+          ("M-H"   . ivy-resume) )
 
   :config
   (bind-keys :map ivy-minibuffer-map
