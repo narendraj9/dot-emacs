@@ -1453,13 +1453,8 @@ after doing `symbol-overlay-put'."
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
 (use-package company
-  :doc
-  "I don't like auto-completion at all. However, I have
-  realized that sometimes, it can come in really handy,
-  especially while programming in a dynamic language that
-  encourages very long identifier names."
   :ensure t
-  :demand t
+  :hook (emacs-init . global-company-mode)
   :diminish company-mode
   :config
   (define-key company-mode-map [remap indent-for-tab-command]
@@ -1470,7 +1465,7 @@ after doing `symbol-overlay-put'."
              ("C-n"   . company-select-next-or-abort)
              ("C-p"   . company-select-previous-or-abort))
 
-  (setq company-idle-delay 0.5
+  (setq company-idle-delay 2.0
         company-tooltip-align-annotations t
         company-tooltip-flip-when-above t
         company-tooltip-offset-display 'lines)
