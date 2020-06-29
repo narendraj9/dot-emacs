@@ -96,7 +96,7 @@ buffer."
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
           (any ".*@openjdk.java.net" "OpenJDK")
           (any ".*lists.postgresql.org" "PostgreSQL")
-          (any ".*@postgresql.org" "PostgeSQL")
+          (any ".*@postgresql.org" "PostgreSQL")
           (any "wireguard@lists.zx2c4.com" "Wireguard")
           (any "picolisp@software-lab.de" "PicoLisp")
           (any ".*@freebsd.org" "FreeBSD")
@@ -140,7 +140,7 @@ buffer."
       gnus-use-article-prefetch t)
 
 ;; HTML Email -> Text
-(setq mm-text-html-renderer 'gnus-w3m
+(setq mm-text-html-renderer 'shr
       gnus-article-browse-delete-temp t)
 
 ;; Keep my responses in the same group

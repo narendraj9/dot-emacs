@@ -2015,7 +2015,8 @@ after doing `symbol-overlay-put'."
   :doc "The HTML parser that is used at multiple places in Emacs"
   :defer t
   :init
-  (setq shr-width 80))
+  (setq shr-width 80
+        shr-use-fonts nil))
 
 ;;; Ivy and Friends
 ;; ──────────────────────────────────────────────────────────────────

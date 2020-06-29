@@ -45,6 +45,11 @@
   "Face for minor modes in mode line."
   :group 'mode-line-faces)
 
+(defface mode-line-battery-face
+  ()
+  "Face for battery information in the mode line."
+  :group 'mode-line-faces)
+
 
 (defun simple-mode-line-render (left middle right)
   "Return a mode-line construct with MIDDLE centered and
@@ -58,7 +63,7 @@ available space adjust after LEFT and before RIGHT."
          (r-len (length r))
          (available-width (- (window-total-width)
                              (+ l-len m-len r-len)
-                             1          ; - some empty space at the end.
+                             1        ; - some empty space at the end.
                              ))
          (l-space  (max 0 (- c (+ l-len (/ m-len 2)))))
          (r-space (max 0 (- available-width l-space))))
@@ -169,7 +174,10 @@ mouse-3: Toggle minor modes"
 (use-package battery
   :demand t
   :config
-  (setq battery-mode-line-format "%b%p%%")
+  (setq battery-mode-line-format
+        (propertize "%b%p%%"
+                    'face
+                    'mode-line-battery-face))
   (display-battery-mode +1))
 
 (provide 'mode-line-config)
