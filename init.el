@@ -2469,13 +2469,9 @@ after doing `symbol-overlay-put'."
 (use-package paredit
   :ensure t
   :diminish paredit-mode
-  :hook ((emacs-lisp-mode lisp-mode
-                          clojure-mode
-                          clojurescript-mode
-                          cider-repl-mode
-                          racket-mode
-                          scheme-mode
-                          eval-expression-minibuffer-setup)
+  :hook (( emacs-lisp-mode lisp-mode clojure-mode clojurescript-mode
+           cider-repl-mode racket-mode scheme-mode
+           eval-expression-minibuffer-setup)
          . enable-paredit-mode)
   :bind (:map paredit-mode-map
               ("M-S" . paredit-splice-sexp)
@@ -2521,40 +2517,6 @@ after doing `symbol-overlay-put'."
   (mapcar (lambda (key-seq)
             (unbind-key key-seq paredit-mode-map))
           (list "M-r" "M-s" "M-?")))
-
-(use-package smartparens
-  :ensure t
-  :defer 2
-  :bind (:map smartparens-mode-map
-              ("M-S"   . sp-splice-sexp)
-              ("M-R"   . sp-raise-sexp)
-              ("C-M-)" . utils-paredit-slurp-all-the-way-forward)
-              ("C-M-(" . utils-paredit-slurp-all-the-way-bacward)
-              ("C-M-}" . utils-paredit-barf-all-the-way-forward)
-              ("C-M-{" . utils-paredit-barf-all-the-way-bacward))
-  :diminish smartparens-mode
-  :config
-  (setq sp-highlight-pair-overlay nil)
-  (setq sp-ignore-modes-list
-        (append sp-ignore-modes-list
-                '(emacs-lisp-mode
-                  lisp-mode
-                  clojure-mode
-                  cider-repl-mode
-                  eshell-mode
-                  eval-expression-minibuffer-setup)))
-
-  (sp-use-paredit-bindings)
-
-  (dolist (key-seq (list "M-r" "M-s" "M-?"))
-    (unbind-key key-seq smartparens-mode-map))
-
-  ;; Remove this remapping
-  (define-key smartparens-strict-mode-map [remap kill-region] nil)
-  (define-key smartparens-strict-mode-map [remap delete-region] nil)
-
-  ;; Enable `smartparens-global-mode';
-  (smartparens-global-mode +1))
 
 (use-package javadoc-lookup :bind ("C-h j" . javadoc-lookup) :ensure t)
 (use-package clojure-mode
