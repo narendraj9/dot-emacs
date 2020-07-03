@@ -736,6 +736,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (wrap-region-global-mode +1))
 
+(use-package electric-pair-mode :init (electric-pair-mode +1))
+
 (use-package wgrep :defer t :ensure t)
 (use-package region-bindings-mode
   :diminish region-bindings-mode
@@ -2463,7 +2465,6 @@ after doing `symbol-overlay-put'."
     :hook (emacs-mode . highlight-defined-mode)))
 
 (use-package xray :load-path "package/lisp/" :defer t)
-
 (use-package macrostep  :defer t :ensure t)
 
 (use-package paredit
@@ -2823,8 +2824,7 @@ after doing `symbol-overlay-put'."
   :bind (:map ruby-mode-map
               ("C-c i" . rinari-insert-erb-skeletion))
   :config
-  (global-rinari-mode)
-  (add-hook 'ruby-mode-hook 'electric-pair-mode))
+  (global-rinari-mode))
 
 (use-package robe
   :ensure t
@@ -2843,7 +2843,6 @@ after doing `symbol-overlay-put'."
 (use-package go-mode
   :ensure t
   :hook ((go-mode . lsp)
-         (go-mode . electric-pair-mode)
          (go-mode . lsp-go-install-save-hooks))
   :config
   (use-package go-guru :ensure t)
