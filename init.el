@@ -736,7 +736,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (wrap-region-global-mode +1))
 
-(use-package electric-pair-mode :init (electric-pair-mode +1))
+(use-package elec-pair :init (electric-pair-mode +1))
 
 (use-package wgrep :defer t :ensure t)
 (use-package region-bindings-mode
