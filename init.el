@@ -594,6 +594,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (minibuffer-depth-indicate-mode +1))
 
 (use-package tab-bar
+  :bind (:map tab-prefix-map ("s" . tab-switcher))
   :doc
   "This built-in package provides a way to keep a set of window
    configurations around that can be switched to easily."
