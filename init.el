@@ -2526,6 +2526,11 @@ after doing `symbol-overlay-put'."
   :pin melpa
   :defer t
   :mode "\\.clj\\'"
+  :init
+  (add-hook #'clojure-mode-hook
+            (lambda ()
+              (remove-hook 'project-find-functions
+                           #'clojure-current-project)))
   :config
   (setq clojure-indent-style :always-align
         clojure-align-forms-automatically t))
@@ -2575,7 +2580,11 @@ after doing `symbol-overlay-put'."
               (lambda (&rest _args)
                 (completion-at-point)))
 
-  (define-clojure-indent (for-all 1)))
+  (define-clojure-indent (for-all 1))
+
+  (add-hook 'cider-repl-mode-hook
+            (lambda ()
+              (define-key cider-repl-mode-map (kbd "C-<return>") nil))))
 
 
 (use-package flycheck-clojure
