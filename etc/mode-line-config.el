@@ -84,63 +84,52 @@ available space adjust after LEFT and before RIGHT."
                             (10 ,(propertize " (%l,%C)"))
                             (6 ,(propertize " L%l")))))))
 
-(setq
- mode-line-modes
- (let ((recursive-edit-help-echo "Recursive edit, type C-M-c to get out"))
-   (list (propertize "%[" 'help-echo recursive-edit-help-echo)
-         (propertize "( " 'face 'mode-line-delim)
-         `(:propertize ("" mode-name)
-                       face mode-line-mode-name
-                       help-echo "Major mode\n\
-mouse-1: Display major mode menu\n\
-mouse-2: Show help for major mode\n\
-mouse-3: Toggle minor modes"
-                       mouse-face mode-line-highlight
-                       local-map ,mode-line-major-mode-keymap)
-         '("" mode-line-process)
-         `(:propertize ("" minor-mode-alist)
-                       face mode-line-minor-mode-face
-                       mouse-face mode-line-highlight
-                       help-echo "Minor mode\n\
-mouse-1: Display minor mode menu\n\
-mouse-2: Show help for minor mode\n\
-mouse-3: Toggle minor modes"
-                       local-map ,mode-line-minor-mode-keymap)
-         (propertize "%n" 'help-echo "mouse-2: Remove narrowing from buffer"
-                     'mouse-face 'mode-line-highlight
-                     'local-map (make-mode-line-mouse-map
-                                 'mouse-2 #'mode-line-widen))
-         (propertize " )" 'face 'mode-line-delim)
-         (propertize "%]" 'help-echo recursive-edit-help-echo)
-         " ")))
+(setq mode-line-modes
+      (let ((recursive-edit-help-echo "Recursive edit, type C-M-c to get out"))
+        (list (propertize "%[" 'help-echo recursive-edit-help-echo)
+              (propertize "( " 'face 'mode-line-delim)
+              `(:propertize ("" mode-name)
+                            face mode-line-mode-name
+                            mouse-face mode-line-highlight
+                            local-map ,mode-line-major-mode-keymap)
+              '("" mode-line-process)
+              `(:propertize ("" minor-mode-alist)
+                            face mode-line-minor-mode-face
+                            mouse-face mode-line-highlight
+                            local-map ,mode-line-minor-mode-keymap)
+              (propertize "%n"
+                          'mouse-face 'mode-line-highlight
+                          'local-map (make-mode-line-mouse-map 'mouse-2 #'mode-line-widen))
+              (propertize " )" 'face 'mode-line-delim)
+              (propertize "%]" 'help-echo recursive-edit-help-echo)
+              " ")))
 
-(setq-default
- mode-line-format
- '(:eval (simple-mode-line-render
-          ;; -- Left
-          '("%e"
-            mode-line-front-space
-            mode-line-mule-info
-            mode-line-client
-            mode-line-modified
-            mode-line-auto-compile
-            mode-line-remote
-            (evil-mode (:eval
-                        (format " {%s}"
-                                (propertize (substring (symbol-name evil-state)
-                                                       0 1)
-                                            'face
-                                            'font-lock-variable-name-face))))
-            mode-line-frame-identification
-            mode-line-buffer-identification
-            "   " mode-line-position "  "
-            (vc-mode vc-mode))
+(setq-default mode-line-format
+              '(:eval (simple-mode-line-render
+                       ;; -- Left
+                       '("%e"
+                         mode-line-front-space
+                         mode-line-mule-info
+                         mode-line-client
+                         mode-line-modified
+                         mode-line-auto-compile
+                         mode-line-remote
+                         (evil-mode (:eval
+                                     (format " {%s}"
+                                             (propertize (substring (symbol-name evil-state)
+                                                                    0 1)
+                                                         'face
+                                                         'font-lock-variable-name-face))))
+                         mode-line-frame-identification
+                         mode-line-buffer-identification
+                         "   " mode-line-position "  "
+                         (vc-mode vc-mode))
 
-          ;; -- Middle
-          mode-line-modes
+                       ;; -- Middle
+                       mode-line-modes
 
-          ;; -- Right
-          (list mode-line-misc-info mode-line-end-spaces))))
+                       ;; -- Right
+                       (list mode-line-misc-info mode-line-end-spaces))))
 
 ;;; Battery and Time display in the mode line
 ;;; ----------------------------------------------------------------------------

@@ -655,12 +655,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "Make chromium the default browser if it is installed."
   :init
   (cond
+   ((executable-find "firefox")
+    (setq browse-url-browser-function 'browse-url-firefox))
    ((executable-find "chromium")
     (setq browse-url-browser-function 'browse-url-chromium))
    ((executable-find "google-chrome")
-    (setq browse-url-browser-function 'browse-url-chrome))
-   ((executable-find "firefox")
-    (setq browse-url-browser-function 'browse-url-firefox)))
+    (setq browse-url-browser-function 'browse-url-chrome)))
   :config
   (advice-add 'browse-url-chromium
               :before
