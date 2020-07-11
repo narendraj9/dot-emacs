@@ -30,6 +30,7 @@
 (require 'ag)
 (require 'counsel)
 (require 'alert)
+(require 'defs)
 
 (defun org-agenda-redo-with-days-to-deadline ()
   "Change `org-agenda' buffer and display days to deadline for all tasks."
@@ -41,7 +42,8 @@
 (defun open-org-file ()
   "Quick open a notes org file."
   (interactive)
-  (projectile-find-file-in-directory (expand-file-name org-directory)))
+  (let ((default-directory (expand-file-name org-directory)))
+    (project-find-file)))
 
 (defun search-notes-files ()
   "Search org files using `counsel-ag'."
@@ -714,6 +716,16 @@ non-empty lines in the block (excluding the line with
   ;; (add-hook 'org-agenda-finalize-hook #'org-gcal-fetch)
   ;; (add-hook 'org-capture-before-finalize-hook #'org-gcal-sync)
   )
+
+(use-package org-timer
+  :init
+  (add-hook 'org-timer-done-hook
+            (lambda ()
+              (message "Org timer expired. Please any key to stop notifications.")
+              (cl-do () ((not (sit-for 1)) :done)
+                (play-sound-file (expand-file-name "audio/quite-impressed.wav"
+                                                   emacs-assets-directory)
+                                 90)))))
 
 (provide 'org-config)
 ;;; org-config.el ends here

@@ -135,6 +135,8 @@ buffer."
                (nnimap-streaming t)
                (nnimap-split-methods ,nnmail-split-fancy)))
 
+(setq gnus-parameters '((".*" (gcc-self . t))))
+
 ;; Pre-fetch for speed
 (setq gnus-asynchronous t
       gnus-use-article-prefetch t)
@@ -183,7 +185,7 @@ buffer."
 (setq gnus-use-cache t)
 
 ;;; -- Show current Summary entry in Echo Area
-(defun gnus-summary-echo-current-headers ()
+(defun gnus-summary-echo-current-headers (&rest _callback)
   "Return current from/subject/date string or nil if nothing."
   (when-let ((headers (gnus-summary-article-header))
              (mail-date (gnus-user-date (mail-header-date headers)))
