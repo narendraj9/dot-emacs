@@ -2573,7 +2573,9 @@ after doing `symbol-overlay-put'."
         cider-repl-history-file (expand-file-name "var/cider-repl-history.el"
                                                   user-emacs-directory)
         cider-eldoc-display-for-symbol-at-point nil
-        cider-eldoc-display-context-dependent-info t)
+        cider-eldoc-display-context-dependent-info t
+
+        cider-repl-use-content-types t)
 
   (advice-add 'cider-repl-indent-and-complete-symbol
               :around
