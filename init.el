@@ -811,7 +811,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;;               (lambda (&rest _args) (deactivate-mark nil)))
   (define-key global-map
     [remap exchange-point-and-mark]
-    #'exchange-point-and-mark*))
+    #'exchange-point-and-mark*)
+
+  (add-to-list 'display-buffer-alist
+               '("\\*Async Shell Command\\*" display-buffer-no-window)))
 
 (use-package ialign
   :doc "Very useful to get quick feedback for alignment with
