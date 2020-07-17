@@ -2472,6 +2472,11 @@ after doing `symbol-overlay-put'."
     :ensure t
     :hook (emacs-mode . highlight-defined-mode)))
 
+(use-package plisp-mode
+  :doc
+  "https://picolisp.com/wiki/?Documentation"
+  :ensure t)
+
 (use-package xray :load-path "package/lisp/" :defer t)
 (use-package macrostep  :defer t :ensure t)
 
