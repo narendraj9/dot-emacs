@@ -1872,6 +1872,12 @@ after doing `symbol-overlay-put'."
 
 (use-package eshell
   :bind (:map ctl-quote-map ("C-p" . eshell-toggle))
+  :init
+  (setq eshell-modules-list
+        '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
+           eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
+           eshell-rebind eshell-script eshell-smart eshell-term eshell-tramp
+           eshell-unix eshell-xtra))
   :preface
   (defun eshell-toggle ()
     (interactive)
