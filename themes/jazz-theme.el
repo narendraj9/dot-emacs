@@ -474,6 +474,8 @@
 
    ;; linum-mode
    `(linum ((,class (:foreground ,jazz-bg+2 :background ,jazz-bg-1))))
+   `(line-number ((,class (:foreground ,jazz-bg+2 :background ,jazz-bg-1))))
+   `(line-number-current-line ((,class (:foreground ,jazz-blue-6 :background ,jazz-bg-1))))
 
    ;; magit
    `(magit-section-title ((,class (:foreground ,jazz-yellow :weight bold :box nil :background ,jazz-bg))))

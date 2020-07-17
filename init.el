@@ -1742,8 +1742,7 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――
 
 (use-package display-line-numbers
-  :bind ( :map ctl-quote-map
-          ("l l" . display-line-numbers-mode)))
+  :bind ( :map ctl-period-map ([\C-m] . display-line-numbers-mode)))
 
 (use-package type-break
   :bind (:map ctl-quote-map
@@ -1850,11 +1849,9 @@ after doing `symbol-overlay-put'."
     ("q"  nil)))
 
 (use-package highlight-indent-guides
-  :defer t
+  :ensure t
   :diminish highlight-indent-guides-mode
-  :init
-  (hook-into-modes #'highlight-indent-guides-mode
-                   'prog-mode-hook)
+  :hook (prog-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guides-method 'character
         highlight-indent-guides-character ?\x2502))
