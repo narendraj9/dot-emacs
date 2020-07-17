@@ -1741,6 +1741,10 @@ after doing `symbol-overlay-put'."
 ;;; Programming in general
 ;; ――――――――――――――――――――――――――――――――――――
 
+(use-package display-line-numbers
+  :bind ( :map ctl-quote-map
+          ("l l" . display-line-numbers-mode)))
+
 (use-package type-break
   :bind (:map ctl-quote-map
               ("b" . type-break))
