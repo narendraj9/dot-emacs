@@ -2541,14 +2541,14 @@ after doing `symbol-overlay-put'."
   :pin melpa
   :defer t
   :mode "\\.clj\\'"
-  :init
-  (add-hook #'clojure-mode-hook
-            (lambda ()
-              (remove-hook 'project-find-functions
-                           #'clojure-current-project)))
   :config
   (setq clojure-indent-style :always-align
-        clojure-align-forms-automatically t))
+        clojure-align-forms-automatically t)
+  ;; Workaround for Clojure pojects in a monorepo.
+  (advice-add 'project-find-file :around
+              (lambda (p-find-file &rest args)
+                (let ((project-find-functions (list #'project-try-vc)))
+                  (apply p-find-file args)))))
 
 (use-package clj-refactor
   :pin melpa
