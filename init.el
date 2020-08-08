@@ -2659,8 +2659,6 @@ after doing `symbol-overlay-put'."
   (defun start-slime ()
     (when (not (slime-connected-p))
       (save-window-excursion (slime))))
-  :hook ((lisp-mode . start-slime)
-         (lisp-mode . slime-mode))
   :config
   (require 'slime-editing-commands)
 
