@@ -1742,7 +1742,7 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――
 
 (use-package display-line-numbers
-  :bind ( :map ctl-period-map ([\C-m] . display-line-numbers-mode)))
+  :bind ( :map ctl-period-map ([\C-m] . display-line-numbers-mode) ))
 
 (use-package type-break
   :bind (:map ctl-quote-map
@@ -1914,6 +1914,12 @@ after doing `symbol-overlay-put'."
               ("C-c C-k" . haskell-compile))
   :hook ((haskell-mode . haskell-doc-mode)
          (haskell-mode . haskell-indentation-mode)))
+
+(use-package lsp-haskell
+  :ensure t
+  :after haskell-mode
+  :config
+  (setq lsp-haskell-process-path-hie "hie-wrapper"))
 
 (use-package intero
   :doc
