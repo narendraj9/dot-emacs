@@ -2308,13 +2308,6 @@ after doing `symbol-overlay-put'."
   ;; LSP Clients
   (setq lsp-clients-clangd-executable "clangd"))
 
-(use-package company-lsp
-  :after  lsp-mode
-  :ensure t
-  :config
-  (setq company-lsp-enable-snippet t
-        company-lsp-cache-candidates t))
-
 (use-package lsp-ui
   :ensure t
   :after lsp-mode
