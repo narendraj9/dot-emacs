@@ -3406,6 +3406,7 @@ after doing `symbol-overlay-put'."
         google-translate-listen-program "mplayer")
 
   :config
+  (require 'cl-macs)                    ; uses the `case' macro.
   (advice-add 'google-translate-json-suggestion
               :override
               (lambda (json)
