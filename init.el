@@ -883,18 +883,17 @@ after doing `symbol-overlay-put'."
   :config
   (setq savehist-file (expand-file-name "var/savehist.el"
                                         user-emacs-directory))
-  (setq savehist-additional-variables '(kill-ring
-                                        limit-usage
-                                        minibuffer-history
-                                        minibuffer-command-history
-                                        ;; ---
-                                        command-history
-                                        ;; ---
-                                        define-word-archives
-                                        define-word-list
-                                        ;; ---
-                                        ivy-views))
-  (savehist-mode +1))
+  (setq savehist-additional-variables
+        '( kill-ring minibuffer-history minibuffer-command-history command-history
+           limit-usage define-word-archives define-word-list ivy-views))
+  (savehist-mode +1)
+  ;; https://emacs.stackexchange.com/a/4191/14967
+  ;; Prevent `kill-ring' values from causing very long pauses while
+  ;; shutting down Emacs by removing text properties from `kill-ring'
+  ;; entries.
+  (add-hook 'kill-emacs-hook
+            (lambda ()
+              (setq kill-ring (mapcar 'substring-no-properties kill-ring)))))
 
 (use-package vcursor
   :doc
