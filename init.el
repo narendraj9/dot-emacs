@@ -3446,7 +3446,7 @@ after doing `symbol-overlay-put'."
     (let ((translate-buffer "*Google Translate*")
           (translate-fn (if (use-region-p) #'google-translate-at-point
                           #'google-translate-query-translate)))
-      (case arg
+      (cl-case arg
         (1 (funcall translate-fn))
         (4 (let ((google-translate-default-source-language google-translate-default-target-language)
                  (google-translate-default-target-language google-translate-default-source-language))
