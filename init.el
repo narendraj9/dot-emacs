@@ -1733,23 +1733,14 @@ after doing `symbol-overlay-put'."
 ;;; Language Server Protocol
 ;;  ------------------------
 
-(use-package lsp-mode
+(use-package eglot
   :ensure t
-  :diminish lsp-mode
-  :bind ( :map lsp-mode-map ("C-c x" . lsp-execute-code-action) )
-  :init
-  (setq lsp-keymap-prefix "C-;"
-        lsp-file-watch-threshold 5000
-        ;; Eldoc configuration
-        lsp-eldoc-render-all nil
-        ;; Language specific configuration
-        lsp-clients-clangd-executable "clangd"
-        lsp-rust-server 'rust-analyzer)
+  :defer t
   :config
-  ;; GOPATH needs to be set properly for `gopls' to work.
-  (lsp-register-custom-settings
-   '(("gopls.completeUnimported" t t)
-     ("gopls.staticcheck" t t))))
+  (hook-into-modes #'eglot-ensure 'java-mode 'rust-mode 'c-mode 'c++-mode)
+  (add-to-list 'eglot-server-programs
+               '(rust-mode . ("rust-analyzer"))))
+
 
 ;;; ----------------------------------------------------------------------------
 
@@ -1914,9 +1905,7 @@ after doing `symbol-overlay-put'."
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
-(use-package jinja2-mode
-  :defer t
-  :ensure t)
+(use-package jinja2-mode :defer t :ensure t)
 
 ;;; HASKELL-MODE
 ;;  ─────────────────────────────────────────────────────────────────
@@ -1927,20 +1916,6 @@ after doing `symbol-overlay-put'."
               ("C-c C-k" . haskell-compile))
   :hook ((haskell-mode . haskell-doc-mode)
          (haskell-mode . haskell-indentation-mode)))
-
-(use-package lsp-haskell
-  :ensure t
-  :after haskell-mode
-  :config
-  (setq lsp-haskell-process-path-hie "hie-wrapper"))
-
-(use-package intero
-  :doc
-  "It works! It just takes a lot of time to install intero. Be
-   patient."
-  :ensure t
-  :defer t
-  :hook (haskell-mode . intero-mode))
 
 ;;; GRAPHICS
 ;; ──────────────────────────────────────────────────────────────────
@@ -2067,14 +2042,6 @@ after doing `symbol-overlay-put'."
   (setq ivy-posframe-parameters
         '((left-fringe . 10)))
   (ivy-posframe-mode 1))
-
-(use-package helm
-  :doc
-  "LSP mode uses `helm` directly. But install `lsp-mode' didn't
-   install `helm' automatically last time. It probably didn't
-   require `helm' before usage."
-  :ensure t
-  :after lsp-mode)
 
 (use-package smex
   :doc "Used by `ivy-M-x' for sorting based on frequency + recency."
@@ -2233,40 +2200,7 @@ after doing `symbol-overlay-put'."
 
 ;;; JAVA
 ;; ----------------------------------------------------------------------------
-(use-package java-mode
-  :defer t
-  :hook ( (java-mode . company-mode-quicker)
-          (java-mode . lsp) )
-  :init
-  (use-package lsp-java
-    :ensure t
-    :config
-    (setq lsp-java-save-actions-organize-imports t)
-
-    (unless (file-exists-p lsp-java-lombok-jar-path)
-      (require 'url-handlers)
-      (url-copy-file "https://projectlombok.org/downloads/lombok.jar"
-                     lsp-java-lombok-jar-path))
-
-    (setq lsp-java-vmargs
-          (list "-noverify"
-                "-Xmx1G"
-                "-XX:+UseG1GC"
-                "-XX:+UseStringDeduplication"
-                (format "-javaagent:%s" lsp-java-lombok-jar-path)))
-
-    :preface
-    (defvar lsp-java-lombok-jar-path
-      (expand-file-name "var/lombok.jar" user-emacs-directory)))
-
-  (use-package dap-mode
-    :doc "For debugging Java applications."
-    :ensure t
-    :defer t
-    :hook ((java-mode . dap-mode)
-           (java-mode . dap-ui-mode))
-    :config
-    (require 'dap-java)))
+(use-package java-mode :defer t :hook ( (java-mode . company-mode-quicker) ))
 
 (use-package gradle-mode
   :doc "Gradle integration in Emacs."
@@ -2304,9 +2238,6 @@ after doing `symbol-overlay-put'."
     :demand t
     :pin manual
     :load-path "etc/")
-
-  (add-hook 'c-mode-hook #'lsp)
-  (add-hook 'c++-mode-hook #'lsp)
   (add-hook 'c-mode-hook #'custom-c-mode-common-hook)
   (add-hook 'c++-mode-hook #'custom-c-mode-common-hook))
 
@@ -2356,7 +2287,6 @@ after doing `symbol-overlay-put'."
 
   (add-hook 'rust-mode-hook
             (lambda ()
-              (lsp)
               (eldoc-mode +1)
               (cargo-minor-mode +1)
               (flycheck-rust-setup))))
@@ -2802,19 +2732,10 @@ after doing `symbol-overlay-put'."
 ;; ──────────────────────────────────────────────────────────────────
 (use-package go-mode
   :ensure t
-  :hook ((go-mode . lsp)
-         (go-mode . lsp-go-install-save-hooks))
   :config
   (use-package go-guru :ensure t)
-
   (unless (getenv "GOPATH")
-    (setenv "GOPATH" (shell-command-to-string "echo -n $GOPATH")))
-
-  :preface
-  ;; Use `gopls' to format buffer and clean up imports.
-  (defun lsp-go-install-save-hooks ()
-    (add-hook 'before-save-hook #'lsp-format-buffer t t)
-    (add-hook 'before-save-hook #'lsp-organize-imports t t)))
+    (setenv "GOPATH" (shell-command-to-string "echo -n $GOPATH"))))
 
 ;;; NIX
 ;; ──────────────────────────────────────────────────────────────────
