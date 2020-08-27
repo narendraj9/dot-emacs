@@ -2385,13 +2385,11 @@ after doing `symbol-overlay-put'."
               ("RET" . newline-and-indent))
   :config
   (use-package cargo :ensure t)
-  (use-package racer :ensure t)
   (use-package flycheck-rust :ensure t)
 
   (add-hook 'rust-mode-hook
             (lambda ()
               (lsp)
-              (racer-mode +1)
               (eldoc-mode +1)
               (cargo-minor-mode +1)
               (flycheck-rust-setup))))
