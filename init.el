@@ -1751,8 +1751,6 @@ after doing `symbol-overlay-put'."
    '(("gopls.completeUnimported" t t)
      ("gopls.staticcheck" t t))))
 
-(use-package lsp-ui :ensure t :after lsp-mode)
-
 ;;; ----------------------------------------------------------------------------
 
 (use-package display-line-numbers
