@@ -2281,32 +2281,29 @@ after doing `symbol-overlay-put'."
 
 (use-package lsp-mode
   :ensure t
-  :hook ((java-mode . lsp)
-         (rust-mode . lsp)
-         ;; (c-mode    . lsp)
-         ;; (c++-mode  . lsp)
-         )
+  :hook ( (java-mode . lsp)
+          (rust-mode . lsp)
+          (c-mode    . lsp)
+          (c++-mode  . lsp) )
   :diminish lsp-mode
-  :bind (:map lsp-mode-map
-              ("C-c x" . lsp-execute-code-action))
+  :bind ( :map lsp-mode-map ("C-c x" . lsp-execute-code-action) )
   :init
   (setq lsp-keymap-prefix "C-;"
-        lsp-eldoc-render-all nil)
+        lsp-eldoc-render-all nil
+        lsp-file-watch-threshold 1000)
   :config
-  (unless (f-file-p lsp-session-file)
-    (f-touch lsp-session-file))
-
-  (define-key lsp-mode-map
-    (kbd lsp-keymap-prefix) lsp-command-map)
-
-  (setq lsp-file-watch-threshold 3000)
   ;; GOPATH needs to be set properly for `gopls' to work.
   (lsp-register-custom-settings
    '(("gopls.completeUnimported" t t)
      ("gopls.staticcheck" t t)))
 
   ;; LSP Clients
-  (setq lsp-clients-clangd-executable "clangd"))
+  (require 'lsp-clients)
+  (setq lsp-clients-clangd-executable "clangd")
+
+  ;; LSP Servers
+  (require 'lsp-rust)
+  (setq lsp-rust-server 'rust-analyzer))
 
 (use-package lsp-ui
   :ensure t
@@ -3089,7 +3086,7 @@ after doing `symbol-overlay-put'."
   (use-package bbdb-mua
     :defer 10
     :config
-    (setq bbdb-mua-auto-update-p 'create
+    (setq bbdb-mua-auto-update-p 'update
           bbdb-mua-pop-up nil)
     (bbdb-mua-auto-update-init 'gnus 'message))
 
