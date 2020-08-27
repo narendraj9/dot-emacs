@@ -1736,8 +1736,9 @@ after doing `symbol-overlay-put'."
 (use-package eglot
   :ensure t
   :defer t
-  :config
+  :init
   (hook-into-modes #'eglot-ensure 'java-mode 'rust-mode 'c-mode 'c++-mode)
+  :config
   (add-to-list 'eglot-server-programs
                '(rust-mode . ("rust-analyzer"))))
 
@@ -1777,7 +1778,11 @@ after doing `symbol-overlay-put'."
   :config
   (require 'ansi-color))
 
-(use-package eldoc :diminish eldoc-mode :config (global-eldoc-mode +1))
+(use-package eldoc
+  :diminish eldoc-mode
+  :config
+  (setq eldoc-echo-area-use-multiline-p nil)
+  (global-eldoc-mode +1))
 
 (use-package which-func
   :doc "Display the current function in the mode line."
@@ -2062,6 +2067,7 @@ after doing `symbol-overlay-put'."
 
   :config
   (bind-keys :map ivy-minibuffer-map
+             ("M-["     . ivy-backward-delete-char)
              ("C-x C-f" . fallback-to-find-file)
              ("C-S-W"   . ivy-yank-symbol*)
              ("C-w"     . ivy-yank-word)
