@@ -112,17 +112,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;; LIBRARIES
 ;;  ─────────────────────────────────────────────────────────────────
-(use-package ht        :defer t :ensure t)
-(use-package fsm       :defer t :ensure t)
-(use-package websocket :defer t :ensure t)
-(use-package memoize   :defer t :ensure t)
-(use-package s         :defer t :ensure t)
-(use-package dash      :defer t :ensure t)
-(use-package request   :defer t :ensure t)
-(use-package mustache  :defer t :ensure t)
-(use-package anaphora  :defer t :ensure t)
-(use-package ctable    :defer t :ensure t)
-(use-package posframe  :ensure t)
+
+(use-package s       :defer t :ensure t)
+(use-package dash    :defer t :ensure t)
+(use-package request :defer t :ensure t)
 
 (use-package htmlfontify
   :defer t
@@ -1737,8 +1730,61 @@ after doing `symbol-overlay-put'."
   (setq hledger-input-buffer-height 20)
   (add-hook 'hledger-input-mode-hook #'company-mode-quicker))
 
-;;; Programming in general
-;; ――――――――――――――――――――――――――――――――――――
+;;; Language Server Protocol
+;;  ------------------------
+
+(use-package lsp-mode
+  :ensure t
+  :diminish lsp-mode
+  :bind ( :map lsp-mode-map ("C-c x" . lsp-execute-code-action) )
+  :init
+  (setq lsp-keymap-prefix "C-;"
+        lsp-eldoc-render-all nil
+        lsp-file-watch-threshold 5000
+        ;; Language specific configuration
+        lsp-clients-clangd-executable "clangd"
+        lsp-rust-server 'rust-analyzer)
+  :config
+  ;; GOPATH needs to be set properly for `gopls' to work.
+  (lsp-register-custom-settings
+   '(("gopls.completeUnimported" t t)
+     ("gopls.staticcheck" t t))))
+
+(use-package lsp-ui
+  :ensure t
+  :after lsp-mode
+  :preface
+  (defun lsp-ui-doc-toggle ()
+    "Toggle document display for symbol at point."
+    (interactive)
+    ;; Not using `this-command' here to make sure that doc can stay displayed as
+    ;; I move around in the buffer.
+    (if (get 'lsp-ui-doc-toggle 'doc-visible-p)
+        (progn (put 'lsp-ui-doc-toggle 'doc-visible-p nil)
+               (lsp-ui-doc-hide))
+      (lsp-ui-doc-show)
+      (put 'lsp-ui-doc-toggle 'doc-visible-p t)))
+
+  :config
+  (setq lsp-ui-sideline-enable nil
+        lsp-ui-sideline-show-symbol nil
+        lsp-ui-sideline-show-code-actions t
+        lsp-ui-sideline-update-mode 'point)
+
+  (setq lsp-ui-sideline-show-hover t)
+
+  (setq lsp-ui-doc-enable nil         ; Disable auto doc show on hover
+        lsp-ui-doc-header t
+        lsp-ui-doc-position 'at-point ; When asked to, display doc at point.
+        lsp-ui-doc-use-webkit t)
+
+  (bind-keys :map lsp-ui-mode-map
+             :prefix "C-c C-d"
+             :prefix-map lsp-ui-doc-map
+             ("C-t" . lsp-ui-doc-show)
+             ("C-d" . lsp-describe-thing-at-point)))
+
+
 
 (use-package display-line-numbers
   :bind ( :map ctl-period-map ([\C-m] . display-line-numbers-mode) ))
@@ -2222,7 +2268,8 @@ after doing `symbol-overlay-put'."
 ;; ----------------------------------------------------------------------------
 (use-package java-mode
   :defer t
-  :hook ((java-mode . company-mode-quicker))
+  :hook ( (java-mode . company-mode-quicker)
+          (java-mode . lsp) )
   :init
   (use-package lsp-java
     :ensure t
@@ -2276,70 +2323,6 @@ after doing `symbol-overlay-put'."
     :ensure t
     :pin melpa))
 
-;;; Language Server Protocol
-;;  ------------------------
-
-(use-package lsp-mode
-  :ensure t
-  :hook ( (java-mode . lsp)
-          (rust-mode . lsp)
-          (c-mode    . lsp)
-          (c++-mode  . lsp) )
-  :diminish lsp-mode
-  :bind ( :map lsp-mode-map ("C-c x" . lsp-execute-code-action) )
-  :init
-  (setq lsp-keymap-prefix "C-;"
-        lsp-eldoc-render-all nil
-        lsp-file-watch-threshold 1000)
-  :config
-  ;; GOPATH needs to be set properly for `gopls' to work.
-  (lsp-register-custom-settings
-   '(("gopls.completeUnimported" t t)
-     ("gopls.staticcheck" t t)))
-
-  ;; LSP Clients
-  (require 'lsp-clients)
-  (setq lsp-clients-clangd-executable "clangd")
-
-  ;; LSP Servers
-  (require 'lsp-rust)
-  (setq lsp-rust-server 'rust-analyzer))
-
-(use-package lsp-ui
-  :ensure t
-  :after lsp-mode
-  :preface
-  (defun lsp-ui-doc-toggle ()
-    "Toggle document display for symbol at point."
-    (interactive)
-    ;; Not using `this-command' here to make sure that doc can stay displayed as
-    ;; I move around in the buffer.
-    (if (get 'lsp-ui-doc-toggle 'doc-visible-p)
-        (progn (put 'lsp-ui-doc-toggle 'doc-visible-p nil)
-               (lsp-ui-doc-hide))
-      (lsp-ui-doc-show)
-      (put 'lsp-ui-doc-toggle 'doc-visible-p t)))
-
-  :config
-  (setq lsp-ui-sideline-enable nil
-        lsp-ui-sideline-show-symbol nil
-        lsp-ui-sideline-show-code-actions t
-        lsp-ui-sideline-update-mode 'point)
-
-  (setq lsp-ui-sideline-show-hover t)
-
-  (setq lsp-ui-doc-enable nil         ; Disable auto doc show on hover
-        lsp-ui-doc-header t
-        lsp-ui-doc-position 'at-point ; When asked to, display doc at point.
-        lsp-ui-doc-use-webkit t)
-
-  (bind-keys :map lsp-ui-mode-map
-             :prefix "C-c C-d"
-             :prefix-map lsp-ui-doc-map
-             ("C-t" . lsp-ui-doc-show)
-             ("C-d" . lsp-describe-thing-at-point)))
-
-
 ;;; C/C++-MODE
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package cc-mode
@@ -2355,6 +2338,8 @@ after doing `symbol-overlay-put'."
     :pin manual
     :load-path "etc/")
 
+  (add-hook 'c-mode-hook #'lsp)
+  (add-hook 'c++-mode-hook #'lsp)
   (add-hook 'c-mode-hook #'custom-c-mode-common-hook)
   (add-hook 'c++-mode-hook #'custom-c-mode-common-hook))
 
@@ -2399,20 +2384,9 @@ after doing `symbol-overlay-put'."
   :bind (:map rust-mode-map
               ("RET" . newline-and-indent))
   :config
-  (use-package cargo
-    :ensure t
-    :config
-    (unless (executable-find "cargo")
-      (message "Please install cargo or modify PATH to include it.")))
-
-  (use-package racer
-    :ensure t
-    :config
-    (setq racer-rust-src-path
-          (expand-file-name "~/code/rust/src/")))
-
-  (use-package flycheck-rust
-    :ensure t)
+  (use-package cargo :ensure t)
+  (use-package racer :ensure t)
+  (use-package flycheck-rust :ensure t)
 
   (add-hook 'rust-mode-hook
             (lambda ()
