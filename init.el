@@ -1739,8 +1739,9 @@ after doing `symbol-overlay-put'."
   :bind ( :map lsp-mode-map ("C-c x" . lsp-execute-code-action) )
   :init
   (setq lsp-keymap-prefix "C-;"
-        lsp-eldoc-render-all nil
         lsp-file-watch-threshold 5000
+        ;; Eldoc configuration
+        lsp-eldoc-render-all nil
         ;; Language specific configuration
         lsp-clients-clangd-executable "clangd"
         lsp-rust-server 'rust-analyzer)
@@ -1750,41 +1751,9 @@ after doing `symbol-overlay-put'."
    '(("gopls.completeUnimported" t t)
      ("gopls.staticcheck" t t))))
 
-(use-package lsp-ui
-  :ensure t
-  :after lsp-mode
-  :preface
-  (defun lsp-ui-doc-toggle ()
-    "Toggle document display for symbol at point."
-    (interactive)
-    ;; Not using `this-command' here to make sure that doc can stay displayed as
-    ;; I move around in the buffer.
-    (if (get 'lsp-ui-doc-toggle 'doc-visible-p)
-        (progn (put 'lsp-ui-doc-toggle 'doc-visible-p nil)
-               (lsp-ui-doc-hide))
-      (lsp-ui-doc-show)
-      (put 'lsp-ui-doc-toggle 'doc-visible-p t)))
+(use-package lsp-ui :ensure t :after lsp-mode)
 
-  :config
-  (setq lsp-ui-sideline-enable nil
-        lsp-ui-sideline-show-symbol nil
-        lsp-ui-sideline-show-code-actions t
-        lsp-ui-sideline-update-mode 'point)
-
-  (setq lsp-ui-sideline-show-hover t)
-
-  (setq lsp-ui-doc-enable nil         ; Disable auto doc show on hover
-        lsp-ui-doc-header t
-        lsp-ui-doc-position 'at-point ; When asked to, display doc at point.
-        lsp-ui-doc-use-webkit t)
-
-  (bind-keys :map lsp-ui-mode-map
-             :prefix "C-c C-d"
-             :prefix-map lsp-ui-doc-map
-             ("C-t" . lsp-ui-doc-show)
-             ("C-d" . lsp-describe-thing-at-point)))
-
-
+;;; ----------------------------------------------------------------------------
 
 (use-package display-line-numbers
   :bind ( :map ctl-period-map ([\C-m] . display-line-numbers-mode) ))
