@@ -1739,8 +1739,9 @@ after doing `symbol-overlay-put'."
   :init
   (hook-into-modes #'eglot-ensure 'java-mode 'rust-mode 'c-mode 'c++-mode)
   :config
-  (add-to-list 'eglot-server-programs
-               '(rust-mode . ("rust-analyzer"))))
+  (dolist (lang-server-spec '((rust-mode . ("rust-analyzer"))
+                              (haskell-mode . ("haskell-language-server"))))
+    (add-to-list 'eglot-server-programs lang-server-spec)))
 
 
 ;;; ----------------------------------------------------------------------------

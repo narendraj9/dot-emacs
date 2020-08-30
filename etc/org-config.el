@@ -609,6 +609,7 @@ non-empty lines in the block (excluding the line with
   :after org-agenda
   :init
   (setq org-habit-graph-column 80
+        org-habit-preceding-days 28
         org-habit-show-done-always-green t))
 
 (use-package org-clock
