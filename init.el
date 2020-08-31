@@ -1737,7 +1737,8 @@ after doing `symbol-overlay-put'."
   :ensure t
   :defer t
   :init
-  (hook-into-modes #'eglot-ensure 'java-mode 'rust-mode 'c-mode 'c++-mode)
+  (hook-into-modes #'eglot-ensure
+                   'java-mode 'rust-mode 'c-mode 'c++-mode 'python-mode)
   :config
   (dolist (lang-server-spec '((rust-mode . ("rust-analyzer"))
                               (haskell-mode . ("haskell-language-server"))))
@@ -1931,7 +1932,11 @@ after doing `symbol-overlay-put'."
 ;;; Notes, Journal and Task Manager
 ;;  ─────────────────────────────────────────────────────────────────
 
-(use-package calfw :ensure t :defer t)
+(use-package calfw     :ensure t :defer t)
+(use-package calfw-org
+  :ensure t
+  :commands cfw:open-org-calendar)
+
 (use-package org-config
   :load-path "etc/"
   :bind (("C-c c" . org-config-capture)
@@ -2303,31 +2308,14 @@ after doing `symbol-overlay-put'."
 
 (use-package py-autopep8
   :ensure t
-  :hook (elpy-mode . py-autopep8-enable-on-save)
-  :init
-  (when (not (executable-find "autopep8"))
-    (message "AutoPEP8 not installed!")))
-
-(use-package elpy
-  :ensure t
-  :defer t
-  :config
-  (setq elpy-rpc-virtualenv-path 'current)
-  (if (executable-find "ipython")
-      (setq python-shell-interpreter "ipython"
-            python-shell-interpreter-args "-i --simple-prompt")
-    (message "IPython not found!")))
+  :hook (python-mode . py-autopep8-enable-on-save))
 
 (use-package python-mode
   :defer t
-  :hook ((python-mode . elpy-mode))
   :config
   (setq python-indent-guess-indent-offset-verbose nil
         python-indent-guess-indent-offset nil
-        python-indent-offset 2)
-
-  (when (not (executable-find "flake8"))
-    (message "Please install flake8")))
+        python-indent-offset 2))
 
 ;;; LISP MODE
 ;;  ─────────────────────────────────────────────────────────────────
