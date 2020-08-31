@@ -163,11 +163,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (setq async-byte-compile-log-file
           (expand-file-name "var/async-bytecomp.log" user-emacs-directory))))
 
-(use-package levenshtein
-  :defines levenshtein-sort
-  :defer t
-  :load-path "lib/")
-
 (use-package frecency
   :doc
   "Record scores for times based on frequency and recency.
@@ -1485,24 +1480,6 @@ after doing `symbol-overlay-put'."
 
 ;; ──────────────────────────────────────────────────────────────────
 
-(use-package dumb-jump
-  :ensure t
-  :bind (("M-g o" . dumb-jump-go-other-window)
-         ("M-g ." . dumb-jump-go)
-         ("M-g ," . dumb-jump-back))
-  :config
-  (setq dumb-jump-selector 'ivy))
-
-(use-package beginend
-  :ensure t
-  :defer 5
-  :diminish beginend-global-mode
-  :config
-  (beginend-global-mode +1)
-  (mapc (lambda (hook-mode-cons)
-          (diminish (cdr hook-mode-cons)))
-        beginend-modes))
-
 (use-package dired-x
   :after dired
   :bind (("C-x C-j" . dired-jump)
@@ -1582,7 +1559,7 @@ after doing `symbol-overlay-put'."
                            (-concat dired-recent-directories)
                            -distinct
                            (-filter #'stringp)
-                           (-filter #'f-directory?))))))
+                           (-filter #'f-directory-p))))))
 
 ;;; SNIPPETS and ABBREVS
 ;; ――――――――――――――――――――――――――――――――――――――――
@@ -1791,7 +1768,7 @@ after doing `symbol-overlay-put'."
   :config
   (setq which-func-modes '(java-mode))
   (setq which-func-unknown "<λ>")
-  (which-func-mode +1))
+  (which-function-mode +1))
 
 (use-package realgud
   :doc "`gud' with bells and whistles."
