@@ -693,6 +693,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         undo-tree-visualizer-relative-timestamps t))
 
 (use-package evil
+  :disabled t
   :ensure t
   :bind (:map evil-motion-state-map
               ("SPC" . counsel-M-x))
