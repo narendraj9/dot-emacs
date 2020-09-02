@@ -731,31 +731,6 @@ Credits: Emacs Prelude"
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
 
-(defvar quick-switch-themes
-  (let ((themes-list (list 'jazz
-                           ;; 'vicarie-and-blackboard
-                           ;; 'tangotango
-                           'poet)))
-    (nconc themes-list themes-list))
-  "A circular list of themes to keep switching between.
-Make sure that the currently enabled theme is at the head of this
-list always.
-
-A nil value implies no custom theme should be enabled.")
-
-(defun quick-switch-themes* ()
-  "Switch between to commonly used faces in Emacs.
-One for writing code and the other for reading articles."
-  (interactive)
-  (if-let ((next-theme (cadr quick-switch-themes)))
-      (progn (when-let ((current-theme (car quick-switch-themes)))
-               (disable-theme (car quick-switch-themes)))
-             (load-theme next-theme t)
-             (message "Loaded theme: %s" next-theme))
-    ;; Always have the dark mode-line theme
-    (mapc #'disable-theme (delq 'smart-mode-line-dark custom-enabled-themes)))
-  (setq quick-switch-themes (cdr quick-switch-themes)))
-
 (defun repeat-command (command &optional message-fn)
   "Make a repeatable command out of COMMAND.
 Optional argument MESSAGE-FN (defaults to 'ignore) is used to
