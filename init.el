@@ -1089,54 +1089,6 @@ after doing `symbol-overlay-put'."
   (setq project-list-file
         (expand-file-name "var/project-list" user-emacs-directory)))
 
-(use-package projectile
-  :doc
-  "All of the projectile provided functionality that I use
-  is already provided by the built-in `project.el'
-  "
-  :disabled t
-  :ensure t
-  :defer 10
-  :diminish projectile-mode
-  :commands (projectile-project-root
-             projectile-project-name
-             projectile-project-p)
-  :bind-keymap ("C-c p" . projectile-command-map)
-  :preface
-  (defun projectile-get-project-root ()
-    "Return root directory path for project or ask for project."
-    (let ((projectile-switch-project-action (lambda ())))
-      (or (projectile-project-p)        ; return path if in a project
-          (projectile-switch-project))))
-
-  (defun projectile-find-file! ()
-    "Switch to a project (if required) before `projectile-find-file'."
-    (interactive)
-    (let ((projectile-require-project-root nil)
-          (default-directory (projectile-get-project-root)))
-      (call-interactively #'projectile-find-file)))
-
-  :init
-  (setd projectile-known-projects-file "var/projectile-projects.eld"
-        projectile-cache-file "var/projectile.cache")
-  (setq projectile-tags-command "ctags-exuberant -Re -f \"%s\" %s ")
-  (setq projectile-completion-system 'ivy)
-
-  :config
-  (define-key projectile-mode-map (kbd "C-c p") #'projectile-command-map)
-
-  (mapc (lambda (d) (push d projectile-globally-ignored-directories))
-        '("vendor/bundle"))
-  (mapc (lambda (f) (push f projectile-globally-ignored-files))
-        '("GTAGS" "GRTAGS" "GPATH"))
-
-  (setq projectile-switch-project-action
-        ;; Open project's root directory in `dired' after switching to
-        ;; project.
-        (lambda () (dired default-directory)))
-
-  (projectile-mode +1))
-
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
 (use-package bookmark
@@ -2244,14 +2196,6 @@ after doing `symbol-overlay-put'."
   (info-lookmore-c-readline)
   (info-lookmore-c-gcc)
   (info-lookmore-apropos-elisp))
-
-(use-package ggtags
-  :ensure t
-  :diminish ggtags-mode
-  :hook ((c-mode   . ggtags-mode)
-         (c++-mode . ggtags-mode))
-  :init
-  (setq ggtags-enable-navigation-keys nil))
 
 (use-package dtrt-indent
   :doc "Automatically guess offset and tabs-indent for opened file."
