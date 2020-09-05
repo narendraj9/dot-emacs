@@ -3114,6 +3114,12 @@ after doing `symbol-overlay-put'."
   :init
   (setq default-input-method "german-prefix"))
 
+
+;;; Network Security Manager
+;;; -----------------------------------------------------------------
+
+(use-package nsm :init (setq network-security-level 'paranoid))
+
 ;;; -----------------------------------------------------------------
 (use-package ipcalc       :ensure t :commands ipcalc)
 (use-package memory-usage :ensure t :commands memory-usage)
