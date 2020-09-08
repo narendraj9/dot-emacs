@@ -1761,7 +1761,7 @@ after doing `symbol-overlay-put'."
   :init
   (setq flycheck-mode-line-prefix ""
         flycheck-global-modes
-        '(emacs-lisp-mode clojure-mode clojurescript-mode yaml-mode sh-mode java-mode rust-mode))
+        '(emacs-lisp-mode clojure-mode clojurescript-mode yaml-mode sh-mode))
 
   (global-flycheck-mode +1)
 
@@ -3118,7 +3118,10 @@ after doing `symbol-overlay-put'."
 ;;; Network Security Manager
 ;;; -----------------------------------------------------------------
 
-(use-package nsm :init (setq network-security-level 'paranoid))
+(use-package nsm
+  :init
+  (setq network-security-level 'paranoid
+        nsm-save-host-names t))
 
 ;;; -----------------------------------------------------------------
 (use-package ipcalc       :ensure t :commands ipcalc)
