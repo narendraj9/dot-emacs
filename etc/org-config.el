@@ -143,7 +143,8 @@
   (setq org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil
         ;; refiling across multiple levels
-        org-refile-targets `(("main.org"    . (:level . 1))
+        org-refile-targets `((nil           . (:maxlevel . 2))
+                             ("main.org"    . (:level . 1))
                              ("capture.org" . (:level . 1))
                              ("someday.org" . (:maxlevel . 2)))
         org-refile-allow-creating-parent-nodes t)
