@@ -1834,7 +1834,12 @@ after doing `symbol-overlay-put'."
                   (if (= (user-uid) 0) " # " " $ ")))
 
         eshell-aliases-file
-        (expand-file-name "./etc/eshell-aliases" user-emacs-directory)))
+        (expand-file-name "./etc/eshell-aliases" user-emacs-directory))
+
+  ;; ANSI colors in Eshell buffers.
+  (add-hook 'eshell-preoutput-filter-functions
+            ;; Or filter ANSI escape sequences with 'ansi-color-filter-apply
+            'ansi-color-apply))
 
 (use-package bpfcc-tools
   :load-path "etc/"
