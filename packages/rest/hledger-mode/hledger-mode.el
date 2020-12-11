@@ -185,11 +185,7 @@ highlighting in both kinds of buffers."
                                (mapcar (lambda (s)
                                          (split-string s ":" t))
                                        hledger-accounts-cache)))
-         (font-lock-acc-string (concat "\\<\\("
-                                       (mapconcat 'identity
-                                                  (delete-dups account-words)
-                                                  "\\|")
-                                       "\\)\\>")))
+         (font-lock-acc-string (rx-to-string `(or ,@account-words))))
     ;; Do this only in view mode
     (font-lock-add-keywords 'hledger-view-mode
                             `((,font-lock-acc-string . hledger-account-face)
