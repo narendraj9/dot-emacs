@@ -2195,6 +2195,7 @@ after doing `symbol-overlay-put'."
     (company-prescient-mode +1))
 
   :config
+  (setq prescient-history-length 1000)
   (prescient-persist-mode +1))
 
 ;;; JAVA
