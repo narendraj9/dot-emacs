@@ -1438,6 +1438,7 @@ after doing `symbol-overlay-put'."
 
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
+
 (use-package company
   :ensure t
   :hook (emacs-init . global-company-mode)
@@ -1462,13 +1463,6 @@ after doing `symbol-overlay-put'."
     (make-local-variable 'company-idle-delay)
     (setq-local company-idle-delay 0.1)
     (company-mode +1)))
-
-(use-package company-statistics
-  :doc "Sort `company-mode' completions by frequency."
-  :ensure t
-  :hook (after-init . company-statistics-mode)
-  :init
-  (setd company-statistics-file "var/company-statistics-cache.el"))
 
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -2029,11 +2023,6 @@ after doing `symbol-overlay-put'."
         '((left-fringe . 10)))
   (ivy-posframe-mode 1))
 
-(use-package smex
-  :doc "Used by `ivy-M-x' for sorting based on frequency + recency."
-  :ensure t
-  :config
-  (setd smex-save-file "var/smex-items"))
 
 (use-package ivy
   :demand t
@@ -2184,6 +2173,29 @@ after doing `symbol-overlay-put'."
                  (progn (deactivate-mark)
                         (buffer-substring-no-properties (mark)
                                                         (point)))))))
+
+
+;;; Completion Filtering and Sorting
+;;; ----------------------------------------------------------------------------
+
+(use-package prescient
+  :demand t
+  :ensure t
+  :init
+  (use-package ivy-prescient
+    :ensure t
+    :after counsel
+    :config
+    (ivy-prescient-mode +1))
+
+  (use-package company-prescient
+    :ensure t
+    :after company
+    :config
+    (company-prescient-mode +1))
+
+  :config
+  (prescient-persist-mode +1))
 
 ;;; JAVA
 ;; ----------------------------------------------------------------------------
