@@ -389,7 +389,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
-  (setq-default cursor-type '(bar . 4)
+  (setq-default cursor-type 'hollow
                 cursor-in-non-selected-windows nil)
 
   ;; Maximize emacs on startup
@@ -549,6 +549,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package ag :ensure t :bind ("M-s M-a" . ag))
 (use-package suggest :defer t :ensure t :commands suggest)
 (use-package helpful
+  :doc
+  "Tries to `read' the buffer to find out the symbol at point."
+  :disabled t
   :ensure t
   :bind (("C-h v" . helpful-variable)
          ("C-h f" . helpful-function)
