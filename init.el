@@ -389,7 +389,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
-  (setq-default cursor-type 'hollow
+  (setq-default cursor-type 'bar
                 cursor-in-non-selected-windows nil)
 
   ;; Maximize emacs on startup
@@ -1654,26 +1654,14 @@ after doing `symbol-overlay-put'."
   :mode ("\\.hledger\\'")
   :bind (("C-c j" . hledger-run-command))
   :config
+
   (setq hledger-jfile
         (expand-file-name "~/miscellany/personal/finance/accounting.journal"))
+
   (add-hook 'hledger-mode-hook
             (lambda ()
               (make-local-variable 'company-backends)
-              (add-to-list 'company-backends 'hledger-company)))
-  (add-hook
-   'hledger-view-mode-hook
-   (lambda ()
-     (let ((b (current-buffer)))
-       (hl-line-mode +1)
-       (run-at-time 1
-                    nil
-                    (lambda ()
-                      (when (buffer-live-p b)
-                        (with-current-buffer b
-                          (center-text-for-reading)
-                          (when (equal hledger-last-run-command "balancesheet")
-                            (highlight-regexp "^.*credit.*$" 'hledger-warning-face)
-                            (highlight-regexp "^.*\\(savings\\|cash\\).*$" nil))))))))))
+              (add-to-list 'company-backends 'hledger-company))))
 
 
 (use-package hledger-input
