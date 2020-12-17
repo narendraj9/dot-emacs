@@ -1444,7 +1444,7 @@ after doing `symbol-overlay-put'."
 
 (use-package company
   :ensure t
-  :hook (emacs-init . global-company-mode)
+  :hook (after-init . global-company-mode)
   :diminish company-mode
   :config
   (define-key company-mode-map [remap indent-for-tab-command]
@@ -2177,7 +2177,10 @@ after doing `symbol-overlay-put'."
     :ensure t
     :after counsel
     :config
-    (ivy-prescient-mode +1))
+    (ivy-prescient-mode +1)
+    ;; Do not sort kill-ring entries, I usually only care about the
+    ;; most recent ones.
+    (add-to-list 'ivy-prescient-sort-commands 'counsel-yank-pop t))
 
   (use-package company-prescient
     :ensure t
@@ -2970,20 +2973,7 @@ after doing `symbol-overlay-put'."
               ("j" . image-next-line)
               ("k" . image-previous-line)
               ("J" . pdf-view-next-line-or-next-page)
-              ("K" . pdf-view-previous-line-or-previous-page)
-              ("R" . reopen-pdf-file))
-  :preface
-  (defun reopen-pdf-file ()
-    "Reopen PDF file."
-    (interactive)
-    (let ((file-path (buffer-file-name (current-buffer)))
-          (current-page (pdf-view-current-page))
-          (interleave-enabledp interleave-pdf-mode))
-      (kill-buffer)
-      (find-file file-path)
-      (pdf-view-goto-page current-page)
-      (when interleave-enabledp
-        (interleave-pdf-mode +1))))
+              ("K" . pdf-view-previous-line-or-previous-page))
   :init
   ;; `abbreviate-file-name' doesn't handle `nil' values. For buffer that do not
   ;; have associated files, this fails. I had been facing this while opening PDF
