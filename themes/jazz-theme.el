@@ -181,7 +181,7 @@
    ;; --
    `(mode-line-size-face ((,class (:foreground ,jazz-yellow))) t)
    `(mode-line-mode-name ((,class (:foreground ,jazz-blue+2))) t t)
-   `(mode-line-minor-mode-face ((,class (:foreground ,jazz-blue-6 :height 96))) t)
+   `(mode-line-minor-mode-face ((,class (:foreground ,jazz-blue-6 :height 120 :bold t))) t)
    `(mode-line-delim ((,class (:foreground ,jazz-orange-2 :box nil :height 130))) t)
    `(mode-line-battery-face ((,class (:foreground ,jazz-orange-2 :box nil :height 130))))
    ;; --

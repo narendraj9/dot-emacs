@@ -585,8 +585,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (diminish 'hs-minor-mode))))
 
 (use-package fringe
-  :config
-  (defvar default-fringe-style (cons (* 1 (frame-char-width)) (frame-char-width)))
+  :init
+  (defvar default-fringe-style (cons (floor (* 1.5 (frame-char-width)))
+                                     (frame-char-width))
+    "This needs to be defined because it's used elsewhere to
+    reset fringes back to the default after highlighting
+    something that requires immediate attention.")
+
   (fringe-mode default-fringe-style))
 
 (use-package tool-bar   :config (tool-bar-mode -1))
@@ -1674,10 +1679,19 @@ after doing `symbol-overlay-put'."
   (hook-into-modes #'eglot-ensure
                    'java-mode 'rust-mode 'c-mode 'c++-mode 'python-mode)
   :config
+  (setq eglot-autoshutdown t)
+
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
                               (haskell-mode      . ("haskell-language-server"))
-                              ((c-mode c++-mode) . ("clangd"))))
+                              ((c-mode c++-mode) . ("clangd-8"))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
+
+
+(use-package tree-sitter
+  :ensure t
+  :defer t
+  :config
+  (use-package tree-sitter-langs :ensure t))
 
 
 ;;; ----------------------------------------------------------------------------
@@ -1756,12 +1770,12 @@ after doing `symbol-overlay-put'."
   :hook (prog-mode . subword-mode)
   :diminish subword-mode)
 
-(use-package flymake :diminish flymake-mode)
 (use-package flycheck
   :ensure t
-  :diminish flycheck-mode
   :bind-keymap ("C-x x" . flycheck-command-map)
   :init
+  (setq flycheck-indication-mode 'left-margin)
+  (setq flycheck-mode-line-prefix "")
   (global-flycheck-mode +1))
 
 (use-package highlight-indent-guides
@@ -1769,7 +1783,7 @@ after doing `symbol-overlay-put'."
   :diminish highlight-indent-guides-mode
   :hook (prog-mode . highlight-indent-guides-mode)
   :config
-  (setq highlight-indent-guides-method 'character
+  (setq highlight-indent-guides-method 'bitmap
         highlight-indent-guides-responsive nil
 
         highlight-indent-guides-auto-odd-face-perc 3
@@ -2278,54 +2292,30 @@ after doing `symbol-overlay-put'."
 (use-package paredit
   :ensure t
   :diminish paredit-mode
-  :hook (( emacs-lisp-mode lisp-mode clojure-mode clojurescript-mode
-           cider-repl-mode racket-mode scheme-mode
-           eval-expression-minibuffer-setup)
-         . enable-paredit-mode)
-  :bind (:map paredit-mode-map
-              ("M-S" . paredit-splice-sexp)
-              ("M-R" . paredit-raise-sexp)
-              ("C-M-)" . utils-paredit-slurp-all-the-way-forward)
-              ("C-M-(" . utils-paredit-slurp-all-the-way-backward)
-              ("C-M-}" . utils-paredit-barf-all-the-way-forward)
-              ("C-M-{" . utils-paredit-barf-all-the-way-backward))
+  :hook ((( emacs-lisp-mode lisp-mode clojure-mode clojurescript-mode
+            cider-repl-mode racket-mode scheme-mode
+            eval-expression-minibuffer-setup)
+          . enable-paredit-mode )
+
+         (prog-mode . sub-paredit-mode))
+
+
+  :bind ( :map paredit-mode-map
+          ("M-S" . paredit-splice-sexp)
+          ("M-R" . paredit-raise-sexp) )
   :preface
-  (defun utils-paredit-barf-all-the-way-backward ()
-    (interactive)
-    (paredit-split-sexp)
-    (paredit-backward-down)
-    (paredit-splice-sexp))
+  (define-minor-mode sub-paredit-mode
+    "A subset of paredit for all `prog-mode' buffers."
+    :keymap (let ((k (make-sparse-keymap)))
+              (define-key k (kbd "C-)") #'paredit-forward-slurp-sexp)
+              (define-key k (kbd "C-}") #'paredit-forward-barf-sexp)
+              (define-key k (kbd "M-S") #'paredit-splice-sexp)
+              (define-key k (kbd "M-R") #'paredit-raise-sexp)
+              (define-key k (kbd "C-k") #'paredit-kill)
+              k))
 
-  (defun utils-paredit-barf-all-the-way-forward ()
-    (interactive)
-    (paredit-split-sexp)
-    (paredit-forward-down)
-    (paredit-splice-sexp)
-    (if (eolp) (delete-horizontal-space)))
-
-  (defun utils-paredit-slurp-all-the-way-backward ()
-    (interactive)
-    (catch 'done
-      (while (not (bobp))
-        (save-excursion
-          (paredit-backward-up)
-          (if (eq (char-before) ?\()
-              (throw 'done t)))
-        (paredit-backward-slurp-sexp))))
-
-  (defun utils-paredit-slurp-all-the-way-forward ()
-    (interactive)
-    (catch 'done
-      (while (not (eobp))
-        (save-excursion
-          (paredit-forward-up)
-          (if (eq (char-after) ?\))
-              (throw 'done t)))
-        (paredit-forward-slurp-sexp))))
   :config
-  (mapcar (lambda (key-seq)
-            (unbind-key key-seq paredit-mode-map))
-          (list "M-r" "M-s" "M-?")))
+  (dolist (k (list "M-r" "M-s" "M-?")) (define-key paredit-mode-map k nil)))
 
 (use-package javadoc-lookup :bind ("C-h j" . javadoc-lookup) :ensure t)
 (use-package clojure-mode
@@ -2727,7 +2717,11 @@ after doing `symbol-overlay-put'."
 ;;; Version Control
 ;;  ─────────────────────────────────────────────────────────────────
 
-(use-package vc :config (setq vc-display-status t))
+(use-package vc
+  :bind ("C-x v C-s" . vc-log-search)
+  :config
+  (setq vc-display-status t))
+
 (use-package diff-mode
   :config
   (setq diff-font-lock-prettify t

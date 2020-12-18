@@ -94,7 +94,12 @@ available space adjust after LEFT and before RIGHT."
                             local-map ,mode-line-major-mode-keymap)
               '("" mode-line-process)
               `(:propertize ("" minor-mode-alist)
-                            face mode-line-minor-mode-face
+
+                            ;; This overrides any other minor-mode
+                            ;; specific text properties for the whole
+                            ;; mode-line sub-string.
+                            ;; face mode-line-minor-mode-face
+
                             mouse-face mode-line-highlight
                             local-map ,mode-line-minor-mode-keymap)
               (propertize "%n"
