@@ -114,6 +114,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;  ─────────────────────────────────────────────────────────────────
 
 (use-package s       :defer t :ensure t)
+(use-package f       :defer t :ensure t)
 (use-package dash    :defer t :ensure t)
 (use-package request :defer t :ensure t)
 
@@ -202,8 +203,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("C-c 0" . quick-switch-themes)
          ("<print>" . snap-it)
          :map ctl-quote-map
-         ("c g" . google-it)
-         ("c !" . insert-date-time-at-point)
+         ("f"   . websearch-it)
+         ("d ." . insert-date-time-at-point)
          ("c e" . vicarie/eval-print-last-sexp)
          ("c =" . vicarie/eval-replace-last-sexp)
          ("c r" . rename-file-and-buffer)
@@ -645,8 +646,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (setq diary-file (expand-file-name "diary" emacs-assets-directory)
         ;; Weeks start on Monday.
-        calendar-week-start-day 1)
-  (add-to-list 'display-buffer-alist '("\\*Calendar\\*" display-buffer-at-bottom)))
+        calendar-week-start-day 1))
 
 (use-package holidays
   :defer t
@@ -842,10 +842,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;;               (lambda (&rest _args) (deactivate-mark nil)))
   (define-key global-map
     [remap exchange-point-and-mark]
-    #'exchange-point-and-mark*)
-
-  (add-to-list 'display-buffer-alist
-               '("\\*Async Shell Command\\*" display-buffer-no-window)))
+    #'exchange-point-and-mark*))
 
 (use-package ialign
   :doc "Very useful to get quick feedback for alignment with
@@ -925,39 +922,6 @@ after doing `symbol-overlay-put'."
   (add-hook 'kill-emacs-hook
             (lambda ()
               (setq kill-ring (mapcar 'substring-no-properties kill-ring)))))
-
-(use-package vcursor
-  :doc
-  "Adds a virtual cursor for editing/copying text."
-  :preface
-  (defun vcursor-avy ()
-    "Move with `avy-goto-char-timer' and add a virtual cursor"
-    (interactive)
-    (require 'vcursor)
-    (save-excursion
-      (avy-goto-char-timer)
-      (vcursor-move (point))))
-
-  :config
-  (defhydra hydra-vcursor-avy (ctl-period-map "C-v")
-    "vcursor"
-    ("j"   vcursor-avy       "avy-set-cursor")
-    ("C-w" vcursor-copy-word "copy-word")
-    ("q"   vcursor-disable   "quit"))
-
-  ;; This is a workaround for a bug that exists in vcursor. Copying a word
-  ;; causes point to move to virtual cursors position.
-  (advice-add 'vcursor-get-char-count
-              :around
-              (lambda (original-fn &rest args)
-                (save-excursion
-                  (apply original-fn args)))))
-
-(use-package iedit
-  :disabled t
-  :ensure t
-  :diminish iedit-mode
-  :bind (:map ctl-quote-map ("C-;" . iedit-mode)))
 
 (use-package beacon
   :ensure t
@@ -1149,6 +1113,21 @@ after doing `symbol-overlay-put'."
 ;;; Buffers, Windows and Frame
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package window
+  :init
+  (dolist (display-spec
+           (list
+            `("\\`\\*e?shell" display-buffer-at-bottom)
+            `("\\*Calendar\\*" display-buffer-at-bottom)
+            `("\\*Async Shell Command\\*" display-buffer-no-window)
+            `("\\`\\*Flycheck errors\\*\\'" (display-buffer-reuse-window
+                                             display-buffer-in-side-window)
+              (side            . bottom)
+              (reusable-frames . visible)
+              (window-height   . 10))))
+    (add-to-list 'display-buffer-alist display-spec)))
+
+
 (use-package winner
   :init
   (setq winner-dont-bind-my-keys t)
@@ -1161,6 +1140,7 @@ after doing `symbol-overlay-put'."
     ("q"  nil "quit")))
 
 (use-package exwm
+  :disabled t
   :ensure t
   :config
   (use-package exwm-configuration
@@ -1776,42 +1756,13 @@ after doing `symbol-overlay-put'."
   :hook (prog-mode . subword-mode)
   :diminish subword-mode)
 
+(use-package flymake :diminish flymake-mode)
 (use-package flycheck
   :ensure t
-  :bind (:map flycheck-command-map
-              ("!" . hydra-flycheck/body)
-              ("f" . hydra-flycheck/body))
-  :bind-keymap ("C-' f" . flycheck-command-map)
+  :diminish flycheck-mode
+  :bind-keymap ("C-x x" . flycheck-command-map)
   :init
-  (setq flycheck-mode-line-prefix ""
-        flycheck-global-modes
-        '(emacs-lisp-mode clojure-mode clojurescript-mode yaml-mode sh-mode))
-
-  (global-flycheck-mode +1)
-
-  ;; Suggestion from: https://www.flycheck.org/en/latest/user/error-list.html
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*Flycheck errors*" eos)
-                 (display-buffer-reuse-window
-                  display-buffer-in-side-window)
-                 (side            . bottom)
-                 (reusable-frames . visible)
-                 (window-height   . 10)))
-  :config
-  (when (not (executable-find "shellcheck"))
-    (message "Not installed on system: `shellcheck'!"))
-
-  (defhydra hydra-flycheck (:pre (flycheck-list-errors))
-    "Flycheck"
-    ("c"  flycheck-buffer                                           "Run")
-    ("f"  flycheck-error-list-set-filter                            "Filter")
-    ("j"  flycheck-next-error                                       "Next")
-    ("n"  flycheck-next-error                                       "Next")
-    ("k"  flycheck-previous-error                                   "Previous")
-    ("p"  flycheck-previous-error                                   "Previous")
-    ("gg" flycheck-first-error                                      "First")
-    ("G"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
-    ("q"  nil)))
+  (global-flycheck-mode +1))
 
 (use-package highlight-indent-guides
   :ensure t
@@ -1819,7 +1770,11 @@ after doing `symbol-overlay-put'."
   :hook (prog-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guides-method 'character
-        highlight-indent-guides-character ?\x2502))
+        highlight-indent-guides-responsive nil
+
+        highlight-indent-guides-auto-odd-face-perc 3
+        highlight-indent-guides-auto-even-face-perc 3
+        highlight-indent-guides-auto-character-face-perc 3))
 
 (use-package aggressive-indent
   :ensure t
@@ -1838,9 +1793,7 @@ after doing `symbol-overlay-put'."
   (setq eshell-modules-list
         '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
            eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
-           eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra
-           ;; eshell-rebind eshell-smart
-           ))
+           eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra ))
   :preface
   (defun eshell-toggle ()
     (interactive)
@@ -1848,10 +1801,8 @@ after doing `symbol-overlay-put'."
         (jump-to-register ?e)
       (window-configuration-to-register ?e)
       (eshell)))
-  :config
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*e?shell" display-buffer-at-bottom))
 
+  :config
   (setq eshell-prompt-function
         (lambda ()
           (concat "(" (file-name-nondirectory (eshell/pwd)) ")"
@@ -1865,13 +1816,20 @@ after doing `symbol-overlay-put'."
             ;; Or filter ANSI escape sequences with 'ansi-color-filter-apply
             'ansi-color-apply))
 
-(use-package bpfcc-tools
-  :load-path "etc/"
-  :commands bpfcc-tools-man-page)
+(use-package bpfcc-tools :load-path "etc/" :commands bpfcc-tools-man-page)
 
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
+
+(use-package sh-script
+  :init
+  (add-hook 'sh-mode
+            (lambda ()
+              (when (not (executable-find "shellcheck"))
+                (message "Not installed on system: `shellcheck'!")))))
+
+
 (use-package jinja2-mode :defer t :ensure t)
 
 ;;; HASKELL-MODE
@@ -2268,7 +2226,7 @@ after doing `symbol-overlay-put'."
   :bind (:map rust-mode-map
               ("RET" . newline-and-indent))
   :config
-  (use-package cargo :ensure t)
+  (use-package cargo :ensure t :diminish cargo-minor-mode)
   (use-package flycheck-rust :ensure t)
 
   (add-hook 'rust-mode-hook
@@ -2746,6 +2704,7 @@ after doing `symbol-overlay-put'."
         gnu-apl-interactive-mode-map-prefix "C-' i ")
   :preface
   (defun em-gnu-apl-init ()
+    (require 'face-remap)
     (activate-input-method 'APL-Z)
     (setq buffer-face-mode-face 'gnu-apl-default)
     (buffer-face-mode)))

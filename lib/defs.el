@@ -326,9 +326,9 @@ Use when on console."
 
 
 (defun insert-date-time-at-point ()
-  "Insert ISO 8601 timestamp at point."
+  "Insert ISO 8601 timestamp at point using `org-time-stamp'."
   (interactive)
-  (insert (read-date "%FT%T%z")))
+  (org-insert-time-stamp (current-time) t 'inactive))
 
 
 (defun notify (msg &optional font-size duration)
@@ -1131,13 +1131,17 @@ respective files."
   (delete-region (point) (progn (forward-word -1) (point))))
 
 
-(defun google-it ()
-  "Google the region selected or the word under point."
+(defun websearch-it ()
+  "Search the region between mark and point using Qwant."
   (interactive)
-  (let ((query (if (region-active-p)
-                   (buffer-substring-no-properties (region-beginning) (region-end))
-                 (word-at-point))))
-    (browse-url (format "https://google.com/search?q=%s" query))))
+  (let ((query (cond
+                ((region-active-p)
+                 (buffer-substring-no-properties (region-beginning) (region-end)))
+
+                ((word-at-point))
+
+                (t (read-string "Query: ")))))
+    (browse-url (format "https://qwant.com/?q=%s" query))))
 
 
 (provide 'defs)
