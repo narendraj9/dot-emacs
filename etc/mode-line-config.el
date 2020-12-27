@@ -50,10 +50,8 @@
   "Face for battery information in the mode line."
   :group 'mode-line-faces)
 
-
 (defun simple-mode-line-render (left middle right)
-  "Return a mode-line construct with MIDDLE centered and
-available space adjust after LEFT and before RIGHT."
+  "Return a mode-line construct with MIDDLE centered and available space adjust after LEFT and before RIGHT."
   (let* ((l (format-mode-line left))
          (m (format-mode-line middle))
          (r (format-mode-line right))
@@ -61,10 +59,7 @@ available space adjust after LEFT and before RIGHT."
          (l-len (length l))
          (m-len (length m))
          (r-len (length r))
-         (available-width (- (window-total-width)
-                             (+ l-len m-len r-len)
-                             1        ; - some empty space at the end.
-                             ))
+         (available-width (- (window-total-width) (+ l-len m-len r-len) 1))
          (l-space  (max 0 (- c (+ l-len (/ m-len 2)))))
          (r-space (max 0 (- available-width l-space))))
     (append left
@@ -74,7 +69,7 @@ available space adjust after LEFT and before RIGHT."
             right)))
 
 (setq mode-line-buffer-identification
-      `((:propertize "%10b" face mode-line-buffer-id)))
+      `(:propertize "%10b" face mode-line-buffer-id))
 
 (setq mode-line-position
       `((:propertize mode-line-percent-position)
@@ -83,31 +78,6 @@ available space adjust after LEFT and before RIGHT."
         (line-number-mode ((column-number-mode
                             (10 ,(propertize " (%l,%C)"))
                             (6 ,(propertize " L%l")))))))
-
-(setq mode-line-modes
-      (let ((recursive-edit-help-echo "Recursive edit, type C-M-c to get out"))
-        (list (propertize "%[" 'help-echo recursive-edit-help-echo)
-              (propertize "( " 'face 'mode-line-delim)
-              `(:propertize ("" mode-name)
-                            face mode-line-mode-name
-                            mouse-face mode-line-highlight
-                            local-map ,mode-line-major-mode-keymap)
-              '("" mode-line-process)
-              `(:propertize ("" minor-mode-alist)
-
-                            ;; This overrides any other minor-mode
-                            ;; specific text properties for the whole
-                            ;; mode-line sub-string.
-                            ;; face mode-line-minor-mode-face
-
-                            mouse-face mode-line-highlight
-                            local-map ,mode-line-minor-mode-keymap)
-              (propertize "%n"
-                          'mouse-face 'mode-line-highlight
-                          'local-map (make-mode-line-mouse-map 'mouse-2 #'mode-line-widen))
-              (propertize " )" 'face 'mode-line-delim)
-              (propertize "%]" 'help-echo recursive-edit-help-echo)
-              " ")))
 
 (setq-default mode-line-format
               '(:eval (simple-mode-line-render
@@ -119,12 +89,6 @@ available space adjust after LEFT and before RIGHT."
                          mode-line-modified
                          mode-line-auto-compile
                          mode-line-remote
-                         (evil-mode (:eval
-                                     (format " {%s}"
-                                             (propertize (substring (symbol-name evil-state)
-                                                                    0 1)
-                                                         'face
-                                                         'font-lock-variable-name-face))))
                          mode-line-frame-identification
                          mode-line-buffer-identification
                          "   " mode-line-position "  "

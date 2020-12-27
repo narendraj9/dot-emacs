@@ -800,6 +800,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          :map ctl-period-map
          ("C-u" . repeated-delete-indentation)
          :map ctl-quote-map
+         (":"   . set-variable)
          ("s >" . shell-command-on-region)
          ("s |" . shell-command-on-region)
          ("s s" . shell-command)
@@ -1527,6 +1528,7 @@ after doing `symbol-overlay-put'."
   (advice-add 'dired-recent-save-list
               :before
               (lambda (&rest _args)
+                (require 'f)
                 (setq dired-recent-directories
                       (->> (and (boundp 'projectile-known-projects)
                                 projectile-known-projects)
@@ -1776,7 +1778,28 @@ after doing `symbol-overlay-put'."
   :init
   (setq flycheck-indication-mode 'left-margin)
   (setq flycheck-mode-line-prefix "")
-  (global-flycheck-mode +1))
+  (global-flycheck-mode +1)
+
+  :config
+  (defun flycheck-mode-line-status-text (&optional status)
+    "This function should return a list because the mode-line
+only applies the 'face property on the first character of a list.
+If we return a single string with all the text properties only
+the first character's face is applied (to the whole string in the
+mode-line)."
+    (when-let ((status
+                (pcase (or status flycheck-last-status-change)
+                  (`running "*")
+                  ((or `errored `no-checker `interrupted `suspicious) "!")
+                  (`finished
+                   (let-alist (flycheck-count-errors flycheck-current-errors)
+                     (when (or .error .warning)
+                       (list "["
+                             (propertize (number-to-string (or .error 0)) 'face 'error)
+                             " "
+                             (propertize (number-to-string (or .warning 0)) 'face 'warning)
+                             "]")))))))
+      (flatten-list (list " FlyC:" status)))))
 
 (use-package highlight-indent-guides
   :ensure t
