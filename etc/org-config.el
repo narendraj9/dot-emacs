@@ -31,6 +31,8 @@
 (require 'counsel)
 (require 'alert)
 (require 'defs)
+(require 'f)
+
 
 (defun org-agenda-redo-with-days-to-deadline ()
   "Change `org-agenda' buffer and display days to deadline for all tasks."
@@ -39,21 +41,26 @@
         (org-deadline-warning-days most-positive-fixnum))
     (org-agenda-redo-all)))
 
-(defun open-org-file ()
-  "Quick open a notes org file."
-  (interactive)
+(defun open-org-file (arg)
+  "Quick open a notes org file.
+If a prefix ARG is provided, then run a `project-find-file'.
+Otherwise, limit to only `org-mode' files."
+  (interactive "P")
   (let ((default-directory (expand-file-name org-directory)))
-    (project-find-file)))
+    (if arg
+        (project-find-file)
+      (->> (f-entries default-directory (lambda (f) (f-ext-p f "org")) t)
+           (completing-read "Select org file: ")
+           (find-file)))))
 
 (defun search-notes-files ()
   "Search org files using `counsel-ag'."
   (interactive)
-  (let ((default-directory org-directory))
-    (call-interactively #'counsel-ag)))
+  (counsel-ag nil org-directory "--org --word-regexp"))
 
 
 (defun org-agenda-toggle-toggle-tags-column ()
-  "Toggle the display of tags column in org-agenda view."
+  "Toggle the display of tags column in `org-agenda' view."
   (interactive)
   (setq org-agenda-remove-tags (not org-agenda-remove-tags))
   (org-agenda-redo))
@@ -610,7 +617,7 @@ non-empty lines in the block (excluding the line with
   :after org-agenda
   :init
   (setq org-habit-graph-column 80
-        org-habit-preceding-days 28
+        org-habit-preceding-days 60
         org-habit-show-done-always-green t))
 
 (use-package org-clock

@@ -185,7 +185,7 @@ highlighting in both kinds of buffers."
                                (mapcar (lambda (s)
                                          (split-string s ":" t))
                                        hledger-accounts-cache)))
-         (font-lock-acc-string (rx-to-string `(or ,@account-words))))
+         (font-lock-acc-string (rx-to-string `(seq word-start (or ,@account-words) word-end))))
     ;; Do this only in view mode
     (font-lock-add-keywords 'hledger-view-mode
                             `((,font-lock-acc-string . hledger-account-face)

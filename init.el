@@ -1022,10 +1022,9 @@ after doing `symbol-overlay-put'."
               ("C-f d" . footnote-delete-footnote)
               ("C-f g" . footnote-goto-footnote)))
 
-
+(use-package csv-mode      :defer t :ensure t)
 
 (use-package markdown-mode :defer t :ensure t)
-(use-package csv-mode      :defer t :ensure t)
 
 (use-package cdlatex :ensure t :hook (Latex-Mode-Hook . turn-on-cdlatex))
 (use-package auctex
@@ -1648,7 +1647,15 @@ after doing `symbol-overlay-put'."
   (add-hook 'hledger-mode-hook
             (lambda ()
               (make-local-variable 'company-backends)
-              (add-to-list 'company-backends 'hledger-company))))
+              (add-to-list 'company-backends 'hledger-company)))
+
+  (add-hook 'hledger-view-mode-hook #'hl-line-mode)
+  (add-hook 'hledger-view-mode-hook
+            (lambda ()
+              (run-with-timer 2 nil (lambda ()
+                                      (when (get-buffer-window hledger-reporting-buffer-name)
+                                        (with-current-buffer hledger-reporting-buffer-name
+                                          (center-text-for-reading))))))))
 
 
 (use-package hledger-input
@@ -2315,7 +2322,8 @@ mode-line)."
 (use-package paredit
   :ensure t
   :diminish paredit-mode
-  :hook ((( emacs-lisp-mode lisp-mode clojure-mode clojurescript-mode
+  :hook ((( emacs-lisp-mode inferior-emacs-lisp-mode
+            lisp-mode clojure-mode clojurescript-mode
             cider-repl-mode racket-mode scheme-mode
             eval-expression-minibuffer-setup)
           . enable-paredit-mode )
@@ -3204,6 +3212,8 @@ mode-line)."
 
   :config
   (require 'cl-macs)                    ; uses the `case' macro.
+  (advice-add 'google-translate--search-tkk
+              :override (lambda (&rest _args) (list 430675 2721866130)))
   (advice-add 'google-translate-json-suggestion
               :override
               (lambda (json)
@@ -3270,6 +3280,11 @@ mode-line)."
     (interactive)
     (clm/open-command-log-buffer)
     (global-command-log-mode +1)))
+
+(use-package activity-watch-mode
+  :diminish activity-watch-mode
+  :ensure t
+  :hook (emacs-startup . global-activity-watch-mode))
 
 (provide 'init)
 ;;; init.el ends here
