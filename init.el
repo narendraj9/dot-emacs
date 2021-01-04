@@ -2346,7 +2346,8 @@ mode-line)."
               k))
 
   :config
-  (dolist (k (list "M-r" "M-s" "M-?")) (define-key paredit-mode-map k nil)))
+  (dolist (k (list "M-r" "M-s" "M-?"))
+    (define-key paredit-mode-map (kbd k) nil)))
 
 (use-package javadoc-lookup :bind ("C-h j" . javadoc-lookup) :ensure t)
 (use-package clojure-mode
@@ -3284,7 +3285,13 @@ mode-line)."
 (use-package activity-watch-mode
   :diminish activity-watch-mode
   :ensure t
-  :hook (emacs-startup . global-activity-watch-mode))
+  :hook (emacs-startup . global-activity-watch-mode)
+  :config
+  (setq activity-watch-project-name-resolvers '(project magit-dir-force magit-origin))
+
+  :preface
+  (defun activity-watch-project-name-project ()
+    (project-root (project-current))))
 
 (provide 'init)
 ;;; init.el ends here
