@@ -95,14 +95,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (let ((body (use-package-process-keywords name-symbol rest state)))
       body)))
 
-;;; Emacs initialization benchmarking
-(use-package benchmark-init
-  :doc "Use `benchmark-init/show-durations-tree' after startup."
-  :ensure t
-  :init
-  (benchmark-init/activate)
-  (add-hook 'after-init-hook #'benchmark-init/deactivate))
-
 ;;; Byte-compilation
 (setq load-prefer-newer t)
 (use-package auto-compile
@@ -995,6 +987,7 @@ after doing `symbol-overlay-put'."
 
 (use-package goto-line-preview
   :ensure t
+  :disabled t
   :config
   (global-set-key [remap goto-line] 'goto-line-preview))
 
@@ -2346,7 +2339,8 @@ mode-line)."
               k))
 
   :config
-  (dolist (k (list "M-r" "M-s" "M-?")) (define-key paredit-mode-map k nil)))
+  (dolist (k (list "M-r" "M-s" "M-?"))
+    (define-key paredit-mode-map (kbd k) nil)))
 
 (use-package javadoc-lookup :bind ("C-h j" . javadoc-lookup) :ensure t)
 (use-package clojure-mode
@@ -3212,6 +3206,7 @@ mode-line)."
 
   :config
   (require 'cl-macs)                    ; uses the `case' macro.
+  (require 'google-translate-tk)
   (advice-add 'google-translate--search-tkk
               :override (lambda (&rest _args) (list 430675 2721866130)))
   (advice-add 'google-translate-json-suggestion
@@ -3284,7 +3279,13 @@ mode-line)."
 (use-package activity-watch-mode
   :diminish activity-watch-mode
   :ensure t
-  :hook (emacs-startup . global-activity-watch-mode))
+  :hook (emacs-startup . global-activity-watch-mode)
+  :config
+  (setq activity-watch-project-name-resolvers '(project magit-dir-force magit-origin))
+
+  :preface
+  (defun activity-watch-project-name-project ()
+    (directory-file-name (f-relative (project-root (project-current)) "~"))))
 
 (provide 'init)
 ;;; init.el ends here
