@@ -95,14 +95,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (let ((body (use-package-process-keywords name-symbol rest state)))
       body)))
 
-;;; Emacs initialization benchmarking
-(use-package benchmark-init
-  :doc "Use `benchmark-init/show-durations-tree' after startup."
-  :ensure t
-  :init
-  (benchmark-init/activate)
-  (add-hook 'after-init-hook #'benchmark-init/deactivate))
-
 ;;; Byte-compilation
 (setq load-prefer-newer t)
 (use-package auto-compile
@@ -113,9 +105,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; LIBRARIES
 ;;  ─────────────────────────────────────────────────────────────────
 
-(use-package s       :defer t :ensure t)
-(use-package f       :defer t :ensure t)
-(use-package dash    :defer t :ensure t)
+(use-package s       :demand t :ensure t)
+(use-package f       :demand t :ensure t)
+(use-package dash    :demand t :ensure t)
 (use-package request :defer t :ensure t)
 
 (use-package htmlfontify
@@ -995,6 +987,7 @@ after doing `symbol-overlay-put'."
 
 (use-package goto-line-preview
   :ensure t
+  :disabled t
   :config
   (global-set-key [remap goto-line] 'goto-line-preview))
 
@@ -3213,6 +3206,7 @@ mode-line)."
 
   :config
   (require 'cl-macs)                    ; uses the `case' macro.
+  (require 'google-translate-tk)
   (advice-add 'google-translate--search-tkk
               :override (lambda (&rest _args) (list 430675 2721866130)))
   (advice-add 'google-translate-json-suggestion
@@ -3291,7 +3285,8 @@ mode-line)."
 
   :preface
   (defun activity-watch-project-name-project ()
-    (project-root (project-current))))
+    (directory-file-name (f-relative (project-root (project-current)) "~"))))
+
 
 (provide 'init)
 ;;; init.el ends here
