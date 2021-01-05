@@ -105,9 +105,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; LIBRARIES
 ;;  ─────────────────────────────────────────────────────────────────
 
-(use-package s       :defer t :ensure t)
-(use-package f       :defer t :ensure t)
-(use-package dash    :defer t :ensure t)
+(use-package s       :demand t :ensure t)
+(use-package f       :demand t :ensure t)
+(use-package dash    :demand t :ensure t)
 (use-package request :defer t :ensure t)
 
 (use-package htmlfontify
