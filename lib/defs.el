@@ -1144,5 +1144,14 @@ respective files."
     (browse-url (format "https://qwant.com/?q=%s" query))))
 
 
+(defun upcase-last-symbol-and-space ()
+  "Up-case the last keyword and end it with a space."
+  (interactive)
+  (upcase-region (save-excursion
+                   (re-search-backward (rx (syntax whitespace))))
+                 (point))
+  (insert " "))
+
+
 (provide 'defs)
 ;;; defs.el ends here

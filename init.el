@@ -716,41 +716,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;;; TEXT-EDITING, FOLDING and NAVIGATION
 ;; ─────────────────────────────────────────────────────────────────
-(use-package undo-tree
-  :doc
-  "evil-mode turns on `global-undo-tree-mode'. I don't want it to
-  override default Emacs undo bindings so this `use-package'
-  declaration must be placed before that of `evil-mode'."
-  :ensure t
-  :diminish undo-tree-mode
-  :bind ("C-x u" . undo-tree-visualize)
-  :init
-  (setq undo-tree-map (make-sparse-keymap))
 
-  :config
-  (setq undo-tree-visualizer-timestamps t
-        undo-tree-visualizer-relative-timestamps t))
+(use-package elec-pair :init (electric-pair-mode +1))
+(use-package wgrep :defer t :ensure t)
 
-(use-package evil
-  :disabled t
-  :ensure t
-  :bind (:map evil-motion-state-map
-              ("SPC" . counsel-M-x))
-  :init
-  (setq evil-toggle-key "C-; C-;"
-        evil-default-state 'emacs
-        evil-insert-state-modes (list)
-        evil-motion-state-modes (list)
-        evil-default-cursor (list cursor-type))
-  (evil-mode +1))
-
-(use-package typo
-  :doc
-  "Guesses the correct quotation marks"
-  :ensure t
-  :defer 20
-  :commands typo-global-mode
-  :config (typo-global-mode))
+(use-package hydra :ensure t :demand t :commands defhydra)
 
 (use-package wrap-region
   :doc
@@ -765,30 +735,20 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (wrap-region-global-mode +1))
 
-(use-package elec-pair :init (electric-pair-mode +1))
-
-(use-package wgrep :defer t :ensure t)
 (use-package region-bindings-mode
   :diminish region-bindings-mode
   :ensure t
   :config
   (region-bindings-mode-enable))
 
-(use-package hydra
-  :ensure t
-  :demand t
-  :commands defhydra
-  :config
-  ;; (setq hydra-hint-display-type 'posframe)
-  )
-
 (use-package select :init (setq select-enable-clipboard t))
 (use-package simple
   :doc "The great simple.el"
   :demand t
   :diminish auto-fill-function
-  :bind (("M-q" . fill-or-unfill)
-         ("M-[" . backward-delete-word)
+  :bind (("M-q"   . fill-or-unfill)
+         ("M-["   . backward-delete-word)
+         ("S-SPC" . upcase-last-symbol-and-space)
          :map ctl-period-map
          ("C-u" . repeated-delete-indentation)
          :map ctl-quote-map
@@ -901,8 +861,6 @@ after doing `symbol-overlay-put'."
   :doc "Where simple ends, maybe misc.el begins"
   :bind (("M-z" . zap-up-to-char)
          ("M-Z" . copy-from-above-command)))
-
-(use-package picture :defer t)
 
 (use-package savehist
   :demand t
@@ -2260,17 +2218,23 @@ mode-line)."
 (use-package rust-mode
   :defer t
   :ensure t
-  :bind (:map rust-mode-map
-              ("RET" . newline-and-indent))
+  :bind ( :map rust-mode-map
+          ("RET" . newline-and-indent) )
   :config
-  (use-package cargo :ensure t :diminish cargo-minor-mode)
+  (use-package cargo
+    :ensure t
+    :diminish cargo-minor-mode
+    :bind ( :map cargo-minor-mode-map
+            ("C-. C-k" . cargo-process-check)) )
+
   (use-package flycheck-rust :ensure t)
 
   (add-hook 'rust-mode-hook
             (lambda ()
               (eldoc-mode +1)
               (cargo-minor-mode +1)
-              (flycheck-rust-setup))))
+              ;; (flycheck-rust-setup)
+              )))
 
 ;;; PYTHON-MODE
 ;;  ─────────────────────────────────────────────────────────────────
@@ -3112,6 +3076,7 @@ mode-line)."
   :defer t
   :preface
   (defun upcase-last-keyword ()
+    (interactive)
     (when (and (memql last-input-event  (list ?  ?\())
                (save-excursion
                  (backward-char 2)
@@ -3207,8 +3172,7 @@ mode-line)."
   :config
   (require 'cl-macs)                    ; uses the `case' macro.
   (require 'google-translate-tk)
-  (advice-add 'google-translate--search-tkk
-              :override (lambda (&rest _args) (list 430675 2721866130)))
+
   (advice-add 'google-translate-json-suggestion
               :override
               (lambda (json)
@@ -3285,7 +3249,8 @@ mode-line)."
 
   :preface
   (defun activity-watch-project-name-project ()
-    (directory-file-name (f-relative (project-root (project-current)) "~"))))
+    (when-let ((p (project-current)))
+      (directory-file-name (f-relative (project-root p) "~")))))
 
 
 (provide 'init)
