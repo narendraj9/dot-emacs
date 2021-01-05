@@ -2220,23 +2220,17 @@ mode-line)."
 (use-package rust-mode
   :defer t
   :ensure t
+  :hook ((rust-mode . eldoc-mode)
+         (rust-mode . cargo-minor-mode))
   :bind ( :map rust-mode-map
-          ("RET" . newline-and-indent) )
+          ("RET" . newline-and-indent) ))
+
+(use-package cargo
+  :ensure t
+  :after rust-mode
+  :diminish cargo-minor-mode
   :config
-  (use-package cargo
-    :ensure t
-    :diminish cargo-minor-mode
-    :bind ( :map cargo-minor-mode-map
-            ("C-. C-k" . cargo-process-check)) )
-
-  (use-package flycheck-rust :ensure t)
-
-  (add-hook 'rust-mode-hook
-            (lambda ()
-              (eldoc-mode +1)
-              (cargo-minor-mode +1)
-              ;; (flycheck-rust-setup)
-              )))
+  (define-key cargo-mode-map (kbd "C-. C-k") #'cargo-process-check))
 
 ;;; PYTHON-MODE
 ;;  ─────────────────────────────────────────────────────────────────
