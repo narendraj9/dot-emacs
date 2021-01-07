@@ -2079,7 +2079,9 @@ mode-line)."
     (counsel-ag (or (and (symbol-at-point)
                          (symbol-name (symbol-at-point)))
                     "")
-                (project-root (project-current)))))
+                (if-let ((p (project-current)))
+                    (project-root p)
+                  default-directory))))
 
 (use-package counsel-bbdb
   :ensure t

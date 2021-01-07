@@ -691,6 +691,7 @@ non-empty lines in the block (excluding the line with
   (advice-add 'org-noter :before #'org-noter-add-attachment-path))
 
 (use-package org-blog
+  :disabled t
   :after ox-publish
   :load-path "~/blog/src/"
   :preface
