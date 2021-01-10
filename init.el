@@ -2225,6 +2225,10 @@ mode-line)."
   :bind ( :map rust-mode-map
           ("RET" . newline-and-indent) ))
 
+(use-package flycheck-rust
+  :hook (rust-mode . flycheck-rust-setup)
+  :ensure t)
+
 (use-package cargo
   :ensure t
   :after rust-mode
