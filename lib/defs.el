@@ -1131,8 +1131,11 @@ respective files."
   (delete-region (point) (progn (forward-word -1) (point))))
 
 
-(defun websearch-it ()
-  "Search the region between mark and point using Qwant."
+(defun websearch-it (&optional base-url)
+  "Search the region between mark and point using Qwant.
+
+If BASE-URL is not nil, use it as the URL template to insert the
+search keyword."
   (interactive)
   (let ((query (cond
                 ((region-active-p)
@@ -1141,8 +1144,26 @@ respective files."
                 ((word-at-point))
 
                 (t (read-string "Query: ")))))
-    (browse-url (format "https://qwant.com/?q=%s" query))))
+    (browse-url (format (or base-url "https://qwant.com/?q=%s") query))))
 
+(defun search-linguee ()
+  "Search for word at Linguee.com."
+  (interactive)
+  (let ((inhibit-message t)
+        (temp-file-path (make-temp-file "linguee" nil ".png")))
+    (with-current-buffer-window
+        "*Linguee Dictionary*"
+        (list)
+        (lambda (window _value)
+          (select-window window t))
+      (shell-command (format "firefox --headless --window-size %s,%s --screenshot %s 'https://www.linguee.com/english-german/search?source=auto&query=%s'"
+                             (/ (frame-pixel-width) 2)
+                             (frame-pixel-height)
+                             temp-file-path
+                             (read-string "Search: ")))
+      (insert-image-file temp-file-path)
+      (delete-file temp-file-path)
+      (help-mode))))
 
 (defun upcase-last-symbol-and-space ()
   "Up-case the last keyword and end it with a space."

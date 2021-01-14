@@ -196,6 +196,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("<print>" . snap-it)
          :map ctl-quote-map
          ("f"   . websearch-it)
+         ("t"   . search-linguee)
          ("d ." . insert-date-time-at-point)
          ("c e" . vicarie/eval-print-last-sexp)
          ("c =" . vicarie/eval-replace-last-sexp)
@@ -1736,7 +1737,8 @@ after doing `symbol-overlay-put'."
   :init
   (setq flycheck-indication-mode 'left-margin)
   (setq flycheck-mode-line-prefix "")
-  (global-flycheck-mode +1)
+
+  (hook-into-modes #'flycheck-mode 'clojure-mode)
 
   :config
   (defun flycheck-mode-line-status-text (&optional status)
