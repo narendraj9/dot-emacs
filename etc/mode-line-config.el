@@ -50,6 +50,26 @@
   "Face for battery information in the mode line."
   :group 'mode-line-faces)
 
+
+;;; Tabs
+
+(defun tab-bar-modeline ()
+  "Return a string representation of current tab-bars."
+  (unless (< (length (tab-bar-tabs)) 2)
+    (let ((tab-index 0))
+      (format "|Tabs: %s|"
+              (mapconcat (lambda (tab)
+                           (setq tab-index (1+ tab-index))
+                           (format (if (eq 'current-tab (car tab))
+                                       "[%s]"
+                                     "%s")
+                                   tab-index))
+                         (tab-bar-tabs)
+                         " ")))))
+
+;;;
+
+
 (defun simple-mode-line-render (left middle right)
   "Return a mode-line construct with MIDDLE centered and available space adjust after LEFT and before RIGHT."
   (let* ((l (format-mode-line left))
@@ -78,6 +98,8 @@
         (line-number-mode ((column-number-mode
                             (10 ,(propertize " (%l,%C)"))
                             (6 ,(propertize " L%l")))))))
+
+(add-to-list 'mode-line-misc-info '(:eval (tab-bar-modeline)) t)
 
 (setq-default mode-line-format
               '(:eval (simple-mode-line-render
