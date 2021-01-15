@@ -57,12 +57,12 @@
   "Return a string representation of current tab-bars."
   (unless (< (length (tab-bar-tabs)) 2)
     (let ((tab-index 0))
-      (format "|Tabs: %s|"
+      (format "|%s|"
               (mapconcat (lambda (tab)
                            (setq tab-index (1+ tab-index))
                            (format (if (eq 'current-tab (car tab))
-                                       "[%s]"
-                                     "%s")
+                                       (propertize "[%s]" 'face 'mode-line-emphasis)
+                                     (propertize "%s" 'face 'mode-line))
                                    tab-index))
                          (tab-bar-tabs)
                          " ")))))

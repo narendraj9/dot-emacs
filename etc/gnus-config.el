@@ -41,6 +41,7 @@
 (require 'nnir)
 (require 'eldoc)
 
+
 (use-package messages-are-flowing
   :doc
   "Defines command
@@ -172,6 +173,22 @@ buffer."
                           (horizontal 1.0
                                       (summary 1.0 point)
                                       (article ,(if (< 160 (frame-width)) 0.5 75)))))
+
+(defun gnus-article-shorten-urls ()
+  (gnus-with-article-buffer
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward gnus-button-url-regexp (point-max) t)
+        (let* ((bounds (thing-at-point-bounds-of-url-at-point))
+               (url-start (car bounds))
+               (url-end (cdr bounds))
+               (url-at-point (thing-at-point-url-at-point)))
+          (when (and url-start url-end)
+            (put-text-property url-start
+                               url-end
+                               'display (gnus-shorten-url url-at-point 60))))))))
+
+(add-hook 'gnus-article-prepare-hook #'gnus-article-shorten-urls)
 
 ;;; Timezone for date headers
 (setq gnus-article-date-headers '(local lapsed))
