@@ -1173,6 +1173,30 @@ search keyword."
                  (point))
   (insert " "))
 
+(defvar current-weather nil "Information about current weather")
+(defun current-weather ()
+  (when-let ((api-key (-> (auth-source-search :host "openweathermap.org")
+                          car
+                          (plist-get :appid))))
+    (request "https://api.openweathermap.org/data/2.5/weather"
+      :params `((lat   . ,calendar-latitude)
+                (lon   . ,calendar-longitude)
+                (appid . ,api-key)
+                (units . "metric"))
+      :parser #'json-read
+      :error (lambda (&rest args) (message "error: %s" args))
+      :success (lambda (&rest args)
+                 (let ((data (plist-get args :data)))
+                   (setq current-weather
+                         (format "%s°C %s"
+                                 (->> data
+                                      (alist-get 'main)
+                                      (alist-get 'temp))
+                                 (->> data
+                                      (alist-get 'weather)
+                                      (seq-map (lambda (e) (alist-get 'description e)))
+                                      (apply #'concat)))))))))
+
 
 (provide 'defs)
 ;;; defs.el ends here
