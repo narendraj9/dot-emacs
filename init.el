@@ -1661,6 +1661,7 @@ after doing `symbol-overlay-put'."
   :bind ( :map ctl-period-map ([\C-m] . display-line-numbers-mode) ))
 
 (use-package type-break
+  :disabled t
   :bind (:map ctl-quote-map
               ("b" . type-break))
   :init
