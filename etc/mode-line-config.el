@@ -51,6 +51,12 @@
   :group 'mode-line-faces)
 
 
+(defface mode-line-dimmed
+  '((t (:foreground "grey60")))
+  "A Face for items that are always dimmed"
+  :group 'mode-line-faces)
+
+
 ;;; Tabs
 
 (defun tab-bar-modeline ()
@@ -66,6 +72,30 @@
                                    tab-index))
                          (tab-bar-tabs)
                          " ")))))
+
+;;; Weather
+
+(defvar current-weather-update-interval 1800
+  "Interval for calling weather API to update weather information.")
+
+(defvar current-weather-fetcher-timer
+  (run-with-timer 0
+                  current-weather-update-interval
+                  (lambda ()
+                    (run-with-idle-timer 30 nil #'current-weather)))
+  "Idle timer for fetching the current weather information.")
+
+(add-to-list 'mode-line-misc-info
+             '(:eval
+               (when-let ((ts (and current-weather
+                                   (get-text-property 0 'timestamp current-weather))))
+                 (propertize current-weather
+                             'face
+                             (if (< (time-convert (time-subtract (current-time) ts) 'integer)
+                                    current-weather-update-interval)
+                                 'mode-line-dimmed
+                               'mode-line-inactive))))
+             t)
 
 ;;;
 

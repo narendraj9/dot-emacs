@@ -1188,14 +1188,20 @@ search keyword."
       :success (lambda (&rest args)
                  (let ((data (plist-get args :data)))
                    (setq current-weather
-                         (format "%s°C %s"
-                                 (->> data
-                                      (alist-get 'main)
-                                      (alist-get 'temp))
-                                 (->> data
-                                      (alist-get 'weather)
-                                      (seq-map (lambda (e) (alist-get 'description e)))
-                                      (apply #'concat)))))))))
+                         (propertize (format "%s°C"
+                                             (->> data
+                                                  (alist-get 'main)
+                                                  (alist-get 'temp)))
+                                     'help-echo
+                                     (format "Updated at: %s\n%s"
+                                             (format-time-string "%FT%T%z"(current-time))
+                                             (pp-to-string data))
+                                     ;; (->> data
+                                     ;;      (alist-get 'weather)
+                                     ;;      (seq-map (lambda (e) (alist-get 'description e)))
+                                     ;;      (apply #'concat))
+                                     'timestamp
+                                     (current-time))))))))
 
 
 (provide 'defs)
