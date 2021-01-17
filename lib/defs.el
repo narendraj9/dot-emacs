@@ -1156,7 +1156,9 @@ search keyword."
         (list)
         (lambda (window _value)
           (select-window window t))
-      (shell-command (format "firefox --headless --window-size %s,%s --screenshot %s 'https://www.linguee.com/english-german/search?source=auto&query=%s'"
+      ;; Create a profile named linguee beforehand with `firefox -ProfileManager'.
+      (shell-command (format "%s --headless --window-size %s,%s --screenshot %s 'https://www.linguee.com/english-german/search?source=auto&query=%s'"
+                             browse-url-firefox-program
                              (/ (frame-pixel-width) 2)
                              (frame-pixel-height)
                              temp-file-path
