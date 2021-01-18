@@ -1149,23 +1149,7 @@ search keyword."
 (defun search-linguee ()
   "Search for word at Linguee.com."
   (interactive)
-  (let ((inhibit-message t)
-        (temp-file-path (make-temp-file "linguee" nil ".png")))
-    (with-current-buffer-window
-        "*Linguee Dictionary*"
-        (list)
-        (lambda (window _value)
-          (select-window window t))
-      ;; Create a profile named linguee beforehand with `firefox -ProfileManager'.
-      (shell-command (format "%s --headless --window-size %s,%s --screenshot %s 'https://www.linguee.com/english-german/search?source=auto&query=%s'"
-                             browse-url-firefox-program
-                             (/ (frame-pixel-width) 2)
-                             (frame-pixel-height)
-                             temp-file-path
-                             (read-string "Search: ")))
-      (insert-image-file temp-file-path)
-      (delete-file temp-file-path)
-      (help-mode))))
+  (websearch-it "https://www.linguee.com/english-german/search?source=auto&query=%s"))
 
 (defun upcase-last-symbol-and-space ()
   "Up-case the last keyword and end it with a space."
@@ -1185,25 +1169,26 @@ search keyword."
                 (lon   . ,calendar-longitude)
                 (appid . ,api-key)
                 (units . "metric"))
+
       :parser #'json-read
-      :error (lambda (&rest args) (message "error: %s" args))
-      :success (lambda (&rest args)
-                 (let ((data (plist-get args :data)))
-                   (setq current-weather
-                         (propertize (format "%s°C"
-                                             (->> data
-                                                  (alist-get 'main)
-                                                  (alist-get 'temp)))
-                                     'help-echo
-                                     (format "Updated at: %s\n%s"
-                                             (format-time-string "%FT%T%z"(current-time))
-                                             (pp-to-string data))
-                                     ;; (->> data
-                                     ;;      (alist-get 'weather)
-                                     ;;      (seq-map (lambda (e) (alist-get 'description e)))
-                                     ;;      (apply #'concat))
-                                     'timestamp
-                                     (current-time))))))))
+
+      :error
+      (lambda (&rest args) (message "error: %s" args))
+
+      :success
+      (lambda (&rest args)
+        (let ((data (plist-get args :data)))
+          (setq current-weather
+                (propertize (format "%s°C"
+                                    (->> data
+                                         (alist-get 'main)
+                                         (alist-get 'temp)))
+                            'help-echo
+                            (format "Updated at: %s\n%s"
+                                    (format-time-string "%FT%T%z"(current-time))
+                                    (pp-to-string data))
+                            'timestamp
+                            (current-time))))))))
 
 
 (provide 'defs)
