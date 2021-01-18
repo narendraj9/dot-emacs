@@ -2972,14 +2972,7 @@ mode-line)."
     (`gnu/linux
      (midnight-mode +1)
      (midnight-delay-set 'midnight-delay -7200)
-     (add-hook 'midnight-hook
-               (lambda ()
-                 (when (and (boundp 'commit-org-files)
-                            commit-org-files)
-                   (commit-org-files))
-                 (when (member (format-time-string "%A")
-                               '("Sunday" "Saturday"))
-                   (alert "You might want to rebuild Emacs today.")))))))
+     (add-hook 'midnight-hook (lambda () (message "Midnight Mode!"))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 (use-package highlight :ensure t :defer t)
