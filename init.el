@@ -2977,7 +2977,15 @@ mode-line)."
      (midnight-mode +1)
      (midnight-delay-set 'midnight-delay -7200)
      (add-hook 'midnight-hook
-               (lambda () (message "Midnight Mode!"))))))
+               (lambda ()
+                 (require 'magit)
+                 (require 'notifications)
+                 (let ((default-directory (expand-file-name "~/miscellany/")))
+                   (magit-run-git-async "commit" "-am" "Scheduled check in.")
+                   (magit-run-git-async "annex" "sync" "--content")
+                   (magit-push-current-to-pushremote nil)
+                   (notifications-notify :title "Emacs (midnight-mode)"
+                                         :body "Pushed ~/miscellany.git to push-remote.")))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 (use-package highlight :ensure t :defer t)
