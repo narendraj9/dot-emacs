@@ -257,6 +257,9 @@ buffer."
 (define-key gnus-summary-mode-map (kbd "W =")
   #'balance-windows)
 
+(define-key gnus-summary-mode-map (kbd "y")
+  #'gnus-article-wash-html)
+
 
 (provide 'gnus-config)
 ;;; gnus-config.el ends here
