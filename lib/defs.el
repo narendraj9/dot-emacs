@@ -1173,7 +1173,8 @@ search keyword."
       :parser #'json-read
 
       :error
-      (lambda (&rest args) (message "error: %s" args))
+      (lambda (&rest _args)
+        (message "Failed to fetch weather info from openweathermap.org"))
 
       :success
       (lambda (&rest args)
