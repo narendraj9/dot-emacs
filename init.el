@@ -1636,12 +1636,14 @@ after doing `symbol-overlay-put'."
 (use-package eglot
   :ensure t
   :defer t
+  :bind ( :map eglot-mode-map
+          ("C-c r g" . eglot-code-actions)
+          ("C-c r r" . eglot-rename))
   :init
   (hook-into-modes #'eglot-ensure
                    'java-mode 'rust-mode 'c-mode 'c++-mode 'python-mode)
   :config
   (setq eglot-autoshutdown t)
-
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
                               (haskell-mode      . ("haskell-language-server"))
                               ((c-mode c++-mode) . ("clangd-8"))))
@@ -2740,20 +2742,17 @@ mode-line)."
     (let ((default-directory directory))
       (call-interactively #'magit-status)))
 
-  :bind (;; So that indentation is sane
-         :map magit-mode-map
-         ("C-c C-r" . magit-change-repository)
-         :map ctl-period-map
-         ("C-x" . magit-status))
+  :bind ( :map magit-mode-map
+          ("C-c C-r" . magit-change-repository)
+          :map ctl-period-map
+          ("C-x" . magit-status) )
 
   :init
-  ;; Disable `global-magit-file-mode' until it can replace `git-gutter-mode'.
-  ;; This needs to happen before the package is loaded because these minor
-  ;; modes are enabled at load-time.
-  (setq global-magit-file-mode nil)
+  (setq magit-define-global-key-bindings nil)
 
   :config
   (magit-auto-revert-mode -1)
+
   (setq magit-completing-read-function 'ivy-completing-read
         ;; Showing diffs during commits is currently slow.
         magit-commit-show-diff nil
@@ -2761,6 +2760,7 @@ mode-line)."
         magit-diff-refine-hunk t)
 
   (add-hook 'git-commit-mode-hook 'turn-on-flyspell)
+
   (mapc (lambda (mode)
           (add-hook mode
                     (lambda ()
