@@ -85,7 +85,7 @@ buffer."
 ;; (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
 (setq gnus-summary-display-arrow t
       gnus-summary-line-format "%U %2B%(%-18,18f  %) %s\n"
-      gnus-sum-thread-tree-single-indent "᛫ "
+      gnus-sum-thread-tree-single-indent " "
       gnus-sum-thread-tree-root "ŧ "
       gnus-sum-thread-tree-single-leaf "⤷ "
       gnus-sum-thread-tree-vertical        "│ "

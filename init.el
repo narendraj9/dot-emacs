@@ -361,12 +361,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (use-package mode-line-config :demand t :load-path "etc/")
 
   ;; Setup my favorite fonts [if available]
-  (if (font-availablep "Symbola")
-      (set-fontset-font "fontset-default" nil
-                        (font-spec :name "Symbola" :size 15)
-                        nil 'append)
-    (add-to-list 'emacs-init-end-info
-                 "! You do not have Symbola font installed."))
+  (dolist (font (list "Symbola" "Firacode"))
+    (if (font-availablep font)
+        (set-fontset-font "fontset-default" nil
+                          (font-spec :name font :size 15)
+                          nil 'append)))
 
   ;; Font for reading news
   (cond
@@ -2983,7 +2982,7 @@ mode-line)."
                  (let ((default-directory (expand-file-name "~/miscellany/")))
                    (magit-run-git-async "commit" "-am" "Scheduled check in.")
                    (magit-run-git-async "annex" "sync" "--content")
-                   (magit-push-current-to-pushremote nil)
+                   (magit-run-git-async "push")
                    (notifications-notify :title "Emacs (midnight-mode)"
                                          :body "Pushed ~/miscellany.git to push-remote.")))))))
 
