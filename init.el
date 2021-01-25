@@ -971,6 +971,7 @@ after doing `symbol-overlay-put'."
   :config
   :bind (:map ctl-quote-map
               ("C-f a" . footnote-add-footnote)
+              ("C-f b" . footnote-back-to-message)
               ("C-f d" . footnote-delete-footnote)
               ("C-f g" . footnote-goto-footnote)))
 
