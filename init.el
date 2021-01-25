@@ -361,12 +361,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (use-package mode-line-config :demand t :load-path "etc/")
 
   ;; Setup my favorite fonts [if available]
-  (if (font-availablep "Symbola")
-      (set-fontset-font "fontset-default" nil
-                        (font-spec :name "Symbola" :size 15)
-                        nil 'append)
-    (add-to-list 'emacs-init-end-info
-                 "! You do not have Symbola font installed."))
+  (dolist (font (list "Symbola" "Firacode"))
+    (if (font-availablep font)
+        (set-fontset-font "fontset-default" nil
+                          (font-spec :name font :size 15)
+                          nil 'append)))
 
   ;; Font for reading news
   (cond
@@ -1637,12 +1636,14 @@ after doing `symbol-overlay-put'."
 (use-package eglot
   :ensure t
   :defer t
+  :bind ( :map eglot-mode-map
+          ("C-c r g" . eglot-code-actions)
+          ("C-c r r" . eglot-rename))
   :init
   (hook-into-modes #'eglot-ensure
                    'java-mode 'rust-mode 'c-mode 'c++-mode 'python-mode)
   :config
   (setq eglot-autoshutdown t)
-
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
                               (haskell-mode      . ("haskell-language-server"))
                               ((c-mode c++-mode) . ("clangd-8"))))
@@ -2741,20 +2742,17 @@ mode-line)."
     (let ((default-directory directory))
       (call-interactively #'magit-status)))
 
-  :bind (;; So that indentation is sane
-         :map magit-mode-map
-         ("C-c C-r" . magit-change-repository)
-         :map ctl-period-map
-         ("C-x" . magit-status))
+  :bind ( :map magit-mode-map
+          ("C-c C-r" . magit-change-repository)
+          :map ctl-period-map
+          ("C-x" . magit-status) )
 
   :init
-  ;; Disable `global-magit-file-mode' until it can replace `git-gutter-mode'.
-  ;; This needs to happen before the package is loaded because these minor
-  ;; modes are enabled at load-time.
-  (setq global-magit-file-mode nil)
+  (setq magit-define-global-key-bindings nil)
 
   :config
   (magit-auto-revert-mode -1)
+
   (setq magit-completing-read-function 'ivy-completing-read
         ;; Showing diffs during commits is currently slow.
         magit-commit-show-diff nil
@@ -2762,6 +2760,7 @@ mode-line)."
         magit-diff-refine-hunk t)
 
   (add-hook 'git-commit-mode-hook 'turn-on-flyspell)
+
   (mapc (lambda (mode)
           (add-hook mode
                     (lambda ()
@@ -2984,7 +2983,7 @@ mode-line)."
                  (let ((default-directory (expand-file-name "~/miscellany/")))
                    (magit-run-git-async "commit" "-am" "Scheduled check in.")
                    (magit-run-git-async "annex" "sync" "--content")
-                   (magit-push-current-to-pushremote nil)
+                   (magit-run-git-async "push")
                    (notifications-notify :title "Emacs (midnight-mode)"
                                          :body "Pushed ~/miscellany.git to push-remote.")))))))
 
