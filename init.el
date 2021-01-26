@@ -2978,14 +2978,16 @@ mode-line)."
      (midnight-delay-set 'midnight-delay -7200)
      (add-hook 'midnight-hook
                (lambda ()
+                 (defcustom avoid-personal-repo-sync nil "Avoid pushing changes daily.")
                  (require 'magit)
                  (require 'notifications)
-                 (let ((default-directory (expand-file-name "~/miscellany/")))
-                   (magit-run-git-async "commit" "-am" "Scheduled check in.")
-                   (magit-run-git-async "annex" "sync" "--content")
-                   (magit-run-git-async "push")
-                   (notifications-notify :title "Emacs (midnight-mode)"
-                                         :body "Pushed ~/miscellany.git to push-remote.")))))))
+                 (unless avoid-personal-repo-sync
+                   (let ((default-directory (expand-file-name "~/miscellany/")))
+                    (magit-run-git-async "commit" "-am" "Scheduled check in.")
+                    (magit-run-git-async "annex" "sync" "--content")
+                    (magit-run-git-async "push")
+                    (notifications-notify :title "Emacs (midnight-mode)"
+                                          :body "Pushed ~/miscellany.git to push-remote."))))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 (use-package highlight :ensure t :defer t)
