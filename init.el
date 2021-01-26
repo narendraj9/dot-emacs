@@ -2982,12 +2982,13 @@ mode-line)."
                  (require 'magit)
                  (require 'notifications)
                  (unless avoid-personal-repo-sync
-                   (let ((default-directory (expand-file-name "~/miscellany/")))
-                    (magit-run-git-async "commit" "-am" "Scheduled check in.")
-                    (magit-run-git-async "annex" "sync" "--content")
-                    (magit-run-git-async "push")
-                    (notifications-notify :title "Emacs (midnight-mode)"
-                                          :body "Pushed ~/miscellany.git to push-remote."))))))))
+                   (let ((inhibit-magit-refresh t)
+                         (default-directory (expand-file-name "~/miscellany/")))
+                     (magit-run-git-async "commit" "-am" "Scheduled check in.")
+                     (magit-run-git-async "annex" "sync" "--content")
+                     (magit-run-git-async "push")
+                     (notifications-notify :title "Emacs (midnight-mode)"
+                                           :body "Pushed ~/miscellany.git to push-remote."))))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 (use-package highlight :ensure t :defer t)
