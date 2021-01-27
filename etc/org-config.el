@@ -328,9 +328,9 @@ Otherwise, limit to only `org-mode' files."
   (defun with-no-drawer (func &rest args)
     (interactive "P")
     (if (eq org-log-note-purpose 'note)
-        (let ((org-log-state-notes-insert-after-drawers t))
-          (flet ((org-log-into-drawer (&rest args) nil))
-            (apply func args)))
+        (let ((org-log-state-notes-insert-after-drawers t)
+              (org-log-into-drawer nil))
+          (apply func args))
       (apply func args)))
 
   (defun org-entry-age ()

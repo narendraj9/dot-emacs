@@ -661,7 +661,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun show-appt-notifications (disp-fn &rest args)
     "Show notifications for an appointment using default alert style."
-    (alert (format "In %s minutes: %s" (first args) (third args)) :title "Reminder")
+    (alert (format "In %s minutes: %s" (car args) (caddr args)) :title "Reminder")
     (apply disp-fn args))
 
   :init
