@@ -1159,9 +1159,13 @@ search keyword."
                  (point))
   (insert " "))
 
+(defcustom mode-line-current-weather nil
+  "Display current weather information in the mode-line.")
+
 (defvar current-weather nil "Information about current weather")
 (defun current-weather ()
-  (when-let ((api-key (-> (auth-source-search :host "openweathermap.org")
+  (when-let ((_ mode-line-current-weather)
+             (api-key (-> (auth-source-search :host "openweathermap.org")
                           car
                           (plist-get :appid))))
     (request "https://api.openweathermap.org/data/2.5/weather"
