@@ -2336,9 +2336,6 @@ mode-line)."
               ("C-; c <SPC>" . clojure-top-level-spacing))
   :config
   (cljr-add-keybindings-with-prefix "C-;")
-  (setq cljr-ignore-analyzer-errors t
-        cljr-warn-on-eval nil)
-
   (add-hook 'clojure-mode-hook
             (lambda ()
               (add-hook #'before-save-hook
