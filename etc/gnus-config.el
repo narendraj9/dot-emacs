@@ -95,6 +95,7 @@ buffer."
 ;; Primary. Rest should be split.
 (setq nnmail-split-fancy
       `(| (nato ,(format ".*%s.*" user-mail-address) "Primary")
+          (any "guile-user@gnu.org" "Guile Users")
           (any ".*@openjdk.java.net" "OpenJDK")
           (any ".*lists.postgresql.org" "PostgreSQL")
           (any ".*@postgresql.org" "PostgreSQL")

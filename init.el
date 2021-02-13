@@ -1604,10 +1604,12 @@ after doing `symbol-overlay-put'."
   (add-hook 'hledger-view-mode-hook #'hl-line-mode)
   (add-hook 'hledger-view-mode-hook
             (lambda ()
-              (run-with-timer 2 nil (lambda ()
-                                      (when (get-buffer-window hledger-reporting-buffer-name)
-                                        (with-current-buffer hledger-reporting-buffer-name
-                                          (center-text-for-reading))))))))
+              (run-with-timer 0.5
+                              nil
+                              (lambda ()
+                                (when (get-buffer-window hledger-reporting-buffer-name)
+                                  (with-current-buffer hledger-reporting-buffer-name
+                                    (center-text-for-reading))))))))
 
 
 (use-package hledger-input
@@ -1952,7 +1954,9 @@ mode-line)."
   :defer t
   :init
   (setq shr-width 80
-        shr-use-fonts nil))
+        shr-use-fonts nil
+        shr-color-visible-distance-min 10
+        shr-color-visible-luminance-min 60))
 
 ;;; Ivy and Friends
 ;; ──────────────────────────────────────────────────────────────────
@@ -3165,73 +3169,6 @@ mode-line)."
               ("c w" . forecast))
   :config
   (add-hook 'forecast-mode-hook (lambda () (text-scale-decrease 1))))
-
-(use-package google-translate
-  :ensure t
-  :bind (
-         :map ctl-quote-map
-         ("l p" . google-translate-listen)
-         :map ctl-x-map
-         ("/" . google-translate-dwim)
-         )
-  :init
-  (setq google-translate-show-phonetic t
-        google-translate-listen-program "mplayer")
-
-  :config
-  (require 'cl-macs)                    ; uses the `case' macro.
-  (require 'google-translate-tk)
-
-  (advice-add 'google-translate-json-suggestion
-              :override
-              (lambda (json)
-                (when-let ((info (and (< (length json) 7)
-                                      (aref json 7))))
-                  (aref info 1))))
-  :preface
-  (defun google-translate-record-pair ()
-    "Return the source word and the translated word (from the
-     *Google Translate* buffer as a cons pair."
-    (if (string= (buffer-name) "*Google Translate*")
-        (let* ((trim (lambda (s) (->> s s-trim (s-replace-all '(("[Listen]" . ""))))))
-               (text-start (text-property-any (point-min)
-                                              (point-max)
-                                              'face
-                                              'google-translate-text-face))
-               (middle (text-property-any (point-min)
-                                          (point-max)
-                                          'face
-                                          'google-translate-translation-face)))
-          (define-word-record-definition (funcall trim (buffer-substring-no-properties text-start middle))
-            (funcall trim (buffer-substring middle (point-max)))))
-      (message "*Google Translate* is not the current buffer.")))
-
-  (defun google-translate-listen ()
-    (interactive)
-    (google-translate-listen-translation
-     google-translate-default-source-language
-     (cond
-      ((use-region-p) (buffer-substring (region-beginning) (region-end)))
-      ((word-at-point))
-      (t (message "Couldn't find anything to translate.")))))
-
-  (defun google-translate-dwim (arg)
-    "Quickly translate default source <-> default destination languages."
-    (interactive "p")
-    (let ((translate-buffer "*Google Translate*")
-          (translate-fn (if (use-region-p) #'google-translate-at-point
-                          #'google-translate-query-translate)))
-      (cl-case arg
-        (1 (funcall translate-fn))
-        (4 (let ((google-translate-default-source-language google-translate-default-target-language)
-                 (google-translate-default-target-language google-translate-default-source-language))
-             (funcall translate-fn)))
-        (16 (funcall translate-fn t)))
-      (dolist (w (window-list))
-        (when (equal translate-buffer (buffer-name (window-buffer w)))
-          (select-window w)))
-      (with-current-buffer translate-buffer
-        (google-translate-record-pair)))))
 
 (use-package gif-screencast
   :defer t

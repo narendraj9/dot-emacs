@@ -97,12 +97,7 @@ If ARG is supplied, reset margins and fringes to zero."
                              w)))
          (margin-width (if arg
                            0
-                         (/ (max (- (+ (window-width)
-                                       left-margin-width
-                                       right-margin-width)
-                                    max-text-width)
-                                 0)
-                            2))))
+                         (/ (max (- (frame-width) max-text-width) 0) 2))))
     (setq left-margin-width margin-width)
     (setq right-margin-width margin-width)
     ;; `set-window-margings' does a similar thing but those changes do
