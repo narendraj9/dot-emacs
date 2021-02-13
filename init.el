@@ -869,7 +869,7 @@ after doing `symbol-overlay-put'."
                                         user-emacs-directory))
   (setq savehist-additional-variables
         '( kill-ring minibuffer-history minibuffer-command-history command-history
-           limit-usage define-word-archives define-word-list ivy-views))
+           limit-usage ivy-views))
   (savehist-mode +1)
   ;; https://emacs.stackexchange.com/a/4191/14967
   ;; Prevent `kill-ring' values from causing very long pauses while
@@ -1281,100 +1281,6 @@ after doing `symbol-overlay-put'."
   (setd pcache-directory "var/pcache/"))
 
 (use-package popup :defer t :ensure t)
-
-(use-package wordly
-  :doc "Lookup word definition and synonyms."
-  :load-path "packages/rest/wordly/"
-  :defer t
-  :pin manual
-  :bind (:map ctl-quote-map
-              ("c l" . wordly-define-word-local)
-              ("c D" . wordly-define-word-at-point)
-              ("c s" . wordly-show-synonyms-for-word-at-point))
-  :preface
-  (defun wordly-define-word-local ()
-    (interactive)
-    (->> (if (region-active-p)
-             (buffer-substring (region-beginning) (region-end))
-           (read-string "Word: "))
-         (format "define %s")
-         shell-command-to-string
-         ansi-color-apply
-         display-message-or-buffer)))
-
-(use-package define-word
-  :ensure t
-  :bind (:map ctl-quote-map
-              ("c d" . define-word))
-  :commands define-word-review
-  :config
-  (advice-add 'define-word
-              :around
-              (lambda (original &rest args)
-                (let* ((result (apply original args))
-                       (result (if (windowp result)
-                                   (with-current-buffer (window-buffer result)
-                                     (buffer-string))
-                                 result)))
-                  (define-word-record-definition (car args) result))))
-  (push '(wordnik . display-message-or-buffer) define-word-displayfn-alist)
-
-  :preface
-  (defvar define-word-list ()
-    "List of words looked up so far.")
-
-  (defvar define-word-archives ()
-    "List of words looked up and deleted.")
-
-  (defun define-word-delete-word ()
-    (interactive)
-    (let* ((phrase (buffer-substring-no-properties (point-at-bol)
-                                                   (point-at-eol)))
-           (definition (assoc-default phrase define-word-list #'equal))
-           (inhibit-read-only t))
-      (if (not phrase)
-          (message "No word at point.")
-        (setq define-word-list (assoc-delete-all phrase define-word-list))
-        (unless (assoc-default phrase define-word-archives #'equal)
-          (setq define-word-archives
-                (cons (cons phrase definition)
-                      define-word-archives)))
-        (put-text-property (point-at-bol)
-                           (point-at-eol)
-                           'face '((t (:strike-through t)))))))
-
-  (defun define-word-record-definition (word definition)
-    (unless (assoc word define-word-list #'equal)
-      (push (cons word definition) define-word-list)))
-
-  (defun define-word-archives ()
-    (interactive)
-    (let ((define-word-list define-word-archives))
-      (define-word-review)))
-
-  (defun define-word-review ()
-    "Go through words that I looked up in the past."
-    (interactive)
-    (with-current-buffer (get-buffer-create "Review Words")
-      (local-set-key (kbd "C-k") #'define-word-delete-word)
-      (local-set-key (kbd "g")  #'define-word-review)
-      (let ((inhibit-read-only t))
-        (erase-buffer)
-        (dolist (word-def define-word-list)
-          (let* ((word (car word-def))
-                 (definition (format "\n%s\n" (cdr word-def))))
-            (insert-button word
-                           'face 'widget-button
-                           'action
-                           (lambda (&rest args)
-                             (momentary-string-display definition
-                                                       (point-at-eol)
-                                                       ?q))))
-          (insert "\n"))
-        (beginning-of-buffer))
-      (help-mode)
-      (display-line-numbers-mode +1)
-      (switch-to-buffer (current-buffer)))))
 
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
