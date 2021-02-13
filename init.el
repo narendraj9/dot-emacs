@@ -29,23 +29,6 @@
 
 ;;; Avoid garbage collection during Emacs startup. Garbage collection when
 ;;; Emacs loses focus.
-(defvar var-gc-statistics '(vec)
-  "A (`calc') matrix of gc timestamps and `gc-elapsed'.
-It stores cumulative time spent on each GC.  Consecutive
-`gc-elapsed' values (as integers representing milliseconds) can
-be substracted to get time spent during a specific GC.  Uses
-internal representation used by calc to store matrices.  So this
-might break in future.")
-
-(add-hook 'post-gc-hook
-          (lambda ()
-            (setq var-gc-statistics
-                  (cons 'vec
-                        (cons (list 'vec
-                                    (time-convert nil 'integer)
-                                    (floor (* 1000 gc-elapsed)))
-                              (cdr var-gc-statistics))))))
-
 (setq gc-cons-threshold most-positive-fixnum)
 (add-hook 'after-init-hook (lambda () (setq gc-cons-threshold (* 10 1024 1024))))
 
@@ -869,7 +852,7 @@ after doing `symbol-overlay-put'."
                                         user-emacs-directory))
   (setq savehist-additional-variables
         '( kill-ring minibuffer-history minibuffer-command-history command-history
-           limit-usage ivy-views))
+           limit-usage ivy-views ))
   (savehist-mode +1)
   ;; https://emacs.stackexchange.com/a/4191/14967
   ;; Prevent `kill-ring' values from causing very long pauses while
