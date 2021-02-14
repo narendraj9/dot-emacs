@@ -1231,6 +1231,30 @@ after doing `symbol-overlay-put'."
 
 
 ;; ――――――――――――――――――――――――――――――――――――――――
+
+(use-package dictionary
+  :doc "`dictionary' is a built-in package. It uses
+`dictionary-connection' that provides nice utility functions for
+talking to any TCP server."
+  :bind ( :map global-map ([double-down-mouse-1] . dictionary-quick-definition) )
+
+  :config
+  (setq dictionary-server "dict.org")
+
+  :preface
+  (defun dictionary-quick-definition (event)
+    (interactive "e")
+    (require 'dictionary)
+    (if-let ((meaning (dictionary-definition (dictionary-word-at-mouse-event event))))
+        ;; I need this delay so that the tooltip isn't immediately
+        ;; removed because of the mouse event itself.
+        (run-with-timer 1
+                        nil
+                        (lambda ()
+                          (let ((x-gtk-use-system-tooltips nil))
+                            (tooltip-show meaning))))
+      (message "No meaning found for: %s" (dictionary-word-at-mouse-event event)))))
+
 (use-package flyspell
   :diminish flyspell-mode
   :bind (:map ctl-period-map
