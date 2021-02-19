@@ -1782,10 +1782,10 @@ mode-line)."
 
   (eval-after-load "org"
     '(progn
-       (require 'org-config)
        (setq org-default-notes-file
              (expand-file-name "notes.org" org-directory))
-       (set-register ?o (cons 'file org-default-notes-file))))
+       (set-register ?o (cons 'file org-default-notes-file))
+       (require 'org-config)))
 
   ;; `org-agenda-get-restriction-and-command' ignores rules for
   ;; displaying buffers (i.e. `display-buffer-alist'). This advice

@@ -482,22 +482,27 @@ non-empty lines in the block (excluding the line with
     (org-capture))
 
   :config
+  (defconst org-config--common-metadata
+    (concat ":METADATA:\n"
+            " CREATED: %U         \n"
+            " LOCATION: [[%F][%f]]\n"
+            ":END:"))
+
   (setq org-capture-templates
         `(("i" "TODO" entry (file+headline "capture.org" "Tasks")
            ,(concat
              "* TODO %?                                           %^G\n"))
+          ("n" "NOTE" entry (file org-default-notes-file)
+           ,(concat "* %? %^G\n"
+                    "%i\n\n"
+                    org-config--common-metadata))
           ("l" "Article" plain (file+headline "habits.org" "ReadingList")
            "- [ ] %(org-cliplink-capture) %?"
            :immediate-finish t
            :append t)
           ("j" "Journal" entry (file+olp+datetree "journal.org")
            ,(concat "* %? %^G           \n\n"
-                    "╭──────────────      \n"
-                    " Entered on %U       \n"
-                    " Was in: [[%F][%f]]  \n"
-                    " ──────────────      \n"
-                    " %i                  \n"
-                    "╰──────────────        "))
+                    org-config--common-metadata))
           ("c" "Question" entry (file+headline "questions.org" "Questions")
            "* %?\n ")
           ("h" "Habit" entry (file+headline "habits.org"  "Habits")
