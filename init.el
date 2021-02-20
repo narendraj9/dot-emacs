@@ -3100,6 +3100,7 @@ mode-line)."
     (global-command-log-mode +1)))
 
 (use-package activity-watch-mode
+  :disabled t
   :diminish activity-watch-mode
   :ensure t
   :hook (emacs-startup . global-activity-watch-mode)
