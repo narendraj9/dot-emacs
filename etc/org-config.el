@@ -78,7 +78,11 @@ Otherwise, limit to only `org-mode' files."
                           "~/miscellany/personal/org/")
         org-archive-location (format "%s::datetree/* Archived Tasks"
                                      (expand-file-name "_archives/archive.org"
-                                                       org-directory)))
+                                                       org-directory))
+        org-default-notes-file (expand-file-name "notes.org" org-directory))
+
+  (set-register ?o (cons 'file org-default-notes-file))
+
   :config
   (setq org-cycle-separator-lines 0
         org-cycle-include-plain-lists 'integrate
@@ -206,16 +210,10 @@ Otherwise, limit to only `org-mode' files."
                             (let ((default-directory org-directory))
                               (file-expand-wildcards "*.org"))))
 
+        ;; Text search all org files under `org-directory' recursively.
         org-agenda-text-search-extra-files
-        (append
-         ;; Add all org-mode files under _archives no matter ignoring
-         ;; the depth in the directory structure.
-         (directory-files-recursively (concat org-directory "_archives/")
-                                      ".*org")
-         (file-expand-wildcards (expand-file-name "notes/*.org"
-                                                  org-directory))
-         (list (expand-file-name "capture.org"
-                                 org-directory))))
+        (directory-files-recursively org-directory ".*org$"))
+
   (setq org-agenda-restore-windows-after-quit t
 
         org-agenda-span 7
@@ -492,7 +490,7 @@ non-empty lines in the block (excluding the line with
         `(("i" "TODO" entry (file+headline "capture.org" "Tasks")
            ,(concat
              "* TODO %?                                           %^G\n"))
-          ("n" "NOTE" entry (file org-default-notes-file)
+          ("n" "NOTE" entry (file ,org-default-notes-file)
            ,(concat "* %? %^G\n"
                     "%i\n\n"
                     org-config--common-metadata))

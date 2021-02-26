@@ -1779,13 +1779,7 @@ mode-line)."
          ("C-d" . search-notes-files))
   :init
   (bind-key "C-c a" #'org-agenda)
-
-  (eval-after-load "org"
-    '(progn
-       (setq org-default-notes-file
-             (expand-file-name "notes.org" org-directory))
-       (set-register ?o (cons 'file org-default-notes-file))
-       (require 'org-config)))
+  (eval-after-load "org" '(require 'org-config))
 
   ;; `org-agenda-get-restriction-and-command' ignores rules for
   ;; displaying buffers (i.e. `display-buffer-alist'). This advice
