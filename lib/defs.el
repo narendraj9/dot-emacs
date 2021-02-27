@@ -1132,13 +1132,9 @@ respective files."
 If BASE-URL is not nil, use it as the URL template to insert the
 search keyword."
   (interactive)
-  (let ((query (cond
-                ((region-active-p)
-                 (buffer-substring-no-properties (region-beginning) (region-end)))
-
-                ((word-at-point))
-
-                (t (read-string "Query: ")))))
+  (let ((query (if (region-active-p)
+                   (buffer-substring-no-properties (region-beginning) (region-end))
+                 (read-string "Query: " (word-at-point)))))
     (browse-url (format (or base-url "https://qwant.com/?q=%s") query))))
 
 (defun search-linguee ()

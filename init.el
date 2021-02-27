@@ -178,8 +178,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("C-c 0" . quick-switch-themes)
          ("<print>" . snap-it)
          :map ctl-quote-map
-         ("f"   . websearch-it)
-         ("t"   . search-linguee)
+         ("w s" . websearch-it)
+         ("l t" . search-linguee)
          ("d ." . insert-date-time-at-point)
          ("c e" . vicarie/eval-print-last-sexp)
          ("c =" . vicarie/eval-replace-last-sexp)
@@ -1236,7 +1236,10 @@ after doing `symbol-overlay-put'."
   :doc "`dictionary' is a built-in package. It uses
 `dictionary-connection' that provides nice utility functions for
 talking to any TCP server."
-  :bind ( :map global-map ([double-down-mouse-1] . dictionary-quick-definition) )
+  :bind ( :map global-map
+          ([double-down-mouse-1] . dictionary-quick-definition)
+          :map ctl-quote-map
+          ("l d" . dictionary-search ) )
 
   :config
   (setq dictionary-server "dict.org")

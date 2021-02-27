@@ -203,16 +203,20 @@ Otherwise, limit to only `org-mode' files."
 
   (setq org-agenda-skip-unavailable-files t)
   (setq org-agenda-files
-        (mapcar (lambda (f)
-                  (expand-file-name f org-directory))
-                (seq-filter (lambda (f)
-                              (member f org-agenda-known-files))
-                            (let ((default-directory org-directory))
-                              (file-expand-wildcards "*.org"))))
+        (seq-concatenate 'list
+                         (mapcar (lambda (f) (expand-file-name f org-directory))
+                                 (seq-filter (lambda (f)
+                                               (member f org-agenda-known-files))
+                                             (let ((default-directory org-directory))
+                                               (file-expand-wildcards "*.org"))))
+                         ;; Allow TODO items to be created while writing notes
+                         ;; on a subject.
+                         (directory-files-recursively (expand-file-name "notes/" org-directory)
+                                                      ".*\\.org$"))
 
         ;; Text search all org files under `org-directory' recursively.
         org-agenda-text-search-extra-files
-        (directory-files-recursively org-directory ".*org$"))
+        (directory-files-recursively org-directory ".*\\.org$"))
 
   (setq org-agenda-restore-windows-after-quit t
 
