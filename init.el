@@ -168,7 +168,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ;; Default: \C-m => RET
     "\C-m" [C-m])
 
-
+  (bind-keys* :prefix [C-m]   :prefix-map ctl-m-map)
   (bind-keys* :prefix "C-'"   :prefix-map ctl-quote-map)
   (bind-keys* :prefix "C-."   :prefix-map ctl-period-map)
   (bind-keys* :prefix "C-;"   :prefix-map ctl-semicolon-map)
@@ -179,7 +179,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("<print>" . snap-it)
          :map ctl-quote-map
          ("w s" . websearch-it)
-         ("l t" . search-linguee)
+         ("l l" . search-linguee)
+         ("l t" . translate-with-linguee)
          ("d ." . insert-date-time-at-point)
          ("c e" . vicarie/eval-print-last-sexp)
          ("c =" . vicarie/eval-replace-last-sexp)
@@ -1054,6 +1055,8 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――――――
 
 (use-package window
+  ;; There is no mnemonic here, it's just convenient to type.
+  :bind ( :map ctl-m-map ("C-l" . delete-other-windows) )
   :init
   (dolist (display-spec
            (list
@@ -1564,7 +1567,7 @@ talking to any TCP server."
   (setq eglot-autoshutdown t)
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
                               (haskell-mode      . ("haskell-language-server"))
-                              ((c-mode c++-mode) . ("clangd-8"))))
+                              ((c-mode c++-mode) . ("clangd"))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
 
@@ -1623,6 +1626,13 @@ talking to any TCP server."
   (setq which-func-modes '(java-mode))
   (setq which-func-unknown "<λ>")
   (which-function-mode +1))
+
+(use-package gud
+  :config
+  (setq gdb-show-main t
+        ;; Change this to `t' or use command `gdb-many-windows' to
+        ;; have a fancier IDE like UI.
+        gdb-many-windows nil))
 
 (use-package realgud
   :doc "`gud' with bells and whistles."
@@ -1863,8 +1873,11 @@ mode-line)."
   :doc "The HTML parser that is used at multiple places in Emacs"
   :defer t
   :init
-  (setq shr-width 80
+  (setq shr-width 90
         shr-use-fonts nil
+        ;; Gnus Article buffers look better with this.
+        shr-use-colors nil
+        ;; These are not used when `shr-use-colors' is `nil'.
         shr-color-visible-distance-min 10
         shr-color-visible-luminance-min 60))
 
@@ -2361,8 +2374,8 @@ mode-line)."
 ;;; [WO]MAN-MODE
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package man
-  :bind (:map ctl-quote-map
-              ("C-m" . man))
+  :bind ( :map ctl-quote-map ("C-m" . man)
+          :map ctl-m-map ([C-m] . man ) )
   :config
   (setq Man-notify-method 'aggressive)
   (add-hook 'Man-mode-hook

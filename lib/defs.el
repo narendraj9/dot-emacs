@@ -1142,6 +1142,11 @@ search keyword."
   (interactive)
   (websearch-it "https://www.linguee.com/english-german/search?source=auto&query=%s"))
 
+(defun translate-with-linguee ()
+  "Use https://www.deepl.com/translator#de/en/ for translating German -> English."
+  (interactive)
+  (websearch-it "https://www.deepl.com/translator#de/en/%s"))
+
 (defun upcase-last-symbol-and-space ()
   "Up-case the last keyword and end it with a space."
   (interactive)
