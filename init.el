@@ -2108,19 +2108,12 @@ mode-line)."
 ;;; C/C++-MODE
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package cc-mode
-  :bind (:map c-mode-base-map
-              ("<return>" . newline-and-indent)
-              ("C-c C-k"  . compile)
-              ("C-c C-t"  . c-toggle-comment-style))
+  :bind ( :map c-mode-base-map
+          ("<return>" . newline-and-indent)
+          ("C-c C-k"  . compile)
+          ("C-c C-t"  . c-toggle-comment-style) )
   :config
-  (setq-default c-block-comment-flag t)
-
-  (use-package cc-config
-    :demand t
-    :pin manual
-    :load-path "etc/")
-  (add-hook 'c-mode-hook #'custom-c-mode-common-hook)
-  (add-hook 'c++-mode-hook #'custom-c-mode-common-hook))
+  (setq-default c-block-comment-flag t))
 
 (use-package info-lookmore
   :doc "Adds extra info manuals for `info-lookup-symbol'."

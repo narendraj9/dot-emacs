@@ -537,7 +537,7 @@ non-empty lines in the block (excluding the line with
   :defer t
   :init
   (setq org-columns-default-format
-        "%60ITEM(Task) %10EFFORT(Estimated Effort) {:} %10CLOCKSUM(Time Spent)"))
+        "%TODO  %3PRIORITY %TAGS %60ITEM(Task) %10EFFORT(Estimated Effort) {:} %10CLOCKSUM(Time Spent)"))
 
 (use-package ob-ipython
   :doc "Org-babel with IPython."
@@ -605,6 +605,7 @@ non-empty lines in the block (excluding the line with
   :config
   (org-babel-do-load-languages 'org-babel-load-languages
                                `((emacs-lisp . t)
+                                 (sqlite     . t)
                                  (sql        . t)
                                  (lisp       . t)
                                  (ipython    . ,(executable-find "jupyter"))
