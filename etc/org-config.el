@@ -195,7 +195,8 @@ Otherwise, limit to only `org-mode' files."
   :after org
   :init
   (setq org-agenda-cmp-user-defined #'org-backlog-compare-fn
-        org-complete-tags-always-offer-all-agenda-tags t)
+        org-complete-tags-always-offer-all-agenda-tags t
+        org-extend-today-until 1)
 
   (defvar org-agenda-known-files
     (list "journal.org" "main.org" "remember.org" "habits.org" "work.org" "calendar.org")
