@@ -786,6 +786,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     [remap exchange-point-and-mark]
     #'exchange-point-and-mark*))
 
+
+(use-package apropos
+  :config
+  (setq apropos-do-all t))
+
 (use-package ialign
   :doc "Very useful to get quick feedback for alignment with
   `align.el'."
