@@ -393,8 +393,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                     ("Asia/Calcutta" "New Delhi")
                                     ("America/Seattle" "Seattle")))
   (defface date-time-face
-    '((t :foreground "green yellow"
-         :distant-foreground "black"))
+    '((((background dark))
+       :foreground "green yellow" :distant-foreground "black")
+      (((background light))
+       :foreground "black" :distant-foreground "grey"))
     "Face for date time in mode line."
     :group 'display-time)
 
