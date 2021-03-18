@@ -1669,7 +1669,9 @@ talking to any TCP server."
 
 (use-package flycheck
   :ensure t
-  :bind-keymap ("C-x x" . flycheck-command-map)
+  :bind-keymap ("C-. e" . flycheck-command-map)
+  :bind ( :map ctl-period-map
+          ("C-e" . flycheck-list-errors ))
   :init
   (setq flycheck-indication-mode 'left-margin)
   (setq flycheck-mode-line-prefix "")
@@ -1700,7 +1702,8 @@ mode-line)."
 (use-package highlight-indent-guides
   :ensure t
   :diminish highlight-indent-guides-mode
-  :hook (prog-mode . highlight-indent-guides-mode)
+  :bind ( :map ctl-period-map
+          ("C-l" . highlight-indent-guides-mode))
   :config
   (setq highlight-indent-guides-method 'bitmap
         highlight-indent-guides-responsive nil
