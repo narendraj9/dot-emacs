@@ -56,7 +56,7 @@ Otherwise, limit to only `org-mode' files."
 (defun search-notes-files ()
   "Search org files using `counsel-ag'."
   (interactive)
-  (counsel-ag nil org-directory "--org --word-regexp"))
+  (counsel-ag nil org-directory "--smart-case --all-text"))
 
 
 (defun org-agenda-toggle-toggle-tags-column ()
