@@ -208,13 +208,14 @@ buffer."
   (when-let ((headers (gnus-summary-article-header))
              (mail-date (gnus-user-date (mail-header-date headers)))
              ;; Hide eldoc for currently selected article.
-             (_show-info-p (and gnus-current-article
-                                (not (= (gnus-summary-article-number)
-                                        gnus-current-article)))))
-    (format "%s %s \n %s%s"
+             ;; (_show-info-p (and gnus-current-article
+             ;;                    (not (= (gnus-summary-article-number)
+             ;;                            gnus-current-article))))
+             )
+    (format "%s %s \n %s"
             (propertize mail-date 'face 'gnus-header-from)
             (propertize (mail-header-from headers) 'face 'gnus-header-name)
-            (make-string (length mail-date) ? )
+            ;; (make-string (length mail-date) ? )
             (propertize (mail-header-subject headers) 'face 'gnus-header-subject))))
 
 
@@ -233,6 +234,7 @@ buffer."
 (add-hook 'gnus-summary-mode-hook
           (lambda ()
             (gnus-undo-mode +1)
+            (setq-local eldoc-echo-area-use-multiline-p t)
             (defalias 'gnus-summary-position-point #'beginning-of-line)
             (add-hook 'eldoc-documentation-functions
                       #'gnus-summary-echo-current-headers

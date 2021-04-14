@@ -369,6 +369,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq-default cursor-type 'bar
                 cursor-in-non-selected-windows nil)
 
+  (setq x-underline-at-descent-line t)
+
   ;; Maximize emacs on startup
   (when (window-system)
     (add-to-list 'default-frame-alist
@@ -384,6 +386,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package time
   :demand t
   :preface
+  :bind ( :map ctl-quote-map ("c t" . world-clock) )
   :init
   (display-time-mode +1)
   :config

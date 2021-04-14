@@ -47,11 +47,14 @@ If a prefix ARG is provided, then run a `project-find-file'.
 Otherwise, limit to only `org-mode' files."
   (interactive "P")
   (let ((default-directory (expand-file-name org-directory)))
-    (if arg
-        (project-find-file)
-      (->> (f-entries default-directory (lambda (f) (f-ext-p f "org")) t)
-           (completing-read "Select org file: ")
-           (find-file)))))
+    (->> (f-entries default-directory
+                    (if arg #'f-file? (lambda (f) (f-ext-p f "org")))
+                    t)
+      (mapcar (lambda (f)
+                (propertize f
+                            'display (string-truncate-left f (- (window-width) 10)))))
+      (completing-read "Select org file: ")
+      (find-file))))
 
 (defun search-notes-files ()
   "Search org files using `counsel-ag'."
@@ -626,7 +629,9 @@ non-empty lines in the block (excluding the line with
   :after org-agenda
   :init
   (setq org-habit-graph-column 80
-        org-habit-preceding-days 60
+        ;; Use `customize-variable' depending on the screen size and
+        ;; resolution.
+        ;; org-habit-preceding-days 60
         org-habit-show-done-always-green t))
 
 (use-package org-clock
