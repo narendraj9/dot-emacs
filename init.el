@@ -323,6 +323,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defalias 'yes-or-no-p 'y-or-n-p))
 
+(use-package comp
+  :if (fboundp 'native-compile)
+  :custom (comp-async-report-warnings-errors nil))
+
 (use-package appearance
   :doc "`use-package' doesn't throw an error for non-existent packages"
   :load-path "themes/"
@@ -377,7 +381,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                  '(fullscreen . maximized)))
 
   ;; Diminish some minor modes
-  (diminish 'hi-lock-mode))
+  (diminish 'hi-lock-mode)
+
+  ;; Disable mixed fonts in modus themes
+  (setq modus-themes-no-mixed-fonts t))
 
 
 ;;; Battery and Time display in the mode line
@@ -2906,19 +2913,19 @@ mode-line)."
     (`gnu/linux
      (midnight-mode +1)
      (midnight-delay-set 'midnight-delay -7200)
-     ;; (add-hook 'midnight-hook
-     ;;           (lambda ()
-     ;;             (defcustom avoid-personal-repo-sync nil "Avoid pushing changes daily.")
-     ;;             (require 'magit)
-     ;;             (require 'notifications)
-     ;;             (unless avoid-personal-repo-sync
-     ;;               (let ((inhibit-magit-refresh t)
-     ;;                     (default-directory (expand-file-name "~/miscellany/")))
-     ;;                 (magit-run-git-async "commit" "-am" "Scheduled check in.")
-     ;;                 (magit-run-git-async "annex" "sync" "--content")
-     ;;                 (magit-run-git-async "push")
-     ;;                 (notifications-notify :title "Emacs (midnight-mode)"
-     ;;                                       :body "Pushed ~/miscellany.git to push-remote.")))))
+     (add-hook 'midnight-hook
+               (lambda ()
+                 (defcustom avoid-personal-repo-sync nil "Avoid pushing changes daily.")
+                 (require 'magit)
+                 (require 'notifications)
+                 (unless avoid-personal-repo-sync
+                   (let ((inhibit-magit-refresh t)
+                         (default-directory (expand-file-name "~/miscellany/")))
+                     ;; (magit-run-git-async "commit" "-am" "Scheduled check in.")
+                     (magit-run-git-async "annex" "sync" "--content")
+                     ;; (magit-run-git-async "push")
+                     (notifications-notify :title "Emacs (midnight-mode)"
+                                           :body "Synched ~/miscellany.git to push-remote.")))))
      )))
 
 ;;; ──────────────────────────────────────────────────────────────────
