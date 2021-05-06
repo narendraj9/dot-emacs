@@ -3034,10 +3034,11 @@ mode-line)."
                       (< 1 (length (word-at-point))))))
       (upcase-word -1)))
   :init
-  (add-hook 'sql-interactive-mode-hook
-            (lambda ()
-              (make-local-variable 'post-self-insert-hook)
-              (add-hook 'post-self-insert-hook #'upcase-last-keyword))))
+  ;; (add-hook 'sql-interactive-mode-hook
+  ;;           (lambda ()
+  ;;             (make-local-variable 'post-self-insert-hook)
+  ;;             (add-hook 'post-self-insert-hook #'upcase-last-keyword)))
+  )
 
 (use-package mule-cmds
   :bind (("C-x \\" . set-input-method)
