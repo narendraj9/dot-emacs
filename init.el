@@ -370,7 +370,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
-  (setq-default cursor-type 'bar
+  (setq-default ;; cursor-type 'bar
                 cursor-in-non-selected-windows nil)
 
   (setq x-underline-at-descent-line t)
