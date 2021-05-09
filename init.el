@@ -310,6 +310,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq-default tab-width 4)
   (setq-default fill-column 70)
 
+  ;; Disable bell
+  (setq ring-bell-function (lambda ()))
+
   ;; Enable some disabled commands
   (mapc (lambda (c) (put c 'disabled nil))
         '(narrow-to-region
