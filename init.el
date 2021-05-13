@@ -1947,9 +1947,8 @@ mode-line)."
   (setq ivy-initial-inputs-alist nil
         ivy-re-builders-alist '((t . ivy--regex-ignore-order))
         ivy-use-virtual-buffers t
-        ;; ivy provides better completion compared to default, company mode
-        ;; doesn't work nicely with `completion-in-region-function'.
-        ivy-do-completion-in-region t)
+        ;; This is broken for eshell buffers.
+        ivy-do-completion-in-region nil)
 
   (setq ivy-ignore-buffers `("\\` "
                              "\\`\\*git-monitor:"
