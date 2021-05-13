@@ -38,7 +38,6 @@
 (require 'smtpmail)
 (require 'message)
 
-(require 'nnir)
 (require 'eldoc)
 
 
@@ -106,6 +105,7 @@ buffer."
           (any "tech@openbsd.org" "OpenBSD")
           (any "announce@openbsd.org" "OpenBSD")
           (any "emacs-devel@gnu.org*" "Emacs Dev")
+          (any "hyperbole-users@gnu.org" "Emacs")
           (any "help-gnu-emacs@gnu.org" "Emacs")
           (any "gnunet-developers@gnu.org" "GNU Net")
           (any "ietf@ietf.org" "IETF")
@@ -131,7 +131,7 @@ buffer."
 (setq gnus-select-method
       `(nnimap "gmail"
                (nnimap-address "imap.gmail.com")
-               (nnir-search-engine imap)
+               ;; (nnir-search-engine imap)
                (nnimap-inbox "INBOX")
                (nnimap-stream ssl)
                (nnimap-streaming t)
