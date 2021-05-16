@@ -2101,8 +2101,9 @@ mode-line)."
   (setq prescient-history-length 1000)
   (prescient-persist-mode +1))
 
-;;; JAVA
-;; ----------------------------------------------------------------------------
+;;; Programming Languages
+;;; ──────────────────────────────────────────────────────────────────
+
 (use-package java-mode :defer t :hook ( (java-mode . company-mode-quicker) ))
 
 (use-package gradle-mode
@@ -2127,8 +2128,6 @@ mode-line)."
     :ensure t
     :pin melpa))
 
-;;; C/C++-MODE
-;;  ─────────────────────────────────────────────────────────────────
 (use-package cc-mode
   :bind ( :map c-mode-base-map
           ("<return>" . newline-and-indent)
@@ -2157,8 +2156,6 @@ mode-line)."
   :diminish dtrt-indent-mode
   :hook (java-mode . dtrt-indent-mode))
 
-;;; RUST
-;; ──────────────────────────────────────────────────────────────────
 (use-package pos-tip
   :doc "Racer needs this package and for some reason, it is not
   installed."
@@ -2183,22 +2180,22 @@ mode-line)."
   :config
   (define-key cargo-mode-map (kbd "C-. C-k") #'cargo-process-check))
 
-;;; PYTHON-MODE
-;;  ─────────────────────────────────────────────────────────────────
-
 (use-package py-autopep8
   :ensure t
   :hook (python-mode . py-autopep8-enable-on-save))
 
 (use-package python-mode
+  :ensure t
   :defer t
   :config
   (setq python-indent-guess-indent-offset-verbose nil
         python-indent-guess-indent-offset nil
         python-indent-offset 2))
 
-;;; LISP MODE
-;;  ─────────────────────────────────────────────────────────────────
+(use-package prolog
+  :mode "\\.pl\\'"
+  :custom (prolog-system 'gnu))
+
 (use-package emacs-lisp-mode
   :bind (:map emacs-lisp-mode-map
               ("C-c C-k" . eval-buffer*))
