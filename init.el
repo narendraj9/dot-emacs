@@ -1076,19 +1076,30 @@ after doing `symbol-overlay-put'."
 
 (use-package window
   ;; There is no mnemonic here, it's just convenient to type.
-  :bind ( :map ctl-m-map ("C-l" . delete-other-windows) )
+  :bind ( :map ctl-m-map ("C-l" . delete-other-windows)
+          :map ctl-period-map ("e" . fit-window-to-buffer))
   :init
+  (setq fit-window-to-buffer-horizontally t
+        window-resize-pixelwise t)
+
   (dolist (display-spec
-           (list
-            `("\\`\\*e?shell" display-buffer-at-bottom)
-            `("\\*Calendar\\*" display-buffer-at-bottom)
-            `("\\*Async Shell Command\\*" display-buffer-no-window)
-            `("\\`\\*Flycheck errors\\*\\'" (display-buffer-reuse-window
-                                             display-buffer-in-side-window)
-              (side            . bottom)
-              (reusable-frames . visible)
-              (window-height   . 10))))
-    (add-to-list 'display-buffer-alist display-spec)))
+           '( ("\\`\\*e?shell" display-buffer-at-bottom)
+              ("\\*Calendar\\*" display-buffer-at-bottom)
+              ("\\*Async Shell Command\\*" display-buffer-no-window)
+
+              ("\\`\\*Flycheck errors\\*\\'" (display-buffer-reuse-window
+                                              display-buffer-in-side-window)
+               (side            . bottom)
+               (reusable-frames . visible)
+               (window-height   . 10))) )
+    (add-to-list 'display-buffer-alist display-spec))
+
+  (dolist (buffer-regex '("\\`\\*eldoc\\*\\'" "\\`magit: .*\\'" "\\`\\*cider-doc\\*\\'"))
+    (add-to-list 'display-buffer-alist
+                 `(,buffer-regex display-buffer-in-direction
+                                 (window . main)
+                                 (direction . right)
+                                 (window-width . 0.5)))))
 
 
 (use-package winner
