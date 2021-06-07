@@ -1590,10 +1590,12 @@ talking to any TCP server."
   :defer t
   :bind ( :map eglot-mode-map
           ("C-c r g" . eglot-code-actions)
-          ("C-c r r" . eglot-rename))
+          ("C-c r r" . eglot-rename)
+          ("C-c C-d" . toggle-eldoc-doc-buffer) )
   :init
   (hook-into-modes #'eglot-ensure
-                   'java-mode 'rust-mode 'c-mode 'c++-mode 'python-mode)
+                   'java-mode 'rust-mode 'c-mode 'c++-mode 'python-mode
+                   'go-mode)
   :config
   (setq eglot-autoshutdown t)
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
@@ -1649,7 +1651,15 @@ talking to any TCP server."
   :diminish eldoc-mode
   :config
   (setq eldoc-echo-area-use-multiline-p nil)
-  (global-eldoc-mode +1))
+  (global-eldoc-mode +1)
+  :preface
+  (defun toggle-eldoc-doc-buffer ()
+    "Depends upon internal details of `eldoc-mode'."
+    (interactive)
+    (if-let ((w (some-window (lambda (w) (eq (window-buffer w)
+                                             eldoc--doc-buffer)))))
+        (delete-window w)
+      (eldoc-doc-buffer))))
 
 (use-package which-func
   :doc "Display the current function in the mode line."
@@ -1742,7 +1752,7 @@ mode-line)."
   :ensure t
   :defer t
   :diminish aggressive-indent-mode
-  :hook ((emacs-lisp-mode clojure-mode racket-mode scheme-mode) . aggressive-indent-mode))
+  :hook ((emacs-lisp-mode clojure-mode racket-mode scheme-mode cc-mode) . aggressive-indent-mode))
 
 (use-package comint
   :defer t
@@ -2204,7 +2214,7 @@ mode-line)."
         python-indent-offset 2))
 
 (use-package prolog
-  :mode "\\.pl\\'"
+  :mode ("\\.pl\\'" . prolog-mode)
   :custom (prolog-system 'gnu))
 
 (use-package emacs-lisp-mode
