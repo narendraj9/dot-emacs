@@ -1769,10 +1769,14 @@ mode-line)."
   :preface
   (defun eshell-toggle ()
     (interactive)
-    (if (eq major-mode 'eshell-mode)
-        (jump-to-register ?e)
-      (window-configuration-to-register ?e)
-      (eshell)))
+    (let ((text-in-region
+           (when (region-active-p)
+             (buffer-substring (region-beginning) (region-end)))))
+      (if (eq major-mode 'eshell-mode)
+          (jump-to-register ?e)
+        (window-configuration-to-register ?e)
+        (eshell)
+        (when text-in-region (insert text-in-region)))))
 
   :config
   (setq eshell-prompt-function
