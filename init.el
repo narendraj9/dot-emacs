@@ -1707,33 +1707,21 @@ talking to any TCP server."
   :ensure t
   :bind-keymap ("C-. e" . flycheck-command-map)
   :bind ( :map ctl-period-map
-          ("C-e" . flycheck-list-errors ))
+          ("C-e" . list-linter-errors))
   :init
   (setq flycheck-indication-mode 'left-margin)
   (setq flycheck-mode-line-prefix "")
 
   (hook-into-modes #'flycheck-mode 'clojure-mode)
 
-  :config
-  (defun flycheck-mode-line-status-text (&optional status)
-    "This function should return a list because the mode-line
-only applies the 'face property on the first character of a list.
-If we return a single string with all the text properties only
-the first character's face is applied (to the whole string in the
-mode-line)."
-    (when-let ((status
-                (pcase (or status flycheck-last-status-change)
-                  (`running "*")
-                  ((or `errored `no-checker `interrupted `suspicious) "!")
-                  (`finished
-                   (let-alist (flycheck-count-errors flycheck-current-errors)
-                     (when (or .error .warning)
-                       (list "["
-                             (propertize (number-to-string (or .error 0)) 'face 'error)
-                             " "
-                             (propertize (number-to-string (or .warning 0)) 'face 'warning)
-                             "]")))))))
-      (flatten-list (list " FlyC:" status)))))
+  :preface
+  (defun list-linter-errors ()
+    (interactive)
+    (cond
+     (flymake-mode
+      (flymake-show-diagnostics-buffer))
+
+     (t (flycheck-list-errors)))))
 
 (use-package highlight-indent-guides
   :ensure t
