@@ -1917,164 +1917,22 @@ talking to any TCP server."
         shr-color-visible-distance-min 10
         shr-color-visible-luminance-min 60))
 
-;;; Ivy and Friends
-;; ──────────────────────────────────────────────────────────────────
+;;; Minibuffer Completion
+;;; ----------------------------------------------------------------------------
 
-(use-package ivy-posframe
-  :doc "Custom positions for ivy buffers."
-  :ensure t
-  :disabled t
-  :config
-  (setq ivy-posframe-display-functions-alist
-        '((complete-symbol . ivy-posframe-display-at-point)
-          (swiper . nil)
-          (swiper-isearch . nil)
-          (counsel-rg . nil)
-          (t . ivy-posframe-display-at-frame-center)))
-  (setq ivy-posframe-parameters
-        '((left-fringe . 10)))
-  (ivy-posframe-mode 1))
+(use-package orderless :ensure t :custom (completion-styles '(orderless)))
+(use-package selectrum :ensure t :init (selectrum-mode +1))
 
+(use-package embark :ensure t)
 
-(use-package ivy
-  :demand t
-  :ensure t
-  :diminish ivy-mode
-  :bind ( :map ivy-occur-grep-mode-map
-          ("q"     . kill-buffer-delete-window)
-          :map global-map
-          ("C-x b" . ivy-switch-buffer)
-          ("C-x B" . ivy-switch-buffer-other-window)
-          ("M-H"   . ivy-resume) )
-
-  :config
-  (bind-keys :map ivy-minibuffer-map
-             ("M-["     . ivy-backward-delete-char)
-             ("C-x C-f" . fallback-to-find-file)
-             ("C-S-W"   . ivy-yank-symbol*)
-             ("C-w"     . ivy-yank-word)
-             ("C-. @"   . ivy-yank-expanded-region)
-             ("C-r"     . ivy-previous-line-or-history)
-             ("M-r"     . ivy-reverse-i-search))
-
-  (setq ivy-initial-inputs-alist nil
-        ivy-re-builders-alist '((t . ivy--regex-ignore-order))
-        ivy-use-virtual-buffers t
-        ;; This is broken for eshell buffers.
-        ivy-do-completion-in-region nil)
-
-  (setq ivy-ignore-buffers `("\\` "
-                             "\\`\\*git-monitor:"
-                             "\\`magit-process:"
-                             "\\`magit:"
-                             "\\`\\*helpful:"
-                             "\\.elc$"
-                             "\\`\\.newsrc-dribble\\'"
-                             "\\`\\.newsrc.eld\\'"
-                             ;; Check these buffers with \C-x \C-b
-                             "\\`##?[a-z+@-]*\\'"))
-
-  ;; Disable sorting on input collection
-  (mapc (lambda (cmd)
-          (push (list cmd) ivy-sort-functions-alist))
-        '(hledger-run-command))
-
-  (ivy-mode +1)
-
-  :preface
-  (defun fallback-to-find-file ()
-    (interactive)
-    (ivy-set-action
-     (lambda (_x)
-       (let ((completing-read-function 'completing-read-default))
-         (call-interactively 'find-file))))
-    (ivy-done))
-
-  (defun ivy-yank-symbol* ()
-    "Yank symbol at point into ivy minibuffer."
-    (interactive)
-    (if-let ((symbol (with-ivy-window (thing-at-point 'symbol))))
-        (insert symbol)
-      (message "No symbol at point"))))
-
-
-(use-package counsel
-  :ensure t
-  :commands counsel-ag
-  :bind (("M-x"       . counsel-M-x)
-         ("C-x 8 RET" . counsel-unicode-char)
-         ("M-y"       . counsel-yank-pop)
-         ("M-s a"     . counsel-project-ag)
-         :map minibuffer-local-map
-         ("M-r" . counsel-minibuffer-history)
-
-         :map ctl-quote-map
-         ("C-'" . counsel-imenu))
-  :config
-  (setq ivy-initial-inputs-alist nil)
-  (setq counsel-yank-pop-separator
-        (format "\n%s\n" (make-string 60 ?┅)))
-
-  (setq counsel-find-file-ignore-regexp
-        (concat "\\(\\`\\.[^.]\\|"
-                (regexp-opt completion-ignored-extensions)
-                "\\)"))
-
-  (ivy-set-actions 'counsel-ag '(("f"  counsel-add-ag-flag "Flags")))
-
-  ;; `org-mode-map' and `org-agenda-mode-map' might not be loaded yet.
-  (eval-after-load "org"
-    '(bind-keys :map org-mode-map
-                ("C-c C-j" . counsel-org-goto)
-                ("C-c C-q" . counsel-org-tag)))
-
-  (eval-after-load "org-agenda"
-    '(bind-keys :map org-agenda-mode-map
-                (":" . counsel-org-tag-agenda)))
-  :preface
-  (defun counsel-add-ag-flag (_args)
-    "Insert a new flag into the `counsel-ag-command' being executed.
-       This is intended to be invoked with `ivy-dispatching-call' `C-M-m'."
-    (setq counsel-ag-command
-          (concat (format counsel-ag-command
-                          (ivy-read "Flags: " '()))
-                  " %s")))
-
-  (defun counsel-project-ag ()
-    "Start `counsel-ag' for current project."
-    (interactive)
-    (counsel-ag (or (and (symbol-at-point)
-                         (symbol-name (symbol-at-point)))
-                    "")
-                (if-let ((p (project-current)))
-                    (project-root p)
-                  default-directory))))
-
-(use-package counsel-bbdb
-  :ensure t
-  :after bbdb
-  :config
-  ;; This will feel like a hack until I get used to this being here or I
-  ;; forget about its existence.
-  (setf (symbol-function 'bbdb-complete-mail)
-        #'counsel-bbdb-complete-mail))
-
-(use-package ivy-hydra :ensure t)
 (use-package swiper
   :ensure t
   :commands swiper-from-isearch
-  :bind (
-         :map global-map
-         ("M-s s" . swiper*)
-         :map ctl-period-map
-         ("C-s"   . swiper*)
-         ("C-S-s" . swiper-all)
-         )
+  :bind ( :map ctl-period-map ("C-s"   . swiper*) )
   :init
   (bind-key "C-." #'swiper-from-isearch isearch-mode-map)
-  :config
-  (setq ivy-initial-inputs-alist nil)
 
+  :config
   (bind-keys :map swiper-map
              ("M-%" . swiper-query-replace)
              ("C-w" . ivy-yank-word)
@@ -2088,31 +1946,24 @@ talking to any TCP server."
                                                         (point)))))))
 
 
-;;; Completion Filtering and Sorting
-;;; ----------------------------------------------------------------------------
-
-(use-package prescient
-  :demand t
+(use-package consult
   :ensure t
-  :init
-  (use-package ivy-prescient
-    :ensure t
-    :after counsel
-    :config
-    (ivy-prescient-mode +1)
-    ;; Do not sort kill-ring entries, I usually only care about the
-    ;; most recent ones.
-    (add-to-list 'ivy-prescient-sort-commands 'counsel-yank-pop t))
+  :custom (consult-preview-key (kbd "M-."))
+  :bind ( :map global-map
+          ("C-x b" . consult-buffer)
 
-  (use-package company-prescient
-    :ensure t
-    :after company
-    :config
-    (company-prescient-mode +1))
+          :map ctl-quote-map
+          ("C-'" . counsel-imenu)) )
 
-  :config
-  (setq prescient-history-length 1000)
-  (prescient-persist-mode +1))
+(use-package counsel
+  :ensure t
+  :bind ( ("C-x 8 RET" . counsel-unicode-char)
+          ("M-y"       . counsel-yank-pop)
+          ("M-s a"     . counsel-ag)
+
+
+          :map minibuffer-local-map
+          ("M-r" . counsel-minibuffer-history) ))
 
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
@@ -2219,7 +2070,7 @@ talking to any TCP server."
     (eval-buffer (current-buffer))
     (message "%s" (propertize "=> Buffer Evaluation Complete"
                               'face
-                              'compilation-mode-line-exit)))
+                              'compilatoin-mode-line-exit)))
   :init
   (use-package highlight-defined
     :ensure t
@@ -2923,7 +2774,16 @@ talking to any TCP server."
      (when (< emacs-major-version 25)
        (setq visible-bell nil)))
     (`gnu/linux
-     (midnight-mode +1))))
+     (midnight-delay-set 'midnight-delay -7200)
+     (midnight-mode +1)
+     ;; Start Redshift if it's not already running on the system.
+     (unless (seq-find (lambda (pid)
+                         (when-let ((args (assoc-default 'args (process-attributes pid))))
+                           (string-match "^redshift .*" args)))
+                       (list-system-processes))
+       (async-shell-command (format "redshift -l %s:%s"
+                                    (number-to-string calendar-latitude)
+                                    (number-to-string calendar-longitude)))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 (use-package highlight :ensure t :defer t)
