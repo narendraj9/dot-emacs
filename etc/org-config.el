@@ -172,9 +172,9 @@ Otherwise, limit to only `org-mode' files."
                              (setq mode-name "Org")
                              ;; Turn on `variable-pitch-mode' if using a light
                              ;; theme
-                             (when (eq (frame-parameter nil 'background-mode)
-                                       'light)
-                               (variable-pitch-mode +1))
+                             ;; (when (eq (frame-parameter nil 'background-mode)
+                             ;;           'light)
+                             ;;   (variable-pitch-mode +1))
                              (local-set-key [remap goto-address-at-point]
                                             #'org-open-at-point)))
   (plist-put org-format-latex-options

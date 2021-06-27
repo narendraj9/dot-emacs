@@ -348,7 +348,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-to-list 'custom-theme-load-path
                (expand-file-name "themes/"
                                  user-emacs-directory))
-  (load-theme 'jazz)
+  (load-theme 'modus-operandi)
   (use-package mode-line-config :demand t :load-path "etc/")
 
   ;; Setup my favorite fonts [if available]
@@ -374,7 +374,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
   (setq-default ;; cursor-type 'bar
-                cursor-in-non-selected-windows nil)
+   cursor-in-non-selected-windows nil)
 
   (setq x-underline-at-descent-line t)
 
@@ -1952,6 +1952,7 @@ talking to any TCP server."
   :ensure t
   :custom (consult-preview-key (kbd "M-."))
   :bind ( :map global-map
+          ("M-y"   . counsel-yank-pop)
           ("C-x b" . consult-buffer)
 
           :map ctl-quote-map
@@ -1960,9 +1961,7 @@ talking to any TCP server."
 (use-package counsel
   :ensure t
   :bind ( ("C-x 8 RET" . counsel-unicode-char)
-          ("M-y"       . counsel-yank-pop)
           ("M-s a"     . counsel-ag)
-
 
           :map minibuffer-local-map
           ("M-r" . counsel-minibuffer-history) ))
