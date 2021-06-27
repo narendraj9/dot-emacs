@@ -1923,7 +1923,9 @@ talking to any TCP server."
 (use-package orderless :ensure t :custom (completion-styles '(orderless)))
 (use-package selectrum :ensure t :init (selectrum-mode +1))
 
-(use-package embark :ensure t)
+(use-package embark
+  :bind ("C-c C-." . embark-act)
+  :ensure t)
 
 (use-package swiper
   :ensure t
