@@ -1350,6 +1350,13 @@ talking to any TCP server."
         company-tooltip-flip-when-above t
         company-tooltip-offset-display 'lines)
 
+  ;; https://www.reddit.com/r/emacs/comments/nichkl/how_to_use_different_completion_styles_in_the/
+  (advice-add 'company-capf
+              :around
+              (lambda (capf-fn &rest args)
+                (let ((completion-styles '(basic partial-completion)))
+                  (apply capf-fn args))))
+
   :preface
   (defun company-mode-quicker ()
     "Makes `company-mode' show completions quickly in a buffer."
@@ -1923,7 +1930,10 @@ talking to any TCP server."
 ;;; Minibuffer Completion
 ;;; ----------------------------------------------------------------------------
 
-(use-package orderless :ensure t :custom (completion-styles '(partial-completion orderless)))
+(use-package orderless
+  :ensure t
+  :custom (completion-styles '(orderless)))
+
 (use-package selectrum :ensure t :init (selectrum-mode +1))
 
 (use-package embark
