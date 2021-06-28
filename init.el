@@ -1923,7 +1923,7 @@ talking to any TCP server."
 ;;; Minibuffer Completion
 ;;; ----------------------------------------------------------------------------
 
-(use-package orderless :ensure t :custom (completion-styles '(orderless)))
+(use-package orderless :ensure t :custom (completion-styles '(partial-completion orderless)))
 (use-package selectrum :ensure t :init (selectrum-mode +1))
 
 (use-package embark
