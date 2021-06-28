@@ -310,7 +310,13 @@ Otherwise, limit to only `org-mode' files."
               (quietly (org-agenda-to-appt t))
               (setq mode-name "Org Agenda")
               (local-set-key [remap goto-address-at-point] #'org-agenda-open-link)
-              (hl-line-mode 1)
+
+              ;; Alternative to a constantly highlighted line
+              (dolist (org-move-fn '(org-agenda-next-line org-agenda-previous-line))
+                (add-function :after
+                              (symbol-function org-move-fn)
+                              (lambda ()
+                                (pulse-momentary-highlight-one-line (point-at-bol)))))
 
               (bind-keys :map org-agenda-mode-map
                          ("T"       . org-agenda-toggle-toggle-tags-column)
