@@ -324,6 +324,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           list-timers
           list-threads))
 
+  ;; Dialog boxes don't work with Xmonad.
+  (setq use-dialog-box nil)
+
   (defalias 'yes-or-no-p 'y-or-n-p))
 
 (use-package comp
