@@ -1934,7 +1934,12 @@ talking to any TCP server."
   :ensure t
   :custom (completion-styles '(orderless)))
 
-(use-package selectrum :ensure t :init (selectrum-mode +1))
+(use-package selectrum
+  :ensure t
+  ;; I prefer `company-mode' provided UI to complete in buffers other
+  ;; than the minibuffer.
+  :custom (selectrum-complete-in-buffer nil)
+  :init (selectrum-mode +1))
 
 (use-package embark
   :bind ("C-c C-." . embark-act)
@@ -2795,7 +2800,7 @@ talking to any TCP server."
                          (when-let ((args (assoc-default 'args (process-attributes pid))))
                            (string-match "^redshift .*" args)))
                        (list-system-processes))
-       (async-shell-command (format "redshift -l %s:%s"
+       (async-shell-command (format "nohup redshift -l %s:%s"
                                     (number-to-string calendar-latitude)
                                     (number-to-string calendar-longitude)))))))
 
