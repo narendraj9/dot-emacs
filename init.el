@@ -1715,9 +1715,9 @@ talking to any TCP server."
 
 (use-package flycheck
   :ensure t
-  :bind-keymap ("C-. e" . flycheck-command-map)
-  :bind ( :map ctl-period-map
-          ("C-e" . list-linter-errors))
+  :bind-keymap ("C-x C-." . flycheck-command-map)
+  :bind ( :map flycheck-command-map
+          ("C-." . list-linter-errors) )
   :init
   (setq flycheck-indication-mode 'left-margin)
   (setq flycheck-mode-line-prefix "")
@@ -1728,7 +1728,8 @@ talking to any TCP server."
   (defun list-linter-errors ()
     (interactive)
     (cond
-     (flymake-mode
+     ((and (boundp 'flymake-mode)
+           flymake-make)
       (flymake-show-diagnostics-buffer))
 
      (t (flycheck-list-errors)))))
