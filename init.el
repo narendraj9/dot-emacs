@@ -1375,7 +1375,7 @@ talking to any TCP server."
          ("a"     . counsel-ag)
          ("r"     . counsel-rg)
          ("z"     . kill-buffer-delete-window)
-         ("j"     . ido-find-file)
+         ("j"     . dired-x-find-file)
          ("f"     . project-find-file)
          ("~"     . dired-go-home)
          ("C-c u" . dired-up-repeatedly))
