@@ -1080,7 +1080,7 @@ after doing `symbol-overlay-put'."
 (use-package window
   ;; There is no mnemonic here, it's just convenient to type.
   :bind ( :map ctl-m-map ("C-l" . delete-other-windows)
-          :map ctl-period-map ("e" . fit-window-to-buffer))
+          :map ctl-period-map ("e" . fit-window-to-buffer*) )
   :init
   (setq fit-window-to-buffer-horizontally t
         window-resize-pixelwise t)
@@ -1102,7 +1102,12 @@ after doing `symbol-overlay-put'."
                  `(,buffer-regex display-buffer-in-direction
                                  (window . main)
                                  (direction . right)
-                                 (window-width . 0.5)))))
+                                 (window-width . 0.5))))
+
+  :preface
+  (defun fit-window-to-buffer* (arg)
+    (interactive "P")
+    (fit-window-to-buffer (if arg (other-window 1) (selected-window)))))
 
 
 (use-package winner
@@ -1728,8 +1733,7 @@ talking to any TCP server."
   (defun list-linter-errors ()
     (interactive)
     (cond
-     ((and (boundp 'flymake-mode)
-           flymake-make)
+     ((memq 'flymake-mode local-minor-modes)
       (flymake-show-diagnostics-buffer))
 
      (t (flycheck-list-errors)))))
