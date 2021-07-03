@@ -1080,7 +1080,7 @@ after doing `symbol-overlay-put'."
 (use-package window
   ;; There is no mnemonic here, it's just convenient to type.
   :bind ( :map ctl-m-map ("C-l" . delete-other-windows)
-          :map ctl-period-map ("e" . fit-window-to-buffer))
+          :map ctl-period-map ("e" . fit-window-to-buffer*) )
   :init
   (setq fit-window-to-buffer-horizontally t
         window-resize-pixelwise t)
@@ -1102,7 +1102,12 @@ after doing `symbol-overlay-put'."
                  `(,buffer-regex display-buffer-in-direction
                                  (window . main)
                                  (direction . right)
-                                 (window-width . 0.5)))))
+                                 (window-width . 0.5))))
+
+  :preface
+  (defun fit-window-to-buffer* (arg)
+    (interactive "P")
+    (fit-window-to-buffer (if arg (other-window 1) (selected-window)))))
 
 
 (use-package winner
@@ -1728,8 +1733,7 @@ talking to any TCP server."
   (defun list-linter-errors ()
     (interactive)
     (cond
-     ((and (boundp 'flymake-mode)
-           flymake-make)
+     ((memq 'flymake-mode local-minor-modes)
       (flymake-show-diagnostics-buffer))
 
      (t (flycheck-list-errors)))))
@@ -2271,7 +2275,7 @@ talking to any TCP server."
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package man
   :bind ( :map ctl-quote-map ("C-m" . man)
-          :map ctl-m-map ([C-m] . man ) )
+          :map ctl-m-map ([C-m] . woman ) )
   :config
   (setq Man-notify-method 'aggressive)
   (add-hook 'Man-mode-hook
@@ -2465,7 +2469,17 @@ talking to any TCP server."
   :config
   (use-package go-guru :ensure t)
   (unless (getenv "GOPATH")
-    (setenv "GOPATH" (shell-command-to-string "echo -n $GOPATH"))))
+    (setenv "GOPATH" (shell-command-to-string "echo -n $GOPATH")))
+
+  (require 'project)
+  (defun project-find-go-module (dir)
+    (when-let ((root (locate-dominating-file dir "go.mod")))
+      (cons 'go-module root)))
+
+  (cl-defmethod project-root ((project (head go-module)))
+    (cdr project))
+
+  (add-hook 'project-find-functions #'project-find-go-module))
 
 ;;; NIX
 ;; ──────────────────────────────────────────────────────────────────
@@ -2760,8 +2774,9 @@ talking to any TCP server."
   ;; `pdf-cache' compiled, Emacs lisp tries to execute it as a
   ;; function. That's why I have defined it here as a function instead
   ;; of a macro:
-  (defun pdf-view-current-page (&optional window)
-    (image-mode-window-get 'page window)))
+  (eval-after-load "pdf-view"
+    '(defun pdf-view-current-page (&optional window)
+       (image-mode-window-get 'page window))))
 
 (use-package pdf-view-restore
   :ensure t
@@ -2812,7 +2827,7 @@ talking to any TCP server."
                          (when-let ((args (assoc-default 'args (process-attributes pid))))
                            (string-match "^redshift .*" args)))
                        (list-system-processes))
-       (async-shell-command (format "nohup redshift -l %s:%s"
+       (async-shell-command (format "nohup redshift -l %s:%s > /tmp/redshift.log"
                                     (number-to-string calendar-latitude)
                                     (number-to-string calendar-longitude)))))))
 
