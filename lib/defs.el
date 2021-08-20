@@ -861,8 +861,7 @@ binary file."
 ;;;###autoload
 (define-minor-mode utils-easy-move-mode
   "A mode for bindings in a read only environment. Mimicks vim."
-  nil
-  "Easy"
+  :lighter "Easy"
   (utils-easy-move (make-sparse-keymap)))
 
 (defun format-alist (x)

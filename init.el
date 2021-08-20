@@ -1792,7 +1792,8 @@ talking to any TCP server."
         eshell-aliases-file
         (expand-file-name "./etc/eshell-aliases" user-emacs-directory))
 
-  (define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common)
+  (eval-after-load 'em-cmpl
+    '(define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common))
 
   ;; ANSI colors in Eshell buffers.
   (add-hook 'eshell-preoutput-filter-functions
