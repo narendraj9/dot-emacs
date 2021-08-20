@@ -1127,15 +1127,27 @@ respective files."
 
 
 (defun websearch-it (&optional base-url)
-  "Search the region between mark and point using Qwant.
+  "Search the region between mark and point using base-url.
 
 If BASE-URL is not nil, use it as the URL template to insert the
 search keyword."
   (interactive)
-  (let ((query (if (region-active-p)
-                   (buffer-substring-no-properties (region-beginning) (region-end))
-                 (read-string "Query: " (word-at-point)))))
-    (browse-url (format (or base-url "https://qwant.com/?q=%s") query))))
+  (letrec ((query (if (region-active-p)
+                      (buffer-substring-no-properties (region-beginning) (region-end))
+                    (read-string "Query: " (word-at-point))))
+           (url (format (or base-url "https://duckduckgo.com/?q=%s") query))
+           (image-file (make-temp-file "wkhtmltoimage-" nil ".png"))
+           (clean-up (lambda (&rest _args) (delete-file image-file)))
+           (p (start-process "wkhtmltoimage" nil "wkhtmltoimage" url image-file))
+           (display-buffer-alist '((" \\*Web\\*"  (display-buffer-reuse-window
+                                                   display-buffer-in-side-window)
+                                    (side . right)
+                                    (window-width . 0.5)))))
+    (with-current-buffer-window (get-buffer-create " *Web*") 'display-buffer-pop-up-window clean-up
+      (while (eq 'run (process-status p))
+        (sit-for 1))
+      (insert-image-file image-file)
+      (help-mode))))
 
 (defun search-linguee ()
   "Search for word at Linguee.com."

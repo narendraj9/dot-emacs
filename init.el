@@ -1089,7 +1089,6 @@ after doing `symbol-overlay-put'."
            '( ("\\`\\*e?shell" display-buffer-at-bottom)
               ("\\*Calendar\\*" display-buffer-at-bottom)
               ("\\*Async Shell Command\\*" display-buffer-no-window)
-
               ("\\`\\*Flycheck errors\\*\\'" (display-buffer-reuse-window
                                               display-buffer-in-side-window)
                (side            . bottom)
