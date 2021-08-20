@@ -1345,6 +1345,7 @@ talking to any TCP server."
     #'company-indent-or-complete-common)
 
   (bind-keys :map company-active-map
+             ("C-j"   . company-complete-selection)
              ("<tab>" . company-complete-common-or-cycle)
              ("C-n"   . company-select-next-or-abort)
              ("C-p"   . company-select-previous-or-abort))
@@ -1352,7 +1353,8 @@ talking to any TCP server."
   (setq company-idle-delay 2.0
         company-tooltip-align-annotations t
         company-tooltip-flip-when-above t
-        company-tooltip-offset-display 'lines)
+        company-tooltip-offset-display 'lines
+        company-format-margin-function nil)
 
   ;; https://www.reddit.com/r/emacs/comments/nichkl/how_to_use_different_completion_styles_in_the/
   (advice-add 'company-capf
@@ -1762,7 +1764,8 @@ talking to any TCP server."
   (setq comint-scroll-show-maximum-output nil))
 
 (use-package eshell
-  :bind (:map ctl-quote-map ("C-p" . eshell-toggle))
+  :bind ( :map ctl-quote-map
+          ("C-p" . eshell-toggle) )
   :init
   (setq eshell-modules-list
         '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
@@ -1788,6 +1791,8 @@ talking to any TCP server."
 
         eshell-aliases-file
         (expand-file-name "./etc/eshell-aliases" user-emacs-directory))
+
+  (define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common)
 
   ;; ANSI colors in Eshell buffers.
   (add-hook 'eshell-preoutput-filter-functions
