@@ -351,7 +351,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-to-list 'custom-theme-load-path
                (expand-file-name "themes/"
                                  user-emacs-directory))
-  (load-theme 'modus-operandi)
+  (load-theme 'jazz)
   (use-package mode-line-config :demand t :load-path "etc/")
 
   ;; Setup my favorite fonts [if available]
