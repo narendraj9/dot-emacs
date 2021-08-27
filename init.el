@@ -2968,27 +2968,6 @@ talking to any TCP server."
 (use-package memory-usage :ensure t :commands memory-usage)
 (use-package proof-general :defer t :ensure t)
 
-(use-package langtool
-  :ensure t
-  :bind (:map ctl-quote-map
-              ("c k" . langtool-check))
-  :config
-  (setq langtool-disabled-rules "WHITESPACE_RULE")
-
-  :init
-  (setq langtool-language-tool-jar
-        (expand-file-name "var/LanguageTool-Stable/languagetool-commandline.jar"
-                          user-emacs-directory))
-  (unless (file-exists-p langtool-language-tool-jar)
-    (let ((default-directory user-emacs-directory))
-      (async-shell-command
-       "rm -rf var/LanguageTool*;
-        wget -O var/languagetool.zip https://languagetool.org/download/LanguageTool-stable.zip;
-        unzip -o var/languagetool.zip -d var/;
-        rm var/languagetool.zip;
-        mv var/LanguageTool-* var/LanguageTool-Stable")
-      (add-to-list 'emacs-init-end-info "> Started download for languagetool."))))
-
 (use-package backlight
   :load-path "packages/lisp"
   :commands backlight)
