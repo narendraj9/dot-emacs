@@ -1373,7 +1373,6 @@ talking to any TCP server."
 ;; ──────────────────────────────────────────────────────────────────
 
 (use-package dired-x
-  :after dired
   :bind (("C-x C-j" . dired-jump)
          :map dired-mode-map
          ("M-<"   . dired-to-first-entry)
