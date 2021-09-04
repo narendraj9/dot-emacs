@@ -81,9 +81,9 @@
 
 (prodigy-define-service
   :name "blog@localhost"
-  :command "python2"
-  :args '("-m" "SimpleHTTPServer" "8000")
-  :cwd "~/blog/"
+  :command "python"
+  :args '("-m" "http.server" "8000")
+  :cwd "~/code/blog/"
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
 

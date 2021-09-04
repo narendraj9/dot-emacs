@@ -751,8 +751,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (("M-q"   . fill-or-unfill)
          ("M-["   . backward-delete-word)
          ("S-SPC" . upcase-last-symbol-and-space)
+
          :map ctl-period-map
          ("C-u" . repeated-delete-indentation)
+
          :map ctl-quote-map
          (":"   . set-variable)
          ("s >" . shell-command-on-region)
@@ -761,7 +763,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("s !" . shell-command)
          ("s a" . async-shell-command)
          ("s &" . async-shell-command)
-         ("s ." . shell-command-from-region))
+         ("s ." . shell-command-from-region) )
   :hook ((prog-mode hledger-mode)  . comment-auto-fill)
   :preface
   (defun exchange-point-and-mark* (arg)
@@ -1110,15 +1112,12 @@ after doing `symbol-overlay-put'."
 
 
 (use-package winner
+  :bind ( :map ctl-m-map
+          (">" . winner-redo)
+          ("<" . winner-undo) )
   :init
   (setq winner-dont-bind-my-keys t)
-  (winner-mode +1)
-
-  (defhydra hydra-winner (global-map "C-x w")
-    "winner> "
-    ("/"  winner-undo "undo")
-    ("\\"  winner-redo "redo")
-    ("q"  nil "quit")))
+  (winner-mode +1))
 
 (use-package exwm
   :disabled t
@@ -1677,6 +1676,7 @@ talking to any TCP server."
       (eldoc-doc-buffer))))
 
 (use-package which-func
+  :disabled t
   :doc "Display the current function in the mode line."
   :config
   (setq which-func-modes '(java-mode))
@@ -2278,8 +2278,7 @@ talking to any TCP server."
 ;;; [WO]MAN-MODE
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package man
-  :bind ( :map ctl-quote-map ("C-m" . man)
-          :map ctl-m-map ([C-m] . woman ) )
+  :bind ( :map ctl-quote-map ("C-m" . man) )
   :config
   (setq Man-notify-method 'aggressive)
   (add-hook 'Man-mode-hook
