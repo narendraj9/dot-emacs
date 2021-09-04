@@ -1996,7 +1996,24 @@ talking to any TCP server."
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
 
-(use-package java-mode :defer t :hook ( (java-mode . company-mode-quicker) ))
+(use-package java-mode
+  :defer t
+  :hook ( (java-mode . company-mode-quicker) )
+
+  :init
+  (defcustom eclipse-jdt-jar-path
+    (let ((jar-paths (file-expand-wildcards (concat "~/code/eclipse.jdt.ls/"
+                                                    "org.eclipse.jdt.ls.product/target/"
+                                                    "repository/plugins/org.eclipse.equinox.launcher_*.jar"))))
+      (when (< 1 (length jar-paths))
+        (error "Multiple Eclipse JDT jar files found."))
+      (expand-file-name (car jar-paths)))
+    "Path to the Eclipse JDT Language Server jar file.")
+
+  (setenv "CLASSPATH"
+          (concat (getenv "CLASSPATH")
+                  path-separator
+                  eclipse-jdt-jar-path)))
 
 (use-package gradle-mode
   :doc "Gradle integration in Emacs."
