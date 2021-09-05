@@ -2115,7 +2115,7 @@ talking to any TCP server."
     (eval-buffer (current-buffer))
     (message "%s" (propertize "=> Buffer Evaluation Complete"
                               'face
-                              'compilatoin-mode-line-exit)))
+                              'compilation-mode-line-exit)))
   :init
   (use-package highlight-defined
     :ensure t
