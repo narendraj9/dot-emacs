@@ -308,7 +308,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Misc
   (setq-default tab-width 4)
-  (setq-default fill-column 70)
+  (setq-default fill-column 80)
 
   ;; Disable bell
   (setq ring-bell-function (lambda ()))
@@ -1628,7 +1628,13 @@ talking to any TCP server."
 ;;; ----------------------------------------------------------------------------
 
 (use-package display-line-numbers
-  :bind ( :map ctl-period-map ([\C-m] . display-line-numbers-mode) ))
+  :bind ( :map ctl-period-map
+          ([\C-m] . display-line-numbers-and-column-indicator) )
+  :preface
+  (defun display-line-numbers-and-column-indicator ()
+    (interactive)
+    (call-interactively #'display-line-numbers-mode)
+    (call-interactively #'display-fill-column-indicator-mode)))
 
 (use-package type-break
   :disabled t

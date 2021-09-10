@@ -28,6 +28,7 @@
 (require 'bbdb-gnus)
 
 (require 'gnus)
+(require 'gnus-sum)
 (require 'gnus-msg)
 (require 'gnus-art)
 (require 'gnus-async)
@@ -170,26 +171,30 @@ buffer."
   (add-to-list 'mm-discouraged-alternatives "text/richtext"))
 
 ;;; Window configuration for Summary and Article buffers.
-(gnus-add-configuration `(article
-                          (horizontal 1.0
-                                      (summary 0.25 point)
-                                      (article 1.0))))
+(defvar reading-view `(vertical 1.0
+                                (summary 0.25 point)
+                                (article 1.0)))
+(defvar skimming-view `(vertical 1.0
+                                 (summary 0.75 point)
+                                 (article 1.0)))
 
+(gnus-add-configuration (list 'article reading-view))
 
 (defun gnus-toggle-layout ()
   (interactive)
-  (let* ((toggle-view (zerop (mod (put this-command
-                                       :count
-                                       (1+ (or (get this-command :count) 0)))
-                                  2)))
-         (split (if toggle-view
-                    '(vertical 1.0 (summary 0.75 point) (article 1.0))
-                  '(vertical 1.0 (summary 0.25 point) (article 1.0)))))
-    (gnus-add-configuration (list 'article split))
-    (gnus-with-article-buffer
-      (delete-other-windows (get-buffer-window (current-buffer)))
-      (gnus-configure-frame split))))
+  (let* ((current-view (cadr (assq 'article gnus-buffer-configuration)))
+         (new-view (if (equal current-view reading-view)
+                       skimming-view
+                     reading-view)))
+    (gnus-add-configuration (list 'article new-view))
+    (delete-other-windows (get-buffer-window gnus-summary-buffer))
+    (gnus-configure-frame new-view)))
 
+(add-function :before
+              (symbol-function 'gnus-summary-scroll-up)
+              (lambda (&rest _args)
+                (gnus-add-configuration (list 'article skimming-view))
+                (gnus-toggle-layout)))
 
 (defun gnus-article-shorten-urls ()
   (gnus-with-article-buffer
@@ -256,7 +261,9 @@ buffer."
 
 (add-hook 'gnus-article-mode-hook
           (lambda ()
-            (setq truncate-lines nil word-wrap t)
+            (setq truncate-lines nil
+                  word-wrap t
+                  fill-column 90)
             (gnus-undo-mode +1)))
 
 (add-hook 'gnus-summary-mode-hook
@@ -279,11 +286,11 @@ buffer."
 ;;; Personal Key Bindings
 ;; ----------------------------------------------------------------------------
 
-(dolist (key-command
-         (list (cons (kbd "W =") #'balance-windows)
-               (cons (kbd "y") #'gnus-article-wash-html)
-               (cons (kbd "i") #'gnus-toggle-layout)))
-  (define-key gnus-summary-mode-map (car key-command) (cdr key-command)))
+(dolist (key-command (list (cons "W =" #'balance-windows)
+                           (cons "y" #'gnus-article-wash-html)
+                           (cons "i" #'gnus-toggle-layout)
+                           (cons "C-j" #'gnus-summary-scroll-up)))
+  (define-key gnus-summary-mode-map (kbd (car key-command)) (cdr key-command)))
 
 (provide 'gnus-config)
 ;;; gnus-config.el ends here
