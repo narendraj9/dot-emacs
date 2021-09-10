@@ -2011,8 +2011,10 @@ talking to any TCP server."
     (let ((jar-paths (file-expand-wildcards (concat "~/code/eclipse.jdt.ls/"
                                                     "org.eclipse.jdt.ls.product/target/"
                                                     "repository/plugins/org.eclipse.equinox.launcher_*.jar"))))
+      (unless jar-paths
+        (message "Failed to find any JDT jar files."))
       (when (< 1 (length jar-paths))
-        (error "Multiple Eclipse JDT jar files found."))
+        (message "Multiple Eclipse JDT jar files found."))
       (expand-file-name (car jar-paths)))
     "Path to the Eclipse JDT Language Server jar file.")
 
@@ -2762,8 +2764,11 @@ talking to any TCP server."
   :hook ((gnus-group-mode . olivetti-mode)
          (gnus-article-mode . goto-address-mode))
   :init
-  (setd gnus-init-file "etc/gnus-config.el")
+  (setd gnus-init-file "etc/gnus-config.el"
+        gnus-home-directory "~/miscellany/gnus")
+
   (hook-into-modes #'hl-line-mode 'gnus-summary-mode 'gnus-group-mode)
+
   ;; So that I have SMTP settings even if Gnus config hasn't been loaded yet.
   (add-hook 'message-mode-hook
             (lambda ()
