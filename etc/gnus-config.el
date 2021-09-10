@@ -172,8 +172,24 @@ buffer."
 ;;; Window configuration for Summary and Article buffers.
 (gnus-add-configuration `(article
                           (horizontal 1.0
-                                      (summary 1.0 point)
-                                      (article ,(if (< 160 (frame-width)) 0.5 75)))))
+                                      (summary 0.25 point)
+                                      (article 1.0))))
+
+
+(defun gnus-toggle-layout ()
+  (interactive)
+  (let* ((toggle-view (zerop (mod (put this-command
+                                       :count
+                                       (1+ (or (get this-command :count) 0)))
+                                  2)))
+         (split (if toggle-view
+                    '(vertical 1.0 (summary 0.75 point) (article 1.0))
+                  '(vertical 1.0 (summary 0.25 point) (article 1.0)))))
+    (gnus-add-configuration (list 'article split))
+    (gnus-with-article-buffer
+      (delete-other-windows (get-buffer-window (current-buffer)))
+      (gnus-configure-frame split))))
+
 
 (defun gnus-article-shorten-urls ()
   (gnus-with-article-buffer
@@ -218,6 +234,18 @@ buffer."
             ;; (make-string (length mail-date) ? )
             (propertize (mail-header-subject headers) 'face 'gnus-header-subject))))
 
+;;; Searching Mail
+;; ----------------------------------------------------------------------------
+
+(defun gnus-search-mail ()
+  (interactive)
+  (let* ((query-string (mail-header-from (gnus-summary-article-header)))
+         (search-spec
+          `((search-query-spec (query . ,query-string)
+                               (raw))
+            (search-group-spec ("nnimap:gmail" "[Gmail]/All Mail")))))
+    (gnus-group-read-ephemeral-search-group nil search-spec)))
+
 
 ;;; Hooks
 ;; ----------------------------------------------------------------------------
@@ -251,18 +279,11 @@ buffer."
 ;;; Personal Key Bindings
 ;; ----------------------------------------------------------------------------
 
-(define-key gnus-summary-mode-map (kbd "W |")
-  (lambda ()
-    (interactive)
-    (gnus-with-article-buffer
-      (fit-window-to-buffer (get-buffer-window)))))
-
-(define-key gnus-summary-mode-map (kbd "W =")
-  #'balance-windows)
-
-(define-key gnus-summary-mode-map (kbd "y")
-  #'gnus-article-wash-html)
-
+(dolist (key-command
+         (list (cons (kbd "W =") #'balance-windows)
+               (cons (kbd "y") #'gnus-article-wash-html)
+               (cons (kbd "i") #'gnus-toggle-layout)))
+  (define-key gnus-summary-mode-map (car key-command) (cdr key-command)))
 
 (provide 'gnus-config)
 ;;; gnus-config.el ends here
