@@ -1134,19 +1134,8 @@ search keyword."
   (letrec ((query (if (region-active-p)
                       (buffer-substring-no-properties (region-beginning) (region-end))
                     (read-string "Query: " (word-at-point))))
-           (url (format (or base-url "https://duckduckgo.com/?q=%s") query))
-           (image-file (make-temp-file "wkhtmltoimage-" nil ".png"))
-           (clean-up (lambda (&rest _args) (delete-file image-file)))
-           (p (start-process "wkhtmltoimage" nil "wkhtmltoimage" url image-file))
-           (display-buffer-alist '((" \\*Web\\*"  (display-buffer-reuse-window
-                                                   display-buffer-in-side-window)
-                                    (side . right)
-                                    (window-width . 0.5)))))
-    (with-current-buffer-window (get-buffer-create " *Web*") 'display-buffer-pop-up-window clean-up
-      (while (eq 'run (process-status p))
-        (sit-for 1))
-      (insert-image-file image-file)
-      (help-mode))))
+           (url (format (or base-url "https://duckduckgo.com/?q=%s") query)))
+    (eww-browse-url url)))
 
 (defun search-linguee ()
   "Search for word at Linguee.com."

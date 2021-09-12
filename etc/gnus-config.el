@@ -67,7 +67,9 @@ buffer."
 (setq gnus-visible-headers
       "^From:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Followup-To:\\|^Reply-To:\\|^Summary:\\|^Keywords:\\|^To:\\|^[BGF]?Cc:\\|^Posted-To:\\|^Mail-Copies-To:\\|^Mail-Followup-To:\\|^Apparently-To:\\|^Gnus-Warning:\\|^Resent-From:\\|^X-Sent:\\|^User-Agent:\\|^X-Mailer:\\|^X-Newsreader:")
 
+(setq gnus-summary-thread-gathering-function 'gnus-gather-threads-by-references)
 (setq gnus-thread-hide-subtree t)
+
 
 ;; Article and thread sorting
 (setq gnus-article-sort-functions
@@ -175,7 +177,7 @@ buffer."
                                 (summary 0.25 point)
                                 (article 1.0)))
 (defvar skimming-view `(vertical 1.0
-                                 (summary 0.75 point)
+                                 (summary 0.9 point)
                                  (article 1.0)))
 
 (gnus-add-configuration (list 'article reading-view))
@@ -241,6 +243,21 @@ buffer."
 
 ;;; Searching Mail
 ;; ----------------------------------------------------------------------------
+
+(defun gm-nnir-group-make-gmail-group (query)
+  "Use GMail search syntax.
+See https://support.google.com/mail/answer/7190?hl=en for syntax.
+
+Credits:  https://emacspeak.blogspot.com/2020/09/searching-gmail-from-gnus.html"
+  (interactive "sGMail Query: ")
+  (let ((nnir-imap-default-search-key "imap")
+        (q (format "X-GM-RAW \"%s\"" query)))
+    (cond
+     ((gnus-group-group-name)           ; Search current group
+      (gnus-group-make-nnir-group
+       nil                              ; no extra params needed
+       `(nnir-specs (nnir-query-spec (query ,q)))))
+     (t (error "Not on a group.")))))
 
 (defun gnus-search-mail ()
   (interactive)

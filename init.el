@@ -617,11 +617,27 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;; ──────────────────────────────────────────────────────────────────
 (use-package minibuffer
+  :bind ( :map minibuffer-mode-map
+          ("C-w" . yank-symbol-to-minibuffer-or-kill-region ) )
   :config
   (setq enable-recursive-minibuffers t
         history-delete-duplicates t
         history-length 1000)
-  (minibuffer-depth-indicate-mode +1))
+  (minibuffer-depth-indicate-mode +1)
+
+  :preface
+  (defun yank-symbol-to-minibuffer-or-kill-region ()
+    (interactive)
+    (if (region-active-p)
+        (call-interactively #'kill-region)
+      (insert (with-minibuffer-selected-window
+                (let ((starting-point (if (eq last-command this-command)
+                                          (get this-command :starting-point)
+                                        (put this-command  :starting-point (point))))
+                      (p (point)))
+                  (forward-word)
+                  (pulse-momentary-highlight-region starting-point (point))
+                  (buffer-substring p (point))))))))
 
 (use-package tab-bar
   :bind (:map tab-prefix-map ("s" . tab-switcher))
