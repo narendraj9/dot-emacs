@@ -72,10 +72,9 @@ Otherwise, limit to only `org-mode' files."
   :pin org
   :ensure org-plus-contrib
   :demand t
-  :bind (("C-c l" . org-store-link)
-         :map org-mode-map
-         ("C-c C-x l" . counsel-org-entity)
-         ("M-q" . org-fill-paragraph))
+  :bind ( :map org-mode-map
+          ("C-c C-x l" . counsel-org-entity)
+          ("M-q" . org-fill-paragraph) )
   :init
   (setq org-directory (or (getenv "ORG_DIRECTORY")
                           "~/miscellany/personal/org/")

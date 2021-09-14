@@ -1862,7 +1862,8 @@ talking to any TCP server."
 
 (use-package org-config
   :load-path "etc/"
-  :bind (("C-c c" . org-config-capture)
+  :bind (("C-c l" . org-store-link)
+         ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
          :map ctl-quote-map
          ("C-n" . open-org-file)
@@ -2067,7 +2068,8 @@ talking to any TCP server."
           ("C-c C-k"  . compile)
           ("C-c C-t"  . c-toggle-comment-style) )
   :config
-  (setq-default c-block-comment-flag t))
+  (setq-default c-block-comment-flag t
+                c-auto-newline t))
 
 (use-package info-lookmore
   :doc "Adds extra info manuals for `info-lookup-symbol'."

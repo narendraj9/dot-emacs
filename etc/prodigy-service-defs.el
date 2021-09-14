@@ -137,5 +137,16 @@
   :kill-process-buffer-on-stop t
   :truncate-output t)
 
+
+(prodigy-define-service
+  :name "SSH SOCKS5 Proxy"
+  :command "ssh"
+  :stop-signal 'int
+  :kill-process-buffer-on-stop t
+  :args (lambda (&rest _service-opts)
+          (list "-D"  (read-string "Port: ")
+                "-fN" (read-string "Host: "))))
+
+
 (provide 'prodigy-service-defs)
 ;;; prodigy-service-defs.el ends here
