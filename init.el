@@ -1629,7 +1629,6 @@ talking to any TCP server."
   :config
   (setq eglot-autoshutdown t)
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
-                              (haskell-mode      . ("haskell-language-server"))
                               ((c-mode c++-mode) . ("clangd"))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
@@ -1865,6 +1864,12 @@ talking to any TCP server."
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
+         ;; Bindings for using the Timer
+         :map ctl-x-map
+         ("x 0" . org-timer-start)
+         ("x ;" . org-timer-set-timer)
+         ("x ." . org-timer)
+         ("x _" . org-timer-stop)
          :map ctl-quote-map
          ("C-n" . open-org-file)
          ("C-d" . search-notes-files))
