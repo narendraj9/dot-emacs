@@ -1076,10 +1076,20 @@ after doing `symbol-overlay-put'."
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
 (use-package bookmark
+  :bind ( :map ctl-x-r-map ("u" . bookmark-set-url*) )
   :defer 5
   :config
   (setq bookmark-save-flag 1
-        bookmark-default-file (expand-file-name "~/miscellany/assets/bookmarks.el")))
+        bookmark-default-file (expand-file-name "~/miscellany/assets/bookmarks.el"))
+
+  :preface
+  (defun bookmark-set-url* (url)
+    (interactive "sBookmark URL: ")
+    (if (assoc url bookmark-alist)
+        (user-error "%s is already bookmarked" url)
+      (push `(,url . ((handler . ,(lambda (bookmark)
+                                    (browse-url (car bookmark))))))
+            bookmark-alist))))
 
 (use-package saveplace
   :init
@@ -1319,9 +1329,11 @@ talking to any TCP server."
     "Unbind C-. from `flyspell-mode-map'."
     (flyspell-mode +1)
     (unbind-key "C-." flyspell-mode-map))
-  :hook (((markdown-mode latex-mode TeX-mode message-mode)
-          . enable-flyspell)
-         (prog-mode . flyspell-prog-mode))
+
+  :hook ( (( markdown-mode latex-mode TeX-mode message-mode
+             org-mode)
+           . enable-flyspell)
+          (prog-mode . flyspell-prog-mode))
   :init
   (setq flyspell-auto-correct-binding (kbd "C-:"))
 
