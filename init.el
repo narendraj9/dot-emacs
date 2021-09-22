@@ -39,7 +39,6 @@
 
 ;;; PACKAGE ARCHIVES
 ;;  ─────────────────────────────────────────────────────────────────
-(require 'package)
 
 (eval-and-compile
   (mapc (lambda (archive)
@@ -47,11 +46,8 @@
         (list (cons "melpa" "https://melpa.org/packages/")
               (cons "melpa-stable" "https://stable.melpa.org/packages/")
               (cons "org"  "https://orgmode.org/elpa/")))
-
-  (setq package-enable-at-startup nil
-        package-user-dir (expand-file-name "packages/elpa/"
-                                           user-emacs-directory))
-  (package-initialize))
+  (setq package-user-dir (expand-file-name "packages/elpa/"
+                                           user-emacs-directory)))
 
 ;;; USE-PACKAGE
 ;; ──────────────────────────────────────────────────────────────────
@@ -1680,7 +1676,9 @@ talking to any TCP server."
   (add-hook 'compilation-filter-hook
             #'compilation-escape-colors-to-ansi-colors)
   :config
-  (require 'ansi-color))
+  (require 'ansi-color)
+
+  (setq compilation-scroll-output t))
 
 (use-package eldoc
   :diminish eldoc-mode
@@ -2253,7 +2251,8 @@ talking to any TCP server."
 
   (add-hook 'cider-repl-mode-hook
             (lambda ()
-              (define-key cider-repl-mode-map (kbd "C-<return>") nil))))
+              (define-key cider-repl-mode-map (kbd "C-<return>") nil)
+              (define-key cider-repl-mode-map (kbd "TAB") #'company-indent-or-complete-common))))
 
 
 (use-package flycheck-clojure
