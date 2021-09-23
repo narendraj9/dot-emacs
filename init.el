@@ -39,15 +39,13 @@
 
 ;;; PACKAGE ARCHIVES
 ;;  ─────────────────────────────────────────────────────────────────
-
-(eval-and-compile
-  (mapc (lambda (archive)
-          (add-to-list 'package-archives archive))
-        (list (cons "melpa" "https://melpa.org/packages/")
-              (cons "melpa-stable" "https://stable.melpa.org/packages/")
-              (cons "org"  "https://orgmode.org/elpa/")))
-  (setq package-user-dir (expand-file-name "packages/elpa/"
-                                           user-emacs-directory)))
+(require 'package)
+(setq package-archives
+      '(("gnu"          . "https://elpa.gnu.org/packages/")
+        ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
+        ("org"          . "https://orgmode.org/elpa/")
+        ("melpa"        . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 ;;; USE-PACKAGE
 ;; ──────────────────────────────────────────────────────────────────
