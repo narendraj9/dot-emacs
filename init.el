@@ -1073,20 +1073,36 @@ after doing `symbol-overlay-put'."
 
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
+
 (use-package bookmark
   :bind ( :map ctl-x-r-map ("u" . bookmark-set-url*) )
   :defer 5
   :config
   (setq bookmark-save-flag 1
-        bookmark-default-file (expand-file-name "~/miscellany/assets/bookmarks.el"))
-
+        bookmark-default-file (expand-file-name "~/miscellany/assets/bookmarks.el")
+        bookmark-set-fringe-mark nil)
   :preface
+  (defun bookmark-url-handler (url-bookmark)
+    "Handle parameterized URL links.
+
+     Parameters are placed inside the URL string as
+     {{Prompt for the param}}."
+    (let ((url (car url-bookmark))
+          (start-index 0))
+      (while (and (< start-index (length url))
+                  (string-match "{{\\([^}]+\\)}}" url start-index))
+        (setq start-index (match-end 0)
+              url (string-replace (match-string 0 url)
+                                  (read-string (concat (match-string 1 url) ": "))
+                                  url)))
+      (browse-url url)))
+
   (defun bookmark-set-url* (url)
     (interactive "sBookmark URL: ")
     (if (assoc url bookmark-alist)
         (user-error "%s is already bookmarked" url)
-      (push `(,url . ((handler . ,(lambda (bookmark)
-                                    (browse-url (car bookmark))))))
+      (push `(,url . ((handler . bookmark-url-handler)
+                      (filename . ,url)))
             bookmark-alist))))
 
 (use-package saveplace
