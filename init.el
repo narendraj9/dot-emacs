@@ -1087,7 +1087,7 @@ after doing `symbol-overlay-put'."
 
      Parameters are placed inside the URL string as
      {{Prompt for the param}}."
-    (let ((url (car url-bookmark))
+    (let ((url (bookmark-prop-get url-bookmark 'url))
           (start-index 0))
       (while (and (< start-index (length url))
                   (string-match "{{\\([^}]+\\)}}" url start-index))
@@ -1097,13 +1097,13 @@ after doing `symbol-overlay-put'."
                                   url)))
       (browse-url url)))
 
-  (defun bookmark-set-url* (url)
-    (interactive "sBookmark URL: ")
-    (if (assoc url bookmark-alist)
-        (user-error "%s is already bookmarked" url)
-      (push `(,url . ((handler . bookmark-url-handler)
-                      (filename . ,url)))
-            bookmark-alist))))
+  (defun bookmark-set-url* (url description)
+    (interactive "sBookmark URL: \nsDescription: ")
+    (push (cons description
+                `((handler . bookmark-url-handler)
+                  (filename . ,url)    ; for display
+                  (url . ,url)))
+          bookmark-alist)))
 
 (use-package saveplace
   :init

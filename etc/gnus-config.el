@@ -198,7 +198,10 @@ buffer."
                 (gnus-add-configuration (list 'article skimming-view))
                 (gnus-toggle-layout)))
 
-(defun gnus-article-shorten-urls ()
+(defun gnus-article-shorten-urls (&optional arg)
+  "Shorten URLs to a max of 60 chars. With a prefix ARG, hide
+URLs."
+  (interactive "P")
   (gnus-with-article-buffer
     (save-excursion
       (goto-char (point-min))
@@ -208,9 +211,12 @@ buffer."
                (url-end (cdr bounds))
                (url-at-point (thing-at-point-url-at-point)))
           (when (and url-start url-end)
-            (put-text-property url-start
+            (put-text-property (if (equal "\n" (buffer-substring-no-properties (1- url-start) url-start))
+                                   (- url-start 1)
+                                 url-start)
                                url-end
-                               'display (gnus-shorten-url url-at-point 60))))))))
+                               'display
+                               (if arg "🔗" (gnus-shorten-url url-at-point 60)))))))))
 
 (add-hook 'gnus-article-prepare-hook #'gnus-article-shorten-urls)
 
