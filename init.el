@@ -1641,6 +1641,7 @@ talking to any TCP server."
   :ensure t
   :defer t
   :bind ( :map eglot-mode-map
+          ("C-c M-j" . eglot-reconnect)
           ("C-c r g" . eglot-code-actions)
           ("C-c r r" . eglot-rename)
           ("C-c C-d" . toggle-eldoc-doc-buffer) )
