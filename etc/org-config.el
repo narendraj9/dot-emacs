@@ -117,7 +117,10 @@ Otherwise, limit to only `org-mode' files."
         org-enforce-todo-dependencies t
 
         ;; Keep state change notes into LOGBOOK drawer
-        org-log-into-drawer t)
+        org-log-into-drawer t
+        org-log-reschedule 'time
+        org-log-redeadline 'time
+        org-log-done 'time)
 
   (add-hook 'org-follow-link-hook
             (lambda (&rest args) (message "Opening link..." args)))
