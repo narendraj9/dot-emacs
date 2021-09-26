@@ -2097,9 +2097,35 @@ talking to any TCP server."
           ("<return>" . newline-and-indent)
           ("C-c C-k"  . compile)
           ("C-c C-t"  . c-toggle-comment-style) )
+  :init
+  (setq c-default-style '((java-mode . "*java*")
+                          (awk-mode . "awk")
+			              (other . "gnu")))
   :config
   (setq-default c-block-comment-flag t
-                c-auto-newline t))
+                c-auto-newline t)
+  (c-add-style "*java*" '("java"
+                          ;; https://github.com/google/styleguide/blob/gh-pages/google-c-style.el
+                          (c-hanging-semi&comma-criteria
+                           c-semi&comma-no-newlines-for-oneline-inliners
+                           c-semi&comma-inside-parenlist
+                           c-semi&comma-no-newlines-before-nonblanks)
+                          (c-hanging-braces-alist
+                           (defun-open after)
+                           (defun-close before after)
+                           (class-open after)
+                           (class-close before after)
+                           (inexpr-class-open after)
+                           (inexpr-class-close before)
+                           (namespace-open after)
+                           (inline-open after)
+                           (inline-close before after)
+                           (block-open after)
+                           (block-close . c-snug-do-while)
+                           (extern-lang-open after)
+                           (extern-lang-close after)
+                           (statement-case-open after)
+                           (substatement-open after)))))
 
 (use-package info-lookmore
   :doc "Adds extra info manuals for `info-lookup-symbol'."
