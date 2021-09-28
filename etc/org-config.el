@@ -510,10 +510,11 @@ non-empty lines in the block (excluding the line with
            ,(concat "* %? %^G\n"
                     "%i\n\n"
                     org-config--common-metadata))
-          ("l" "Article" plain (file+headline "habits.org" "ReadingList")
-           "- [ ] %(org-cliplink-capture) %?"
-           :immediate-finish t
-           :append t)
+          ("l" "Article" plain (file+headline "habits.org" "Reading List")
+           "%(org-cliplink-capture) %?"
+           :empty-lines 1
+           :prepend t
+           :immediate-finish t)
           ("j" "Journal" entry (file+olp+datetree "journal.org")
            ,(concat "* %? %^G           \n\n"
                     org-config--common-metadata))
