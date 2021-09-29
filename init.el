@@ -1144,12 +1144,15 @@ after doing `symbol-overlay-put'."
 
 
 (use-package winner
-  :bind ( :map ctl-m-map
-          (">" . winner-redo)
-          ("<" . winner-undo) )
   :init
   (setq winner-dont-bind-my-keys t)
-  (winner-mode +1))
+  (winner-mode +1)
+
+  (define-key ctl-m-map
+    (kbd ">") (with-repeat-command winner-redo))
+
+  (define-key ctl-m-map
+    (kbd "<") (with-repeat-command winner-undo)))
 
 (use-package exwm
   :disabled t
