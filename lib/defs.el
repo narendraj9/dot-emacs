@@ -734,6 +734,12 @@ print information about what repeat is doing."
     (setq last-repeatable-command command)
     (repeat nil)))
 
+(defmacro with-repeat-command (command &optional message-fn)
+  (list 'defun (intern (format "with-repeat-command--%s" command)) ()
+        (documentation (symbol-function command))
+        (list 'interactive)
+        (list 'repeat-command (list 'quote command) (list 'quote message-fn))))
+
 (defun quick-switch-themes ()
   "A repeatable version of `quick-switch-themes'.
 The last key in the key binding can be used for repeating it."

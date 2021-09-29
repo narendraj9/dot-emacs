@@ -762,9 +762,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("M-["   . backward-delete-word)
          ("S-SPC" . upcase-last-symbol-and-space)
 
-         :map ctl-period-map
-         ("C-u" . repeated-delete-indentation)
-
          :map ctl-quote-map
          (":"   . set-variable)
          ("s >" . shell-command-on-region)
@@ -814,7 +811,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;;               (lambda (&rest _args) (deactivate-mark nil)))
   (define-key global-map
     [remap exchange-point-and-mark]
-    #'exchange-point-and-mark*))
+    #'exchange-point-and-mark*)
+
+  (define-key ctl-period-map (kbd "C-u") (with-repeat-command delete-indentation)))
 
 
 (use-package apropos
@@ -956,11 +955,8 @@ after doing `symbol-overlay-put'."
 
 (use-package goto-last-change
   :ensure t
-  :bind ("C-x C-SPC" . repeatable-goto-last-change)
-  :preface
-  (defun repeatable-goto-last-change ()
-    (interactive)
-    (repeat-command #'goto-last-change)))
+  :init
+  (define-key ctl-x-map (kbd "C-SPC") (with-repeat-command goto-last-change)))
 
 (use-package goto-line-preview
   :ensure t
@@ -1169,14 +1165,9 @@ after doing `symbol-overlay-put'."
 ;;; NAVIGATION
 ;; ――――――――――――――――――――――――――――――――――――――――
 (use-package mwim
-  :bind (:map goto-map
-              ("TAB" . mwim-repeating))
   :ensure t
-  :preface
-  (defun mwim-repeating ()
-    "Repeating form of `mwim'."
-    (interactive)
-    (repeat-command 'mwim)))
+  :init
+  (define-key goto-map (kbd "TAB") (with-repeat-command mwim)))
 
 (use-package isearch
   :doc "Search for the string in the active region, if there is any."
@@ -1419,8 +1410,7 @@ talking to any TCP server."
          ("z"     . kill-buffer-delete-window)
          ("j"     . dired-x-find-file)
          ("f"     . project-find-file)
-         ("~"     . dired-go-home)
-         ("C-c u" . dired-up-repeatedly))
+         ("~"     . dired-go-home))
   :hook ((dired-after-readin . dired-hide-details-mode)
          (dired-mode         . hl-line-mode)
          (dired-mode         . dired-omit-mode))
@@ -1430,6 +1420,9 @@ talking to any TCP server."
         dired-hide-details-hide-information-lines nil)
 
   :config
+  (define-key dired-mode-map
+    (kbd "C-c u") (with-repeat-command dired-up-directory message))
+
   (setq dired-auto-revert-buffer t)
 
   ;; Hide all files that start with a dot when `dired-omit-mode' is active.
@@ -1457,11 +1450,6 @@ talking to any TCP server."
     (interactive)
     (goto-char (point-max))
     (dired-previous-line 1))
-
-  (defun dired-up-repeatedly ()
-    "Go up repeatedly in a Dired buffer."
-    (interactive)
-    (repeat-command 'dired-up-directory #'message))
 
   (defun dired-go-home ()
     "Switch current directory to ~/."
