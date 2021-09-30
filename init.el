@@ -2734,7 +2734,7 @@ talking to any TCP server."
 (use-package password-cache
   :init
   (setq password-cache t
-        password-cache-expiry 3600))
+        password-cache-expiry (* 12 3600)))
 
 (use-package tramp
   :defer t
