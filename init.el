@@ -753,6 +753,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (region-bindings-mode-enable))
 
+(use-package repeat
+  :bind ( :map ctl-m-map ("z" . repeat-complex-command) ))
+
 (use-package select :init (setq select-enable-clipboard t))
 (use-package simple
   :doc "The great simple.el"
