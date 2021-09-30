@@ -519,7 +519,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package re-builder
   :defer t
   :config
-  (setq reb-re-syntax 'pcre))
+  (setq reb-re-syntax 'string))
 
 (use-package pcre2el
   :doc "I intend to read the code carefully someday."
@@ -1805,11 +1805,7 @@ talking to any TCP server."
 (use-package eshell
   :bind ( :map ctl-quote-map
           ("C-p" . eshell-toggle) )
-  :init
-  (setq eshell-modules-list
-        '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
-           eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
-           eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra ))
+
   :preface
   (defun eshell-toggle ()
     (interactive)
@@ -1822,8 +1818,14 @@ talking to any TCP server."
         (eshell)
         (when text-in-region (insert text-in-region)))))
 
-  :config
-  (setq eshell-prompt-function
+  :init
+  (setq eshell-modules-list
+        '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
+           eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
+           eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra ))
+
+  (setq eshell-prompt-regexp "([^#$]*) [#$] "
+        eshell-prompt-function
         (lambda ()
           (concat "(" (file-name-nondirectory (eshell/pwd)) ")"
                   (if (= (user-uid) 0) " # " " $ ")))
