@@ -411,7 +411,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     :group 'display-time)
 
   (setq display-time-string-forms
-        '((propertize (format " %s %0s %s %s:%s " day monthname
+        '((propertize (format " %s/%s/%s %s %s:%s " day month (substring year -2)
                               dayname 24-hours minutes am-pm)
                       'face
                       'date-time-face))
