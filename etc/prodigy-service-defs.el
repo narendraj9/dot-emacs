@@ -144,7 +144,8 @@
   :stop-signal 'int
   :kill-process-buffer-on-stop t
   :args (lambda (&rest _service-opts)
-          (list "-D"  (read-string "Port: ")
+          (list "-v"
+                "-D"  (read-string "Port: ")
                 "-fN" (read-string "Host: "))))
 
 
