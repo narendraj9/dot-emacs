@@ -655,7 +655,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (setq diary-file (expand-file-name "diary" emacs-assets-directory)
         ;; Weeks start on Monday.
-        calendar-week-start-day 1))
+        calendar-week-start-day 1
+        ;; Month header show the month of the year.
+        calendar-month-header
+        '(propertize (format "%s %d/%d" (calendar-month-name month) month year)
+                     'font-lock-face 'calendar-month-header)))
 
 (use-package holidays
   :defer t
