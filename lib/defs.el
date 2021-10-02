@@ -736,7 +736,9 @@ print information about what repeat is doing."
 
 (defmacro with-repeat-command (command &optional message-fn)
   (list 'defun (intern (format "with-repeat-command--%s" command)) ()
-        (documentation (symbol-function command))
+        ;; It's possible that `command' is not loaded yet as a function.
+        (when-let ((fn (symbol-function command)))
+          (documentation fn))
         (list 'interactive)
         (list 'repeat-command (list 'quote command) (list 'quote message-fn))))
 
