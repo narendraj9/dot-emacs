@@ -820,7 +820,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     [remap exchange-point-and-mark]
     #'exchange-point-and-mark*)
 
-  (define-key ctl-period-map (kbd "C-u") (with-repeat-command delete-indentation)))
+  (define-key ctl-period-map (kbd "C-u") (with-repeat-command delete-indentation))
+
+  (add-hook 'activate-mark-hook (lambda () (setq cursor-type (cons 'bar 4))))
+  (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t))))
 
 
 (use-package apropos
