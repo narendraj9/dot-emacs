@@ -2106,7 +2106,9 @@ talking to any TCP server."
 			              (other . "gnu")))
   :config
   (setq-default c-block-comment-flag t
-                c-auto-newline t)
+                c-auto-newline t
+                c-basic-offset 2)
+
   (c-add-style "*java*" '("java"
                           ;; https://github.com/google/styleguide/blob/gh-pages/google-c-style.el
                           (c-hanging-semi&comma-criteria

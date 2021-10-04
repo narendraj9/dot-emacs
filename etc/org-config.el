@@ -122,6 +122,9 @@ Otherwise, limit to only `org-mode' files."
         org-log-redeadline 'time
         org-log-done 'time)
 
+  (push '(redeadline .  "New deadline from %S to %s on %t") org-log-note-headings)
+  (push '(reschedule .  "Rescheduled from %S to %s on %t") org-log-note-headings)
+
   (add-hook 'org-follow-link-hook
             (lambda (&rest args) (message "Opening link..." args)))
 
