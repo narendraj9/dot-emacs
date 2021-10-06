@@ -736,7 +736,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package elec-pair :init (electric-pair-mode +1))
 (use-package wgrep :defer t :ensure t)
 
-(use-package hydra :ensure t :demand t :commands defhydra)
+(use-package hydra :disabled t :ensure t :demand t :commands defhydra)
 
 (use-package wrap-region
   :doc
@@ -758,7 +758,24 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (region-bindings-mode-enable))
 
 (use-package repeat
-  :bind ( :map ctl-m-map ("z" . repeat-complex-command) ))
+  :bind ( :map ctl-m-map ("z" . repeat-complex-command) )
+  :init
+  ;; If a symbol property named `repeat-map' exists for a command and it's a
+  ;; keymap, it's activate as a transient-map after command is executed.
+  (repeat-mode +1)
+
+  :config
+  (setq repeat-exit-timeout 5)
+
+  :preface
+  (defmacro define-repeat-map (&rest bindings)
+    (declare (indent 0))
+    (let ((m (make-sparse-keymap))
+          (name (gensym "repeat-map--")))
+      (dolist (binding bindings)
+        (define-key m (kbd (car binding)) (cdr binding))
+        (put (cdr binding) 'repeat-map name))
+      (list 'defvar name (list 'quote m)))))
 
 (use-package select :init (setq select-enable-clipboard t))
 (use-package simple
@@ -768,6 +785,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (("M-q"   . fill-or-unfill)
          ("M-["   . backward-delete-word)
          ("S-SPC" . upcase-last-symbol-and-space)
+
+         :map ctl-period-map
+         ("C-u" . delete-indentation)
 
          :map ctl-quote-map
          (":"   . set-variable)
@@ -790,6 +810,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (shell-command (buffer-substring-no-properties beg end)))
 
   :config
+  (define-repeat-map ("C-u" . delete-indentation))
+
   ;; Multiple-cursors changes transient-mark-mode to (only only .. t),
   ;; if shift-select-mode is enabled.
   (setq shift-select-mode nil)
@@ -819,8 +841,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (define-key global-map
     [remap exchange-point-and-mark]
     #'exchange-point-and-mark*)
-
-  (define-key ctl-period-map (kbd "C-u") (with-repeat-command delete-indentation))
 
   (add-hook 'activate-mark-hook (lambda () (setq cursor-type (cons 'bar 4))))
   (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t))))
@@ -965,8 +985,9 @@ after doing `symbol-overlay-put'."
 
 (use-package goto-last-change
   :ensure t
+  :bind ( :map ctl-x-map ("C-SPC" . goto-last-change) )
   :init
-  (define-key ctl-x-map (kbd "C-SPC") (with-repeat-command goto-last-change)))
+  (define-repeat-map ("C-SPC" .  goto-last-change)))
 
 (use-package goto-line-preview
   :ensure t
@@ -1154,15 +1175,12 @@ after doing `symbol-overlay-put'."
 
 
 (use-package winner
+  :bind ( :map ctl-m-map ("<" . winner-undo ) )
   :init
   (setq winner-dont-bind-my-keys t)
   (winner-mode +1)
-
-  (define-key ctl-m-map
-    (kbd ">") (with-repeat-command winner-redo))
-
-  (define-key ctl-m-map
-    (kbd "<") (with-repeat-command winner-undo)))
+  (define-repeat-map (">" . winner-redo)
+                     ("<" . winner-undo)))
 
 (use-package exwm
   :disabled t
@@ -1179,8 +1197,9 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――――――
 (use-package mwim
   :ensure t
+  :bind ( :map goto-map ("TAB" . mwim) )
   :init
-  (define-key goto-map (kbd "TAB") (with-repeat-command mwim)))
+  (define-repeat-map ("TAB" . mwim)))
 
 (use-package isearch
   :doc "Search for the string in the active region, if there is any."
@@ -1198,16 +1217,6 @@ after doing `symbol-overlay-put'."
   (setq isearch-lazy-count t
         lazy-highlight-initial-delay 1.0
         lazy-count-prefix-format "(%s/%s) ")
-
-  (defhydra hydra-isearch (:color pink)
-    "isearch> "
-    ("C-<return>" isearch-exit-other-end    "other end" :exit t)
-    ("C-="        isearch-toggle-case-fold  "toggle case")
-    ("C-t"        isearch-toggle-regexp     "toggle regexp")
-    ("C-^"        isearch-edit-string       "edit string")
-    ("C-i"        isearch-complete          "complete"))
-
-  (bind-key "C-o" #'hydra-isearch/body isearch-mode-map)
 
   :preface
   (defun isearch-yank-symbol ()
@@ -1275,24 +1284,12 @@ after doing `symbol-overlay-put'."
   (setq fit-window-to-buffer-horizontally t)
 
   (advice-add #'split-window-below :filter-return #'select-window)
-  (advice-add #'split-window-right :filter-return #'select-window)
-
-  (defhydra hydra-next-prev-buffer (global-map "C-c")
-    "buffer> "
-    (">" echoing-next-buffer "next")
-    ("<" echoing-previous-buffer "previous"))
-
-  (defhydra hydra-enlarge-window (global-map "C-x" :timeout 1.0)
-    "window>"
-    ("|" fit-window-to-buffer "fit-to-buffer")
-    ("^" enlarge-window "enlarge-vertically")
-    ("{" enlarge-window-horizontally "enlarge-horizontally")
-    ("}" shrink-window-horizontally "shrink-horizontally")))
+  (advice-add #'split-window-right :filter-return #'select-window))
 
 (use-package ace-window
   :doc
   "This should come after `window's use-package
-   declaration. Otherwise, `window' would overwrite the binding for \\[ace-window]]."
+  declaration. Otherwise, `window' would overwrite the binding for \\[ace-window]]."
   :ensure t
   :doc "Use `ace-window' instead of `other-window'."
   :bind ("C-x o" . ace-window))
@@ -1314,8 +1311,8 @@ after doing `symbol-overlay-put'."
 
 (use-package dictionary
   :doc "`dictionary' is a built-in package. It uses
-`dictionary-connection' that provides nice utility functions for
-talking to any TCP server."
+  `dictionary-connection' that provides nice utility functions for
+  talking to any TCP server."
   :bind ( :map global-map
           ([double-down-mouse-1] . dictionary-quick-definition)
           :map ctl-quote-map
@@ -1416,6 +1413,7 @@ talking to any TCP server."
 (use-package dired-x
   :bind (("C-x C-j" . dired-jump)
          :map dired-mode-map
+         ("C-c u" . dired-up-directory)
          ("M-<"   . dired-to-first-entry)
          ("M->"   . dired-to-last-entry)
          ("a"     . counsel-ag)
@@ -1433,8 +1431,7 @@ talking to any TCP server."
         dired-hide-details-hide-information-lines nil)
 
   :config
-  (define-key dired-mode-map
-    (kbd "C-c u") (with-repeat-command dired-up-directory message))
+  (define-repeat-map ("u" . dired-up-directory))
 
   (setq dired-auto-revert-buffer t)
 
@@ -1549,7 +1546,7 @@ talking to any TCP server."
   ;; https://github.com/abo-abo/swiper/issues/1736#issuecomment-419730497
   (defun yankpad-insert-from-current-category (&optional name)
     "Insert snippet NAME from `yankpad-category'.  Prompts for NAME unless set.
-     Does not change `yankpad-category'."
+  Does not change `yankpad-category'."
     (ivy-read "Snippet: " (yankpad-active-snippets)
               :action (lambda (x)
                         (let* ((name (car x))
@@ -1697,7 +1694,7 @@ talking to any TCP server."
   :preface
   (defun compilation-escape-colors-to-ansi-colors ()
     "Colorize from `compilation-filter-start' to `point'.
-     https://endlessparentheses.com/ansi-colors-in-the-compilation-buffer-output.html"
+  https://endlessparentheses.com/ansi-colors-in-the-compilation-buffer-output.html"
     (let ((inhibit-read-only t))
       (ansi-color-apply-on-region compilation-filter-start (point))))
   :init
@@ -1896,11 +1893,11 @@ talking to any TCP server."
          :map ctl-x-map
          ("x 0" . org-timer-start)
          ("x ;" . org-timer-set-timer)
-         ("x ." . org-timer)
-         ("x _" . org-timer-stop)
-         :map ctl-quote-map
-         ("C-n" . open-org-file)
-         ("C-d" . search-notes-files))
+  ("x ." . org-timer)
+  ("x _" . org-timer-stop)
+  :map ctl-quote-map
+  ("C-n" . open-org-file)
+  ("C-d" . search-notes-files))
   :init
   (bind-key "C-c a" #'org-agenda)
   (eval-after-load "org" '(require 'org-config))
