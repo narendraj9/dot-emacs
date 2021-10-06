@@ -55,3 +55,4 @@ tmp/backups/*
 !.gitattributes
 
 !calc.el
+!early-init.el
