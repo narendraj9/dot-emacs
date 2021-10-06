@@ -736,6 +736,7 @@ non-empty lines in the block (excluding the line with
 
 (use-package org-gcal
   :ensure t
+  :bind ( :map org-agenda-mode-map ("C-c g" . org-gcal-fetch* ) )
   :when (and (boundp 'gcal-client-id)
              (boundp 'gcal-client-secret))
   :config
@@ -747,9 +748,20 @@ non-empty lines in the block (excluding the line with
   (setq org-gcal-notify-p nil
         org-gcal-auto-archive t)
 
+  :init
   ;; (add-hook 'org-agenda-finalize-hook #'org-gcal-fetch)
   ;; (add-hook 'org-capture-before-finalize-hook #'org-gcal-sync)
-  )
+  :preface
+  (defun org-gcal-fetch* ()
+    (interactive)
+    (let ((org-agenda-files (list (expand-file-name "calendar.org"
+                                                    org-directory)))
+          org-agenda-text-search-extra-files
+          org-generic-id-files org-id-extra-files org-generic-id-search-archives)
+      (org-gcal-sync t t)
+      ;; Give the above function some time to execute asynchronously (using
+      ;; `emacs-deferred').
+      (sit-for 5))))
 
 (use-package org-timer
   :init
