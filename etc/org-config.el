@@ -50,11 +50,9 @@ Otherwise, limit to only `org-mode' files."
     (->> (f-entries default-directory
                     (if arg #'f-file? (lambda (f) (f-ext-p f "org")))
                     t)
-      (mapcar (lambda (f)
-                (propertize f
-                            'display (string-truncate-left f (- (window-width) 10)))))
-      (completing-read "Select org file: ")
-      (find-file))))
+         (mapcar (lambda (f) (propertize f 'display (f-relative f org-directory))))
+         (completing-read "Select org file: ")
+         (find-file))))
 
 (defun search-notes-files ()
   "Search org files using `counsel-ag'."
