@@ -653,6 +653,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (:map ctl-quote-map
               ("c c" . calendar))
   :init
+  (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
+
   (setq diary-file (expand-file-name "diary" emacs-assets-directory)
         ;; Weeks start on Monday.
         calendar-week-start-day 1
