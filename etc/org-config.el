@@ -754,6 +754,9 @@ non-empty lines in the block (excluding the line with
   :preface
   (defun org-gcal-fetch* ()
     (interactive)
+    ;; Defines `org-generic-id-*' vars as dynamic so that the next let binding
+    ;; doesn't make them lexically scoped in this function.
+    (require 'org-generic-id)
     (let ((org-agenda-files (list (expand-file-name "calendar.org"
                                                     org-directory)))
           org-agenda-text-search-extra-files
