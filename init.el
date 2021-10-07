@@ -170,6 +170,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :bind (("C-c m" . switch-to-minibuffer)
          ("C-c 0" . quick-switch-themes)
+         ("C-c b" . switch-to-buffer-with-mode)
          ("<print>" . snap-it)
          :map ctl-quote-map
          ("w s" . websearch-it)

@@ -225,8 +225,28 @@ Argument END ending point for region."
          (now (time-subtract (current-time)
                              delta-time)))
     (letf (((symbol-function 'current-time) (lambda () now)))
-      (org-agenda-todo))))
+          (org-agenda-todo))))
 
+
+(defun switch-to-buffer-with-mode (arg)
+  "Switch buffer with `completion' candidates limited to just one
+`major-mode'.
+
+The mode defaults to the `major-mode' of the current buffer. If
+prefix ARG is provided, the user is asked for the major-mode."
+  (interactive "P")
+  (let* ((mode-options (seq-uniq (mapcar (lambda (b)
+                                           (buffer-local-value 'major-mode b))
+                                         (buffer-list))))
+         (mode (if arg
+                   (intern (completing-read "Mode: " mode-options))
+                 major-mode)))
+    (switch-to-buffer (read-buffer (format "%s: " mode)
+                                   nil
+                                   t
+                                   (lambda (b)
+                                     (with-current-buffer (car b)
+                                       (eq mode major-mode)))))))
 
 (defun switch-to-minibuffer ()
   "Switch to minibuffer."
