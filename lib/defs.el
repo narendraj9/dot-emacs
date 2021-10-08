@@ -241,13 +241,26 @@ current buffer."
   (let* ((mode-options (seq-uniq (mapcar (lambda (b)
                                            (buffer-local-value 'major-mode b))
                                          (buffer-list))))
+         (mode-matches (lambda (read-chars)
+                         (seq-filter (lambda (m) (string-prefix-p read-chars (symbol-name m)))
+                                     mode-options)))
          selected-mode read-chars)
     (if arg
         (setq selected-mode major-mode)
       (while (not selected-mode)
-        (setq read-chars (concat read-chars (single-key-description (read-char nil))))
-        (let ((matches (seq-filter (lambda (m) (string-prefix-p read-chars (symbol-name m)))
-                                   mode-options)))
+        (setq read-chars
+              (concat read-chars
+                      (single-key-description
+                       (read-char
+                        (when read-chars
+                          (format "%s: "
+                                  (mapconcat (lambda (m)
+                                               (concat (propertize read-chars
+                                                                   'face 'minibuffer-prompt)
+                                                       (string-remove-prefix read-chars (symbol-name m))))
+                                             (funcall mode-matches read-chars)
+                                             ", ")))))))
+        (let ((matches (funcall mode-matches read-chars)))
           (cond
            ((zerop (length matches))
             (user-error "No matching modes found."))

@@ -61,6 +61,9 @@ buffer."
       smtpmail-smtp-service 587
       gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]")
 
+;; (require 'supercite)
+;; (add-hook 'mail-citation-hook 'sc-cite-original)
+
 (setq send-mail-function 'smtpmail-send-it
       message-send-mail-function 'smtpmail-send-it)
 

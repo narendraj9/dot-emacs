@@ -2003,7 +2003,9 @@ after doing `symbol-overlay-put'."
   :ensure t
   ;; I prefer `company-mode' provided UI to complete in buffers other
   ;; than the minibuffer.
-  :custom (selectrum-complete-in-buffer nil)
+  :custom
+  ((selectrum-complete-in-buffer nil)
+   (selectrum-files-select-input-dirs t))
   :init (selectrum-mode +1))
 
 (use-package embark
