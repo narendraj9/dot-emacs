@@ -229,24 +229,37 @@ Argument END ending point for region."
 
 
 (defun switch-to-buffer-with-mode (arg)
-  "Switch buffer with `completion' candidates limited to just one
-`major-mode'.
+  "Switch to buffer with `completion' candidates limited to just
+one `major-mode'.
 
-The mode defaults to the `major-mode' of the current buffer. If
-prefix ARG is provided, the user is asked for the major-mode."
+This command waits for the user to type just enough characters to
+uniquely identify the target `major-mode'.
+
+With a prefix ARG, the mode defaults to the `major-mode' of the
+current buffer."
   (interactive "P")
   (let* ((mode-options (seq-uniq (mapcar (lambda (b)
                                            (buffer-local-value 'major-mode b))
                                          (buffer-list))))
-         (mode (if arg
-                   (intern (completing-read "Mode: " mode-options))
-                 major-mode)))
-    (switch-to-buffer (read-buffer (format "%s: " mode)
+         selected-mode read-chars)
+    (if arg
+        (setq selected-mode major-mode)
+      (while (not selected-mode)
+        (setq read-chars (concat read-chars (single-key-description (read-char nil))))
+        (let ((matches (seq-filter (lambda (m) (string-prefix-p read-chars (symbol-name m)))
+                                   mode-options)))
+          (cond
+           ((zerop (length matches))
+            (user-error "No matching modes found."))
+
+           ((= 1 (length matches))
+            (setq selected-mode (car matches)))))))
+    (switch-to-buffer (read-buffer (format "%s: " selected-mode)
                                    nil
                                    t
                                    (lambda (b)
                                      (with-current-buffer (car b)
-                                       (eq mode major-mode)))))))
+                                       (eq selected-mode major-mode)))))))
 
 (defun switch-to-minibuffer ()
   "Switch to minibuffer."
