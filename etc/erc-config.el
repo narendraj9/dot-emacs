@@ -59,7 +59,7 @@
       erc-track-showcount t)
 
 (setq erc-autojoin-channels-alist
-      '(("freenode.net"
+      '(("libera.chat"
          "#emacs-berlin" "#emacs" "#org-mode" "#haskell" "#glugnith"
          "#clojure" "#bash" "#fp@nith" "#go-nuts" "#gnunet")))
 
@@ -70,9 +70,9 @@
       erc-server-reconnect-timeout 30
       erc-server-reconnect-attempts 1024)
 
-(if (boundp 'my-freenode-nickserv-password)
+(if (boundp 'my-libera-nickserv-password)
     (setq erc-nickserv-passwords
-          `((freenode (("narendraj9" . ,my-freenode-nickserv-password))))))
+          `((Libera.Chat (("narendraj9" . ,my-libera-nickserv-password))))))
 
 ;; Do not switch buffers on connecting
 (setq erc-join-buffer 'bury)
@@ -96,8 +96,8 @@
   (erc-services-mode 1)
   (if (and (boundp 'znc-server) (boundp 'znc-port) (boundp 'znc-password))
       (erc-tls :server znc-server :port znc-port :password znc-password)
-    (erc-tls :server "irc.freenode.net" :port 6697)
-    (message "Error: my-freenode-nickserv-password not bound")))
+    (erc-tls :server "irc.libera.chat" :port 6697)
+    (message "Error: my-libera-nickserv-password not bound")))
 
 (provide 'erc-config)
 ;;; erc-config.el ends here
