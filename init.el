@@ -37,6 +37,10 @@
       (file-name-directory (or load-file-name
                                "~/.emacs.d/init.el")))
 
+;;; GnuTLS
+;; ──────────────────────────────────────────────────────────────────
+(setq gnutls-verify-error t)
+
 ;;; PACKAGE ARCHIVES
 ;;  ─────────────────────────────────────────────────────────────────
 (require 'package)
@@ -424,7 +428,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand t
   :config
   (setq battery-mode-line-format
-        (propertize "%b%p%%"
+        (propertize "%b%p%% "
                     'face
                     'mode-line-battery-face))
   (display-battery-mode +1))
@@ -765,7 +769,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   ;; If a symbol property named `repeat-map' exists for a command and it's a
   ;; keymap, it's activate as a transient-map after command is executed.
-  (repeat-mode +1)
+  (let ((inhibit-message t))
+    (repeat-mode +1))
 
   :config
   (setq repeat-exit-timeout 5)
@@ -1147,8 +1152,7 @@ after doing `symbol-overlay-put'."
 
 (use-package window
   ;; There is no mnemonic here, it's just convenient to type.
-  :bind ( :map ctl-m-map ("C-l" . delete-other-windows)
-          :map ctl-period-map ("e" . fit-window-to-buffer*) )
+  :bind (:map ctl-period-map ("e" . fit-window-to-buffer*) )
   :init
   (setq fit-window-to-buffer-horizontally t
         window-resize-pixelwise t)
@@ -1809,6 +1813,9 @@ after doing `symbol-overlay-put'."
   :config
   (setq comint-scroll-show-maximum-output nil))
 
+(use-package term
+  :bind ( "s-<return>" . term ))
+
 (use-package eshell
   :bind ( :map ctl-quote-map
           ("C-p" . eshell-toggle) )
@@ -1870,7 +1877,7 @@ after doing `symbol-overlay-put'."
   :ensure t
   :defer t
   :bind (:map haskell-mode-map
-              ("C-c C-k" . haskell-compile))
+              ("C-c C-k" . haskell-compile) )
   :hook ((haskell-mode . haskell-doc-mode)
          (haskell-mode . haskell-indentation-mode)))
 
@@ -3131,7 +3138,6 @@ after doing `symbol-overlay-put'."
   (defun activity-watch-project-name-project ()
     (when-let ((p (project-current)))
       (directory-file-name (f-relative (project-root p) "~")))))
-
 
 (provide 'init)
 ;;; init.el ends here

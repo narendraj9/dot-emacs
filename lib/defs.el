@@ -139,7 +139,7 @@ I tend to use then together always."
 
 
 (defun vicarie/eval-print-last-sexp ()
-    "Evaluate and print the last sexp on the same line."
+  "Evaluate and print the last sexp on the same line."
   (interactive)
   (vicarie/eval-last-sexp-and-do (lambda (value)
                                    (insert (format " (= %s ) " value)))))
@@ -1111,13 +1111,13 @@ Shows a message only when the forms take more than a second."
                                 (pulse-iterations 20)
                                 (pulse-delay 0.5))
                             (case (random 3)
-                              (0 (pulse-momentary-highlight-region
-                                  (window-start)
-                                  (window-end)))
-                              (1 (pulse-momentary-highlight-region
-                                  (window-start)
-                                  (window-end)))
-                              (2 (ding) (ding))))))))))
+                                  (0 (pulse-momentary-highlight-region
+                                      (window-start)
+                                      (window-end)))
+                                  (1 (pulse-momentary-highlight-region
+                                      (window-start)
+                                      (window-end)))
+                                  (2 (ding) (ding))))))))))
 
 
 (defun indian-math-group-float (f)
@@ -1219,31 +1219,36 @@ search keyword."
                           car
                           (plist-get :appid))))
     (request "https://api.openweathermap.org/data/2.5/weather"
-      :params `((lat   . ,calendar-latitude)
-                (lon   . ,calendar-longitude)
-                (appid . ,api-key)
-                (units . "metric"))
+             :params `((lat   . ,calendar-latitude)
+                       (lon   . ,calendar-longitude)
+                       (appid . ,api-key)
+                       (units . "metric"))
 
-      :parser #'json-read
+             :parser #'json-read
 
-      :error
-      (lambda (&rest _args)
-        (message "Failed to fetch weather info from openweathermap.org"))
+             :error
+             (lambda (&rest _args)
+               (message "Failed to fetch weather info from openweathermap.org"))
 
-      :success
-      (lambda (&rest args)
-        (let ((data (plist-get args :data)))
-          (setq current-weather
-                (propertize (format "%s°C"
-                                    (->> data
-                                         (alist-get 'main)
-                                         (alist-get 'temp)))
-                            'help-echo
-                            (format "Updated at: %s\n%s"
-                                    (format-time-string "%FT%T%z"(current-time))
-                                    (pp-to-string data))
-                            'timestamp
-                            (current-time))))))))
+             :success
+             (lambda (&rest args)
+               (let ((data (plist-get args :data)))
+                 (setq current-weather
+                       (propertize (format "%s°C"
+                                           (->> data
+                                                (alist-get 'main)
+                                                (alist-get 'temp)))
+                                   'help-echo
+                                   (format "Updated at: %s\n%s"
+                                           (format-time-string "%FT%T%z"(current-time))
+                                           (pp-to-string data))
+                                   'timestamp
+                                   (current-time))))))))
+
+
+(defun start-emacspeak ()
+  (interactive)
+  (load-file (expand-file-name "~/code/emacspeak/lisp/emacspeak-setup.el")))
 
 
 (provide 'defs)
