@@ -1821,16 +1821,21 @@ after doing `symbol-overlay-put'."
           ("C-p" . eshell-toggle) )
 
   :preface
-  (defun eshell-toggle ()
-    (interactive)
-    (let ((text-in-region
+  (defun eshell-toggle (arg)
+    (interactive "P")
+    (let ((directory default-directory)
+          (text-in-region
            (when (region-active-p)
              (buffer-substring (region-beginning) (region-end)))))
       (if (eq major-mode 'eshell-mode)
           (jump-to-register ?e)
         (window-configuration-to-register ?e)
         (eshell)
-        (when text-in-region (insert text-in-region)))))
+        (when arg
+          (insert (format "; cd %s ; " (shell-quote-argument directory)))
+          (eshell-send-input))
+        (when text-in-region
+          (insert text-in-region)))))
 
   :init
   (setq eshell-modules-list
