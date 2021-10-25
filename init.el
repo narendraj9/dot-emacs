@@ -700,6 +700,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (advice-add 'appt-disp-window :around #'show-appt-notifications))
 
+(use-package eww
+  :custom ((eww-auto-rename-buffer 'title)
+           (eww-browse-url-new-window-is-tab t))
+  :config
+  (add-hook 'eww-after-render-hook #'eww-readable))
+
 (use-package browse-url
   :defer t
   :doc "Make chromium the default browser if it is installed."
@@ -712,6 +718,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    ((executable-find "google-chrome")
     (setq browse-url-browser-function 'browse-url-chrome)))
   :config
+  (setq browse-url-new-window-flag t)
+
   (advice-add 'browse-url-chromium
               :before
               (lambda (url &optional _window)
@@ -829,6 +837,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq kill-ring-max 1000
         save-interprogram-paste-before-kill t
         kill-do-not-save-duplicates t)
+
+  ;; Avoid displaying key bindings for commands.
+  (setq suggest-key-bindings nil)
 
   (setq async-shell-command-buffer 'new-buffer
         set-mark-command-repeat-pop t
@@ -2066,6 +2077,21 @@ after doing `symbol-overlay-put'."
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
 
+(use-package javadoc-lookup
+  :ensure t
+  :after java-mode
+  :bind ( :map java-mode-map
+          ("C-c ; d" . javadoc-lookup)
+          ("C-c ; i" . javadoc-add-import)
+          ("C-c ; s" . javadoc-sort-imports) )
+  :init
+  (add-hook 'java-mode-hook
+            (lambda ()
+              (setq-local browse-url-browser-function 'eww-browse-url)))
+
+  :config
+  (setq javadoc-lookup-completing-read-function completing-read-function))
+
 (use-package java-mode
   :defer t
   :hook ( (java-mode . company-mode-quicker) )
@@ -2260,7 +2286,6 @@ after doing `symbol-overlay-put'."
   (dolist (k (list "M-r" "M-s" "M-?"))
     (define-key paredit-mode-map (kbd k) nil)))
 
-(use-package javadoc-lookup :bind ("C-h j" . javadoc-lookup) :ensure t)
 (use-package clojure-mode
   :ensure t
   :pin melpa
