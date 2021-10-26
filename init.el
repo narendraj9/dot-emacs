@@ -702,7 +702,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package eww
   :custom ((eww-auto-rename-buffer 'title)
-           (eww-browse-url-new-window-is-tab t))
+           (eww-browse-url-new-window-is-tab nil))
   :config
   (add-hook 'eww-after-render-hook #'eww-readable))
 
@@ -1777,8 +1777,29 @@ after doing `symbol-overlay-put'."
   (smart-jump-setup-default-registers))
 
 (use-package subword
-  :hook (prog-mode . subword-mode)
-  :diminish subword-mode)
+  ;; :hook (prog-mode . subword-mode)
+  :diminish subword-mode
+  :init
+  (global-subword-mode +1))
+
+
+(use-package help-at-pt
+  :bind ( :map ctl-m-map
+          ("." . display-help-at-pt ) )
+  :preface
+  (defun display-help-at-pt ()
+    (interactive)
+    (require 'popup)
+    (when-let ((help (help-at-pt-kbd-string)))
+      (popup-tip help
+                 :point (point)
+                 :around t
+                 :margin 2))))
+
+(use-package flymake
+  :bind ( :map flymake-mode-map
+          ("M-g n" . flymake-goto-next-error)
+          ("M-g p" . flymake-goto-prev-error) ))
 
 (use-package flycheck
   :ensure t
@@ -2077,21 +2098,6 @@ after doing `symbol-overlay-put'."
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
 
-(use-package javadoc-lookup
-  :ensure t
-  :after java-mode
-  :bind ( :map java-mode-map
-          ("C-c ; d" . javadoc-lookup)
-          ("C-c ; i" . javadoc-add-import)
-          ("C-c ; s" . javadoc-sort-imports) )
-  :init
-  (add-hook 'java-mode-hook
-            (lambda ()
-              (setq-local browse-url-browser-function 'eww-browse-url)))
-
-  :config
-  (setq javadoc-lookup-completing-read-function completing-read-function))
-
 (use-package java-mode
   :defer t
   :hook ( (java-mode . company-mode-quicker) )
@@ -2112,6 +2118,17 @@ after doing `symbol-overlay-put'."
           (concat (getenv "CLASSPATH")
                   path-separator
                   eclipse-jdt-jar-path)))
+
+(use-package javadoc-lookup
+  :ensure t
+  :init
+  (setq javadoc-lookup-completing-read-function completing-read-function)
+  (add-hook 'java-mode-hook
+            (lambda ()
+              (setq-local browse-url-browser-function 'eww-browse-url)
+              (define-key java-mode-map (kbd "C-c ; d")  #'javadoc-lookup)
+              (define-key java-mode-map (kbd "C-c ; i")  #'javadoc-add-import)
+              (define-key java-mode-map (kbd "C-c ; s")  #'javadoc-sort-imports))))
 
 (use-package gradle-mode
   :doc "Gradle integration in Emacs."

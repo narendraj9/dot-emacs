@@ -247,12 +247,12 @@
    `(popup-scroll-bar-foreground-face ((,class (:background ,jazz-bg+3))))
    `(popup-scroll-bar-background-face ((,class (:background ,jazz-fg+1))))
    `(popup-menu-mouse-face ((,class (:background ,jazz-yellow+1 :foreground ,jazz-bg))))
-   `(popup-tip-face ((,class (:background ,jazz-bg+3 :foreground ,jazz-bg))))
+   `(popup-tip-face ((,class (:background ,jazz-fg :foreground "black"))))
+
 
    ;; auto-complete
    `(ac-candidate-face ((,class (:background ,jazz-bg+3 :foreground "black"))))
    `(ac-selection-face ((,class (:background ,jazz-blue-4 :foreground ,jazz-fg))))
-   `(popup-tip-face ((,class (:background ,jazz-yellow-2 :foreground "black"))))
    `(popup-scroll-bar-foreground-face ((,class (:background ,jazz-blue-5))))
    `(popup-scroll-bar-background-face ((,class (:background ,jazz-bg-1))))
    `(popup-isearch-match ((,class (:background ,jazz-bg :foreground ,jazz-fg))))

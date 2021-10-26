@@ -309,6 +309,9 @@ Credits:  https://emacspeak.blogspot.com/2020/09/searching-gmail-from-gnus.html"
 ;;; [[info:gnus#Delayed Articles][info:gnus#Delayed Articles]]
 (gnus-delay-initialize)
 
+;;; Scoring
+(setq gnus-summary-mark-below -100)
+
 
 ;;; Personal Key Bindings
 ;; ----------------------------------------------------------------------------
