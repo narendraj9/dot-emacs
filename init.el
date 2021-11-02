@@ -2901,7 +2901,8 @@ after doing `symbol-overlay-put'."
          (gnus-article-mode . goto-address-mode))
   :init
   (setd gnus-init-file "etc/gnus-config.el"
-        gnus-home-directory "~/miscellany/gnus")
+        gnus-home-directory "~/miscellany/gnus"
+        gnus-directory "~/miscellany/gnus")
 
   (hook-into-modes #'hl-line-mode 'gnus-summary-mode 'gnus-group-mode)
 

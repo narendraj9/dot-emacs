@@ -74,11 +74,15 @@ buffer."
 (setq gnus-thread-hide-subtree t)
 
 
-;; Article and thread sorting
+;;; Article and thread sorting
+;; ===========================
+;; This is ineffective when threading is turned on,
+;;`gnus-thread-sort-functions' controls sorting of threads.
 (setq gnus-article-sort-functions
       '(gnus-article-sort-by-most-recent-date))
 (setq gnus-thread-sort-functions
-      '(gnus-thread-sort-by-most-recent-date))
+      '(gnus-thread-sort-by-most-recent-date
+        gnus-thread-sort-by-total-score))
 
 ;; To get all the mails in a thread from the server.
 ;; http://emacs.1067599.n8.nabble.com/Gnus-and-emails-sent-by-me-td445407.html#a445427
@@ -310,7 +314,7 @@ Credits:  https://emacspeak.blogspot.com/2020/09/searching-gmail-from-gnus.html"
 (gnus-delay-initialize)
 
 ;;; Scoring
-(setq gnus-summary-mark-below -100)
+(setq gnus-summary-mark-below most-negative-fixnum)
 
 
 ;;; Personal Key Bindings
