@@ -1205,7 +1205,9 @@ search keyword."
   "Up-case the last keyword and end it with a space."
   (interactive)
   (upcase-region (save-excursion
-                   (re-search-backward (rx (syntax whitespace))))
+                   (re-search-backward (rx (or (syntax whitespace)
+                                               line-start))
+                                       (point-min) t))
                  (point))
   (insert " "))
 

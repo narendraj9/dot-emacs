@@ -1394,6 +1394,7 @@ after doing `symbol-overlay-put'."
 
 (use-package company
   :ensure t
+  :bind ( :map ctl-m-map ("i" . company-complete ) )
   :hook (after-init . global-company-mode)
   :diminish company-mode
   :config
@@ -1860,8 +1861,8 @@ after doing `symbol-overlay-put'."
            (when (region-active-p)
              (buffer-substring (region-beginning) (region-end)))))
       (if (eq major-mode 'eshell-mode)
-          (jump-to-register ?e)
-        (window-configuration-to-register ?e)
+          (set-window-configuration (get this-command :window-config))
+        (put this-command :window-config (current-window-configuration))
         (eshell)
         (when arg
           (insert (format "; cd %s ; " (shell-quote-argument directory)))
@@ -1884,8 +1885,8 @@ after doing `symbol-overlay-put'."
         eshell-aliases-file
         (expand-file-name "./etc/eshell-aliases" user-emacs-directory))
 
-  (eval-after-load 'em-cmpl
-    '(define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common))
+  ;; (eval-after-load 'em-cmpl
+  ;;   '(define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common))
 
   ;; ANSI colors in Eshell buffers.
   (add-hook 'eshell-preoutput-filter-functions
@@ -2995,9 +2996,12 @@ after doing `symbol-overlay-put'."
                          (when-let ((args (assoc-default 'args (process-attributes pid))))
                            (string-match "^redshift .*" args)))
                        (list-system-processes))
-       (async-shell-command (format "nohup redshift -l %s:%s > /tmp/redshift.log"
-                                    (number-to-string calendar-latitude)
-                                    (number-to-string calendar-longitude)))))))
+       ;; Redshift doesn't work on Wayland.
+       ;; =================================
+       ;; (async-shell-command (format "nohup redshift -l %s:%s > /tmp/redshift.log"
+       ;;                              (number-to-string calendar-latitude)
+       ;;                              (number-to-string calendar-longitude)))
+       ))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 (use-package highlight :ensure t :defer t)
@@ -3092,24 +3096,6 @@ after doing `symbol-overlay-put'."
       (unless (and (boundp 'gnuplot-mode)
                    (not gnuplot-mode))
         (gnuplot-mode)))))
-
-(use-package sql
-  :defer t
-  :preface
-  (defun upcase-last-keyword ()
-    (interactive)
-    (when (and (memql last-input-event  (list ?  ?\())
-               (save-excursion
-                 (backward-char 2)
-                 (and (memq (face-at-point) '(font-lock-keyword-face font-lock-builtin-face))
-                      (< 1 (length (word-at-point))))))
-      (upcase-word -1)))
-  :init
-  ;; (add-hook 'sql-interactive-mode-hook
-  ;;           (lambda ()
-  ;;             (make-local-variable 'post-self-insert-hook)
-  ;;             (add-hook 'post-self-insert-hook #'upcase-last-keyword)))
-  )
 
 (use-package mule-cmds
   :bind (("C-x \\" . set-input-method)
