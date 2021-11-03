@@ -1885,6 +1885,11 @@ after doing `symbol-overlay-put'."
         eshell-aliases-file
         (expand-file-name "./etc/eshell-aliases" user-emacs-directory))
 
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              ;; `orderless' doesn't make much sense for shell completion.
+              (setq-local completion-styles '(basic partial-completion emacs22))))
+
   ;; (eval-after-load 'em-cmpl
   ;;   '(define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common))
 
