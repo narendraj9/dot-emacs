@@ -234,18 +234,12 @@ Optional argument AUTHOR is what the word suggests but checkdoc was complaining 
 
 (defun quoted-scratch-generate-scratch-message (&optional quote-string)
   "Generate message content for scratch buffer.
-Make sure you set the :text-type text property to :quote-string.
-
 If argument QUOTE-STRING is provided, use that as the quote."
-  (propertize (format "%s%s"
-                      (or quote-string (quoted-scratch-random-quote-string))
-                      (if quoted-scratch-show-auroville-quality
-                          (quoted-scratch-get-auroville-quality)
-                        ""))
-              ;; Distinguishing quote text from other text with a text
-              ;; property.
-              :text-type :quote-string
-              'rear-nonsticky t))
+  (format "%s%s"
+          (or quote-string (quoted-scratch-random-quote-string))
+          (if quoted-scratch-show-auroville-quality
+              (quoted-scratch-get-auroville-quality)
+            "")))
 
 (defun quoted-scratch-remove-text-with-property (start p v)
   "From point START, remove first chunk with prop P set to V.
@@ -274,11 +268,16 @@ delete all text in a buffer."
       ;; like to work only on the quote text and not change the other
       ;; unrelated text in the scratch buffer.
       (while (quoted-scratch-remove-text-with-property (point-min)
-                                                       :text-type
-                                                       :quote-string))
+                                                       'text-type
+                                                       'quote-string))
       ;; Now insert new quote at the top of the buffer
       (goto-char (point-min))
-      (insert (propertize quote-text 'category 'quoted-scratch-properties))
+      (insert (propertize "\n"
+                          'text-type 'quote-string
+                          'display quote-text
+                          'category 'quoted-scratch-properties
+                          'rear-nonsticky t
+                          'front-sticky t))
       (let ((pulse-delay 0.10))
         (pulse-momentary-highlight-region (point-min)
                                           (point)
@@ -319,9 +318,12 @@ Argument STATUS is the http status of the request."
 Optional argument POP-TO-BUFFERP makes the window pop to the buffer if non-nil."
   (interactive)
   (let ((window-start (window-start)))
-    (quoted-scratch-update-quote-text-in-scratch (mapconcat 'funcall
-                                                            quoted-scratch-scratchers
-                                                            quoted-scratch-separator))
+    (quoted-scratch-update-quote-text-in-scratch
+     (propertize (mapconcat 'funcall
+                            quoted-scratch-scratchers
+                            quoted-scratch-separator)
+                 'text-type 'quote-string
+                 'rear-nonsticky t))
     (and pop-to-bufferp (pop-to-buffer "*scratch*"))
     (when (equal (selected-window)
                  (get-buffer-window "*scratch*"))
