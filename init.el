@@ -270,18 +270,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                    (read-string (format "%s [Type %d to confirm] "
                                         prompt
                                         random-number))))))
-  (setq ;; initial-scratch-message ""
-   initial-major-mode
-   (lambda ()
-     (lisp-interaction-mode)
-     (setq header-line-format
-           '(:eval
-             (format "Emacs Uptime: %-20s | Sys Time: %-20s | System Load: %-20s"
-                     (emacs-uptime)
-                     (format-seconds "%Y, %D, %2H, %2M, %z%S"
-                                     (time-convert (get-internal-run-time)
-                                                   'integer))
-                     (load-average 'use-float)))))))
+  (setq initial-scratch-message ""
+        initial-major-mode
+        (lambda ()
+          (lisp-interaction-mode)
+          (setq header-line-format
+                '(:eval
+                  (format "Emacs Uptime: %-20s | Sys Time: %-20s | System Load: %-20s"
+                          (emacs-uptime)
+                          (format-seconds "%Y, %D, %2H, %2M, %z%S"
+                                          (time-convert (get-internal-run-time)
+                                                        'integer))
+                          (load-average 'use-float)))))))
 
 (use-package custom
   :doc "Custom configuration and personal information."
@@ -390,6 +390,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Disable mixed fonts in modus themes
   (setq modus-themes-no-mixed-fonts t))
+
+
+(use-package quoted-scratch
+  :load-path "packages/rest/quoted-scratch"
+  :init
+  (add-hook 'after-init-hook #'quoted-scratch-refresh-quote-when-idle)
+  :config
+  (setq quoted-scratch-show-auroville-quality nil))
 
 
 ;;; Battery and Time display in the mode line
@@ -1693,7 +1701,6 @@ after doing `symbol-overlay-put'."
     (call-interactively #'display-fill-column-indicator-mode)))
 
 (use-package type-break
-  :disabled t
   :bind (:map ctl-quote-map
               ("b" . type-break))
   :init
@@ -1704,6 +1711,7 @@ after doing `symbol-overlay-put'."
 
 
 (use-package keyfreq
+  :disabled t
   :load-path "packages/lisp"
   :config
   (keyfreq-mode +1)
@@ -1947,11 +1955,11 @@ after doing `symbol-overlay-put'."
          :map ctl-x-map
          ("x 0" . org-timer-start)
          ("x ;" . org-timer-set-timer)
-  ("x ." . org-timer)
-  ("x _" . org-timer-stop)
-  :map ctl-quote-map
-  ("C-n" . open-org-file)
-  ("C-d" . search-notes-files))
+         ("x ." . org-timer)
+         ("x _" . org-timer-stop)
+         :map ctl-quote-map
+         ("C-n" . open-org-file)
+         ("C-d" . search-notes-files))
   :init
   (bind-key "C-c a" #'org-agenda)
   (eval-after-load "org" '(require 'org-config))

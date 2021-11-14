@@ -3430,3 +3430,7 @@ faithful to the language semantics.”
 “Some people get things they don’t deserve and others deserve things they
 don’t get.”
                                                                     - Kamau Bobb
+
+"To the most trivial actions, attach the devotion and mindfulness of a hundred monks. To
+matters of life and death, attach a sense of humor."
+                                                                       - Zhuangzi
