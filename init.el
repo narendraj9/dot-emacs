@@ -1403,12 +1403,13 @@ after doing `symbol-overlay-put'."
 
 (use-package company
   :ensure t
-  :bind ( :map ctl-m-map ("i" . company-complete ) )
+  :bind ( :map ctl-m-map ("i" . company-complete )
+          :map ctl-m-map ("C-c" . company-complete ))
   :hook (after-init . global-company-mode)
   :diminish company-mode
   :config
   (define-key company-mode-map [remap indent-for-tab-command]
-    #'company-indent-or-complete-common)
+              #'company-indent-or-complete-common)
 
   (bind-keys :map company-active-map
              ("C-j"   . company-complete-selection)
@@ -2338,6 +2339,8 @@ after doing `symbol-overlay-put'."
   :diminish clj-refactor-mode
   :after clojure-mode
   :hook (clojure-mode . clj-refactor-mode)
+  :custom ((cljr-insert-newline-after-require . nil)
+           (cljr-auto-clean-ns . nil))
   :bind (:map clj-refactor-map
               ("C-; c <SPC>" . clojure-top-level-spacing))
   :config
@@ -2380,8 +2383,7 @@ after doing `symbol-overlay-put'."
 
   (add-hook 'cider-repl-mode-hook
             (lambda ()
-              (define-key cider-repl-mode-map (kbd "C-<return>") nil)
-              (define-key cider-repl-mode-map (kbd "TAB") #'company-indent-or-complete-common))))
+              (define-key cider-repl-mode-map (kbd "C-<return>") nil))))
 
 
 (use-package flycheck-clojure
