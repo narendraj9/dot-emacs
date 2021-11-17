@@ -767,14 +767,29 @@ non-empty lines in the block (excluding the line with
       (sit-for 5))))
 
 (use-package org-timer
+  :preface
+  (defun org-timer-start--without-prompt (minutes)
+    (interactive)
+    (let ((org-timer-default-timer minutes))
+      (org-timer-set-timer '(4))))
+
+  (defun org-timer-start-pomodoro ()
+    (interactive)
+    (org-timer-start--without-prompt 25))
+
+  (defun org-timer-start-break ()
+    (interactive)
+    (org-timer-start--without-prompt 5))
+
   :init
   (add-hook 'org-timer-done-hook
             (lambda ()
-              (message "Org timer expired. Please any key to stop notifications.")
+              (fringe-set-louder)
               (cl-do () ((not (sit-for 1)) :done)
                 (play-sound-file (expand-file-name "audio/quite-impressed.wav"
                                                    emacs-assets-directory)
-                                 90)))))
+                                 40))
+              (fringe-restore-default))))
 
 (provide 'org-config)
 ;;; org-config.el ends here

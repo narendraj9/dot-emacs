@@ -594,6 +594,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     reset fringes back to the default after highlighting
     something that requires immediate attention.")
 
+  (defun fringe-set-louder ()
+    (fringe-mode 50 )
+    (set-face-attribute 'fringe nil :inverse-video t))
+
+  (defun fringe-restore-default ()
+    (fringe-mode default-fringe-style)
+    (set-face-attribute 'fringe nil :inverse-video nil))
+
   (fringe-mode default-fringe-style))
 
 (use-package tool-bar   :config (tool-bar-mode -1))
@@ -967,10 +975,8 @@ after doing `symbol-overlay-put'."
   (add-hook 'multiple-cursors-mode-hook
             (lambda ()
               (if multiple-cursors-mode
-                  (progn (set-face-attribute 'fringe nil :inverse-video t)
-                         (fringe-mode 50))
-                (set-face-attribute 'fringe nil :inverse-video nil)
-                (fringe-mode default-fringe-style))))
+                  (fringe-set-louder)
+                (fringe-restore-default))))
 
   :bind
   (("C->" . mc/mark-next-like-this)
@@ -1948,17 +1954,25 @@ after doing `symbol-overlay-put'."
   :ensure t
   :commands cfw:open-org-calendar)
 
+(use-package timeclock
+  :init
+  (setq timeclock-file
+        (expand-file-name "timelog" emacs-assets-directory)))
+
 (use-package org-config
   :load-path "etc/"
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
          ;; Bindings for using the Timer
-         :map ctl-x-map
-         ("x 0" . org-timer-start)
-         ("x ;" . org-timer-set-timer)
+         :map ctl-m-map
+         ("x p" . org-timer-start-pomodoro)
+         ("x b" . org-timer-start-break)
+         ("x s" . org-timer-start)
+         ("x S" . org-timer-stop)
+         ("x c" . org-timer-set-timer)
          ("x ." . org-timer)
-         ("x _" . org-timer-stop)
+
          :map ctl-quote-map
          ("C-n" . open-org-file)
          ("C-d" . search-notes-files))
