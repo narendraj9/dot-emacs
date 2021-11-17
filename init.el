@@ -790,7 +790,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (repeat-mode +1))
 
   :config
-  (setq repeat-exit-timeout 5)
+  (setq repeat-exit-timeout 30)
 
   :preface
   (defmacro define-repeat-map (&rest bindings)
@@ -1108,6 +1108,7 @@ after doing `symbol-overlay-put'."
                                 (variable-pitch-mode +1)))))
 
 (use-package discover
+  :disabled t
   :doc "Discovering more about Emacs"
   :ensure t
   :hook (dired-mode . dired-turn-on-discover))
