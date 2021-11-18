@@ -1966,7 +1966,9 @@ after doing `symbol-overlay-put'."
          ("C-c a" . org-agenda)
          ;; Bindings for using the Timer
          :map ctl-m-map
+         ("x i" . org-timer-summarize-pomodoros)
          ("x p" . org-timer-start-pomodoro)
+         ("x e" . org-timer-edit-pomodoro)
          ("x b" . org-timer-start-break)
          ("x s" . org-timer-start)
          ("x S" . org-timer-stop)

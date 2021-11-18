@@ -768,27 +768,108 @@ non-empty lines in the block (excluding the line with
 
 (use-package org-timer
   :preface
+  (defvar org-timer-pomodoro-file
+    (expand-file-name "pomodoro.el" emacs-assets-directory))
+
+  (defvar org-timer--pomodoros (list))
+  (defvar org-timer--pomodoro-start-time nil)
+  (defvar org-timer--last-pomodoro-title nil)
+
+  (defun org-timer--persist-pomodoro (p)
+    (with-temp-buffer
+      (prin1 p (current-buffer))
+      (terpri (current-buffer))
+      (append-to-file (point-min) (point-max) org-timer-pomodoro-file)))
+
+  (defun org-timer--load-pomodoros ()
+    (with-temp-buffer
+      (insert-file-contents org-timer-pomodoro-file)
+      (goto-char (point-min))
+      (condition-case end-of-file-error
+          (while t
+            (push (read (current-buffer)) org-timer--pomodoros))
+        (end-of-file))))
+
+  (defun org-timer--pomodoro-record ()
+    (let ((this-pomodoro (list org-timer--pomodoro-start-time
+                               (current-time)
+                               org-timer--last-pomodoro-title)))
+      (push this-pomodoro org-timer--pomodoros)
+      (org-timer--persist-pomodoro this-pomodoro)  )
+    (remove-hook 'org-timer-done-hook #'org-timer--pomodoro-record)
+    (setq org-timer--pomodoro-start-time nil))
+
   (defun org-timer-start--without-prompt (minutes)
     (interactive)
     (let ((org-timer-default-timer minutes))
       (org-timer-set-timer '(4))))
 
-  (defun org-timer-start-pomodoro ()
-    (interactive)
-    (org-timer-start--without-prompt 25))
+  (defun org-timer-start-pomodoro (&optional arg)
+    (interactive "P")
+    (when (not org-timer--pomodoros)
+      (org-timer--load-pomodoros))
+    (setq org-timer--pomodoro-start-time (current-time))
+    (when (not org-timer--last-pomodoro-title)
+      (setq org-timer--last-pomodoro-title (read-string "Title: ")))
+    (org-timer-start--without-prompt (if arg (read-number "Duration: ") 25))
+    (message ">> Start: %s" org-timer--last-pomodoro-title)
+    (add-hook 'org-timer-done-hook #'org-timer--pomodoro-record))
 
   (defun org-timer-start-break ()
     (interactive)
     (org-timer-start--without-prompt 5))
 
+  (defun org-timer-edit-pomodoro (new-title)
+    (interactive "MNew Title: ")
+    (setf (caddar org-timer--pomodoros) new-title)
+    (setq org-timer--last-pomodoro-title new-title))
+
+  (defun org-timer-summarize-pomodoros ()
+    (interactive)
+    (when (not org-timer--pomodoros)
+      (org-timer--load-pomodoros))
+    (let* ((pomodoro-buffer-name " *POMODORO*")
+           (day-ps-alist (-group-by (lambda (p) (format-time-string "%F (%a)" (car p)))
+                                    org-timer--pomodoros))
+           (format-ps
+            (lambda (ps)
+              (->> (nconc (-interleave ps
+                                       (-zip-with (lambda (p1 p2)
+                                                    (time-to-seconds (time-subtract (cadr p1)
+                                                                                    (car p2))))
+                                                  ps
+                                                  (cdr ps)))
+                          (last ps))
+                   (-map (lambda (p)
+                           (if (consp p)
+                               (format "\t%s %s: %s\n"
+                                       (format-time-string "%H:%M" (car p))
+                                       (format-time-string "%H:%M" (cadr p))
+                                       (caddr p))
+                             (format "%8d mins\n"
+                                     (floor (/ p 60))))))
+                   (apply #'concat))))
+           (summary
+            (->> day-ps-alist
+                 (-mapcat (lambda (day-ps)
+                            (format "%s:\n%s"
+                                    (propertize (car day-ps) 'face 'highlight)
+                                    (funcall format-ps (cdr day-ps))))))))
+      (with-output-to-temp-buffer pomodoro-buffer-name
+        (with-current-buffer pomodoro-buffer-name
+          (insert (or summary "No Pomodoros"))))))
+
   :init
   (add-hook 'org-timer-done-hook
             (lambda ()
               (fringe-set-louder)
+              (setq header-line-format
+                    (format "Pomodoro: %s" org-timer--last-pomodoro-title))
               (cl-do () ((not (sit-for 1)) :done)
                 (play-sound-file (expand-file-name "audio/quite-impressed.wav"
                                                    emacs-assets-directory)
                                  40))
+              (setq header-line-format nil)
               (fringe-restore-default))))
 
 (provide 'org-config)
