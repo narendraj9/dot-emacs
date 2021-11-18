@@ -96,6 +96,7 @@
 
 (defun pomodoro-start-break ()
   (interactive)
+  (pomodoro-remove-notifications)
   (pomodoro-start-without-prompt 5))
 
 (defun pomodoro-edit-title (new-title)
@@ -108,7 +109,8 @@
   (when (not pomodoro-list)
     (pomodoro-load-file))
   (let* ((pomodoro-buffer-name " *POMODORO*")
-         (day-ps-alist (-group-by (lambda (p) (format-time-string "%F (%a)" (car p)))
+         (day-ps-alist (-group-by (lambda (p)
+                                    (format-time-string "%F (%a)" (car p)))
                                   pomodoro-list))
          (format-ps
           (lambda (ps)
@@ -131,21 +133,29 @@
          (summary
           (->> day-ps-alist
                (-mapcat (lambda (day-ps)
-                          (format "%s:\n%s"
+                          (format "%s [%d]:\n%s"
                                   (propertize (car day-ps) 'face 'highlight)
+                                  (length (cdr day-ps))
                                   (funcall format-ps (cdr day-ps))))))))
     (with-output-to-temp-buffer pomodoro-buffer-name
       (with-current-buffer pomodoro-buffer-name
         (when pomodoro-start-time
-          (insert (format "Current: %s\n\n" pomodoro-last-title)))
+          (insert (format "Current (%s): %s\n\n"
+                          (string-trim (org-timer-value-string))
+                          pomodoro-last-title)))
         (insert (or summary "No Pomodoros"))))))
 
 (defun pomodoro-notify ()
-  (setq header-line-format (format "Pomodoro: %s" pomodoro-last-title))
+  (fringe-mode (cons 4 0))
+  (set-face-attribute 'fringe nil :background "sandy brown")
+  (make-thread (lambda () (play-sound-file pomodoro-notification-file 30)))
   (cl-do () ((not (sit-for 1)) :done)
     (play-sound-file pomodoro-notification-file 40))
-  (setq header-line-format nil)
   (remove-hook 'org-timer-done-hook #'pomodoro-notify))
+
+(defun pomodoro-remove-notifications ()
+  (interactive)
+  (set-face-attribute 'fringe nil :background nil))
 
 (provide 'pomodoro)
 ;;; pomodoro.el ends here

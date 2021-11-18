@@ -1815,6 +1815,7 @@ after doing `symbol-overlay-put'."
                  :margin 2))))
 
 (use-package flymake
+  :diminish flymake-mode
   :bind ( :map flymake-mode-map
           ("M-g n" . flymake-goto-next-error)
           ("M-g p" . flymake-goto-prev-error) ))
