@@ -779,7 +779,8 @@ non-empty lines in the block (excluding the line with
     (with-temp-buffer
       (prin1 p (current-buffer))
       (terpri (current-buffer))
-      (append-to-file (point-min) (point-max) org-timer-pomodoro-file)))
+      (let ((save-silently t))
+        (append-to-file (point-min) (point-max) org-timer-pomodoro-file))))
 
   (defun org-timer--load-pomodoros ()
     (with-temp-buffer
@@ -819,9 +820,9 @@ non-empty lines in the block (excluding the line with
     (interactive)
     (org-timer-start--without-prompt 5))
 
-  (defun org-timer-edit-pomodoro (new-title)
+  (defun org-timer-edit-pomodoro-title (new-title)
+    "Changes the title of the next pomodoro that will be recorded."
     (interactive "MNew Title: ")
-    (setf (caddar org-timer--pomodoros) new-title)
     (setq org-timer--last-pomodoro-title new-title))
 
   (defun org-timer-summarize-pomodoros ()
@@ -857,6 +858,8 @@ non-empty lines in the block (excluding the line with
                                     (funcall format-ps (cdr day-ps))))))))
       (with-output-to-temp-buffer pomodoro-buffer-name
         (with-current-buffer pomodoro-buffer-name
+          (when org-timer--pomodoro-start-time
+            (insert (format "Current: %s\n\n" org-timer--last-pomodoro-title)))
           (insert (or summary "No Pomodoros"))))))
 
   :init

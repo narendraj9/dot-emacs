@@ -1968,7 +1968,7 @@ after doing `symbol-overlay-put'."
          :map ctl-m-map
          ("x i" . org-timer-summarize-pomodoros)
          ("x p" . org-timer-start-pomodoro)
-         ("x e" . org-timer-edit-pomodoro)
+         ("x e" . org-timer-edit-pomodoro-title)
          ("x b" . org-timer-start-break)
          ("x s" . org-timer-start)
          ("x S" . org-timer-stop)
