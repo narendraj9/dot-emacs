@@ -1709,6 +1709,7 @@ after doing `symbol-overlay-put'."
     (call-interactively #'display-fill-column-indicator-mode)))
 
 (use-package type-break
+  :disabled t
   :bind (:map ctl-quote-map
               ("b" . type-break))
   :init

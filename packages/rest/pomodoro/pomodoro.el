@@ -47,6 +47,7 @@
   :type 'file
   :group 'pomodoro)
 
+(defvar pomodoro-default-fringe-style nil)
 (defvar pomodoro-list (list))
 (defvar pomodoro-start-time nil)
 (defvar pomodoro-last-title nil)
@@ -94,10 +95,10 @@
   (add-hook 'org-timer-done-hook #'pomodoro-record)
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
 
-(defun pomodoro-start-break ()
-  (interactive)
+(defun pomodoro-start-break (&optional prefix)
+  (interactive "P")
   (pomodoro-remove-notifications)
-  (pomodoro-start-without-prompt 5))
+  (pomodoro-start-without-prompt (if prefix (read-number "Duration (min): ") 5)))
 
 (defun pomodoro-edit-title ()
   "Changes the title of the next pomodoro that will be recorded."
@@ -147,6 +148,7 @@
         (insert (or summary "No Pomodoros"))))))
 
 (defun pomodoro-notify ()
+  (setq pomodoro-default-fringe-style fringe-mode)
   (fringe-mode (cons 4 0))
   (set-face-attribute 'fringe nil :background "sandy brown")
   (make-thread (lambda () (play-sound-file pomodoro-notification-file 30)))
@@ -156,7 +158,7 @@
 
 (defun pomodoro-remove-notifications ()
   (interactive)
-  (set-face-attribute 'fringe nil :background nil))
+  (fringe-mode pomodoro-default-fringe-style))
 
 (provide 'pomodoro)
 ;;; pomodoro.el ends here
