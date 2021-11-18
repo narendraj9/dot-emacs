@@ -222,7 +222,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                      (mapconcat #'identity
                                                 emacs-init-end-info
                                                 "\n"))))))
-  :hook (after-init . emacs-init-end)
+  ;; :hook (after-init . emacs-init-end)
   :init
   (setq inhibit-splash-screen t)
 
@@ -1966,10 +1966,6 @@ after doing `symbol-overlay-put'."
          ("C-c a" . org-agenda)
          ;; Bindings for using the Timer
          :map ctl-m-map
-         ("x i" . org-timer-summarize-pomodoros)
-         ("x p" . org-timer-start-pomodoro)
-         ("x e" . org-timer-edit-pomodoro-title)
-         ("x b" . org-timer-start-break)
          ("x s" . org-timer-start)
          ("x S" . org-timer-stop)
          ("x c" . org-timer-set-timer)
@@ -1991,6 +1987,15 @@ after doing `symbol-overlay-put'."
               (lambda (original &rest args)
                 (let ((split-window-preferred-function #'split-window-below))
                   (apply original args)))))
+
+
+(use-package pomodoro
+  :load-path "packages/rest/pomodoro"
+  :bind ( :map ctl-m-map
+          ("x i" . pomodoro-summarize)
+          ("x p" . pomodoro-start)
+          ("x e" . pomodoro-edit-title)
+          ("x b" . pomodoro-start-break)))
 
 (use-package thingatpt+
   :load-path "packages/lisp/"
