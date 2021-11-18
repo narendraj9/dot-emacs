@@ -99,10 +99,11 @@
   (pomodoro-remove-notifications)
   (pomodoro-start-without-prompt 5))
 
-(defun pomodoro-edit-title (new-title)
+(defun pomodoro-edit-title ()
   "Changes the title of the next pomodoro that will be recorded."
-  (interactive "MNew Title: ")
-  (setq pomodoro-last-title new-title))
+  (interactive)
+  (setq pomodoro-last-title
+        (completing-read "Pomodoro: " (mapcar #'caddr pomodoro-list))))
 
 (defun pomodoro-summarize ()
   (interactive)
