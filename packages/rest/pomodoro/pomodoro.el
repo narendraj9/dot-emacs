@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'org-timer)
+(require 'seq)
 
 (defgroup pomodoro ()
   "A simple Pomodoro system."
@@ -84,12 +85,14 @@
 
 (defun pomodoro-start (&optional arg)
   (interactive "P")
+  (pomodoro-remove-notifications)
   (when (not pomodoro-list)
     (pomodoro-load-file))
   (setq pomodoro-start-time (current-time))
   (when (not pomodoro-last-title)
     (setq pomodoro-last-title
-          (completing-read "Title: " (mapcar #'caddr pomodoro-list))))
+          (completing-read "Title: "
+                           (seq-uniq (mapcar #'caddr pomodoro-list)))))
   (pomodoro-start-without-prompt (if arg (read-number "Duration: ") 25))
   (message ">> Start: %s" pomodoro-last-title)
   (add-hook 'org-timer-done-hook #'pomodoro-record)
@@ -98,13 +101,15 @@
 (defun pomodoro-start-break (&optional prefix)
   (interactive "P")
   (pomodoro-remove-notifications)
-  (pomodoro-start-without-prompt (if prefix (read-number "Duration (min): ") 5)))
+  (pomodoro-start-without-prompt (if prefix (read-number "Duration (min): ") 5))
+  (add-hook 'org-timer-done-hook #'pomodoro-notify))
 
 (defun pomodoro-edit-title ()
   "Changes the title of the next pomodoro that will be recorded."
   (interactive)
   (setq pomodoro-last-title
-        (completing-read "Pomodoro: " (mapcar #'caddr pomodoro-list))))
+        (completing-read "Pomodoro: "
+                         (seq-uniq (mapcar #'caddr pomodoro-list)))))
 
 (defun pomodoro-summarize ()
   (interactive)
@@ -147,18 +152,23 @@
                           pomodoro-last-title)))
         (insert (or summary "No Pomodoros"))))))
 
+(defun pomodoro-audio-notification ()
+  (when (file-exists-p pomodoro-notification-file)
+    (play-sound-file pomodoro-notification-file 40)))
+
 (defun pomodoro-notify ()
-  (setq pomodoro-default-fringe-style fringe-mode)
-  (fringe-mode (cons 4 0))
+  (setq pomodoro-default-fringe-style (cons fringe-mode
+                                            (face-attribute 'fringe :background)))
+  (fringe-mode (cons 0 4))
   (set-face-attribute 'fringe nil :background "sandy brown")
-  (make-thread (lambda () (play-sound-file pomodoro-notification-file 30)))
-  (cl-do () ((not (sit-for 1)) :done)
-    (play-sound-file pomodoro-notification-file 40))
+  (make-thread #'pomodoro-audio-notification)
+  (cl-do () ((not (sit-for 1)) :done) (pomodoro-audio-notification))
   (remove-hook 'org-timer-done-hook #'pomodoro-notify))
 
 (defun pomodoro-remove-notifications ()
   (interactive)
-  (fringe-mode pomodoro-default-fringe-style))
+  (fringe-mode (car pomodoro-default-fringe-style))
+  (set-face-attribute 'fringe nil :background (cdr pomodoro-default-fringe-style)))
 
 (provide 'pomodoro)
 ;;; pomodoro.el ends here
