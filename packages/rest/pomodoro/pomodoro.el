@@ -29,6 +29,7 @@
 
 (require 'org-timer)
 (require 'seq)
+(require 'dash)
 
 (defgroup pomodoro ()
   "A simple Pomodoro system."
@@ -128,22 +129,21 @@
                                                 ps
                                                 (cdr ps)))
                         (last ps))
-                 (-map (lambda (p)
-                         (if (consp p)
-                             (format "\t%s %s: %s\n"
-                                     (format-time-string "%H:%M" (car p))
-                                     (format-time-string "%H:%M" (cadr p))
-                                     (caddr p))
-                           (format "%8d mins\n"
-                                   (floor (/ p 60))))))
-                 (apply #'concat))))
-         (summary
-          (->> day-ps-alist
-               (-mapcat (lambda (day-ps)
-                          (format "%s [%d]:\n%s"
-                                  (propertize (car day-ps) 'face 'highlight)
-                                  (length (cdr day-ps))
-                                  (funcall format-ps (cdr day-ps))))))))
+                 (mapconcat (lambda (p)
+                              (if (consp p)
+                                  (format "\t%s %s: %s\n"
+                                          (format-time-string "%H:%M" (car p))
+                                          (format-time-string "%H:%M" (cadr p))
+                                          (caddr p))
+                                (format "%8d mins\n"
+                                        (floor (/ p 60)))))))))
+         (summary (mapconcat (lambda (day-ps)
+                               (format "%s [%d]:\n%s"
+                                       (propertize (car day-ps) 'face 'highlight)
+                                       (length (cdr day-ps))
+                                       (funcall format-ps (cdr day-ps))))
+                             day-ps-alist
+                             "\n")))
     (with-output-to-temp-buffer pomodoro-buffer-name
       (with-current-buffer pomodoro-buffer-name
         (when pomodoro-start-time
