@@ -85,16 +85,23 @@
     (org-timer-set-timer '(4))))
 
 (defun pomodoro-start (&optional arg)
+  "Start a new Pomodoro.
+
+   If the default prefix argument is supplied supplied once, asks
+   for the title of the pomodoro. If supplied twice, asks for
+   both the title and the duration of the Pomodoro."
   (interactive "P")
   (pomodoro-remove-notifications)
   (when (not pomodoro-list)
     (pomodoro-load-file))
   (setq pomodoro-start-time (current-time))
-  (when (not pomodoro-last-title)
+  (when (or arg (not pomodoro-last-title))
     (setq pomodoro-last-title
           (completing-read "Title: "
                            (seq-uniq (mapcar #'caddr pomodoro-list)))))
-  (pomodoro-start-without-prompt (if arg (read-number "Duration: ") 25))
+  (pomodoro-start-without-prompt (if (equal arg '(16))
+                                     (read-number "Duration: ")
+                                   25))
   (message ">> Start: %s" pomodoro-last-title)
   (add-hook 'org-timer-done-hook #'pomodoro-record)
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
