@@ -1994,10 +1994,11 @@ after doing `symbol-overlay-put'."
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
   :bind ( :map ctl-m-map
-          ("x i" . pomodoro-summarize)
-          ("x p" . pomodoro-start)
-          ("x e" . pomodoro-edit-title)
-          ("x b" . pomodoro-start-break)))
+          ("x SPC" . pomodoro-remove-notifications)
+          ("x i"   . pomodoro-summarize)
+          ("x p"   . pomodoro-start)
+          ("x e"   . pomodoro-edit-title)
+          ("x b"   . pomodoro-start-break) ))
 
 (use-package thingatpt+
   :load-path "packages/lisp/"
