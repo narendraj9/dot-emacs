@@ -42,6 +42,11 @@
   :type 'file
   :group 'pomodoro)
 
+(defcustom pomodoro-max-notification-count 2
+  "Numbers of times to play audio notification."
+  :type 'number
+  :group 'pomodoro)
+
 (defcustom pomodoro-notification-file
   (expand-file-name "audio/quite-impressed.wav"
                     emacs-assets-directory)
@@ -166,10 +171,12 @@
 (defun pomodoro-notify ()
   (setq pomodoro-default-fringe-style (cons fringe-mode
                                             (face-attribute 'fringe :background)))
-  (fringe-mode (cons 0 4))
+  (fringe-mode (cons 2 0))
   (set-face-attribute 'fringe nil :background "sandy brown")
-  (make-thread #'pomodoro-audio-notification)
-  (cl-do () ((not (sit-for 1)) :done) (pomodoro-audio-notification))
+  (pomodoro-audio-notification)
+  (cl-do ((count 1 (1+ count))) ((or (not (sit-for 1))
+                                     (<= pomodoro-max-notification-count count)))
+    (pomodoro-audio-notification))
   (remove-hook 'org-timer-done-hook #'pomodoro-notify))
 
 (defun pomodoro-remove-notifications ()
