@@ -37,6 +37,9 @@
       (file-name-directory (or load-file-name
                                "~/.emacs.d/init.el")))
 
+;; Remember the last 10000 keystrokes
+(lossage-size 10000)
+
 ;;; GnuTLS
 ;; ──────────────────────────────────────────────────────────────────
 (setq gnutls-verify-error t)
