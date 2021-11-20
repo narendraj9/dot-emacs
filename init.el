@@ -2081,8 +2081,24 @@ after doing `symbol-overlay-put'."
 ;;; ----------------------------------------------------------------------------
 
 (use-package orderless
+  :doc
+  "TODO: Opt-in this completion style when needed instead of making it
+   the default because it breaks completion of commans and filenames
+   in minibuffer and eshell.
+
+   If anything with completions breaks, this is usually the culprit."
   :ensure t
-  :custom (completion-styles '(orderless)))
+  :bind ( :map ctl-m-map ("o" . toggle-completion-stles ) )
+  :custom (completion-styles '(orderless))
+  :preface
+  (defun toggle-completion-stles ()
+    (interactive)
+    (with-temp-message (format "Completion styles: %s"
+                               (setq completion-styles
+                                     (if (equal completion-styles '(orderless))
+                                         '(basic partial-completion emacs22)
+                                       '(orderless))))
+      (sit-for 1))))
 
 (use-package selectrum
   :ensure t

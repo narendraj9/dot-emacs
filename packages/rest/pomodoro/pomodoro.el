@@ -54,6 +54,30 @@
   :type 'file
   :group 'pomodoro)
 
+(defcustom pomodoro-notification-volume 40
+  "Volume (%) to be used for audio notifications."
+  :type 'number
+  :group 'pomodoro)
+
+(defcustom pomodoro-default-duration 25
+  "Default duration (in minutes) for a Pomodoro."
+  :type 'number
+  :group 'pomodoro)
+
+(defcustom pomodoro-default-break 5
+  "Default duration (in minutes) for a break."
+  :type 'number
+  :group 'pomodoro)
+
+(defface pomodoro-standard-face
+  '((t . ((:weight semibold :foreground "sandy brown"))))
+  "Face for pomodoro lines.")
+
+(defface pomodoro-short-face
+  '((t . ((:slant italic :foreground "rosy brown"))))
+  "Face for Pomodoro entries that are shorted than the default
+duration.")
+
 (defvar pomodoro-default-fringe-style nil)
 (defvar pomodoro-list (list))
 (defvar pomodoro-start-time nil)
@@ -106,7 +130,7 @@
                            (seq-uniq (mapcar #'caddr pomodoro-list)))))
   (pomodoro-start-without-prompt (if (equal arg '(16))
                                      (read-number "Duration: ")
-                                   25))
+                                   pomodoro-default-duration))
   (message ">> Start: %s" pomodoro-last-title)
   (add-hook 'org-timer-done-hook #'pomodoro-record)
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
@@ -114,7 +138,9 @@
 (defun pomodoro-start-break (&optional prefix)
   (interactive "P")
   (pomodoro-remove-notifications)
-  (pomodoro-start-without-prompt (if prefix (read-number "Duration (min): ") 5))
+  (pomodoro-start-without-prompt (if prefix
+                                     (read-number "Duration (min): ")
+                                   pomodoro-default-break))
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
 
 (defun pomodoro-edit-title ()
@@ -124,6 +150,37 @@
         (completing-read "Pomodoro: "
                          (seq-uniq (mapcar #'caddr pomodoro-list)))))
 
+(defun pomodoro--format-pomodoro (p)
+  (let* ((start (car p))
+         (end (cadr p))
+         (duration (floor (/ (float-time (time-subtract end start)) 60))))
+    (format (propertize "\t%s %s: %s\n"
+                        'face
+                        (if (<= duration pomodoro-default-duration)
+                            'pomodoro-standard-face
+                          'pomodoro-short-face))
+            (format-time-string "%H:%M" start)
+            (format-time-string "%H:%M" end)
+            (caddr p))))
+
+(defun pomodoro--format (pomodoros)
+  "Summarize a list of Pomodoros (which belong to the same day)."
+  (->> (nconc (-interleave pomodoros
+                           (-zip-with (lambda (p1 p2)
+                                        (time-to-seconds (time-subtract (car p1)
+                                                                        (cadr p2))))
+                                      pomodoros
+                                      (cdr pomodoros)))
+              (last pomodoros))
+       (mapconcat (lambda (p)
+                    (if (consp p)
+                        (pomodoro--format-pomodoro p)
+                      ;; This is the break in between (show it only when it's
+                      ;; more than 5 minutes).
+                      (let ((break (floor (/ p 60))))
+                        (when (< 5 break)
+                          (format "%8d mins\n" break))))))))
+
 (defun pomodoro-summarize ()
   (interactive)
   (when (not pomodoro-list)
@@ -132,28 +189,11 @@
          (day-ps-alist (-group-by (lambda (p)
                                     (format-time-string "%F (%a)" (car p)))
                                   pomodoro-list))
-         (format-ps
-          (lambda (ps)
-            (->> (nconc (-interleave ps
-                                     (-zip-with (lambda (p1 p2)
-                                                  (time-to-seconds (time-subtract (cadr p1)
-                                                                                  (car p2))))
-                                                ps
-                                                (cdr ps)))
-                        (last ps))
-                 (mapconcat (lambda (p)
-                              (if (consp p)
-                                  (format "\t%s %s: %s\n"
-                                          (format-time-string "%H:%M" (car p))
-                                          (format-time-string "%H:%M" (cadr p))
-                                          (caddr p))
-                                (format "%8d mins\n"
-                                        (floor (/ p 60)))))))))
          (summary (mapconcat (lambda (day-ps)
                                (format "%s [%d]:\n%s"
                                        (propertize (car day-ps) 'face 'highlight)
                                        (length (cdr day-ps))
-                                       (funcall format-ps (cdr day-ps))))
+                                       (pomodoro--format (cdr day-ps))))
                              day-ps-alist
                              "\n")))
     (with-output-to-temp-buffer pomodoro-buffer-name
@@ -166,7 +206,7 @@
 
 (defun pomodoro-audio-notification ()
   (when (file-exists-p pomodoro-notification-file)
-    (play-sound-file pomodoro-notification-file 40)))
+    (play-sound-file pomodoro-notification-file pomodoro-notification-volume)))
 
 (defun pomodoro-notify ()
   (setq pomodoro-default-fringe-style (cons fringe-mode
