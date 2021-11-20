@@ -69,6 +69,11 @@
   :type 'number
   :group 'pomodoro)
 
+(defcustom pomodoro-default-long-break 30
+  "Default duration (in minutes) for a longer break."
+  :type 'number
+  :group 'pomodoro)
+
 (defface pomodoro-standard-face
   '((t . ((:weight semibold :foreground "sandy brown"))))
   "Face for pomodoro lines.")
@@ -78,7 +83,10 @@
   "Face for Pomodoro entries that are shorted than the default
 duration.")
 
-(defvar pomodoro-default-fringe-style nil)
+(defvar pomodoro-default-fringe-style
+  (cons fringe-mode
+        (face-attribute 'fringe :background)))
+
 (defvar pomodoro-list (list))
 (defvar pomodoro-start-time nil)
 (defvar pomodoro-last-title nil)
@@ -143,6 +151,13 @@ duration.")
                                    pomodoro-default-break))
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
 
+
+(defun pomodoro-start-long-break ()
+  (interactive)
+  (pomodoro-remove-notifications)
+  (pomodoro-start-without-prompt pomodoro-default-long-break)
+  (add-hook 'org-timer-done-hook #'pomodoro-notify))
+
 (defun pomodoro-edit-title ()
   "Changes the title of the next pomodoro that will be recorded."
   (interactive)
@@ -163,23 +178,40 @@ duration.")
             (format-time-string "%H:%M" end)
             (caddr p))))
 
+(defun pomodoro--duration-mins (t1 t2)
+  "Returns (t1 - t2) in minutes."
+  (floor (/ (time-to-seconds (time-subtract t1 t2)) 60)))
+
+(defun pomodoro--format-duration (mins)
+  "Return a human readable duration."
+  (let ((days (/ mins 1440))
+        (hours (/ (% mins 1440) 60))
+        (mins (% (% mins 1440) 60))
+        (result (list)))
+    (unless (zerop mins)
+      (push (format "%s min%s" mins (if (= mins 1) "" "s")) result))
+    (unless (zerop hours)
+      (push (format "%s hr%s" hours (if (= hours 1) "" "s")) result))
+    (unless (zerop days)
+      (push (format "%s day%s" days (if (= days 1) "" "s")) result))
+    (mapconcat #'identity result " ")))
+
 (defun pomodoro--format (pomodoros)
   "Summarize a list of Pomodoros (which belong to the same day)."
-  (->> (nconc (-interleave pomodoros
-                           (-zip-with (lambda (p1 p2)
-                                        (time-to-seconds (time-subtract (car p1)
-                                                                        (cadr p2))))
-                                      pomodoros
-                                      (cdr pomodoros)))
-              (last pomodoros))
+  (->> (nconc
+        (-interleave pomodoros
+                     (-zip-with (lambda (p1 p2)
+                                  (pomodoro--duration-mins (car p1) (cadr p2)))
+                                pomodoros
+                                (cdr pomodoros)))
+        (last pomodoros))
        (mapconcat (lambda (p)
                     (if (consp p)
                         (pomodoro--format-pomodoro p)
                       ;; This is the break in between (show it only when it's
-                      ;; more than 5 minutes).
-                      (let ((break (floor (/ p 60))))
-                        (when (< 5 break)
-                          (format "%8d mins\n" break))))))))
+                      ;; more than 2 * default break minutes).
+                      (when (< (* 2 pomodoro-default-break) p)
+                        (format "%20s\n" (pomodoro--format-duration p))))))))
 
 (defun pomodoro-summarize ()
   (interactive)
@@ -198,10 +230,14 @@ duration.")
                              "\n")))
     (with-output-to-temp-buffer pomodoro-buffer-name
       (with-current-buffer pomodoro-buffer-name
-        (when pomodoro-start-time
-          (insert (format "Current (%s): %s\n\n"
-                          (string-trim (org-timer-value-string))
-                          pomodoro-last-title)))
+        (if pomodoro-start-time
+            (insert (format "Current (%s): %s\n\n"
+                            (string-trim (org-timer-value-string))
+                            pomodoro-last-title))
+          (insert (format "Last Pomodoro: %s ago\n\n"
+                          (pomodoro--format-duration
+                           (pomodoro--duration-mins (current-time)
+                                                    (cadar pomodoro-list))))))
         (insert (or summary "No Pomodoros"))))))
 
 (defun pomodoro-audio-notification ()

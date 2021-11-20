@@ -1998,7 +1998,8 @@ after doing `symbol-overlay-put'."
           ("x i"   . pomodoro-summarize)
           ("x p"   . pomodoro-start)
           ("x e"   . pomodoro-edit-title)
-          ("x b"   . pomodoro-start-break) ))
+          ("x b"   . pomodoro-start-break)
+          ("x B"   . pomodoro-start-long-break) ))
 
 (use-package thingatpt+
   :load-path "packages/lisp/"
