@@ -165,6 +165,32 @@ duration.")
         (completing-read "Pomodoro: "
                          (seq-uniq (mapcar #'caddr pomodoro-list)))))
 
+;; Notifications
+;; -------------
+
+(defun pomodoro-audio-notification ()
+  (when (file-exists-p pomodoro-notification-file)
+    (play-sound-file pomodoro-notification-file pomodoro-notification-volume)))
+
+(defun pomodoro-notify ()
+  (setq pomodoro-default-fringe-style (cons fringe-mode
+                                            (face-attribute 'fringe :background)))
+  (fringe-mode (cons 2 0))
+  (set-face-attribute 'fringe nil :background "sandy brown")
+  (pomodoro-audio-notification)
+  (cl-do ((count 1 (1+ count))) ((or (not (sit-for 1))
+                                     (<= pomodoro-max-notification-count count)))
+    (pomodoro-audio-notification))
+  (remove-hook 'org-timer-done-hook #'pomodoro-notify))
+
+(defun pomodoro-remove-notifications ()
+  (interactive)
+  (fringe-mode (car pomodoro-default-fringe-style))
+  (set-face-attribute 'fringe nil :background (cdr pomodoro-default-fringe-style)))
+
+;; Summarize my Pomodoros
+;; ----------------------
+
 (defun pomodoro--format-pomodoro (p)
   (let* ((start (car p))
          (end (cadr p))
@@ -211,7 +237,7 @@ duration.")
                       ;; This is the break in between (show it only when it's
                       ;; more than 2 * default break minutes).
                       (when (< (* 2 pomodoro-default-break) p)
-                        (format "%20s\n" (pomodoro--format-duration p))))))))
+                        (format "\t\t%s\n" (pomodoro--format-duration p))))))))
 
 (defun pomodoro-summarize ()
   (interactive)
@@ -240,25 +266,6 @@ duration.")
                                                     (cadar pomodoro-list))))))
         (insert (or summary "No Pomodoros"))))))
 
-(defun pomodoro-audio-notification ()
-  (when (file-exists-p pomodoro-notification-file)
-    (play-sound-file pomodoro-notification-file pomodoro-notification-volume)))
-
-(defun pomodoro-notify ()
-  (setq pomodoro-default-fringe-style (cons fringe-mode
-                                            (face-attribute 'fringe :background)))
-  (fringe-mode (cons 2 0))
-  (set-face-attribute 'fringe nil :background "sandy brown")
-  (pomodoro-audio-notification)
-  (cl-do ((count 1 (1+ count))) ((or (not (sit-for 1))
-                                     (<= pomodoro-max-notification-count count)))
-    (pomodoro-audio-notification))
-  (remove-hook 'org-timer-done-hook #'pomodoro-notify))
-
-(defun pomodoro-remove-notifications ()
-  (interactive)
-  (fringe-mode (car pomodoro-default-fringe-style))
-  (set-face-attribute 'fringe nil :background (cdr pomodoro-default-fringe-style)))
 
 (provide 'pomodoro)
 ;;; pomodoro.el ends here
