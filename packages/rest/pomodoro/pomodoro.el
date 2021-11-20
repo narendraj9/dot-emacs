@@ -239,12 +239,11 @@ duration.")
                       (when (< (* 2 pomodoro-default-break) p)
                         (format "\t\t%s\n" (pomodoro--format-duration p))))))))
 
-(defun pomodoro-summarize ()
-  (interactive)
+;;;###autoload
+(defun pomodoro-summary ()
   (when (not pomodoro-list)
     (pomodoro-load-file))
-  (let* ((pomodoro-buffer-name " *POMODORO*")
-         (day-ps-alist (-group-by (lambda (p)
+  (let* ((day-ps-alist (-group-by (lambda (p)
                                     (format-time-string "%F (%a)" (car p)))
                                   pomodoro-list))
          (summary (mapconcat (lambda (day-ps)
@@ -254,17 +253,22 @@ duration.")
                                        (pomodoro--format (cdr day-ps))))
                              day-ps-alist
                              "\n")))
+    (concat (if pomodoro-start-time
+                (format "Current (%s): %s\n\n"
+                        (string-trim (org-timer-value-string))
+                        pomodoro-last-title)
+              (format "Last Pomodoro: %s ago\n\n"
+                      (pomodoro--format-duration
+                       (pomodoro--duration-mins (current-time)
+                                                (cadar pomodoro-list)))))
+            (or summary "No Pomodoros"))))
+
+(defun pomodoro-summarize ()
+  (interactive)
+  (let ((pomodoro-buffer-name " *POMODORO*"))
     (with-output-to-temp-buffer pomodoro-buffer-name
       (with-current-buffer pomodoro-buffer-name
-        (if pomodoro-start-time
-            (insert (format "Current (%s): %s\n\n"
-                            (string-trim (org-timer-value-string))
-                            pomodoro-last-title))
-          (insert (format "Last Pomodoro: %s ago\n\n"
-                          (pomodoro--format-duration
-                           (pomodoro--duration-mins (current-time)
-                                                    (cadar pomodoro-list))))))
-        (insert (or summary "No Pomodoros"))))))
+        (insert (pomodoro-summary))))))
 
 
 (provide 'pomodoro)

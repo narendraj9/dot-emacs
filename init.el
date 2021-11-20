@@ -1993,13 +1993,27 @@ after doing `symbol-overlay-put'."
 
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
+  :commands pomodoro-summary
   :bind ( :map ctl-m-map
           ("x SPC" . pomodoro-remove-notifications)
           ("x i"   . pomodoro-summarize)
           ("x p"   . pomodoro-start)
           ("x e"   . pomodoro-edit-title)
           ("x b"   . pomodoro-start-break)
-          ("x B"   . pomodoro-start-long-break) ))
+          ("x B"   . pomodoro-start-long-break) )
+  :init
+  (add-hook 'org-agenda-finalize-hook
+            (lambda ()
+              (let ((pomodoro-summary-lines (s-lines (pomodoro-summary)))
+                    (line-count 15))
+                (goto-char (point-max))
+                ;; Just the first 20 lines of the overall Pomodoro summary
+                (insert "\n")
+                (insert (s-join "\n" (seq-take pomodoro-summary-lines line-count)))
+                (when (< line-count (length pomodoro-summary-lines))
+                  (insert "\n\t..."))
+                (goto-char (point-min))
+                (set-window-start (get-buffer-window) (point-min))))))
 
 (use-package thingatpt+
   :load-path "packages/lisp/"
