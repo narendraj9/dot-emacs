@@ -74,6 +74,20 @@
   :type 'number
   :group 'pomodoro)
 
+(defcustom pomodoro-format-list-function
+  #'pomodoro-format-with-icon-char
+  "Function to be used for formatting Pomodoros completed within a day.
+   Provided functions:
+        `pomodoro-format-with-icon-char'
+        `pomodoro-format-textual'"
+  :type 'function
+  :group 'pomodoro)
+
+(defcustom pomodoro-icon-char ?\N{TOMATO}
+  "Character to use for displaying one unit of Pomodoro."
+  :type 'character
+  :group 'pomodoro)
+
 (defface pomodoro-standard-face
   '((t . ((:weight semibold :foreground "sandy brown"))))
   "Face for pomodoro lines.")
@@ -194,8 +208,8 @@ duration.")
 (defun pomodoro--format-pomodoro (p)
   (let* ((start (car p))
          (end (cadr p))
-         (duration (floor (/ (float-time (time-subtract end start)) 60))))
-    (format (propertize "\t%s %s: %s\n"
+         (duration (floor (/ (float-time (time-subtract start end)) 60))))
+    (format (propertize "%s %s: %s"
                         'face
                         (if (<= duration pomodoro-default-duration)
                             'pomodoro-standard-face
@@ -222,8 +236,10 @@ duration.")
       (push (format "%s day%s" days (if (= days 1) "" "s")) result))
     (mapconcat #'identity result " ")))
 
-(defun pomodoro--format (pomodoros)
-  "Summarize a list of Pomodoros (which belong to the same day)."
+(defun pomodoro-format-textual (pomodoros)
+  "Summarize a list of Pomodoros (which belong to the same day).
+   Consecutive Pomodoros with the same title are shown separately
+   on a new line."
   (->> (nconc
         (-interleave pomodoros
                      (-zip-with (lambda (p1 p2)
@@ -233,11 +249,39 @@ duration.")
         (last pomodoros))
        (mapconcat (lambda (p)
                     (if (consp p)
-                        (pomodoro--format-pomodoro p)
+                        (format "\t%-55s\n" (pomodoro--format-pomodoro p))
                       ;; This is the break in between (show it only when it's
                       ;; more than 2 * default break minutes).
                       (when (< (* 2 pomodoro-default-break) p)
                         (format "\t\t%s\n" (pomodoro--format-duration p))))))))
+
+
+(defun pomodoro-format-with-icon-char (pomodoros)
+  "Summarize a list of Pomodoros (which belong to the same day)
+   using 🍅 for displaying Pomodoros."
+  (->> (nconc (-interleave pomodoros
+                           (-zip-with (lambda (p1 p2)
+                                        (pomodoro--duration-mins (car p1) (cadr p2)))
+                                      pomodoros
+                                      (cdr pomodoros)))
+              (last pomodoros))
+       ;; Filter out breaks smaller than (* 2 pomodoro-default-break)
+       (-filter (lambda (p-or-break-mins)
+                  (or (consp p-or-break-mins)
+                      (< (* 2 pomodoro-default-break) p-or-break-mins))))
+       (-partition-by (lambda (p-or-break-mins)
+                        (when (consp p-or-break-mins)
+                          (caddr p-or-break-mins))))
+       (mapconcat (lambda (p-or-break-mins-partition)
+                    (if (consp (car p-or-break-mins-partition))
+                        (let ((covering-p (list (cadar (last p-or-break-mins-partition))
+                                                (caar p-or-break-mins-partition)
+                                                (caddar p-or-break-mins-partition))))
+                          (format "\t%-55s %s\n"
+                                  (pomodoro--format-pomodoro covering-p)
+                                  (make-string (length p-or-break-mins-partition)
+                                               pomodoro-icon-char)))
+                      (format "\t\t%s\n" (pomodoro--format-duration (car p-or-break-mins-partition))))))))
 
 ;;;###autoload
 (defun pomodoro-summary ()
@@ -250,7 +294,7 @@ duration.")
                                (format "%s [%d]:\n%s"
                                        (propertize (car day-ps) 'face 'highlight)
                                        (length (cdr day-ps))
-                                       (pomodoro--format (cdr day-ps))))
+                                       (funcall pomodoro-format-list-function (cdr day-ps))))
                              day-ps-alist
                              "\n")))
     (concat (if pomodoro-start-time
