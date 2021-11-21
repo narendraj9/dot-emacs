@@ -75,6 +75,9 @@
 
 ;;; Weather
 
+(defvar mode-line-config-hide-vc nil
+  "Hide or show vc-status in the mode line.")
+
 (defvar current-weather-update-interval 1800
   "Interval for calling weather API to update weather information.")
 
@@ -144,7 +147,9 @@
                          mode-line-frame-identification
                          mode-line-buffer-identification
                          "   " mode-line-position "  "
-                         (vc-mode vc-mode))
+                         (:eval (when (and vc-mode
+                                           (not mode-line-config-hide-vc))
+                                  vc-mode)))
 
                        ;; -- Middle
                        mode-line-modes

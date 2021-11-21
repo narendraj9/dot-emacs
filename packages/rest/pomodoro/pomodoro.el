@@ -27,6 +27,7 @@
 
 ;;; Code:
 
+(require 'org)
 (require 'org-timer)
 (require 'seq)
 (require 'dash)
@@ -42,7 +43,7 @@
   :type 'file
   :group 'pomodoro)
 
-(defcustom pomodoro-max-notification-count 2
+(defcustom pomodoro-max-notification-count 3
   "Numbers of times to play audio notification."
   :type 'number
   :group 'pomodoro)
@@ -103,7 +104,7 @@ duration.")
 
 (defvar pomodoro-list (list))
 (defvar pomodoro-start-time nil)
-(defvar pomodoro-last-title nil)
+(defvar pomodoro-title nil)
 
 (defun pomodoro-persist (p)
   (with-temp-buffer
@@ -124,7 +125,7 @@ duration.")
 (defun pomodoro-record ()
   (let ((this-pomodoro (list pomodoro-start-time
                              (current-time)
-                             pomodoro-last-title)))
+                             pomodoro-title)))
     (push this-pomodoro pomodoro-list)
     (pomodoro-persist this-pomodoro))
   (remove-hook 'org-timer-done-hook #'pomodoro-record)
@@ -146,14 +147,17 @@ duration.")
   (when (not pomodoro-list)
     (pomodoro-load-file))
   (setq pomodoro-start-time (current-time))
-  (when (or arg (not pomodoro-last-title))
-    (setq pomodoro-last-title
+  (when (or arg (not pomodoro-title))
+    (setq pomodoro-title
           (completing-read "Title: "
                            (seq-uniq (mapcar #'caddr pomodoro-list)))))
   (pomodoro-start-without-prompt (if (equal arg '(16))
                                      (read-number "Duration: ")
                                    pomodoro-default-duration))
-  (message ">> Start: %s" pomodoro-last-title)
+  (message ">> Start: %s [Prediction: %s]"
+           pomodoro-title
+           (car (pomodoro--org-agenda-matching-headings pomodoro-title)))
+  (add-hook 'org-timer-stop-hook (lambda () (setq pomodoro-start-time nil)))
   (add-hook 'org-timer-done-hook #'pomodoro-record)
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
 
@@ -175,7 +179,7 @@ duration.")
 (defun pomodoro-edit-title ()
   "Changes the title of the next pomodoro that will be recorded."
   (interactive)
-  (setq pomodoro-last-title
+  (setq pomodoro-title
         (completing-read "Pomodoro: "
                          (seq-uniq (mapcar #'caddr pomodoro-list)))))
 
@@ -208,10 +212,10 @@ duration.")
 (defun pomodoro--format-pomodoro (p)
   (let* ((start (car p))
          (end (cadr p))
-         (duration (floor (/ (float-time (time-subtract start end)) 60))))
+         (duration (floor (/ (float-time (time-subtract end start)) 60))))
     (format (propertize "%s %s: %s"
                         'face
-                        (if (<= duration pomodoro-default-duration)
+                        (if (<= pomodoro-default-duration duration)
                             'pomodoro-standard-face
                           'pomodoro-short-face))
             (format-time-string "%H:%M" start)
@@ -222,12 +226,14 @@ duration.")
   "Returns (t1 - t2) in minutes."
   (floor (/ (time-to-seconds (time-subtract t1 t2)) 60)))
 
-(defun pomodoro--format-duration (mins)
+(defun pomodoro--format-duration (input-mins)
   "Return a human readable duration."
-  (let ((days (/ mins 1440))
-        (hours (/ (% mins 1440) 60))
-        (mins (% (% mins 1440) 60))
+  (let ((days (/ input-mins 1440))
+        (hours (/ (% input-mins 1440) 60))
+        (mins (% (% input-mins 1440) 60))
         (result (list)))
+    (when (zerop input-mins)
+      (push "<1 min" result))
     (unless (zerop mins)
       (push (format "%s min%s" mins (if (= mins 1) "" "s")) result))
     (unless (zerop hours)
@@ -300,7 +306,7 @@ duration.")
     (concat (if pomodoro-start-time
                 (format "Current (%s): %s\n\n"
                         (string-trim (org-timer-value-string))
-                        pomodoro-last-title)
+                        pomodoro-title)
               (format "Last Pomodoro: %s ago\n\n"
                       (pomodoro--format-duration
                        (pomodoro--duration-mins (current-time)
@@ -312,7 +318,30 @@ duration.")
   (let ((pomodoro-buffer-name " *POMODORO*"))
     (with-output-to-temp-buffer pomodoro-buffer-name
       (with-current-buffer pomodoro-buffer-name
+        (setq revert-buffer-function
+              (lambda (&rest _args) (pomodoro-summarize)))
         (insert (pomodoro-summary))))))
+
+;; Integration with org-agenda
+;; ---------------------------
+
+(defun pomodoro--org-agenda-matching-headings (title)
+  (let ((org-headings (org-map-entries (lambda ()
+                                         (cons (org-get-heading t t t t)
+                                               (org-id-get-create)))
+                                       "/+TODO"
+                                       'agenda)))
+    (seq-sort-by #'car
+                 (lambda (org-heading1 org-heading2)
+                   (< (string-distance title org-heading1)
+                      (string-distance title org-heading2)))
+                 org-headings)))
+
+
+(defun pomodoro-select-org-heading ()
+  (let ((org-headings (pomodoro--org-agenda-matching-headings pomodoro-title)))
+    (assoc (completing-read "Org entry: " org-headings nil t)
+           org-headings)))
 
 
 (provide 'pomodoro)

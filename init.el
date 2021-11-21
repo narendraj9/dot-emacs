@@ -354,7 +354,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                (expand-file-name "themes/"
                                  user-emacs-directory))
   (load-theme 'jazz)
-  (use-package mode-line-config :demand t :load-path "etc/")
 
   ;; Setup my favorite fonts [if available]
   (dolist (font (list "Symbola" "Firacode"))
@@ -394,6 +393,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Disable mixed fonts in modus themes
   (setq modus-themes-no-mixed-fonts t))
 
+(use-package mode-line-config
+  :bind ( :map ctl-m-map
+          ("<C-m>" . mode-line-config-flash-cleaner-line) )
+  :demand t
+  :load-path "etc/"
+  :preface
+  (defun mode-line-config-flash-cleaner-line ()
+    (interactive)
+    (let ((mode-line-modes (list))
+          (mode-line-position nil)
+          (mode-line-config-hide-vc t)
+          (mode-line-buffer-identification nil))
+      (force-mode-line-update)
+      (sit-for 2)
+      (force-mode-line-update))))
 
 (use-package quoted-scratch
   :load-path "packages/rest/quoted-scratch"
@@ -783,8 +797,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (wrap-region-add-wrappers
    '(("=" "=" nil (org-mode))
      ("~" "~" nil (org-mode))))
-
-  (wrap-region-global-mode +1))
+  (wrap-region-global-mode +1)
+  (wrap-region-remove-wrapper "<" 'org-mode))
 
 (use-package region-bindings-mode
   :diminish region-bindings-mode
@@ -994,10 +1008,6 @@ after doing `symbol-overlay-put'."
    :map region-bindings-mode-map
    ("C-x $" . mc-hide-unmatched-lines-mode)
    ("C-x !" . mc/mark-all-like-this)
-   ("M-k"   . mc/mmlte--up)
-   ("M-j"   . mc/mmlte--down)
-   ("M-h"   . mc/mmlte--left)
-   ("M-l"   . mc/mmlte--right)
 
    :map ctl-quote-map
    ("m" . mc/mark-more-like-this-extended)
@@ -2007,16 +2017,22 @@ after doing `symbol-overlay-put'."
   :init
   (add-hook 'org-agenda-finalize-hook
             (lambda ()
-              (let ((pomodoro-summary-lines (s-lines (pomodoro-summary)))
-                    (line-count 15))
-                (goto-char (point-max))
-                ;; Just the first 20 lines of the overall Pomodoro summary
-                (insert "\n")
-                (insert (s-join "\n" (seq-take pomodoro-summary-lines line-count)))
-                (when (< line-count (length pomodoro-summary-lines))
-                  (insert "\n\t..."))
-                (goto-char (point-min))
-                (set-window-start (get-buffer-window) (point-min))))))
+              (when (memq this-command '(org-agenda org-agenda-redo))
+                (let ((pomodoro-summary-lines (s-lines (pomodoro-summary)))
+                      (start-date-regex "^[0-9]\\{4\\}-[0-9]\\{1,2\\}-[0-9]\\{1,2\\}")
+                      (dates-seen 0))
+                  (goto-char (point-max))
+                  (insert "\n")
+                  ;; Assumes the date is not on the first line.
+                  (while (< dates-seen 2)
+                    (insert (car pomodoro-summary-lines))
+                    (insert "\n")
+                    (setq pomodoro-summary-lines (cdr pomodoro-summary-lines))
+                    (when (string-match-p start-date-regex (car pomodoro-summary-lines))
+                      (setq dates-seen (1+ dates-seen))))
+
+                  (goto-char (point-min))
+                  (set-window-start (get-buffer-window) (point-min)))))))
 
 (use-package thingatpt+
   :load-path "packages/lisp/"
@@ -2114,7 +2130,7 @@ after doing `symbol-overlay-put'."
     (with-temp-message (format "Completion styles: %s"
                                (setq completion-styles
                                      (if (equal completion-styles '(orderless))
-                                         '(basic partial-completion emacs22)
+                                         '(basic partial-completion orderless)
                                        '(orderless))))
       (sit-for 1))))
 

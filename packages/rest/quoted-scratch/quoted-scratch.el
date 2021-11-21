@@ -272,9 +272,8 @@ delete all text in a buffer."
                                                        'quote-string))
       ;; Now insert new quote at the top of the buffer
       (goto-char (point-min))
-      (insert (propertize "\n"
+      (insert (propertize quote-text
                           'text-type 'quote-string
-                          'display quote-text
                           'category 'quoted-scratch-properties
                           'rear-nonsticky t
                           'front-sticky t))
@@ -319,11 +318,9 @@ Optional argument POP-TO-BUFFERP makes the window pop to the buffer if non-nil."
   (interactive)
   (let ((window-start (window-start)))
     (quoted-scratch-update-quote-text-in-scratch
-     (propertize (mapconcat 'funcall
-                            quoted-scratch-scratchers
-                            quoted-scratch-separator)
-                 'text-type 'quote-string
-                 'rear-nonsticky t))
+     (mapconcat 'funcall
+                quoted-scratch-scratchers
+                quoted-scratch-separator))
     (and pop-to-bufferp (pop-to-buffer "*scratch*"))
     (when (equal (selected-window)
                  (get-buffer-window "*scratch*"))
