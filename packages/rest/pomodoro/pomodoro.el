@@ -258,7 +258,7 @@ duration.")
 
 (defun pomodoro-format-with-icon-char (pomodoros)
   "Summarize a list of Pomodoros (which belong to the same day)
-   using 🍅 for displaying Pomodoros."
+   using `pomodoro-icon-char' for displaying Pomodoros."
   (->> (nconc (-interleave pomodoros
                            (-zip-with (lambda (p1 p2)
                                         (pomodoro--duration-mins (car p1) (cadr p2)))
