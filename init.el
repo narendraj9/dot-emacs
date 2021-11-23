@@ -994,7 +994,10 @@ after doing `symbol-overlay-put'."
               (if vcursor-use-vcursor-map
                   (progn (fringe-set-louder)
                          (setq vcursor-use-vcursor-map--wc
-                               (current-window-configuration)))
+                               (current-window-configuration))
+                         (save-excursion
+                           (previous-line)
+                           (vcursor-move (point))))
                 (fringe-restore-default)
                 (set-window-configuration vcursor-use-vcursor-map--wc))))
 
