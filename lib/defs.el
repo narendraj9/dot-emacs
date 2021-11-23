@@ -28,6 +28,7 @@
 (require 'repeat)
 (require 'seq)
 (require 's)
+(require 'cl-lib)
 
 (defvar emacs-assets-directory
   (expand-file-name "~/miscellany/assets/")
@@ -224,8 +225,8 @@ Argument END ending point for region."
   (let* ((delta-time (days-to-time n))
          (now (time-subtract (current-time)
                              delta-time)))
-    (letf (((symbol-function 'current-time) (lambda () now)))
-          (org-agenda-todo))))
+    (cl-letf (((symbol-function 'current-time) (lambda () now)))
+      (org-agenda-todo))))
 
 
 (defun switch-to-buffer-with-mode (arg)

@@ -612,7 +612,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     something that requires immediate attention.")
 
   (defun fringe-set-louder ()
-    (fringe-mode 50 )
+    (fringe-mode 20)
     (set-face-attribute 'fringe nil :inverse-video t))
 
   (defun fringe-restore-default ()
@@ -983,6 +983,21 @@ after doing `symbol-overlay-put'."
 (use-package beacon
   :ensure t
   :bind (:map ctl-quote-map ("c p" . beacon-blink)))
+
+(use-package vcursor
+  :bind ( :map ctl-m-map
+          ("v" . vcursor-use-vcursor-map) )
+  (defvar vcursor-use-vcursor-map--wc)
+  (add-hook 'vcursor-use-vcursor-map-hook
+            (lambda ()
+              (if vcursor-use-vcursor-map
+                  (progn (fringe-set-louder)
+                         (setq vcursor-use-vcursor-map--wc
+                               (current-window-configuration)))
+                (fringe-restore-default)
+                (set-window-configuration vcursor-use-vcursor-map--wc))))
+  :config
+  (define-key vcursor-use-vcursor-map (kbd "v")))
 
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors."
