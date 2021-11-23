@@ -987,6 +987,7 @@ after doing `symbol-overlay-put'."
 (use-package vcursor
   :bind ( :map ctl-m-map
           ("v" . vcursor-use-vcursor-map) )
+  :init
   (defvar vcursor-use-vcursor-map--wc)
   (add-hook 'vcursor-use-vcursor-map-hook
             (lambda ()
@@ -996,8 +997,12 @@ after doing `symbol-overlay-put'."
                                (current-window-configuration)))
                 (fringe-restore-default)
                 (set-window-configuration vcursor-use-vcursor-map--wc))))
+
   :config
-  (define-key vcursor-use-vcursor-map (kbd "v")))
+  ;; Workaround for a bug in vcursor.el
+  (advice-add 'vcursor-get-char-count :around
+              (lambda (get-char-count &rest args)
+                (save-excursion (apply get-char-count args)))))
 
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors."
