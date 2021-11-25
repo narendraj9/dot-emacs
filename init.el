@@ -532,10 +532,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package prodigy
   :defer t
-  :bind (
-         :map ctl-quote-map ("s p" . prodigy)
-         :map view-mode-map ("o" . delete-other-windows)
-         )
+  :bind ( :map ctl-quote-map ("s p" . prodigy) )
   :ensure t
   :config
   (load-file (expand-file-name "etc/prodigy-service-defs.el"
