@@ -32,11 +32,6 @@
 
 (setq erc-prompt "|>")
 
-(let ((erc-logs-dir (expand-file-name "var/erc/logs/" user-emacs-directory)))
-  (unless (file-exists-p erc-logs-dir)
-    (mkdir erc-logs-dir t)
-    (setq erc-log-channels-directory erc-logs-dir)))
-
 ;; Kill buffers for channels after /part
 (setq erc-kill-buffer-on-part t)
 ;; Kill buffers for private queries after quitting the server

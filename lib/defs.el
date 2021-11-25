@@ -118,20 +118,6 @@ I tend to use then together always."
   (fill-paragraph)
   (forward-paragraph))
 
-(defun slack-connect ()
-  "Connect to slack."
-  (interactive)
-  (require 'erc-services)
-  (require 'tls)
-  (erc-services-mode +1)
-  (if (boundp 'my-slack-vicarie-password)
-      (erc-tls :server "vicarie.irc.slack.com"
-               :port 6697
-               :nick "narendraj9"
-               :password my-slack-vicarie-password)
-    (message "Error: my-slack-vicarie-password not bound")))
-
-
 (defun vicarie/eval-last-sexp-and-do (f)
   "Eval the last sexp and call F on its value."
   (let ((standard-output (current-buffer))
@@ -152,70 +138,6 @@ I tend to use then together always."
   (vicarie/eval-last-sexp-and-do (lambda (value)
                                    (backward-kill-sexp)
                                    (insert (format "%s" value)))))
-
-
-(defun create-file-for-buffer ()
-  "Create a temporary file for the current buffer.
-To be used for buffers that don't have an associated file."
-  (let* ((temp-file (make-temp-file
-                     (replace-regexp-in-string "\*"
-                                               ""
-                                               (buffer-name))
-                     nil
-                     ".txt")))
-    (write-region (point-min) (point-max) temp-file)
-    temp-file))
-
-
-(defun upload-file (file-path)
-  "Upload a file to transfer.sh using curl.
-I am thinking that
-using curl is more efficient for binary files than using a buffer
-and calling `upload-buffer'.
-Argument FILE-PATH is the path to file."
-  (interactive "fFile: ")
-  (kill-new (shell-command-to-string
-             (format "%s %s %s%s"
-                     "curl -s --upload-file"
-                     (shell-quote-argument file-path)
-                     "https://transfer.sh/"
-                     (shell-quote-argument
-                      (file-name-nondirectory file-path)))))
-  (message "Link copied to clipboard: %s" (s-trim (current-kill 0))))
-
-
-(defun upload-buffer ()
-  "Upload current buffer to transfer.sh.
-This function uses the function `upload-region'."
-  (interactive)
-  (upload-region (point-min) (point-max)))
-
-
-(defun upload-region (beg end)
-  "Upload the contents of the selected region in current buffer.
-It uses transfer.sh Link to the uploaded file is copied to
-clipboard.  Creates a temp file if the buffer isn't associted with
-a file.
-Argument BEG beginning point for region.
-Argument END ending point for region."
-  (interactive "r")
-  (let* ((buf-file-path (buffer-file-name))
-         (file-path (or buf-file-path
-                        (create-file-for-buffer)))
-         (file-name (file-name-nondirectory file-path))
-         (upload-url (format "https://transfer.sh/%s"
-                             file-name))
-         (url-request-method "PUT")
-         (url-request-data (buffer-substring-no-properties beg end))
-         (url-callback (lambda (_unused)
-                         (search-forward "\n\n")
-                         (let ((url-link (buffer-substring (point)
-                                                           (point-max))))
-                           (kill-new url-link)
-                           (message "Link copied to clipboard: %s"
-                                    (s-trim url-link))
-                           (kill-buffer (current-buffer))))))
-    (url-retrieve upload-url url-callback)))
 
 
 (defun org-late-todo (n)
@@ -405,8 +327,6 @@ Requires that dzen is installed."
     (other-window 1)
     (eshell))))
 
-;;; Defunctional Playground
-;;  ─────────────────────────────────────────────────────────────────
 (defun snap-it-to-file ()
   "Take a screenshot of Emacs and return the file path."
   (make-directory "/tmp/screenshots/" t)
@@ -421,12 +341,6 @@ Requires that dzen is installed."
   (upload-file (snap-it-to-file)))
 
 
-(defun go-back-to-intellij ()
-  "Change focus to window running android studio."
-  (interactive)
-  (shell-command "wmctrl -a 'Android Studio'"))
-
-
 (defun post-to-slack (webhook-url message)
   "Post to the slack WEBHOOK-URL contents of MESSAGE."
   (let ((url-request-method "POST")
@@ -439,15 +353,6 @@ Requires that dzen is installed."
                                             (s-trim info-text)))
                            (kill-buffer (current-buffer))))))
     (url-retrieve webhook-url url-callback)))
-
-
-(defun post-region-to-slack-cooking (beg end)
-  "Post region (BEG, END) to one of my slack channels."
-  (interactive "r")
-  (if (boundp 'my-slack-vicarie-cooking-webhook)
-      (post-to-slack my-slack-vicarie-cooking-webhook
-                     (buffer-substring beg end))
-    (message "`my-slack-vicarie-cooking-webhook` not bound to the webhook url")))
 
 
 (defun screenshot-frame (window-id)
@@ -866,31 +771,6 @@ Note: Don't waste your time trying to understanding all this."
      (interactive)
      (message "%s" (call-interactively #',command))))
 
-(defun rebuild-emacs-on-linux ()
-  "Rebuild Emacs from master.
-Assumes that binary `emacs` is in PATH and symlinked to the real
-binary file."
-  (interactive)
-  (async-shell-command
-   "file `readlink $(which emacs)`;
-    if [[ $? -eq 0 ]]; then
-        # emacs/src
-        cd $(dirname `readlink $(which emacs)`);
-        # emacs/
-        cd ..;
-        git pull;
-        while [[ $? -ne 0 ]]; do
-            sleep 1m;
-            notify-send \"Emacs : git pull failed\. Retrying...\";
-            git pull;
-        done
-        make all;
-        notify-send \"Built Emacs $(emacs --version | head -1)!\";
-        notify-send  \"$(git log --oneline -1)\" ;
-    else
-        notify-send --urgency critical \"Something went wrong with building Emacs!\";
-    fi"))
-
 (defun utils-easy-move (map)
   "Set key-bindings (in MAP) for easier navigation."
   (interactive)
@@ -1056,31 +936,6 @@ From Emacs Wiki."
   (interactive)
   (delete-indentation +1))
 
-(defun emacspeak-wizards-execute-asynchronously (key)
-  "Read KEY sequence, then execute its command on a new thread.
-Credits:
-https://emacspeak.blogspot.com/2018/07/using-emacs-threads-to-execute-commands.html"
-  (interactive (list (read-key-sequence "Key Sequence: ")))
-  (let ((l  (local-key-binding key))
-        (g (global-key-binding key)))
-    (cond
-     ( (commandp l)
-       (make-thread l)
-       (message "Running %s on a new thread." l))
-     ((commandp g)
-      (make-thread g)
-      (message "Running %s on a new thread." g))
-     (t (error "%s is not bound to a command" key)))))
-
-(defun async-M-x ()
-  "Read command name and run it in a separate thread."
-  (interactive)
-  (make-thread (read-command "(M-x)& ")))
-
-(defun commit-org-files ()
-  "Commit `org-mode' files."
-  (async-shell-command "~/dotfiles/local/bin/miscellany-commit.sh"))
-
 (defmacro with-timing (trace-id &rest forms)
   "Run FORMS as they are showing time taken to execute them.
 TRACE-ID is printed along with the timing to recognize what was
@@ -1094,32 +949,6 @@ Shows a message only when the forms take more than a second."
        (let ((,elapsed (float-time (time-subtract (current-time) ,nowvar))))
          (when (< 1 ,elapsed)
            (message "[%s] took [%s] seconds" ,trace-id ,elapsed))))))
-
-(defun ding-dong! ()
-  "Randomly blink for a couple of times."
-  (interactive)
-  (require 'pulse)
-  (let ((t-secs 0))
-    (dolist (ding-delay (mapcar (lambda (_)
-                                  (1+ (random 2)))
-                                (number-sequence 1 1000)))
-      (setq t-secs (+ t-secs ding-delay))
-      (when (< t-secs 60)
-        (run-with-timer t-secs
-                        nil
-                        (lambda ()
-                          (let ((visible-bell t)
-                                (pulse-iterations 20)
-                                (pulse-delay 0.5))
-                            (case (random 3)
-                                  (0 (pulse-momentary-highlight-region
-                                      (window-start)
-                                      (window-end)))
-                                  (1 (pulse-momentary-highlight-region
-                                      (window-start)
-                                      (window-end)))
-                                  (2 (ding) (ding))))))))))
-
 
 (defun indian-math-group-float (f)
   "Group floating point numbers in calc-mode.
@@ -1252,6 +1081,15 @@ search keyword."
 (defun start-emacspeak ()
   (interactive)
   (load-file (expand-file-name "~/code/emacspeak/lisp/emacspeak-setup.el")))
+
+(defun preserve-kill-ring (original-fn &rest args)
+  "Advice function for preserving `kill-ring' and
+`kill-ring-yank-pointer'."
+  (let ((kill-ring* kill-ring)
+        (kill-ring-yank-pointer* kill-ring-yank-pointer))
+    (apply original-fn args)
+    (setq kill-ring kill-ring*
+          kill-ring-yank-pointer kill-ring-yank-pointer*)))
 
 
 (provide 'defs)

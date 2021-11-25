@@ -67,7 +67,6 @@ Otherwise, limit to only `org-mode' files."
   (org-agenda-redo))
 
 (use-package org
-  :pin org
   :ensure org-plus-contrib
   :demand t
   :bind ( :map org-mode-map
@@ -191,7 +190,7 @@ Otherwise, limit to only `org-mode' files."
   (setq org-id-link-to-org-use-id t)
 
   ;; Add a new structure template
-  (push '("t" . "#+TITLE: ?") org-structure-template-alist)
+  (add-to-list 'org-structure-template-alist '("t" . "#+TITLE: ?"))
 
   ;; Opening PDF files inside Emacs by default
   (setq org-file-apps

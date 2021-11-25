@@ -343,6 +343,24 @@ duration.")
     (assoc (completing-read "Org entry: " org-headings nil t)
            org-headings)))
 
+(defun pomodoro-append-to-org-agenda ()
+  (when (memq this-command '(org-agenda org-agenda-redo))
+    (let ((pomodoro-summary-lines (s-lines (pomodoro-summary)))
+          (start-date-regex "^[0-9]\\{4\\}-[0-9]\\{1,2\\}-[0-9]\\{1,2\\}")
+          (dates-seen 0))
+      (goto-char (point-max))
+      (insert "\n")
+      ;; Assumes the date is not on the first line.
+      (while (< dates-seen 2)
+        (insert (car pomodoro-summary-lines))
+        (insert "\n")
+        (setq pomodoro-summary-lines (cdr pomodoro-summary-lines))
+        (when (string-match-p start-date-regex (car pomodoro-summary-lines))
+          (setq dates-seen (1+ dates-seen))))
+
+      (goto-char (point-min))
+      (set-window-start (get-buffer-window) (point-min)))))
+
 
 (provide 'pomodoro)
 ;;; pomodoro.el ends here
