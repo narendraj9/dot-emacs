@@ -22,3 +22,7 @@ gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=${1:output.pdf} ${2:input
 movescu --port 8765 --move myAE --call yourAE localhost 9876 -k 'StudyInstanceUID=$0' -ll debug -aet myAE --study -k QueryRetrieveLevel=STUDY
 ** dcmtk's dcmqrscp
 dcmqrscp -ll debug -c ~/dotfiles/local/assets/dcmqrscp.cfg
+** Enable swap Right Ctrl with Right Win
+gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier', 'altwin:meta_alt', 'ctrl:swap_rwin_rctl']"
+** Disable swap Right Ctrl with Right Win
+gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier', 'altwin:meta_alt']"
