@@ -1085,8 +1085,8 @@ search keyword."
 (defun preserve-kill-ring (original-fn &rest args)
   "Advice function for preserving `kill-ring' and
 `kill-ring-yank-pointer'."
-  (let ((kill-ring* kill-ring)
-        (kill-ring-yank-pointer* kill-ring-yank-pointer))
+  (let* ((kill-ring* (copy-sequence kill-ring))
+         (kill-ring-yank-pointer* kill-ring*))
     (apply original-fn args)
     (setq kill-ring kill-ring*
           kill-ring-yank-pointer kill-ring-yank-pointer*)))

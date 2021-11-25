@@ -2359,8 +2359,7 @@ after doing `symbol-overlay-put'."
     :hook (emacs-mode . highlight-defined-mode)))
 
 (use-package plisp-mode
-  :doc
-  "https://picolisp.com/wiki/?Documentation"
+  :doc "https://picolisp.com/wiki/?Documentation"
   :ensure t)
 
 (use-package xray :load-path "package/lisp/" :defer t)
@@ -2376,6 +2375,9 @@ after doing `symbol-overlay-put'."
           . enable-paredit-mode )
 
          (prog-mode . sub-paredit-mode))
+
+  :init
+  (advice-add 'paredit-forward-kill-word :around #'preserve-kill-ring)
 
   :bind ( :map paredit-mode-map
           ("M-S" . paredit-splice-sexp)
