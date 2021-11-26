@@ -995,13 +995,7 @@ after doing `symbol-overlay-put'."
                            (previous-line)
                            (vcursor-move (point))))
                 (fringe-restore-default)
-                (set-window-configuration vcursor-use-vcursor-map--wc))))
-
-  :config
-  ;; Workaround for a bug in vcursor.el
-  (advice-add 'vcursor-get-char-count :around
-              (lambda (get-char-count &rest args)
-                (save-excursion (apply get-char-count args)))))
+                (set-window-configuration vcursor-use-vcursor-map--wc)))))
 
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors."
