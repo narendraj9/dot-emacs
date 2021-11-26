@@ -2019,7 +2019,7 @@ after doing `symbol-overlay-put'."
 
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
-  :commands pomodoro-summary
+  :commands pomodoro-append-to-org-agenda
   :bind ( :map ctl-m-map
           ("x SPC" . pomodoro-remove-notifications)
           ("x i"   . pomodoro-summarize)
@@ -2046,9 +2046,8 @@ after doing `symbol-overlay-put'."
   (desktop-auto-save-enable))
 
 
-;;; Hyperbole
-;;; ──────────────────────────────────────────────────────────────────
-
+;;; Regions
+;;; ----------------------------------------------------------------------------
 (use-package delsel :init (delete-selection-mode +1))
 (use-package expand-region
   :ensure t
@@ -2059,20 +2058,6 @@ after doing `symbol-overlay-put'."
   :bind (:map ctl-period-map
               ("@" . er/expand-region)))
 
-(use-package hyperbole
-  :disabled t
-  :ensure t
-  :init
-  (require 'hyperbole)
-  :config
-  (use-package hyrolo
-    :config
-    (setq hyrolo-entry-regexp "^\\*+ "
-          hyrolo-kill-buffers-after-use t)
-    (remove-hook 'hyrolo-add-hook #'hyrolo-set-date)
-    (remove-hook 'hyrolo-edit-hook #'hyrolo-set-date)))
-
-;;; ---
 (use-package plantuml-mode
   :ensure t
   :defer t
@@ -2247,7 +2232,7 @@ after doing `symbol-overlay-put'."
   :init
   (setq c-default-style '((java-mode . "*java*")
                           (awk-mode . "awk")
-			              (other . "gnu")))
+                          (other . "gnu")))
   :config
   (setq-default c-block-comment-flag t
                 c-auto-newline t
@@ -2548,8 +2533,6 @@ after doing `symbol-overlay-put'."
   :bind (("C-x C-y" . whitespace-mode)
          ("C-x y"   . whitespace-toggle-options))
   :init
-  (setq whitespace-style
-        '(face tabs spaces trailing lines-tail newline empty newline-mark))
   (setq whitespace-display-mappings
         '((space-mark   ?\     [?·]     [?.])
           (space-mark   ?\xA0  [?¤]     [?_])
@@ -2563,8 +2546,7 @@ after doing `symbol-overlay-put'."
               ;; 1. Graphics in `ob-ipython' do not work if we remove trailing
               ;;    newlines. So, this should be excluded for buffers in
               ;;    `image-mode'.
-              (when (not (memq major-mode '(markdown-mode
-                                            image-mode)))
+              (when (not (memq major-mode '(markdown-mode image-mode)))
                 (whitespace-cleanup)
                 (delete-trailing-whitespace)))))
 

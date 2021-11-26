@@ -25,37 +25,37 @@
 
 ;;; Code:
 
-(defface mode-line-delim
-  ()
+(defface mode-line-delim ()
   "Face for mode line delimiters."
   :group 'mode-line-faces)
 
-(defface mode-line-mode-name
-  ()
+(defface mode-line-mode-name ()
   "Face for major mode name."
   :group 'mode-line-faces)
 
-(defface mode-line-minor-mode-face
-  ()
+(defface mode-line-minor-mode-face ()
   "Face for minor modes in mode line."
   :group 'mode-line-faces)
 
-(defface mode-line-size-face
-  ()
+(defface mode-line-size-face ()
   "Face for minor modes in mode line."
   :group 'mode-line-faces)
 
-(defface mode-line-battery-face
-  ()
+(defface mode-line-battery-face ()
   "Face for battery information in the mode line."
   :group 'mode-line-faces)
 
-
-(defface mode-line-dimmed
-  '((t (:foreground "grey60")))
+(defface mode-line-dimmed '((t (:foreground "grey60")))
   "A Face for items that are always dimmed"
   :group 'mode-line-faces)
 
+;;; Collapse spaces if the mode-line is longer than the window width
+(setq mode-line-compact 'long)
+
+;;; Disable variable-pitch for mode-line
+(set-face-attribute 'mode-line nil :inherit 'default)
+(set-face-attribute 'mode-line-inactive nil :inherit 'default)
+(set-face-attribute 'mode-line-active nil :inherit 'default)
 
 ;;; Tabs
 
@@ -68,43 +68,21 @@
                            (setq tab-index (1+ tab-index))
                            (format (if (eq 'current-tab (car tab))
                                        (propertize "[%s]" 'face 'mode-line-emphasis)
-                                     (propertize "%s" 'face 'mode-line))
+                                     (propertize "%s" 'face 'mode-line-inactive))
                                    tab-index))
                          (tab-bar-tabs)
                          " ")))))
 
-;;; Weather
+;;; VC
 
 (defvar mode-line-config-hide-vc nil
   "Hide or show vc-status in the mode line.")
 
-(defvar current-weather-update-interval 1800
-  "Interval for calling weather API to update weather information.")
-
-(defvar current-weather-fetcher-timer
-  (run-with-timer 0
-                  current-weather-update-interval
-                  (lambda ()
-                    (run-with-idle-timer 30 nil #'current-weather)))
-  "Idle timer for fetching the current weather information.")
-
-(add-to-list 'mode-line-misc-info
-             '(:eval
-               (when-let ((ts (and current-weather
-                                   (get-text-property 0 'timestamp current-weather))))
-                 (propertize current-weather
-                             'face
-                             (if (< (time-convert (time-subtract (current-time) ts) 'integer)
-                                    current-weather-update-interval)
-                                 'mode-line-dimmed
-                               'mode-line-inactive))))
-             t)
-
-;;;
-
+;;; Rendering mode-line with spaces spread out evenly.
 
 (defun simple-mode-line-render (left middle right)
-  "Return a mode-line construct with MIDDLE centered and available space adjust after LEFT and before RIGHT."
+  "Return a mode-line construct with MIDDLE centered
+   and available space adjust after LEFT and before RIGHT."
   (let* ((l (format-mode-line left))
          (m (format-mode-line middle))
          (r (format-mode-line right))
@@ -115,11 +93,11 @@
          (available-width (- (window-total-width) (+ l-len m-len r-len) 1))
          (l-space  (max 0 (- c (+ l-len (/ m-len 2)))))
          (r-space (max 0 (- available-width l-space))))
-    (append left
-            (list (format (format "%%%ds" l-space) ""))
-            middle
-            (list (format (format "%%%ds" r-space) ""))
-            right)))
+    (list left
+          (format (format "%%%ds" l-space) "")
+          middle
+          (format (format "%%%ds" r-space) "")
+          right)))
 
 (setq mode-line-buffer-identification
       `(:propertize "%10b" face mode-line-buffer-id))
@@ -155,7 +133,7 @@
                        mode-line-modes
 
                        ;; -- Right
-                       (list mode-line-misc-info mode-line-end-spaces))))
+                       mode-line-misc-info)))
 
 (provide 'mode-line-config)
 ;;; mode-line-config.el ends here
