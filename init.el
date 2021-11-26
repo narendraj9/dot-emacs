@@ -2822,7 +2822,7 @@ after doing `symbol-overlay-put'."
   :config
   (magit-auto-revert-mode -1)
 
-  (setq magit-completing-read-function 'ivy-completing-read
+  (setq magit-completing-read-function 'completing-read-function
         ;; Showing diffs during commits is currently slow.
         magit-commit-show-diff nil
         ;; More granular diffs for the hunk under point
