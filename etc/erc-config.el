@@ -72,15 +72,14 @@
 ;; Do not switch buffers on connecting
 (setq erc-join-buffer 'bury)
 
-(setq erc-log-insert-log-on-open t)
+(setq erc-log-insert-log-on-open nil)
 
 (mapc (lambda (module) (push module erc-modules))
       '(keep-place track scrolltobottom autoaway notify log spelling))
 
-(add-hook 'erc-insert-post-hook #'erc-save-buffer-in-logs)
-(add-hook 'erc-mode-hook #'erc-update-modules)
 (add-hook 'erc-mode-hook
           (lambda ()
+            (erc-update-modules)
             (set (make-local-variable 'scroll-conservatively) 100)))
 
 ;;;###autoload

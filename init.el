@@ -78,12 +78,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (let ((body (use-package-process-keywords name-symbol rest state)))
       body)))
 
-;;; Byte-compilation
+;;; Emacs Lisp Compilation
+
 (setq load-prefer-newer t)
-(use-package auto-compile
-  :ensure t
-  :config
-  (auto-compile-on-save-mode))
+
+(use-package comp
+  :if (fboundp 'native-compile)
+  :custom (comp-async-report-warnings-errors nil))
+
 
 ;; LIBRARIES
 ;;  ─────────────────────────────────────────────────────────────────
@@ -93,58 +95,23 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package dash    :demand t :ensure t)
 (use-package request :defer t :ensure t)
 
-(use-package htmlfontify
+(use-package re-builder
   :defer t
-  :doc "Keeping it here to remember that it exists. This converts
-  a buffer into its equivalent HTML page with inlined CSS to
-  mimick the original Emacs buffer faces and text properties.")
-
-(use-package tracking
-  :doc
-  "Track changes in a buffer and get notified.  Call
-   `tracking-add-buffer' to start tracking a buffer. Then calling
-   `tracking-next-buffer' lets you switch to buffers that you have
-   been tracking. Once a buffer is made visible, it is automatically
-   removing from `tracking-buffers'."
-  :ensure t
-  :defer t)
-
-(use-package alert
-  :defer t
-  :ensure t
   :config
-  (setq alert-default-style 'libnotify)
+  (setq reb-re-syntax 'string))
 
-  :config
-  (alert-define-style
-   'header-line
-   :title "Header Line alert."
-   :notifier
-   (lambda (info)
-     (with-current-buffer (plist-get info :buffer)
-       (setq header-line-format (plist-get info :message))))
-   :remover
-   (lambda (info)
-     (run-with-timer 5 nil
-                     (lambda ()
-                       (with-current-buffer (plist-get info :buffer)
-                         (setq header-line-format nil)))))))
-
-(use-package async
-  :defer t
-  :ensure t
-  :config
-  (use-package async-bytecomp
-    :config
-    (setq async-byte-compile-log-file
-          (expand-file-name "var/async-bytecomp.log" user-emacs-directory))))
-
-(use-package frecency
-  :doc
-  "Record scores for times based on frequency and recency.
-   https://slack.engineering/a-faster-smarter-quick-switcher-77cbc193cb60"
-  :defer t
-  :ensure t)
+(use-package pcre2el
+  :doc "I intend to read the code carefully someday."
+  :after re-builder
+  :bind (:map ctl-quote-map
+              ("c /" . pcre->elisp))
+  :preface
+  (defun pcre->elisp (beg end)
+    "Replace PCRE regex in region (BEG END) with its elisp equivalent."
+    (interactive "r")
+    (let ((pcre-regex (buffer-substring-no-properties beg end)))
+      (delete-region beg end)
+      (insert (pcre-to-elisp pcre-regex)))))
 
 ;;
 ;;  ─────────────────────────────────────────────────────────────────
@@ -157,16 +124,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   ;; Some ergonomic alternatives
   (define-key input-decode-map
-    ;; Default: \C-i => TAB
-    "\C-i" "\C-c")
+              ;; Default: \C-i => TAB
+              "\C-i" "\C-c")
 
   (define-key input-decode-map
-    ;; Default: \C-[ => ESC
-    "\C-[" "\C-x")
+              ;; Default: \C-[ => ESC
+              "\C-[" "\C-x")
 
   (define-key input-decode-map
-    ;; Default: \C-m => RET
-    "\C-m" [C-m])
+              ;; Default: \C-m => RET
+              "\C-m" [C-m])
 
   (bind-keys* :prefix [C-m]   :prefix-map ctl-m-map)
   (bind-keys* :prefix "C-'"   :prefix-map ctl-quote-map)
@@ -208,23 +175,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         no-littering-var-directory "var/"))
 
 (use-package "startup"
-  :preface
-  (setq emacs-init-end-info ())
-  (defun emacs-init-end ()
-    "Function to be called at the end of Emacs init process."
-    (run-with-timer 1
-                    nil
-                    (lambda ()
-                      ;; Emacs init took (actual-emacs-up-time, uptime-felt-like)
-                      (alert (format "Emacs init took (%s, %.2f seconds).\n\n %s"
-                                     (emacs-init-time)
-                                     (1- (time-to-seconds
-                                          (time-subtract (current-time)
-                                                         emacs-start-time)))
-                                     (mapconcat #'identity
-                                                emacs-init-end-info
-                                                "\n"))))))
-  ;; :hook (after-init . emacs-init-end)
   :init
   (setq inhibit-splash-screen t)
 
@@ -330,9 +280,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defalias 'yes-or-no-p 'y-or-n-p))
 
-(use-package comp
-  :if (fboundp 'native-compile)
-  :custom (comp-async-report-warnings-errors nil))
+(use-package tool-bar   :config (tool-bar-mode -1))
+(use-package scroll-bar :config (scroll-bar-mode -1))
+(use-package menu-bar
+  :doc "The menu bar is useful for discovering features that
+   exist in some modes, e.g Gnus, SQLi."
+  :bind (:map ctl-x-map ("w m" . menu-bar-open))
+  :config (menu-bar-mode +1))
 
 (use-package appearance
   :doc "`use-package' doesn't throw an error for non-existent packages"
@@ -407,6 +361,24 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (force-mode-line-update)
       (sit-for 2)
       (force-mode-line-update))))
+
+(use-package fringe
+  :init
+  (defvar default-fringe-style (cons (floor (* 1.5 (frame-char-width)))
+                                     (frame-char-width))
+    "This needs to be defined because it's used elsewhere to
+    reset fringes back to the default after highlighting
+    something that requires immediate attention.")
+
+  (defun fringe-set-louder ()
+    (fringe-mode 20)
+    (set-face-attribute 'fringe nil :inverse-video t))
+
+  (defun fringe-restore-default ()
+    (fringe-mode default-fringe-style)
+    (set-face-attribute 'fringe nil :inverse-video nil))
+
+  (fringe-mode default-fringe-style))
 
 (use-package quoted-scratch
   :load-path "packages/rest/quoted-scratch"
@@ -483,25 +455,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
            ("IRC" (mode . erc-mode))
            ("*Auxiliary*" (name . "\\*.*\\*"))))))
 
+
+;;; Utilities
+;; ──────────────────────────────────────────────────────────────────
+
 (use-package wtf
   :load-path "packages/lisp/"
   :commands wtf-is)
 
-(use-package emlib
-  :load-path "packages/rest/emlib/"
-  :defer t)
-
-(use-package livemacs
-  :defer t
-  :commands livemacs-begin
-  :load-path "packages/rest/livemacs/")
-
-(use-package lively
-  :commands lively
-  :load-path "etc/")
-
-;;; Utilities
-;; ──────────────────────────────────────────────────────────────────
 (use-package tiny
   :doc
   "Provides `tiny-expand' to quickly generate linear sequences.
@@ -509,7 +470,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    Example: m1\n10(list x (sqrt x))|Square root of %d is %.2f"
   :ensure t
   :bind (("C-c C-;" . tiny-expand)))
-
 
 (use-package copy-as-format
   :ensure t
@@ -543,25 +503,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (when (file-exists-p extra-service-defs-path)
       (load-file extra-service-defs-path))))
 
-(use-package re-builder
-  :defer t
-  :config
-  (setq reb-re-syntax 'string))
-
-(use-package pcre2el
-  :doc "I intend to read the code carefully someday."
-  :after re-builder
-  :bind (:map ctl-quote-map
-              ("c /" . pcre->elisp))
-  :preface
-  (defun pcre->elisp (beg end)
-    "Replace PCRE regex in region (BEG END) with its elisp equivalent."
-    (interactive "r")
-    (let ((pcre-regex (buffer-substring-no-properties beg end)))
-      (delete-region beg end)
-      (insert (pcre-to-elisp pcre-regex)))))
-
 ;;; Thanks to https://github.com/Wilfred
+;;; ====================================
+
 (use-package ag :ensure t :bind ("M-s M-a" . ag))
 (use-package suggest :defer t :ensure t :commands suggest)
 (use-package helpful
@@ -584,57 +528,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 :after
                 (lambda ()
                   (make-thread #'elisp-demos-advice-helpful-update)))))
-
-(use-package outline-minor-mode
-  :defer t
-  :init
-  (add-hook 'outline-minor-mode-hook
-            (lambda ()
-              (diminish 'outline-minor-mode))))
-
-(use-package hs-minor-mode
-  :defer t
-  :init
-  (add-hook 'hs-minor-mode-hook
-            (lambda ()
-              (diminish 'hs-minor-mode))))
-
-(use-package fringe
-  :init
-  (defvar default-fringe-style (cons (floor (* 1.5 (frame-char-width)))
-                                     (frame-char-width))
-    "This needs to be defined because it's used elsewhere to
-    reset fringes back to the default after highlighting
-    something that requires immediate attention.")
-
-  (defun fringe-set-louder ()
-    (fringe-mode 20)
-    (set-face-attribute 'fringe nil :inverse-video t))
-
-  (defun fringe-restore-default ()
-    (fringe-mode default-fringe-style)
-    (set-face-attribute 'fringe nil :inverse-video nil))
-
-  (fringe-mode default-fringe-style))
-
-(use-package tool-bar   :config (tool-bar-mode -1))
-(use-package scroll-bar :config (scroll-bar-mode -1))
-
-(use-package feebleline
-  :ensure t
-  :bind (("C-x w f" . feebleline-mode))
-  :hook (feebleline-mode . window-divider-toggle)
-  :preface
-  (defun window-divider-toggle ()
-    (window-divider-mode (if feebleline-mode +1 -1))))
-
-(use-package menu-bar
-  :doc "The menu bar is useful for discovering features that
-   exist in some modes, e.g Gnus, SQLi."
-  :bind (:map ctl-x-map
-              ("w m" . menu-bar-open))
-  :config (menu-bar-mode +1))
-
 
 ;; KEY BINDINGS
 ;; ──────────────────────────────────────────────────────────────────
@@ -762,11 +655,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (show-paren-mode 1))
 
 (use-package rainbow-mode :ensure t :defer t)
-(use-package color-identifiers-mode
-  :doc
-  "The default colors aren't as loud as `rainbow-identifiers-mode'."
-  :ensure t
-  :defer t)
 
 (use-package uniquify
   :doc "Unique buffer names"
@@ -775,13 +663,81 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq uniquify-buffer-name-style 'post-forward
         uniquify-separator " • "))
 
+(use-package ialign
+  :doc "Very useful to get quick feedback for alignment with
+  `align.el'."
+  :ensure t
+  :bind (:map ctl-period-map
+              ("C-a" . ialign)))
+
+(use-package symbol-overlay
+  :ensure t
+  :bind (
+         :map global-map
+         ("M-n" . symbol-overlay-put*)
+         ("M-p" . symbol-overlay-put*)
+
+         :map symbol-overlay-map
+         ("M-n" . symbol-overlay-jump-next)
+         ("M-p" . symbol-overlay-jump-prev))
+  :preface
+  (defvar symbol-overlay-remove-all-timer nil)
+  (defun symbol-overlay-remove-all-timer (buffer)
+    (when (timerp symbol-overlay-remove-all-timer)
+      (cancel-timer symbol-overlay-remove-all-timer))
+    (setq symbol-overlay-remove-all-timer
+          (run-with-timer 2
+                          nil
+                          (lambda ()
+                            (with-current-buffer buffer
+                              (call-interactively #'symbol-overlay-remove-all))))))
+
+  (defun symbol-overlay-put* ()
+    "Jump to the next or previous occurrence of symbol at point
+after doing `symbol-overlay-put'."
+    (interactive)
+    (symbol-overlay-put)
+    (when-let ((command (lookup-key symbol-overlay-map
+                                    (this-command-keys))))
+      (call-interactively command)))
+
+  (defun flash-current-symbol (&rest _)
+    "Pulse highlight symbol at point."
+    (let ((bounds (bounds-of-thing-at-point 'symbol))
+          (pulse-delay 0.01))
+      (pulse-momentary-highlight-region (car bounds)
+                                        (cdr bounds))
+      (symbol-overlay-remove-all-timer (current-buffer))))
+
+  :init
+  (advice-add 'symbol-overlay-jump-call :after #'flash-current-symbol))
+
+(use-package crux
+  :ensure t
+  :bind (("C-<backspace>" . crux-kill-line-backwards)
+         ("S-<return>"    . crux-switch-to-previous-buffer))
+  :hook (after-init . crux-reopen-as-root-mode))
+
 ;;; TEXT-EDITING, FOLDING and NAVIGATION
 ;; ─────────────────────────────────────────────────────────────────
 
 (use-package elec-pair :init (electric-pair-mode +1))
 (use-package wgrep :defer t :ensure t)
 
-(use-package hydra :disabled t :ensure t :demand t :commands defhydra)
+(use-package outline-minor-mode
+  :defer t
+  :init
+  (add-hook 'outline-minor-mode-hook
+            (lambda ()
+              (diminish 'outline-minor-mode))))
+
+(use-package hs-minor-mode
+  :defer t
+  :init
+  (add-hook 'hs-minor-mode-hook
+            (lambda ()
+              (diminish 'hs-minor-mode))))
+
 
 (use-package wrap-region
   :doc
@@ -895,64 +851,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t))))
 
 
-(use-package apropos
-  :config
-  (setq apropos-do-all t))
-
-(use-package ialign
-  :doc "Very useful to get quick feedback for alignment with
-  `align.el'."
-  :ensure t
-  :bind (:map ctl-period-map
-              ("C-a" . ialign)))
-
-(use-package symbol-overlay
-  :ensure t
-  :bind (
-         :map global-map
-         ("M-n" . symbol-overlay-put*)
-         ("M-p" . symbol-overlay-put*)
-
-         :map symbol-overlay-map
-         ("M-n" . symbol-overlay-jump-next)
-         ("M-p" . symbol-overlay-jump-prev))
-  :preface
-  (defvar symbol-overlay-remove-all-timer nil)
-  (defun symbol-overlay-remove-all-timer (buffer)
-    (when (timerp symbol-overlay-remove-all-timer)
-      (cancel-timer symbol-overlay-remove-all-timer))
-    (setq symbol-overlay-remove-all-timer
-          (run-with-timer 2
-                          nil
-                          (lambda ()
-                            (with-current-buffer buffer
-                              (call-interactively #'symbol-overlay-remove-all))))))
-
-  (defun symbol-overlay-put* ()
-    "Jump to the next or previous occurrence of symbol at point
-after doing `symbol-overlay-put'."
-    (interactive)
-    (symbol-overlay-put)
-    (when-let ((command (lookup-key symbol-overlay-map
-                                    (this-command-keys))))
-      (call-interactively command)))
-
-  (defun flash-current-symbol (&rest _)
-    "Pulse highlight symbol at point."
-    (let ((bounds (bounds-of-thing-at-point 'symbol))
-          (pulse-delay 0.01))
-      (pulse-momentary-highlight-region (car bounds)
-                                        (cdr bounds))
-      (symbol-overlay-remove-all-timer (current-buffer))))
-
-  :init
-  (advice-add 'symbol-overlay-jump-call :after #'flash-current-symbol))
-
-(use-package crux
-  :ensure t
-  :bind (("C-<backspace>" . crux-kill-line-backwards)
-         ("S-<return>"    . crux-switch-to-previous-buffer))
-  :hook (after-init . crux-reopen-as-root-mode))
+(use-package apropos :config (setq apropos-do-all t))
 
 (use-package misc
   :doc "Where simple ends, maybe misc.el begins"
@@ -975,10 +874,6 @@ after doing `symbol-overlay-put'."
   (add-hook 'kill-emacs-hook
             (lambda ()
               (setq kill-ring (mapcar 'substring-no-properties kill-ring)))))
-
-(use-package beacon
-  :ensure t
-  :bind (:map ctl-quote-map ("c p" . beacon-blink)))
 
 (use-package vcursor
   :bind ( :map ctl-m-map
@@ -1060,11 +955,6 @@ after doing `symbol-overlay-put'."
   (add-hook 'prog-mode-hook 'outline-minor-mode)
   (add-hook 'prog-mode-hook 'hs-minor-mode))
 
-(use-package boxquote
-  :doc "For nice boxes for quoting text."
-  :commands boxquote-region
-  :ensure t)
-
 (use-package follow-mode
   :bind ("C-c |" . follow-delete-other-windows-and-split))
 
@@ -1081,9 +971,7 @@ after doing `symbol-overlay-put'."
               ("C-f g" . footnote-goto-footnote)))
 
 (use-package csv-mode      :defer t :ensure t)
-
 (use-package markdown-mode :defer t :ensure t)
-
 (use-package cdlatex :ensure t :hook (Latex-Mode-Hook . turn-on-cdlatex))
 (use-package auctex
   :pin gnu
@@ -1138,12 +1026,6 @@ after doing `symbol-overlay-put'."
                               (when (eq (frame-parameter nil 'background-mode)
                                         'light)
                                 (variable-pitch-mode +1)))))
-
-(use-package discover
-  :disabled t
-  :doc "Discovering more about Emacs"
-  :ensure t
-  :hook (dired-mode . dired-turn-on-discover))
 
 (use-package which-key
   :doc "Get quick emacs key binding suggestions"
@@ -1423,11 +1305,6 @@ after doing `symbol-overlay-put'."
   (setq ispell-personal-dictionary personal-dictionary-file))
 
 ;; ──────────────────────────────────────────────────────────────────
-(use-package pcache
-  :defer t
-  :ensure t
-  :init
-  (setd pcache-directory "var/pcache/"))
 
 (use-package popup :defer t :ensure t)
 
@@ -1744,14 +1621,6 @@ after doing `symbol-overlay-put'."
 
   (type-break-mode +1))
 
-
-(use-package keyfreq
-  :disabled t
-  :load-path "packages/lisp"
-  :config
-  (keyfreq-mode +1)
-  (keyfreq-autosave-mode +1))
-
 (use-package compile
   :defer t
   :preface
@@ -1813,20 +1682,11 @@ after doing `symbol-overlay-put'."
   :bind (("M-." . xref-find-definitions)
          ("M-," . xref-pop-marker-stack)))
 
-(use-package smart-jump
-  :ensure t
-  :config
-  ;; Adds modes that do not provide jump to definition functionality
-  ;; themselves.
-  (setq smart-jump-default-mode-list '(web-mode))
-  (smart-jump-setup-default-registers))
-
 (use-package subword
   ;; :hook (prog-mode . subword-mode)
   :diminish subword-mode
   :init
   (global-subword-mode +1))
-
 
 (use-package help-at-pt
   :bind ( :map ctl-m-map
@@ -1943,9 +1803,6 @@ after doing `symbol-overlay-put'."
             ;; Or filter ANSI escape sequences with 'ansi-color-filter-apply
             'ansi-color-apply))
 
-(use-package bpfcc-tools :load-path "etc/" :commands bpfcc-tools-man-page)
-
-
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -1969,6 +1826,8 @@ after doing `symbol-overlay-put'."
   :hook ((haskell-mode . haskell-doc-mode)
          (haskell-mode . haskell-indentation-mode)))
 
+(use-package proof-general :defer t :ensure t)
+
 ;;; GRAPHICS
 ;; ──────────────────────────────────────────────────────────────────
 (use-package gnuplot-mode      :defer t :ensure t)
@@ -1976,11 +1835,6 @@ after doing `symbol-overlay-put'."
 
 ;;; Notes, Journal and Task Manager
 ;;  ─────────────────────────────────────────────────────────────────
-
-(use-package calfw     :ensure t :defer t)
-(use-package calfw-org
-  :ensure t
-  :commands cfw:open-org-calendar)
 
 (use-package timeclock
   :init
@@ -2907,9 +2761,6 @@ after doing `symbol-overlay-put'."
   ;;                tramp-methods))
   )
 
-(use-package docker-tramp :ensure t)
-
-
 ;;; BBDB
 ;; ──────────────────────────────────────────────────────────────────
 (use-package bbdb
@@ -3184,9 +3035,9 @@ after doing `symbol-overlay-put'."
         nsm-save-host-names t))
 
 ;;; -----------------------------------------------------------------
-(use-package ipcalc       :ensure t :commands ipcalc)
-(use-package memory-usage :ensure t :commands memory-usage)
-(use-package proof-general :defer t :ensure t)
+
+(use-package ipcalc        :ensure t :commands ipcalc)
+(use-package memory-usage  :ensure t :commands memory-usage)
 
 (use-package backlight
   :load-path "packages/lisp"
@@ -3230,19 +3081,6 @@ after doing `symbol-overlay-put'."
     (interactive)
     (clm/open-command-log-buffer)
     (global-command-log-mode +1)))
-
-(use-package activity-watch-mode
-  :disabled t
-  :diminish activity-watch-mode
-  :ensure t
-  :hook (emacs-startup . global-activity-watch-mode)
-  :config
-  (setq activity-watch-project-name-resolvers '(project magit-dir-force magit-origin))
-
-  :preface
-  (defun activity-watch-project-name-project ()
-    (when-let ((p (project-current)))
-      (directory-file-name (f-relative (project-root p) "~")))))
 
 (provide 'init)
 ;;; init.el ends here

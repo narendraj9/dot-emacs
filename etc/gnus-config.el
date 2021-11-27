@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+(require 'eldoc)
 (require 'bbdb)
 (require 'bbdb-gnus)
 
@@ -38,9 +39,7 @@
 (require 'nnmail)
 (require 'smtpmail)
 (require 'message)
-
-(require 'eldoc)
-
+(require 'mml)
 
 (use-package messages-are-flowing
   :doc
