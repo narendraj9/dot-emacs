@@ -286,7 +286,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "The menu bar is useful for discovering features that
    exist in some modes, e.g Gnus, SQLi."
   :bind (:map ctl-x-map ("w m" . menu-bar-open))
-  :config (menu-bar-mode +1))
+  :config (menu-bar-mode -1))
 
 (use-package appearance
   :doc "`use-package' doesn't throw an error for non-existent packages"
@@ -2676,7 +2676,7 @@ after doing `symbol-overlay-put'."
   :config
   (magit-auto-revert-mode -1)
 
-  (setq magit-completing-read-function 'completing-read-function
+  (setq magit-completing-read-function completing-read-function
         ;; Showing diffs during commits is currently slow.
         magit-commit-show-diff nil
         ;; More granular diffs for the hunk under point
@@ -2878,13 +2878,7 @@ after doing `symbol-overlay-put'."
 
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────
-(use-package erc-config
-  :commands erc-connect
-  :load-path "etc/"
-  :defer 10
-  :config
-  ;; (erc-connect)
-  )
+(use-package erc-config :commands erc-start! :load-path "etc/" :defer 10)
 
 ;;; EMACS-SERVER
 ;;  ─────────────────────────────────────────────────────────────────

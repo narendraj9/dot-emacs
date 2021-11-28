@@ -135,10 +135,8 @@ Cleans up whitespace."
 (defun quoted-scratch-random-quote-string ()
   "Return a random quote."
   (if quoted-scratch-quotes
-      (propertize (format "%s\n\n"
-                          (nth (random (length quoted-scratch-quotes)) quoted-scratch-quotes))
-                  'font-lock-face 'quoted-scratch-quote-face
-                  'rear-nonsticky t)
+      (format "%s\n\n"
+              (nth (random (length quoted-scratch-quotes)) quoted-scratch-quotes))
     (message "No quotes defined. Maybe the quotes file wasn't parsed properly")))
 
 (defun quoted-scratch-prepare-quote (quote &optional author)
@@ -228,9 +226,7 @@ Optional argument AUTHOR is what the word suggests but checkdoc was complaining 
                  Heiwa
                  Peace ")))
 
-    (propertize (nth  (mod index (length qualities)) qualities)
-                'font-lock-face 'quoted-scratch-auroville-quality-face
-                'rear-nonsticky t)))
+    (nth (mod index (length qualities)) qualities)))
 
 (defun quoted-scratch-generate-scratch-message (&optional quote-string)
   "Generate message content for scratch buffer.
@@ -276,7 +272,9 @@ delete all text in a buffer."
                           'text-type 'quote-string
                           'category 'quoted-scratch-properties
                           'rear-nonsticky t
-                          'front-sticky t))
+                          'front-sticky t
+                          'fontified t
+                          'font-lock-face 'quoted-scratch-quote-face))
       (let ((pulse-delay 0.10))
         (pulse-momentary-highlight-region (point-min)
                                           (point)
@@ -302,10 +300,8 @@ Argument STATUS is the http status of the request."
              (quote (aref quotes 0))
              (quote-string (assoc-default 'quote quote))
              (quote-author (assoc-default 'author quote))
-             (quote* (propertize (quoted-scratch-prepare-quote quote-string
-                                                   quote-author)
-                                 'font-lock-face 'quoted-scratch-quote-face
-                                 'rear-nonsticky t)))
+             (quote* (quoted-scratch-prepare-quote quote-string
+                                                   quote-author)))
         (quoted-scratch-update-quote-text-in-scratch (quoted-scratch-generate-scratch-message quote*)))
     (message "Error fetching quote: %s"
              (assoc-default 'message

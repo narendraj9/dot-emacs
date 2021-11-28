@@ -39,9 +39,7 @@
 ;; Kill buffers for server messages after quitting the server
 (setq erc-kill-server-buffer-on-quit t)
 
-(setq erc-hide-list '("JOIN" "PART" "QUIT"
-                      ;; From erc-backend.el Thanks #erc
-                      "332" "353" "366" "333" "329")
+(setq erc-hide-list '("JOIN" "PART" "QUIT")
       ;; Highlight only channels that that face my nick's face
       erc-current-nick-highlight-type 'nick
       erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE")
@@ -55,8 +53,8 @@
 
 (setq erc-autojoin-channels-alist
       '(("libera.chat"
-         "#emacs-berlin" "#emacs" "#org-mode" "#haskell" "#glugnith"
-         "#clojure" "#bash" "#fp@nith" "#go-nuts" "#gnunet")))
+         "#emacs-berlin" "#emacs" "#org-mode" "#haskell"
+         "#coq" "#glugnith" "#clojure" "#bash")))
 
 (setq erc-prompt-for-nickserv-password nil
       erc-autojoin-timing 'ident
@@ -83,7 +81,7 @@
             (set (make-local-variable 'scroll-conservatively) 100)))
 
 ;;;###autoload
-(defun erc-connect ()
+(defun erc-start! ()
   "Connect to erc."
   (interactive)
   (require 'erc-services)
