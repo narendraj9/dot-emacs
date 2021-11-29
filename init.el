@@ -330,8 +330,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
-  (setq-default ;; cursor-type 'bar
-   cursor-in-non-selected-windows nil)
+  ;;
+  (setq-default cursor-type t)
+  ;; Useful for copying text to a minibuffer.
+  (setq-default cursor-in-non-selected-windows 'hollow)
 
   (setq x-underline-at-descent-line t)
 
@@ -1986,48 +1988,27 @@ after doing `symbol-overlay-put'."
    (selectrum-files-select-input-dirs t))
   :init (selectrum-mode +1))
 
-(use-package embark
-  :bind ("C-c C-." . embark-act)
-  :ensure t)
-
-(use-package swiper
-  :ensure t
-  :commands swiper-from-isearch
-  :bind ( :map ctl-period-map ("C-s"   . swiper*) )
-  :init
-  (bind-key "C-." #'swiper-from-isearch isearch-mode-map)
-
-  :config
-  (bind-keys :map swiper-map
-             ("M-%" . swiper-query-replace)
-             ("C-w" . ivy-yank-word)
-             ("M-h" . swiper-avy))
-  :preface
-  (defun swiper* ()
-    (interactive)
-    (swiper (and (region-active-p)
-                 (progn (deactivate-mark)
-                        (buffer-substring-no-properties (mark)
-                                                        (point)))))))
-
+(use-package embark :ensure t :bind ("C-c C-." . embark-act))
 
 (use-package consult
   :ensure t
   :custom (consult-preview-key (kbd "M-."))
   :bind ( :map global-map
+          ("M-s a" . consult-grep)
           ("M-y"   . counsel-yank-pop)
           ("C-x b" . consult-buffer)
 
-          :map ctl-quote-map
-          ("C-'" . counsel-imenu)) )
-
-(use-package counsel
-  :ensure t
-  :bind ( ("C-x 8 RET" . counsel-unicode-char)
-          ("M-s a"     . counsel-ag)
-
           :map minibuffer-local-map
-          ("M-r" . counsel-minibuffer-history) ))
+          ("M-r" . consult-history)
+
+          :map ctl-quote-map
+          ("C-'" . counsel-imenu)
+
+          :map isearch-mode-map
+          ("C-." . consult-line)
+
+          :map ctl-period-map
+          ("C-s" . consult-line)) )
 
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
@@ -2488,54 +2469,54 @@ after doing `symbol-overlay-put'."
     (interactive "sGem: ")
     (message "Talking to RubyGems...")
     (request
-      (format "https://rubygems.org/api/v1/versions/%s/latest.json" gem)
-      :parser #'json-read
-      :success
-      (cl-function
-       (lambda (&key data &allow-other-keys)
-         (let* ((full-version-str (assoc-default 'version data))
-                (minor-version-str (replace-regexp-in-string "\\.[0-9]+$"
-                                                             ""
-                                                             full-version-str))
-                (gemspec (format "gem '%s', '~> %s', '>= %s'"
-                                 gem
-                                 minor-version-str
-                                 full-version-str)))
-           (insert gemspec)
-           (message "--> %s" gemspec))))
-      :error
-      (cl-function
-       (lambda (&rest args &key error-thrown &allow-other-keys)
-         (message "Failed with : %s" error-thrown)))))
+     (format "https://rubygems.org/api/v1/versions/%s/latest.json" gem)
+     :parser #'json-read
+     :success
+     (cl-function
+      (lambda (&key data &allow-other-keys)
+        (let* ((full-version-str (assoc-default 'version data))
+               (minor-version-str (replace-regexp-in-string "\\.[0-9]+$"
+                                                            ""
+                                                            full-version-str))
+               (gemspec (format "gem '%s', '~> %s', '>= %s'"
+                                gem
+                                minor-version-str
+                                full-version-str)))
+          (insert gemspec)
+          (message "--> %s" gemspec))))
+     :error
+     (cl-function
+      (lambda (&rest args &key error-thrown &allow-other-keys)
+        (message "Failed with : %s" error-thrown)))))
 
   (defun search-ruby-gems (search-term)
     "Search for GEM at Rubygems."
     (interactive "sSearch: ")
     (message "Talking to RubyGems...")
     (request
-      "https://rubygems.org/api/v1/search.json"
-      :params `(("query" . ,search-term))
-      :parser #'json-read
-      :success
-      (cl-function
-       (lambda (&key data &allow-other-keys)
-         (let* ((completions-alist
-                 (mapcar
-                  (lambda (gem)
-                    (let ((gem-name (assoc-default 'name gem))
-                          (gem-info (assoc-default 'info gem)))
-                      (cons (format "%s : %s"
-                                    gem-name
-                                    (truncate-string-to-width gem-info 80 0 nil t))
-                            gem-name)))
-                  data))
-                (chosen-gem (assoc-default (completing-read "Select: "
-                                                            completions-alist)
-                                           completions-alist)))
-           (insert-latest-gemspec chosen-gem))))
-      :error (cl-function
-              (lambda (&rest args &key error-thrown &allow-other-keys)
-                (message "Error: %s" error-thrown)))))
+     "https://rubygems.org/api/v1/search.json"
+     :params `(("query" . ,search-term))
+     :parser #'json-read
+     :success
+     (cl-function
+      (lambda (&key data &allow-other-keys)
+        (let* ((completions-alist
+                (mapcar
+                 (lambda (gem)
+                   (let ((gem-name (assoc-default 'name gem))
+                         (gem-info (assoc-default 'info gem)))
+                     (cons (format "%s : %s"
+                                   gem-name
+                                   (truncate-string-to-width gem-info 80 0 nil t))
+                           gem-name)))
+                 data))
+               (chosen-gem (assoc-default (completing-read "Select: "
+                                                           completions-alist)
+                                          completions-alist)))
+          (insert-latest-gemspec chosen-gem))))
+     :error (cl-function
+             (lambda (&rest args &key error-thrown &allow-other-keys)
+               (message "Error: %s" error-thrown)))))
   :bind (:map ruby-mode-map
               ("C-c C-g" . search-ruby-gems)))
 
