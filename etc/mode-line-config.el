@@ -86,18 +86,17 @@
   (let* ((l (format-mode-line left))
          (m (format-mode-line middle))
          (r (format-mode-line right))
-         (c (/ (window-width) 2))
+         (c (/ (window-total-width) 2))
          (l-len (length l))
          (m-len (length m))
          (r-len (length r))
-         (available-width (- (window-total-width) (+ l-len m-len r-len) 1))
-         (l-space  (max 0 (- c (+ l-len (/ m-len 2)))))
-         (r-space (max 0 (- available-width l-space))))
-    (list left
-          (format (format "%%%ds" l-space) "")
-          middle
-          (format (format "%%%ds" r-space) "")
-          right)))
+         (total-space (max 0 (- (window-total-width (selected-window) 'ceiling) (+ l-len m-len r-len) 1)))
+         (l-space (max 0 (- c (+ l-len (/ m-len 2)))))
+         (r-space (max 0 (- total-space l-space))))
+    ;; Returning a string here, e.g. (concat l m r), is not a good idea because
+    ;; then the string is treated as a mode line construct. The string can
+    ;; contain %- format specifiers.
+    (list "" left (make-string l-space ?\s) middle (make-string r-space ?\s) right)))
 
 (setq mode-line-buffer-identification
       `(:propertize "%10b" face mode-line-buffer-id))

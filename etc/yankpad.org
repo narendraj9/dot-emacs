@@ -5,15 +5,27 @@ awk -v command='openssl x509 -text -noout ' '/BEGIN/ { close(command); }; { prin
 awk -v base_command='keytool -import -trustcacerts -noprompt -storepass ${1:storepass} -storetype jks -keystore ${2:truststore}.jks' 'BEGIN { cert_number = 0; }; /BEGIN CERTIFICATE/ { close(base_command " -alias ca-" cert_number); cert_number++ }; { print | (base_command " -alias ca-" cert_number); }' ${3:input-file}.pem $0
 ** Show server certificate for URL
 openssl s_client -connect ${1:url}:${2:443} -showcerts $0
+
 * Blogging
 ** Blog Header
 #+TITLE: $1
 #+DATE: `(format-time-string (car org-time-stamp-formats))`
 #+AUTHOR: `user-full-name`
 $0
+
 * Java
 ** Start a new Maven Project
 mvn archetype:generate -DgroupId=${1:groupId} -DartifactId=${2:artifactId} -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false ${}
+
+** Run =java= with =jdb=
+java -agentlib:jdwp='transport=dt_socket,server=y,suspend=y,address=127.0.0.1:${1:6823}' ${0:`buffer-file-name`}
+
+** Attach =jdb= to a running =VM=
+jdb -sourcepath ${1:./} -attach ${0:127.0.0.1:6823}
+
+** Run maven project
+
+** Debug maven project
 
 * CommandLine
 ** Merge pdf files
