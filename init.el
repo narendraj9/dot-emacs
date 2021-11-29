@@ -538,28 +538,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
            ("C-f" . ffap))
 
 ;; ──────────────────────────────────────────────────────────────────
-(use-package minibuffer
-  :bind ( :map minibuffer-mode-map
-          ("C-w" . yank-symbol-to-minibuffer-or-kill-region ) )
-  :config
-  (setq enable-recursive-minibuffers t
-        history-delete-duplicates t
-        history-length 1000)
-  (minibuffer-depth-indicate-mode +1)
-
-  :preface
-  (defun yank-symbol-to-minibuffer-or-kill-region ()
-    (interactive)
-    (if (region-active-p)
-        (call-interactively #'kill-region)
-      (insert (with-minibuffer-selected-window
-                (let ((starting-point (if (eq last-command this-command)
-                                          (get this-command :starting-point)
-                                        (put this-command  :starting-point (point))))
-                      (p (point)))
-                  (forward-word)
-                  (pulse-momentary-highlight-region starting-point (point))
-                  (buffer-substring p (point))))))))
 
 (use-package tab-bar
   :bind (:map tab-prefix-map ("s" . tab-switcher))
@@ -570,11 +548,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (tab-bar-history-mode +1)
   (setq tab-bar-show nil
         tab-bar-tab-name-function #'tab-bar-tab-name-all))
-
-(use-package minibuffer-command-history
-  :load-path "etc/"
-  :config
-  (minibuffer-command-history-enable))
 
 (use-package calendar
   :defer t
@@ -1948,6 +1921,41 @@ after doing `symbol-overlay-put'."
 
 ;;; Minibuffer Completion
 ;;; ----------------------------------------------------------------------------
+
+(use-package minibuffer
+  :bind ( :map minibuffer-mode-map
+          ("C-w" . yank-symbol-to-minibuffer-or-kill-region ) )
+  :config
+  (setq enable-recursive-minibuffers t
+        history-delete-duplicates t
+        history-length 1000)
+  (minibuffer-depth-indicate-mode +1)
+
+  :init
+  ;; `partial-completion' is very useful for `completion-at-point'
+  (advice-add 'completion-at-point
+              :around
+              (lambda (compl-at-point &rest args)
+                (let ((completion-styles '(basic partial-completion)))
+                  (apply compl-at-point args))))
+  :preface
+  (defun yank-symbol-to-minibuffer-or-kill-region ()
+    (interactive)
+    (if (region-active-p)
+        (call-interactively #'kill-region)
+      (insert (with-minibuffer-selected-window
+                (let ((starting-point (if (eq last-command this-command)
+                                          (get this-command :starting-point)
+                                        (put this-command  :starting-point (point))))
+                      (p (point)))
+                  (forward-word)
+                  (pulse-momentary-highlight-region starting-point (point))
+                  (buffer-substring p (point))))))))
+
+(use-package minibuffer-command-history
+  :load-path "etc/"
+  :config
+  (minibuffer-command-history-enable))
 
 (use-package orderless
   :doc
