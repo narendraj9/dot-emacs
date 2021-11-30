@@ -704,14 +704,37 @@ after doing `symbol-overlay-put'."
   :init
   (add-hook 'outline-minor-mode-hook
             (lambda ()
-              (diminish 'outline-minor-mode))))
+              (diminish 'outline-minor-mode)))
+  ;; This minor mode uses selective display to hide text so it displays three
+  ;; dots (ellipsis) like `selective-display'
+  ;; https://www.emacswiki.org/emacs/OutlineMode
+  (set-display-table-slot standard-display-table
+                          'selective-display
+                          (string-to-vector " ... ")))
 
-(use-package hs-minor-mode
+(use-package hideshow
   :defer t
   :init
   (add-hook 'hs-minor-mode-hook
             (lambda ()
-              (diminish 'hs-minor-mode))))
+              (diminish 'hs-minor-mode)))
+  :config
+  (setq hs-set-up-overlay #'display-code-line-counts)
+
+  :preface
+  (defun display-code-line-counts (ov)
+    (when-let ((line-count (and (eq 'code (overlay-get ov 'hs))
+                                (count-lines (overlay-start ov)
+                                             (overlay-end ov)))))
+      (overlay-put ov
+                   'display
+                   (propertize (format "  +%s \n" line-count)
+                               'face 'highlight))
+      (overlay-put ov
+                   'before-string
+                   (propertize " "
+                               'display
+                               '(left-fringe right-arrow highlight))))))
 
 
 (use-package wrap-region
@@ -904,13 +927,16 @@ after doing `symbol-overlay-put'."
   (setq ni-narrowed-buf-name-max 40))
 
 (use-package bicycle
+  :doc
+  "Implemented using `hs-minor-mode' and `outline-mode' (which uses
+  `selective-display'). To configure this mode, configure those two
+   minor modes."
   :ensure t
   :after outline
-  :bind (:map outline-minor-mode-map
-              ([C-tab]   . bicycle-cycle)
-              ([backtab] . bicycle-cycle-global)
-              ([S-tab]   . bicycle-cycle-global)))
-
+  :bind ( :map outline-minor-mode-map
+          ([C-tab]   . bicycle-cycle)
+          ([backtab] . bicycle-cycle-global)
+          ([S-tab]   . bicycle-cycle-global)) )
 
 (use-package goto-last-change
   :ensure t
