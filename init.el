@@ -799,8 +799,7 @@ after doing `symbol-overlay-put'."
         save-interprogram-paste-before-kill t
         kill-do-not-save-duplicates t)
 
-  ;; Avoid displaying key bindings for commands.
-  (setq suggest-key-bindings nil)
+  (setq suggest-key-bindings t)
 
   (setq async-shell-command-buffer 'new-buffer
         set-mark-command-repeat-pop t
