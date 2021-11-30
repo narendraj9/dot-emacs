@@ -28,7 +28,6 @@
 (require 'dash)
 (require 's)
 (require 'ag)
-(require 'counsel)
 (require 'alert)
 (require 'defs)
 (require 'f)
@@ -55,9 +54,11 @@ Otherwise, limit to only `org-mode' files."
          (find-file))))
 
 (defun search-notes-files ()
-  "Search org files using `counsel-ag'."
+  "Search org files using `consult-grep'."
   (interactive)
-  (counsel-ag nil org-directory "--smart-case --all-text"))
+  (let ((consult-grep-args (concat consult-grep-args
+                                   " --exclude=*.htm --exclude=*.html")))
+    (consult-grep org-directory)))
 
 
 (defun org-agenda-toggle-toggle-tags-column ()
@@ -69,9 +70,7 @@ Otherwise, limit to only `org-mode' files."
 (use-package org
   :ensure org-plus-contrib
   :demand t
-  :bind ( :map org-mode-map
-          ("C-c C-x l" . counsel-org-entity)
-          ("M-q" . org-fill-paragraph) )
+  :bind ( :map org-mode-map ("M-q" . org-fill-paragraph) )
   :init
   (setq org-directory (or (getenv "ORG_DIRECTORY")
                           "~/miscellany/personal/org/")
@@ -579,9 +578,7 @@ non-empty lines in the block (excluding the line with
           (apply #'format
                  "c%X%X%X"
                  (mapcar (lambda (c) (floor (* c 15)))
-                         (color-name-to-rgb (with-temp-buffer
-                                              (counsel-colors-emacs)
-                                              (buffer-string)))))))
+                         (color-name-to-rgb (read-color))))))
   :init
   (require 'picture)
 
@@ -668,12 +665,12 @@ non-empty lines in the block (excluding the line with
   (defun org-att-complete-link (&optional arg)
     "Completion dispatcher for att: links (rewritten from org-attach-open)"
     (let* ((attach-dir (expand-file-name org-attach-directory org-directory))
-	       (file-paths (directory-files-recursively attach-dir ".*"))
+           (file-paths (directory-files-recursively attach-dir ".*"))
            (completions (mapcar (lambda (f)
                                   (cons (file-name-base f) f))
                                 file-paths))
-	       (file-name (completing-read "att: " completions nil t))
-	       (path (assoc-default file-name completions)))
+           (file-name (completing-read "att: " completions nil t))
+           (path (assoc-default file-name completions)))
       ;; Use existing `file:' to have relative paths work!
       (concat "file:" (file-relative-name path
                                           (file-name-directory (buffer-file-name))))))

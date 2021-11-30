@@ -757,7 +757,6 @@ after doing `symbol-overlay-put'."
   (region-bindings-mode-enable))
 
 (use-package repeat
-  :bind ( :map ctl-m-map ("z" . repeat-complex-command) )
   :init
   ;; If a symbol property named `repeat-map' exists for a command and it's a
   ;; keymap, it's activate as a transient-map after command is executed.
@@ -862,7 +861,7 @@ after doing `symbol-overlay-put'."
                                         user-emacs-directory))
   (setq savehist-additional-variables
         '( kill-ring minibuffer-history minibuffer-command-history command-history
-           limit-usage ivy-views ))
+           limit-usage ))
   (savehist-mode +1)
   ;; https://emacs.stackexchange.com/a/4191/14967
   ;; Prevent `kill-ring' values from causing very long pauses while
@@ -905,8 +904,6 @@ after doing `symbol-overlay-put'."
    ("C-<" . mc/mark-previous-like-this)
    ("C-c >" . mc/mark-all-like-this)
 
-   ;; Use the plain yank-pop when multiple cursors are
-   ;; active. `counsel-yank-pop' doesn't work as expected.
    :map mc/keymap
    ("M-y" . yank-pop)
 
@@ -1347,8 +1344,8 @@ after doing `symbol-overlay-put'."
          ("C-c u" . dired-up-directory)
          ("M-<"   . dired-to-first-entry)
          ("M->"   . dired-to-last-entry)
-         ("a"     . counsel-ag)
-         ("r"     . counsel-rg)
+         ("a"     . consult-grep)
+         ("r"     . consult-ripgrep)
          ("z"     . kill-buffer-delete-window)
          ("j"     . dired-x-find-file)
          ("f"     . project-find-file)
@@ -1459,37 +1456,13 @@ after doing `symbol-overlay-put'."
               ("a k" . yankpad-capture-snippet)
               ("a c" . yankpad-set-category-and-insert))
   :preface
-  (defun ivy-yankpad-set-category (_)
-    (setq yankpad-category
-          (ivy-read "Category: "
-                    (yankpad--categories)
-                    :require-match t)))
-
   (defun yankpad-set-category-and-insert ()
     (interactive)
     (yankpad-set-category)
     (yankpad-insert))
 
   :config
-  (setd yankpad-file "etc/yankpad.org")
-
-  ;; Redefine `yankpad-insert-from-current-category' with help from
-  ;; https://github.com/abo-abo/swiper/issues/1736#issuecomment-419730497
-  (defun yankpad-insert-from-current-category (&optional name)
-    "Insert snippet NAME from `yankpad-category'.  Prompts for NAME unless set.
-  Does not change `yankpad-category'."
-    (ivy-read "Snippet: " (yankpad-active-snippets)
-              :action (lambda (x)
-                        (let* ((name (car x))
-                               (snippet (assoc name (yankpad-active-snippets))))
-                          (if snippet
-                              (yankpad--run-snippet snippet)
-                            (message (concat "No snippet named " name))
-                            nil)))
-              :caller 'yankpad-insert))
-
-  (ivy-set-actions 'yankpad-insert
-                   '(("S"  ivy-yankpad-set-category "Switch Category"))))
+  (setd yankpad-file "etc/yankpad.org"))
 
 (use-package abbrev
   :diminish abbrev-mode
@@ -2012,17 +1985,20 @@ after doing `symbol-overlay-put'."
   :custom (consult-preview-key (kbd "M-."))
   :bind ( :map global-map
           ("M-s a" . consult-grep)
-          ("M-y"   . counsel-yank-pop)
           ("C-x b" . consult-buffer)
+          ("M-y"   . yank-pop)
+
+          :map isearch-mode-map
+          ("C-." . consult-line)
 
           :map minibuffer-local-map
           ("M-r" . consult-history)
 
-          :map ctl-quote-map
-          ("C-'" . counsel-imenu)
+          :map ctl-m-map
+          ("z" . consult-complex-command)
 
-          :map isearch-mode-map
-          ("C-." . consult-line)
+          :map ctl-quote-map
+          ("C-'" . consult-imenu)
 
           :map ctl-period-map
           ("C-s" . consult-line)) )
@@ -2995,7 +2971,6 @@ after doing `symbol-overlay-put'."
 
   (require 'calc-ext)                   ; Modifies the bindings below.
   (define-key calc-mode-map [M-return] #'calc-last-args)
-  (define-key calc-mode-map "x"  #'calc-counsel-M-x)
   (define-key calc-mode-map "gP" #'calc-graph-plot)
 
   (advice-add 'calc :around (lambda (original-calc &rest args)
@@ -3008,10 +2983,6 @@ after doing `symbol-overlay-put'."
   (advice-add 'calc-graph-view-commands :after #'calc-enable-gnuplot-mode)
 
   :preface
-  (defun calc-counsel-M-x ()
-    (interactive)
-    (counsel-M-x "calc-"))
-
   (defun calc-enable-gnuplot-mode (&rest _args)
     (with-current-buffer calc-gnuplot-input
       (unless (and (boundp 'gnuplot-mode)
