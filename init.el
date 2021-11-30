@@ -978,14 +978,6 @@ after doing `symbol-overlay-put'."
     (add-hook 'TeX-after-compilation-finished-functions
               #'TeX-revert-document-buffer)))
 
-(use-package olivetti
-  :doc "Similar to `writeroom-mode' but a little less hard-core."
-  :ensure t
-  :diminish olivetti-mode
-  :hook (nov-mode . olivetti-mode)
-  :config
-  (setq olivetti-body-width 80))
-
 ;; ─────────────────────────────────────────────────────────────────
 
 (use-package volatile-highlights
@@ -2807,8 +2799,7 @@ after doing `symbol-overlay-put'."
 ;; ──────────────────────────────────────────────────────────────────
 (use-package gnus
   :defer t
-  :hook ((gnus-group-mode . olivetti-mode)
-         (gnus-article-mode . goto-address-mode))
+  :hook ((gnus-article-mode . goto-address-mode))
   :init
   (setd gnus-init-file "etc/gnus-config.el"
         gnus-home-directory "~/miscellany/gnus"
