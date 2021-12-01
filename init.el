@@ -1347,7 +1347,7 @@ after doing `symbol-overlay-put'."
          ("C-c u" . dired-up-directory)
          ("M-<"   . dired-to-first-entry)
          ("M->"   . dired-to-last-entry)
-         ("a"     . consult-grep)
+         ("a"     . consult-grep-dwim)
          ("r"     . consult-ripgrep)
          ("z"     . kill-buffer-delete-window)
          ("j"     . dired-x-find-file)
@@ -1989,8 +1989,25 @@ after doing `symbol-overlay-put'."
 (use-package consult
   :ensure t
   :custom (consult-preview-key (kbd "M-."))
+  :preface
+  (defun consult-grep-dwim ()
+    (interactive)
+    (let ((p (project-current)))
+      (cond
+       ;; No project
+       ((not p)
+        (consult-grep))
+
+       ;; A git project
+       ((eq 'Git (vc-responsible-backend (project-root p)))
+        (consult-git-grep (project-root p)))
+
+       ;; A non-git project
+       (t (consult-grep (project-root p))))))
+
+
   :bind ( :map global-map
-          ("M-s a" . consult-grep)
+          ("M-s a" . consult-grep-dwim)
           ("C-x b" . consult-buffer)
           ("M-y"   . yank-pop)
 
