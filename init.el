@@ -3030,7 +3030,10 @@ after doing `symbol-overlay-put'."
 ;;; -----------------------------------------------------------------
 
 (use-package ipcalc        :ensure t :commands ipcalc)
-(use-package memory-usage  :ensure t :commands memory-usage)
+
+(use-package memory-report
+  :doc "Built-in package to print information about Emacs memory usage."
+  :defines memory-report)
 
 (use-package backlight
   :load-path "packages/lisp"
