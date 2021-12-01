@@ -278,7 +278,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Dialog boxes don't work with Xmonad.
   (setq use-dialog-box nil)
 
-  (defalias 'yes-or-no-p 'y-or-n-p))
+  ;; --
+  ;; (defalias 'yes-or-no-p 'y-or-n-p)
+  ;; (setq use-short-answers t)
+  )
 
 (use-package tool-bar   :config (tool-bar-mode -1))
 (use-package scroll-bar :config (scroll-bar-mode -1))
@@ -1931,16 +1934,19 @@ after doing `symbol-overlay-put'."
                 (let ((completion-styles '(basic partial-completion)))
                   (apply compl-at-point args))))
   :preface
-  (defun yank-symbol-to-minibuffer-or-kill-region ()
-    (interactive)
+  (defvar yank-symbol-to-minibuffer-or-kill-region)
+  (defun yank-symbol-to-minibuffer-or-kill-region (&optional arg)
+    (interactive "P")
     (if (region-active-p)
         (call-interactively #'kill-region)
       (insert (with-minibuffer-selected-window
                 (let ((starting-point (if (eq last-command this-command)
-                                          (get this-command :starting-point)
-                                        (put this-command  :starting-point (point))))
+                                          yank-symbol-to-minibuffer-or-kill-region
+                                        (setf yank-symbol-to-minibuffer-or-kill-region (point))))
                       (p (point)))
-                  (forward-word)
+                  (if arg
+                      (forward-word 1)
+                    (forward-symbol 1))
                   (pulse-momentary-highlight-region starting-point (point))
                   (buffer-substring p (point))))))))
 

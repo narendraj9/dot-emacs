@@ -1091,6 +1091,16 @@ search keyword."
     (setq kill-ring kill-ring*
           kill-ring-yank-pointer kill-ring-yank-pointer*)))
 
+(defun show-emacs-configuration ()
+  "Display version and configuration of the running Emacs."
+  (interactive)
+  (display-message-or-buffer
+   (format "Version: %s\n Configuration: \n\tSystem: %s\n\tConfigure flags: %s\n\tEnabled Opts: %s"
+           (emacs-version)
+           system-configuration
+           system-configuration-options
+           system-configuration-features)))
+
 
 (provide 'defs)
 ;;; defs.el ends here
