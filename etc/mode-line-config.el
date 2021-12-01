@@ -50,7 +50,13 @@
   :group 'mode-line-faces)
 
 ;;; Collapse spaces if the mode-line is longer than the window width
-(setq mode-line-compact 'long)
+;; (setq mode-line-compact 'long)
+;;
+;; I've disabled this because even if the mode line can be displayed without
+;; compacting/collapsing spaces, the spaces are compacted/collapsed in certain
+;; situations.
+(setq mode-line-compact nil)
+
 
 ;;; Disable variable-pitch for mode-line
 (set-face-attribute 'mode-line nil :inherit 'default)
@@ -96,7 +102,7 @@
     ;; contain %- format specifiers.
     (list "" left (make-string l-space ?\s) middle
           ;; Display enough space to make sure that right is right-aligned.
-          `(:propertize " " display (space . (:align-to (- right ,r-len))))
+          `(:propertize " " display (space . (:align-to (- scroll-bar ,r-len))))
           right)))
 
 (setq mode-line-buffer-identification
