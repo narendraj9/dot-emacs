@@ -1125,6 +1125,11 @@ search keyword."
            system-configuration-options
            system-configuration-features)))
 
+(defun switch-to-scratch-new-tab ()
+  (interactive)
+  (tab-bar-new-tab)
+  (switch-to-buffer "*scratch*"))
+
 
 (provide 'defs)
 ;;; defs.el ends here

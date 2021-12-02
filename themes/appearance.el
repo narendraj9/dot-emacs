@@ -28,63 +28,66 @@
 (require 'seq)
 (require 'solar)
 
-(defvar app-light-theme 'modus-operandi)
-(defvar app-dark-theme 'jazz)
+(defvar app/light-theme 'modus-operandi)
+(defvar app/dark-theme 'jazz)
 
-(defun app-switch-theme (theme)
+(defun app/switch-theme (theme)
+  ;; Disable other themes.
   (dolist (this-theme custom-enabled-themes)
     (when (not (eq theme this-theme))
       (disable-theme theme)))
-  (load-theme theme t)
-  (sunrise-sunset))
+  ;; If `theme' isn't enabled, enable it.
+  (when (not (memq theme custom-enabled-themes))
+    (load-theme theme t)
+    (run-with-timer 5 nil #'sunrise-sunset)))
 
-(defun app-ft->minutes (t)
+(defun app/ft->minutes (t)
   "Given fractional time: hours since midnight, return (hour minutes)."
   (round (* t 60)))
 
-(defun app-daytime-p ()
+(defun app/daytime-p ()
   "Return true if it's day time in my local timezone."
   (seq-let ((sunrise _) (sunset _) _) (solar-sunrise-sunset (calendar-current-date))
     (let ((now (decode-time (current-time))))
-      (< (app-ft->minutes sunrise)
+      (< (app/ft->minutes sunrise)
          (+ (decoded-time-minute now)
             (* 60 (decoded-time-hour now)))
-         (app-ft->minutes sunset)))))
+         (app/ft->minutes sunset)))))
 
-(defun app-minutes->timer-string (mins)
+(defun app/minutes->timer-string (mins)
   (format "%s:%s" (/ mins 60) (% mins 60)))
 
 
-(defvar app-daytime-based-theme-setup-timer)
-(defun app-daytime-based-theme-setup ()
+(defvar app/daytime-based-theme-setup-timer)
+(defun app/daytime-based-theme-setup ()
   (seq-let ((sunrise _) (sunset _) _) (solar-sunrise-sunset (calendar-current-date))
-    (setq app-daytime-based-theme-setup-timer
-          (run-at-time (if (app-daytime-p)
-                           (app-minutes->timer-string (app-ft->minutes sunset))
+    (setq app/daytime-based-theme-setup-timer
+          (run-at-time (if (app/daytime-p)
+                           (app/minutes->timer-string (app/ft->minutes sunset))
                          ;; Surise of the next day.
-                         (+ (midnight-next) (* 60 (app-ft->minutes sunrise))))
+                         (+ (midnight-next) (* 60 (app/ft->minutes sunrise))))
                        nil
                        (lambda ()
-                         (app-switch-theme (if (app-daytime-p)
-                                               app-dark-theme
-                                             app-light-theme))
+                         (app/switch-theme (if (app/daytime-p)
+                                               app/dark-theme
+                                             app/light-theme))
                          ;; Reset the time again for the next switch
-                         (app-daytime-based-theme-setup))))))
+                         (app/daytime-based-theme-setup))))))
 
 
 ;;;###autoload
-(defun app-init ()
+(defun app/init ()
   "Load the correct theme based on the current time and setup a
 timer for changing the theme next."
-  (if (app-daytime-p)
-      (app-switch-theme app-light-theme)
-    (app-switch-theme app-dark-theme))
-  (app-daytime-based-theme-setup))
+  (if (app/daytime-p)
+      (app/switch-theme app/light-theme)
+    (app/switch-theme app/dark-theme))
+  (app/daytime-based-theme-setup))
 
 
 (provide 'appearance)
 ;;; appearance.el ends here
 
 ;; Local Variables:
-;; read-symbol-shorthands: (("app-" . "appearance-"))
+;; read-symbol-shorthands: (("app/" . "appearance-"))
 ;; End:

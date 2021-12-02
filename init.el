@@ -141,27 +141,32 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (bind-keys* :prefix "C-;"   :prefix-map ctl-semicolon-map)
   (bind-keys* :prefix "C-h x" :prefix-map ctl-h-x-map)
 
-  :bind (("C-c m" . switch-to-minibuffer)
-         ("C-c 0" . quick-switch-themes)
-         ("C-c b" . switch-to-buffer-with-mode)
-         ("<print>" . snap-it)
-         :map ctl-quote-map
-         ("w s" . websearch-it)
-         ("l l" . search-linguee)
-         ("l t" . translate-with-linguee)
-         ("d ." . insert-date-time-at-point)
-         ("c e" . vicarie/eval-print-last-sexp)
-         ("c =" . vicarie/eval-replace-last-sexp)
-         ("c r" . rename-file-and-buffer)
-         ("C-a" . emacspeak-wizards-execute-asynchronously)
-         ("M-x" . async-M-x)
-         :map ctl-period-map
-         ("k"   . compile)
-         ("K"   . recompile)
-         ("$"   . selective-display-beyond-col)
-         ("u"   . underline-text)
-         ("d"   . duplicate-current-line)
-         ("s"   . surround-symbol-with)))
+  :bind ( ("C-c m" . switch-to-minibuffer)
+          ("C-c 0" . quick-switch-themes)
+          ("C-c b" . switch-to-buffer-with-mode)
+          ("<print>" . snap-it)
+
+          :map ctl-m-map
+          ("t" . switch-to-scratch-new-tab)
+
+          :map ctl-quote-map
+          ("w s" . websearch-it)
+          ("l l" . search-linguee)
+          ("l t" . translate-with-linguee)
+          ("d ." . insert-date-time-at-point)
+          ("c e" . vicarie/eval-print-last-sexp)
+          ("c =" . vicarie/eval-replace-last-sexp)
+          ("c r" . rename-file-and-buffer)
+          ("C-a" . emacspeak-wizards-execute-asynchronously)
+          ("M-x" . async-M-x)
+
+          :map ctl-period-map
+          ("k" . compile)
+          ("K" . recompile)
+          ("$" . selective-display-beyond-col)
+          ("u" . underline-text)
+          ("d" . duplicate-current-line)
+          ("s" . surround-symbol-with) ))
 
 (use-package no-littering
   :ensure t
@@ -1442,6 +1447,8 @@ after doing `symbol-overlay-put'."
     (if (company-tooltip-visible-p)
         (company-complete-common-or-cycle)
       (yas-next-field-or-maybe-expand)))
+  :init
+  (setq yas-verbosity 2)
 
   :config
   (setq yas-key-syntaxes '(yas-try-key-from-whitespace))
@@ -2400,10 +2407,9 @@ after doing `symbol-overlay-put'."
          ("C-x y"   . whitespace-toggle-options))
   :init
   (setq whitespace-display-mappings
-        '((space-mark   ?\     [?·]     [?.])
-          (space-mark   ?\xA0  [?¤]     [?_])
-          (newline-mark ?\n    [?↵ ?\n] [?$ ?\n])
-          (tab-mark     ?\t    [?» ?\t] [?\\ ?\t])))
+        '( (space-mark   ?\xA0  [?¤]     [?_])
+           (newline-mark ?\n    [?↵ ?\n] [?$ ?\n])
+           (tab-mark     ?\t    [?» ?\t] [?\\ ?\t]) ))
 
   ;; Cleanup whitespace before saving files
   (add-hook 'before-save-hook

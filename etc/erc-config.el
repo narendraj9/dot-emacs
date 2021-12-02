@@ -54,7 +54,7 @@
 (setq erc-autojoin-channels-alist
       '(("libera.chat"
          "#emacs-berlin" "#emacs" "#org-mode" "#haskell"
-         "#coq" "#glugnith" "#clojure" "#bash")))
+         "#coq" "#clojure" "#bash")))
 
 (setq erc-prompt-for-nickserv-password nil
       erc-autojoin-timing 'ident
