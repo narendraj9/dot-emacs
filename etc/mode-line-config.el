@@ -74,7 +74,7 @@
                            (setq tab-index (1+ tab-index))
                            (format (if (eq 'current-tab (car tab))
                                        (propertize "[%s]" 'face 'mode-line-emphasis)
-                                     (propertize "%s" 'face 'mode-line-inactive))
+                                     "%s")
                                    tab-index))
                          (tab-bar-tabs)
                          " ")))))

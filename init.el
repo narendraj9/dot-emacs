@@ -294,7 +294,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package appearance
   :doc "`use-package' doesn't throw an error for non-existent packages"
   :load-path "themes/"
-  :defines quick-switch-themes
   :preface
   (defun font-availablep (font)
     "Return true if FONT is available on system.
@@ -309,7 +308,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-to-list 'custom-theme-load-path
                (expand-file-name "themes/"
                                  user-emacs-directory))
-  (load-theme 'jazz)
+
+  :config
+  ;; Load the correct theme for the time.
+  (appearance-init)
 
   ;; Setup my favorite fonts [if available]
   (dolist (font (list "Symbola" "Firacode"))
