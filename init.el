@@ -1077,6 +1077,11 @@ after doing `symbol-overlay-put'."
 ;;; Buffers, Windows and Frame
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package pixel-scroll
+  :init
+  (pixel-scroll-mode +1)
+  (pixel-scroll-precision-mode +1))
+
 (use-package window
   ;; There is no mnemonic here, it's just convenient to type.
   :bind (:map ctl-period-map ("e" . fit-window-to-buffer*) )
