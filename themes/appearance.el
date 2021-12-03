@@ -59,13 +59,20 @@
 
 
 (defvar app/daytime-based-theme-setup-timer)
+(defvar app/daytime-offset-mins 10)
 (defun app/daytime-based-theme-setup ()
   (seq-let ((sunrise _) (sunset _) _) (solar-sunrise-sunset (calendar-current-date))
     (setq app/daytime-based-theme-setup-timer
           (run-at-time (if (app/daytime-p)
-                           (app/minutes->timer-string (app/ft->minutes sunset))
+                           (app/minutes->timer-string
+                            ;; Add Offset so that the next time this function
+                            ;; runs, the other branch is taken.
+                            (+ app/daytime-offset-mins
+                               (app/ft->minutes sunset)))
                          ;; Surise of the next day.
-                         (+ (midnight-next) (* 60 (app/ft->minutes sunrise))))
+                         (+ (midnight-next)
+                            (* 60 (+ app/daytime-offset-mins
+                                     (app/ft->minutes sunrise)))))
                        nil
                        (lambda ()
                          (app/switch-theme (if (app/daytime-p)
