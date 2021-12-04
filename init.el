@@ -391,11 +391,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (display-battery-mode +1))
 
 (use-package ibuffer
-  :bind (
-         :map global-map
-         ("C-<return>" . other-window)
-         :map ctl-x-map
-         ("C-b" . ibuffer-other-window))
+  :bind (:map ctl-x-map ("C-b" . ibuffer-other-window) )
   :config
   (setq ibuffer-formats
         '((mark modified read-only locked " "
@@ -1041,6 +1037,10 @@ after doing `symbol-overlay-put'."
   ;; There is no mnemonic here, it's just convenient to type.
   :bind (:map ctl-period-map ("e" . fit-window-to-buffer*) )
   :init
+  ;; Adds an entry to `emulation-mode-map-alists' which take precedence over all
+  ;; active minor-mode keymaps and the active major-mode keymap in a buffer.
+  (bind-key* [C-return] #'other-window)
+
   (setq fit-window-to-buffer-horizontally t
         window-resize-pixelwise t)
 
@@ -2260,11 +2260,7 @@ after doing `symbol-overlay-put'."
               (lambda (&rest _args)
                 (completion-at-point)))
 
-  (define-clojure-indent (for-all 1))
-
-  (add-hook 'cider-repl-mode-hook
-            (lambda ()
-              (define-key cider-repl-mode-map (kbd "C-<return>") nil))))
+  (define-clojure-indent (for-all 1)))
 
 
 (use-package flycheck-clojure
@@ -2651,14 +2647,7 @@ after doing `symbol-overlay-put'."
         ;; More granular diffs for the hunk under point
         magit-diff-refine-hunk t)
 
-  (add-hook 'git-commit-mode-hook 'turn-on-flyspell)
-
-  (mapc (lambda (mode)
-          (add-hook mode
-                    (lambda ()
-                      ;; I want to use C-RET solely for switching buffers.
-                      (unbind-key "C-RET" (intern (format "%s-map" mode))))))
-        '(magit-mode magit-status-mode)))
+  (add-hook 'git-commit-mode-hook 'turn-on-flyspell))
 
 (use-package magit-annex
   :ensure t
