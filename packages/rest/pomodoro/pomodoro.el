@@ -233,6 +233,7 @@
 (defun pomodoro--format-pomodoro (p)
   (let* ((start (car p))
          (end (cadr p))
+         (title (caddr p) )
          (duration (floor (/ (float-time (time-subtract end start)) 60))))
     (format (propertize "%s %s: %s"
                         'face
@@ -241,7 +242,10 @@
                           'pomodoro-short-face))
             (format-time-string "%H:%M" start)
             (format-time-string "%H:%M" end)
-            (caddr p))))
+            (propertize title
+                        'button t
+                        'category 'pomodoro-title-text
+                        'pomodoro-title-text title))))
 
 (defun pomodoro--duration-mins (t1 t2)
   "Returns (t1 - t2) in minutes."
@@ -339,12 +343,25 @@
   (let ((pomodoro-buffer-name " *POMODORO*"))
     (with-output-to-temp-buffer pomodoro-buffer-name
       (with-current-buffer pomodoro-buffer-name
-        (setq revert-buffer-function
-              (lambda (&rest _args) (pomodoro-summarize)))
-        (insert (pomodoro-summary))))))
+        (let ((m (make-sparse-keymap)))
+          (set-keymap-parent m (current-local-map))
+          (use-local-map m)
+          (setq revert-buffer-function
+                (lambda (&rest _args) (pomodoro-summarize)))
+          (define-key m [return] #'pomodoro-jump-to-org-heading)
+          (insert (pomodoro-summary)))))))
 
 ;; Integration with org-agenda
 ;; ---------------------------
+
+(defun pomodoro-jump-to-org-heading ()
+  (interactive)
+  (save-excursion
+    (when-let ((p (text-property-search-forward 'pomodoro-title-text)))
+      (let ((matching-headings
+             (pomodoro--org-agenda-matching-headings (prop-match-value p))))
+        (org-id-goto (assoc-default (completing-read "Heading: " matching-headings)
+                                    matching-headings))))))
 
 (defun pomodoro--org-agenda-matching-headings (title)
   (let ((org-headings (org-map-entries (lambda ()
