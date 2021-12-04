@@ -1208,26 +1208,28 @@ after doing `symbol-overlay-put'."
   `dictionary-connection' that provides nice utility functions for
   talking to any TCP server."
   :bind ( :map global-map
-          ([double-down-mouse-1] . dictionary-quick-definition)
+          ([double-down-mouse-1] . dictionary--word-def*)
+
           :map ctl-quote-map
-          ("l d" . dictionary-search ) )
+          ("l d" . dictionary--word-def)
+          ("l D" . dictionary-search ) )
 
   :config
   (setq dictionary-server "dict.org")
 
   :preface
-  (defun dictionary-quick-definition (event)
+  (defun dictionary--show-def* (event)
     (interactive "e")
-    (require 'dictionary)
-    (if-let ((meaning (dictionary-definition (dictionary-word-at-mouse-event event))))
-        ;; I need this delay so that the tooltip isn't immediately
-        ;; removed because of the mouse event itself.
-        (run-with-timer 1
-                        nil
-                        (lambda ()
-                          (let ((x-gtk-use-system-tooltips nil))
-                            (tooltip-show meaning))))
-      (message "No meaning found for: %s" (dictionary-word-at-mouse-event event)))))
+    (dictionary--word-def (dictionary-word-at-mouse-event event)))
+
+  (defun dictionary--word-def (word)
+    (interactive (list (read-string "Word: " (word-at-point))))
+    (if-let ((meaning (and word (dictionary-definition word))))
+        ;; I need this delay so that the tooltip isn't immediately removed
+        ;; because of the mouse event itself.
+        (run-with-timer 1 nil (lambda ()
+                                (let ((x-gtk-use-system-tooltips nil))
+                                  (tooltip-show meaning)))))))
 
 (use-package flyspell
   :diminish flyspell-mode
