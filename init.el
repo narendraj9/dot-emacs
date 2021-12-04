@@ -1855,7 +1855,8 @@ after doing `symbol-overlay-put'."
 
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
-  :commands pomodoro-append-to-org-agenda
+  :defer 5
+  :commands (pomodoro-mode pomodoro-append-to-org-agenda)
   :bind ( :map ctl-m-map
           ("x SPC" . pomodoro-remove-notifications)
           ("x i"   . pomodoro-summarize)
@@ -1864,7 +1865,9 @@ after doing `symbol-overlay-put'."
           ("x b"   . pomodoro-start-break)
           ("x B"   . pomodoro-start-long-break) )
   :init
-  (add-hook 'org-agenda-finalize-hook #'pomodoro-append-to-org-agenda))
+  (add-hook 'org-agenda-finalize-hook #'pomodoro-append-to-org-agenda)
+  :config
+  (pomodoro-mode +1))
 
 (use-package thingatpt+
   :load-path "packages/lisp/"

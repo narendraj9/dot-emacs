@@ -89,6 +89,15 @@
   :type 'character
   :group 'pomodoro)
 
+(defcustom pomodoro-mode-line-format
+  '(:eval (when (not pomodoro-start-time)
+            " 🔴 "))
+  "Format for mode line spec displayed when there is no active Pomodoro."
+  :type '(sexp)
+  :group 'pomodoro)
+
+(put 'pomodoro-mode-line-format 'risky-local-variable t)
+
 (defface pomodoro-standard-face
   '( (((background light))
       (:weight semibold :foreground "tomato4"))
@@ -366,6 +375,11 @@
       (goto-char (point-min))
       (set-window-start (get-buffer-window) (point-min)))))
 
+;;;###autoload
+(define-minor-mode pomodoro-mode
+  "Pomodoro minor-mode for displaying status in mode line."
+  :global t
+  :lighter pomodoro-mode-line-format)
 
 (provide 'pomodoro)
 ;;; pomodoro.el ends here
