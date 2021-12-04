@@ -299,64 +299,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package appearance
   :doc "`use-package' doesn't throw an error for non-existent packages"
   :load-path "themes/"
-  :preface
-  (defun font-availablep (font)
-    "Return true if FONT is available on system.
-     This is written to avoid calling `find-font' repeatedly."
-    (let ((favailablep (intern (concat font "-availablep"))))
-      (if (boundp favailablep)
-          (symbol-value favailablep)
-        (customize-save-variable favailablep
-                                 (not (null (find-font (font-spec :name font))))))))
-
   :init
   (add-to-list 'custom-theme-load-path
                (expand-file-name "themes/"
                                  user-emacs-directory))
-
   :config
-  ;; Load the correct theme for the time.
-  (appearance-init)
-
-  ;; Setup my favorite fonts [if available]
-  (dolist (font (list "Symbola" "Firacode"))
-    (if (font-availablep font)
-        (set-fontset-font "fontset-default" nil
-                          (font-spec :name font :size 15)
-                          nil 'append)))
-
-  ;; Font for reading news
-  (cond
-   ((font-availablep "Carlito")
-    ;; It would have been great if I could set the background to white
-    ;; while reading anything other than code. Emacs doesn't support
-    ;; buffer-local themes and doing this would require nasty tricks
-    ;; with hooks.
-    (set-face-attribute 'variable-pitch nil
-                        :family "Carlito"
-                        :height 130
-                        :weight 'normal
-                        :width 'ultraexpanded)))
-
-  ;; Show long lines as continuations.
-  (setq-default truncate-lines nil)
-  ;;
-  (setq-default cursor-type t)
-  ;; Useful for copying text to a minibuffer.
-  (setq-default cursor-in-non-selected-windows 'hollow)
-
-  (setq x-underline-at-descent-line t)
-
-  ;; Maximize emacs on startup
-  (when (window-system)
-    (add-to-list 'default-frame-alist
-                 '(fullscreen . maximized)))
-
-  ;; Diminish some minor modes
-  (diminish 'hi-lock-mode)
-
-  ;; Disable mixed fonts in modus themes
-  (setq modus-themes-no-mixed-fonts t))
+  (appearance-init))
 
 (use-package mode-line-config
   :bind ( :map ctl-m-map

@@ -28,6 +28,13 @@
 (require 'seq)
 (require 'solar)
 
+(use-package modus-themes
+  :ensure t
+  :pin gnu
+  :init
+  ;; Disable mixed fonts in modus themes
+  (setq modus-themes-no-mixed-fonts t))
+
 (defvar app/light-theme 'modus-operandi)
 (defvar app/dark-theme 'jazz)
 
@@ -35,7 +42,7 @@
   ;; Disable other themes.
   (dolist (this-theme custom-enabled-themes)
     (when (not (eq theme this-theme))
-      (disable-theme theme)))
+      (disable-theme this-theme)))
   ;; If `theme' isn't enabled, enable it.
   (when (not (memq theme custom-enabled-themes))
     (load-theme theme t)
@@ -60,36 +67,81 @@
 
 (defvar app/daytime-based-theme-setup-timer)
 (defvar app/daytime-offset-mins 10)
-(defun app/daytime-based-theme-setup ()
-  (seq-let ((sunrise _) (sunset _) _) (solar-sunrise-sunset (calendar-current-date))
-    (setq app/daytime-based-theme-setup-timer
-          (run-at-time (if (app/daytime-p)
-                           (app/minutes->timer-string
-                            ;; Add Offset so that the next time this function
-                            ;; runs, the other branch is taken.
-                            (+ app/daytime-offset-mins
-                               (app/ft->minutes sunset)))
-                         ;; Surise of the next day.
-                         (+ (midnight-next)
-                            (* 60 (+ app/daytime-offset-mins
-                                     (app/ft->minutes sunrise)))))
-                       nil
-                       (lambda ()
-                         (app/switch-theme (if (app/daytime-p)
-                                               app/dark-theme
-                                             app/light-theme))
-                         ;; Reset the time again for the next switch
-                         (app/daytime-based-theme-setup))))))
 
+(defun app/daytime-switch-theme ()
+  (app/switch-theme (if (app/daytime-p) app/light-theme app/dark-theme))
+  (app/daytime-switch-theme-reschedule))
+
+(defun app/daytime-switch-theme-reschedule ()
+  (seq-let ((sunrise _) (sunset _) _) (solar-sunrise-sunset (calendar-current-date))
+    (let ((next-switch-time (if (app/daytime-p)
+                                (app/minutes->timer-string
+                                 ;; Add Offset so that the next time this function
+                                 ;; runs, the other branch is taken.
+                                 (+ app/daytime-offset-mins
+                                    (app/ft->minutes sunset)))
+                              ;; Surise of the next day.
+                              (+ (midnight-next)
+                                 (* 60 (+ app/daytime-offset-mins
+                                          (app/ft->minutes sunrise)))))))
+      (setq app/daytime-theme-switcher-timer
+            (run-at-time next-switch-time
+                         nil
+                         #'app/daytime-switch-theme)))))
+
+
+(defun app/font-availablep (font)
+  "Return true if FONT is available on system.
+   This is written to avoid calling `find-font' repeatedly."
+  (let ((favailablep (intern (concat font "-availablep"))))
+    (if (boundp favailablep)
+        (symbol-value favailablep)
+      (customize-save-variable favailablep
+                               (not (null (find-font (font-spec :name font))))))))
+
+
+(defun app/font-setup ()
+  ;; Setup my favorite fonts [if available]
+  (dolist (font (list "Symbola" "Firacode"))
+    (if (app/font-availablep font)
+        (set-fontset-font "fontset-default" nil
+                          (font-spec :name font :size 15)
+                          nil 'append)))
+
+  ;; Font for reading news
+  (cond
+   ((app/font-availablep "Carlito")
+    ;; It would have been great if I could set the background to white
+    ;; while reading anything other than code. Emacs doesn't support
+    ;; buffer-local themes and doing this would require nasty tricks
+    ;; with hooks.
+    (set-face-attribute 'variable-pitch nil
+                        :family "Carlito"
+                        :height 130
+                        :weight 'normal
+                        :width 'ultraexpanded))))
 
 ;;;###autoload
 (defun app/init ()
   "Load the correct theme based on the current time and setup a
 timer for changing the theme next."
-  (if (app/daytime-p)
-      (app/switch-theme app/light-theme)
-    (app/switch-theme app/dark-theme))
-  (app/daytime-based-theme-setup))
+  (app/font-setup)
+  (app/daytime-switch-theme)
+
+  ;; Show long lines as continuations.
+  (setq-default truncate-lines nil)
+
+  ;; Cursor settings
+  (setq-default cursor-type t)
+  ;; Useful for copying text to a minibuffer.
+  (setq-default cursor-in-non-selected-windows 'hollow)
+  ;;
+  (setq x-underline-at-descent-line t)
+
+  ;; Maximize emacs on startup
+  (when (window-system)
+    (add-to-list 'default-frame-alist
+                 '(fullscreen . maximized))))
 
 
 (provide 'appearance)

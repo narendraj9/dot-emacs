@@ -90,7 +90,7 @@
   :group 'pomodoro)
 
 (defcustom pomodoro-mode-line-format
-  '(:eval (when (not pomodoro-start-time)
+  '(:eval (when (not pomodoro-timer)
             " 🔴 "))
   "Format for mode line spec displayed when there is no active Pomodoro."
   :type '(sexp)
@@ -119,6 +119,7 @@
 (defvar pomodoro-list (list))
 (defvar pomodoro-start-time nil)
 (defvar pomodoro-title nil)
+(defvar pomodoro-timer nil)
 
 (defun pomodoro-persist (p)
   (with-temp-buffer
@@ -145,10 +146,18 @@
   (remove-hook 'org-timer-done-hook #'pomodoro-record)
   (setq pomodoro-start-time nil))
 
-(defun pomodoro-start-without-prompt (minutes)
+(defun pomodoro-start-timer (minutes)
   (interactive)
   (let ((org-timer-default-timer minutes))
-    (org-timer-set-timer '(4))))
+    (org-timer-set-timer '(4))
+    (setq pomodoro-timer org-timer-countdown-timer)
+    (add-hook 'org-timer-done-hook #'pomodoro-clear-timer)
+    (add-hook 'org-timer-stop-hook #'pomodoro-clear-timer)))
+
+(defun pomodoro-clear-timer ()
+  (setq pomodoro-timer nil)
+  (remove-hook 'org-timer-done-hook #'pomodoro-clear-timer)
+  (remove-hook 'org-timer-stop-hook #'pomodoro-clear-timer))
 
 (defun pomodoro-start (&optional arg)
   "Start a new Pomodoro.
@@ -165,29 +174,27 @@
     (setq pomodoro-title
           (completing-read "Title: "
                            (seq-uniq (mapcar #'caddr pomodoro-list)))))
-  (pomodoro-start-without-prompt (if (equal arg '(16))
-                                     (read-number "Duration: ")
-                                   pomodoro-default-duration))
+  (pomodoro-start-timer (if (equal arg '(16))
+                            (read-number "Duration: ")
+                          pomodoro-default-duration))
   (message ">> Start: %s [Prediction: %s]"
            pomodoro-title
            (car (pomodoro--org-agenda-matching-headings pomodoro-title)))
-  (add-hook 'org-timer-stop-hook (lambda () (setq pomodoro-start-time nil)))
-  (add-hook 'org-timer-done-hook #'pomodoro-record)
-  (add-hook 'org-timer-done-hook #'pomodoro-notify))
+  (add-hook 'org-timer-done-hook #'pomodoro-record))
 
 (defun pomodoro-start-break (&optional prefix)
   (interactive "P")
   (pomodoro-remove-notifications)
-  (pomodoro-start-without-prompt (if prefix
-                                     (read-number "Duration (min): ")
-                                   pomodoro-default-break))
+  (pomodoro-start-timer (if prefix
+                            (read-number "Duration (min): ")
+                          pomodoro-default-break))
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
 
 
 (defun pomodoro-start-long-break ()
   (interactive)
   (pomodoro-remove-notifications)
-  (pomodoro-start-without-prompt pomodoro-default-long-break)
+  (pomodoro-start-timer pomodoro-default-long-break)
   (add-hook 'org-timer-done-hook #'pomodoro-notify))
 
 (defun pomodoro-edit-title ()
