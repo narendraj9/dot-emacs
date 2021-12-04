@@ -55,7 +55,7 @@
          (app/ft->minutes sunset)))))
 
 (defun app/minutes->timer-string (mins)
-  (format "%s:%s" (/ mins 60) (% mins 60)))
+  (format "%02d:%02d" (/ mins 60) (% mins 60)))
 
 
 (defvar app/daytime-based-theme-setup-timer)

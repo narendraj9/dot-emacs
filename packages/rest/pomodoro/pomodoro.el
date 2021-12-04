@@ -90,13 +90,18 @@
   :group 'pomodoro)
 
 (defface pomodoro-standard-face
-  '((t . ((:weight semibold :foreground "sandy brown"))))
+  '( (((background light))
+      (:weight semibold :foreground "tomato4"))
+     (t
+      (:weight semibold :foreground "sandy brown")) )
   "Face for pomodoro lines.")
 
 (defface pomodoro-short-face
-  '((t . ((:slant italic :foreground "rosy brown"))))
+  '( (((background light))
+      (:weight semibold :foreground "rosy brown"))
+     (t (:slant italic :foreground "rosy brown")) )
   "Face for Pomodoro entries that are shorted than the default
-duration.")
+   duration.")
 
 (defvar pomodoro-default-fringe-style
   (cons fringe-mode
