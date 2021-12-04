@@ -453,6 +453,9 @@
    `(ido-only-match ((,class (:foreground ,jazz-orange :weight normal))))
    `(ido-subdir ((,class (:foreground ,jazz-red))))
 
+   ;; selectrum
+   `(completions-annotations ((,class (:foreground ,jazz-fg :background ,jazz-bg))))
+
    ;; js2-mode
    `(js2-warning-face ((,class (:underline ,jazz-orange))))
    `(js2-error-face ((,class (:foreground ,jazz-red :weight bold))))
