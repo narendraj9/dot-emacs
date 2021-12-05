@@ -179,7 +179,7 @@
                           pomodoro-default-duration))
   (message ">> Start: %s [Prediction: %s]"
            pomodoro-title
-           (car (pomodoro--org-agenda-matching-headings pomodoro-title)))
+           (caar (pomodoro--org-agenda-matching-headings pomodoro-title)))
   (add-hook 'org-timer-done-hook #'pomodoro-record))
 
 (defun pomodoro-start-break (&optional prefix)
@@ -314,6 +314,18 @@
                                                pomodoro-icon-char)))
                       (format "\t\t%s\n" (pomodoro--format-duration (car p-or-break-mins-partition))))))))
 
+
+;;;###autoload
+(defun pomodoro-status ()
+  (if pomodoro-start-time
+      (format "Current (%s): %s\n\n"
+              (string-trim (org-timer-value-string))
+              pomodoro-title)
+    (format "Last Pomodoro: %s ago\n\n"
+            (pomodoro--format-duration
+             (pomodoro--duration-mins (current-time)
+                                      (cadar pomodoro-list))))))
+
 ;;;###autoload
 (defun pomodoro-summary ()
   (when (not pomodoro-list)
@@ -328,15 +340,7 @@
                                        (funcall pomodoro-format-list-function (cdr day-ps))))
                              day-ps-alist
                              "\n")))
-    (concat (if pomodoro-start-time
-                (format "Current (%s): %s\n\n"
-                        (string-trim (org-timer-value-string))
-                        pomodoro-title)
-              (format "Last Pomodoro: %s ago\n\n"
-                      (pomodoro--format-duration
-                       (pomodoro--duration-mins (current-time)
-                                                (cadar pomodoro-list)))))
-            (or summary "No Pomodoros"))))
+    (concat (pomodoro-status) (or summary "No Pomodoros"))))
 
 (defun pomodoro-summarize ()
   (interactive)
@@ -355,13 +359,18 @@
 ;; ---------------------------
 
 (defun pomodoro-jump-to-org-heading ()
+  "Jump to org-heading for the next pomodoro entry in the summary buffer."
   (interactive)
   (save-excursion
     (when-let ((p (text-property-search-forward 'pomodoro-title-text)))
-      (let ((matching-headings
-             (pomodoro--org-agenda-matching-headings (prop-match-value p))))
-        (org-id-goto (assoc-default (completing-read "Heading: " matching-headings)
-                                    matching-headings))))))
+      (let* ((matching-headings
+              (pomodoro--org-agenda-matching-headings (prop-match-value p)))
+             (default-heading (car matching-headings))
+             (selected-heading (completing-read "Heading: "
+                                                matching-headings
+                                                nil t nil nil
+                                                default-heading)))
+        (org-id-goto (assoc-default selected-heading matching-headings))))))
 
 (defun pomodoro--org-agenda-matching-headings (title)
   (let ((org-headings (org-map-entries (lambda ()
