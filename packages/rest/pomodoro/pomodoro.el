@@ -151,13 +151,17 @@
   (let ((org-timer-default-timer minutes))
     (org-timer-set-timer '(4))
     (setq pomodoro-timer org-timer-countdown-timer)
+    (add-hook 'org-timer-done-hook #'pomodoro-notify)
     (add-hook 'org-timer-done-hook #'pomodoro-clear-timer)
     (add-hook 'org-timer-stop-hook #'pomodoro-clear-timer)))
 
 (defun pomodoro-clear-timer ()
   (setq pomodoro-timer nil)
   (remove-hook 'org-timer-done-hook #'pomodoro-clear-timer)
-  (remove-hook 'org-timer-stop-hook #'pomodoro-clear-timer))
+  (remove-hook 'org-timer-stop-hook #'pomodoro-clear-timer)
+  ;; Remove all other hooks that might have been added by other functions.
+  (remove-hook 'org-timer-done-hook #'pomodoro-record)
+  (remove-hook 'org-timer-done-hook #'pomodoro-notify))
 
 (defun pomodoro-start (&optional arg)
   "Start a new Pomodoro.
@@ -187,15 +191,13 @@
   (pomodoro-remove-notifications)
   (pomodoro-start-timer (if prefix
                             (read-number "Duration (min): ")
-                          pomodoro-default-break))
-  (add-hook 'org-timer-done-hook #'pomodoro-notify))
+                          pomodoro-default-break)))
 
 
 (defun pomodoro-start-long-break ()
   (interactive)
   (pomodoro-remove-notifications)
-  (pomodoro-start-timer pomodoro-default-long-break)
-  (add-hook 'org-timer-done-hook #'pomodoro-notify))
+  (pomodoro-start-timer pomodoro-default-long-break))
 
 (defun pomodoro-edit-title ()
   "Changes the title of the next pomodoro that will be recorded."
