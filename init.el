@@ -1,6 +1,6 @@
 ;;; init.el --- narendraj9's Emacs configuration -*- lexical-binding: t; coding: utf-8 -*-
 
-;; Copyright (C) 2016  Narendra Joshi
+;; Copyright (C) 2016, 2021  Narendra Joshi
 
 ;; Author: Narendra Joshi <narendraj9@gmail.com>
 ;; Keywords: Emacs
@@ -1779,6 +1779,7 @@ after doing `symbol-overlay-put'."
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
+
          ;; Bindings for using the Timer
          :map ctl-m-map
          ("x s" . org-timer-start)
@@ -1807,14 +1808,15 @@ after doing `symbol-overlay-put'."
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
   :defer 5
-  :commands (pomodoro-mode pomodoro-append-to-org-agenda)
+  :commands (pomodoro-mode pomodoro-append-to-org-agenda pomodoro-jump-to-org-heading)
   :bind ( :map ctl-m-map
-          ("x SPC" . pomodoro-remove-notifications)
-          ("x i"   . pomodoro-summarize)
-          ("x p"   . pomodoro-start)
-          ("x e"   . pomodoro-edit-title)
-          ("x b"   . pomodoro-start-break)
-          ("x B"   . pomodoro-start-long-break) )
+          ("x <return>" . pomodoro-jump-to-org-heading)
+          ("x SPC"      . pomodoro-remove-notifications)
+          ("x i"        . pomodoro-summarize)
+          ("x p"        . pomodoro-start)
+          ("x e"        . pomodoro-edit-title)
+          ("x b"        . pomodoro-start-break)
+          ("x B"        . pomodoro-start-long-break) )
   :init
   (add-hook 'org-agenda-finalize-hook #'pomodoro-append-to-org-agenda)
   :config

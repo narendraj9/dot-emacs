@@ -353,24 +353,32 @@
           (setq revert-buffer-function
                 (lambda (&rest _args) (pomodoro-summarize)))
           (define-key m [return] #'pomodoro-jump-to-org-heading)
-          (insert (pomodoro-summary)))))))
+          (insert (pomodoro-summary)))))
+    (select-window (get-buffer-window pomodoro-buffer-name))))
 
 ;; Integration with org-agenda
 ;; ---------------------------
 
-(defun pomodoro-jump-to-org-heading ()
-  "Jump to org-heading for the next pomodoro entry in the summary buffer."
-  (interactive)
+(defun pomodoro-jump-to-org-heading (&optional arg)
+  "Jump to org-heading for the next pomodoro entry in the summary buffer.
+Optional argument ARG controls whether we jump directly to the first heading
+ or select one from the options."
+  (interactive "P")
   (save-excursion
-    (when-let ((p (text-property-search-forward 'pomodoro-title-text)))
-      (let* ((matching-headings
-              (pomodoro--org-agenda-matching-headings (prop-match-value p)))
-             (default-heading (car matching-headings))
-             (selected-heading (completing-read "Heading: "
-                                                matching-headings
-                                                nil t nil nil
-                                                default-heading)))
-        (org-id-goto (assoc-default selected-heading matching-headings))))))
+    (if-let ((p (text-property-search-forward 'pomodoro-title-text)))
+        (let* ((matching-headings
+                (pomodoro--org-agenda-matching-headings (prop-match-value p)))
+               (default-heading (car matching-headings))
+               (selected-heading-text
+                (if arg
+                    (completing-read "Heading: "
+                                     matching-headings
+                                     nil t nil nil
+                                     default-heading)
+                  (car default-heading))))
+          (org-id-goto (assoc-default selected-heading-text matching-headings))
+          (org-narrow-to-subtree))
+      (message "No pomodoros found in this buffer."))))
 
 (defun pomodoro--org-agenda-matching-headings (title)
   (let ((org-headings (org-map-entries (lambda ()
