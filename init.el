@@ -52,6 +52,7 @@
         ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
         ("melpa"        . "https://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")))
+(setq package-native-compile t)
 
 ;;; USE-PACKAGE
 ;; ──────────────────────────────────────────────────────────────────
@@ -814,9 +815,9 @@ after doing `symbol-overlay-put'."
   :config
   (setq savehist-file (expand-file-name "var/savehist.el"
                                         user-emacs-directory))
-  (setq savehist-additional-variables
-        '( kill-ring minibuffer-history minibuffer-command-history command-history
-           limit-usage ))
+  (setq savehist-save-minibuffer-history t
+        savehist-additional-variables
+        '( kill-ring command-history limit-usage ))
   (savehist-mode +1)
   ;; https://emacs.stackexchange.com/a/4191/14967
   ;; Prevent `kill-ring' values from causing very long pauses while
@@ -1921,6 +1922,7 @@ after doing `symbol-overlay-put'."
                   (buffer-substring p (point))))))))
 
 (use-package minibuffer-command-history
+  :disabled t
   :load-path "etc/"
   :config
   (minibuffer-command-history-enable))
