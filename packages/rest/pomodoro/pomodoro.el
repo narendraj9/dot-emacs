@@ -30,6 +30,8 @@
 (require 'org)
 (require 'org-timer)
 (require 'seq)
+(require 'cl-lib)
+
 (require 'dash)
 
 (defgroup pomodoro ()
@@ -115,6 +117,14 @@
 (defvar pomodoro-default-fringe-style
   (cons fringe-mode
         (face-attribute 'fringe :background)))
+
+(cl-defstruct (pomodoro-entry (:constructor pomodoro-new)
+                              (:conc-name pomodoro-))
+  "Struct representing a single pomodoro entry."
+  (start (current-time) :read-only t :documentation "Start ts for the pomodoro.")
+  (end nil :documentation "Time for the end of the pomodoro.")
+  (title nil :documentation "Title of the pomodoro.")
+  (org-id nil :documentation "Org ID for an associated Org heading."))
 
 (defvar pomodoro-list (list))
 (defvar pomodoro-start-time nil)
@@ -214,8 +224,6 @@
     (play-sound-file pomodoro-notification-file pomodoro-notification-volume)))
 
 (defun pomodoro-notify ()
-  (setq pomodoro-default-fringe-style (cons fringe-mode
-                                            (face-attribute 'fringe :background)))
   (fringe-mode (cons 2 0))
   (set-face-attribute 'fringe nil :background "sandy brown")
   (pomodoro-audio-notification)
