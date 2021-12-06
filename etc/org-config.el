@@ -501,14 +501,16 @@ non-empty lines in the block (excluding the line with
             " LOCATION: [[%F][%f]]\n"
             ":END:"))
 
+  (setq org-datetree-add-timestamp t)
   (setq org-capture-templates
         `(("i" "TODO" entry (file+headline "capture.org" "Tasks")
            ,(concat
              "* TODO %?                                           %^G\n"))
-          ("n" "NOTE" entry (file ,org-default-notes-file)
+          ("n" "NOTE" entry (file+datetree ,org-default-notes-file)
            ,(concat "* %? %^G\n"
                     "%i\n\n"
-                    org-config--common-metadata))
+                    org-config--common-metadata)
+           :tree-type week)
           ("l" "Article" plain (file+headline "habits.org" "Reading List")
            "%(org-cliplink-capture) %?"
            :empty-lines 1
