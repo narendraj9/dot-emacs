@@ -2651,8 +2651,8 @@ after doing `symbol-overlay-put'."
   (setq magit-completing-read-function completing-read-function
         ;; Showing diffs during commits is currently slow.
         magit-commit-show-diff nil
-        ;; More granular diffs for the hunk under point
-        magit-diff-refine-hunk t)
+        ;; More granular diffs for all visible hunks
+        magit-diff-refine-hunk 'all)
 
   (add-hook 'git-commit-mode-hook 'turn-on-flyspell))
 
