@@ -327,7 +327,7 @@
 
 ;;;###autoload
 (defun pomodoro-status ()
-  (if pomodoro-start-time
+  (if pomodoro-timer
       (format "Current (%s): %s\n\n"
               (string-trim (org-timer-value-string))
               pomodoro-title)

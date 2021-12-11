@@ -1130,6 +1130,13 @@ search keyword."
   (tab-bar-new-tab)
   (switch-to-buffer "*scratch*"))
 
+(defmacro with-selected-date-time (&rest body)
+  `(progn (require 'org)
+          (let ((with-selected-date-time
+                 (org-time-string-to-time (org-read-date))))
+            (cl-letf (((symbol-function 'current-time)
+                       (lambda () with-selected-date-time)))
+              ,@body))))
 
 (provide 'defs)
 ;;; defs.el ends here

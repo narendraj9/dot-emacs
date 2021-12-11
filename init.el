@@ -356,40 +356,35 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package time
   :demand t
   :preface
-  :bind ( :map ctl-quote-map ("c t" . world-clock) )
+  :bind ( :map ctl-quote-map ("c t" . world-clock*) )
   :init
   (display-time-mode +1)
+
   :config
-  (setq world-clock-timer-enable t
+  (setq world-clock-timer-enable nil
         world-clock-time-format "\n──────────────\n\t%A %d %B %R %Z\n")
-  (setq zoneinfo-style-world-list '(("Europe/Berlin" "Berlin")
-                                    ("Asia/Calcutta" "New Delhi")
-                                    ("America/Seattle" "Seattle")))
-  (defface date-time-face
-    '((((background dark))
-       :foreground "green yellow" :distant-foreground "black")
-      (((background light))
-       :foreground "black" :distant-foreground "grey"))
-    "Face for date time in mode line."
-    :group 'display-time)
 
   (setq display-time-string-forms
-        '((propertize (format " %s/%s/%s %s %s:%s "
-                              (substring year -2) (string-trim month) (string-trim day)
-                              dayname 24-hours minutes am-pm)
-                      'face
-                      'date-time-face))
+        '((propertize
+           (format " %s/%s/%s %s %s:%s "
+                   (substring year -2) (string-trim month) (string-trim day) dayname 24-hours minutes)
+           'face 'bold))
         display-time-default-load-average 1     ; 5 minute load avg
         display-time-load-average-threshold 0.8 ; >80%
-        display-time-mail-string ""))
+        display-time-mail-string "")
+
+  :preface
+  (defun world-clock* (&optional arg)
+    (interactive "P")
+    (if arg
+        (with-selected-date-time (world-clock))
+      (world-clock))))
 
 (use-package battery
   :demand t
   :config
   (setq battery-mode-line-format
-        (propertize "%b%p%% "
-                    'face
-                    'mode-line-battery-face))
+        (propertize "%b%p%% " 'face 'mode-line-battery-face))
   (display-battery-mode +1))
 
 (use-package ibuffer
@@ -465,27 +460,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; ====================================
 
 (use-package ag :ensure t :bind ("M-s M-a" . ag))
-(use-package suggest :defer t :ensure t :commands suggest)
-(use-package helpful
-  :doc
-  "Tries to `read' the buffer to find out the symbol at point."
-  :disabled t
-  :ensure t
-  :bind (("C-h v" . helpful-variable)
-         ("C-h f" . helpful-function)
-         ("C-h k" . helpful-key)
-         ("C-h o" . helpful-symbol)
-         :map helpful-mode-map
-         ("<tab>" . forward-button)
-         ("<backtab>" . backward-button))
-  :config
-  (use-package elisp-demos
-    :ensure t
-    :init
-    (advice-add 'helpful-update
-                :after
-                (lambda ()
-                  (make-thread #'elisp-demos-advice-helpful-update)))))
 
 ;; KEY BINDINGS
 ;; ──────────────────────────────────────────────────────────────────
@@ -562,22 +536,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package browse-url
   :defer t
-  :doc "Make chromium the default browser if it is installed."
-  :init
+  :config
+  (setq browse-url-new-window-flag nil)
+
   (cond
    ((executable-find "firefox")
     (setq browse-url-browser-function 'browse-url-firefox))
    ((executable-find "chromium")
     (setq browse-url-browser-function 'browse-url-chromium))
    ((executable-find "google-chrome")
-    (setq browse-url-browser-function 'browse-url-chrome)))
-  :config
-  (setq browse-url-new-window-flag t)
-
-  (advice-add 'browse-url-chromium
-              :before
-              (lambda (url &optional _window)
-                (message "Opening with Chromium: %s" url))))
+    (setq browse-url-browser-function 'browse-url-chrome))))
 
 (use-package paren
   :config
@@ -692,6 +660,17 @@ after doing `symbol-overlay-put'."
                                'display
                                '(left-fringe right-arrow highlight))))))
 
+(use-package bicycle
+  :doc
+  "Implemented using `hs-minor-mode' and `outline-mode' (which uses
+  `selective-display'). To configure this mode, configure those two
+   minor modes."
+  :ensure t
+  :after outline
+  :bind ( :map outline-minor-mode-map
+          ([C-tab]   . bicycle-cycle)
+          ([backtab] . bicycle-cycle-global)
+          ([S-tab]   . bicycle-cycle-global)) )
 
 (use-package wrap-region
   :doc
@@ -796,14 +775,14 @@ after doing `symbol-overlay-put'."
   ;;               (symbol-function #'exchange-point-and-mark)
   ;;               (lambda (&rest _args) (deactivate-mark nil)))
   (define-key global-map
-    [remap exchange-point-and-mark]
-    #'exchange-point-and-mark*)
+              [remap exchange-point-and-mark]
+              #'exchange-point-and-mark*)
 
   (add-hook 'activate-mark-hook (lambda () (setq cursor-type (cons 'bar 4))))
   (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t))))
 
-
 (use-package apropos :config (setq apropos-do-all t))
+(use-package shortdoc :bind ( :map help-map ("g" . shortdoc-display-group) ))
 
 (use-package misc
   :doc "Where simple ends, maybe misc.el begins"
@@ -878,18 +857,6 @@ after doing `symbol-overlay-put'."
   :bind (:map goto-map   ("i" . ni-narrow-to-region-indirect-other-window))
   :config
   (setq ni-narrowed-buf-name-max 40))
-
-(use-package bicycle
-  :doc
-  "Implemented using `hs-minor-mode' and `outline-mode' (which uses
-  `selective-display'). To configure this mode, configure those two
-   minor modes."
-  :ensure t
-  :after outline
-  :bind ( :map outline-minor-mode-map
-          ([C-tab]   . bicycle-cycle)
-          ([backtab] . bicycle-cycle-global)
-          ([S-tab]   . bicycle-cycle-global)) )
 
 (use-package goto-last-change
   :ensure t
@@ -1935,26 +1902,12 @@ after doing `symbol-overlay-put'."
 
    If anything with completions breaks, this is usually the culprit."
   :ensure t
-  :bind ( :map ctl-m-map ("o" . toggle-completion-stles ) )
-  :custom (completion-styles '(orderless))
-  :preface
-  (defun toggle-completion-stles ()
-    (interactive)
-    (with-temp-message (format "Completion styles: %s"
-                               (setq completion-styles
-                                     (if (equal completion-styles '(orderless))
-                                         '(basic partial-completion orderless)
-                                       '(orderless))))
-      (sit-for 1))))
+  :custom (completion-styles '(orderless)))
 
-(use-package selectrum
+(use-package vertico
+  :doc "https://github.com/minad/vertico/wiki"
   :ensure t
-  ;; I prefer `company-mode' provided UI to complete in buffers other
-  ;; than the minibuffer.
-  :custom
-  ((selectrum-complete-in-buffer nil)
-   (selectrum-files-select-input-dirs t))
-  :init (selectrum-mode +1))
+  :init (vertico-mode +1))
 
 (use-package embark :ensure t :bind ("C-c C-." . embark-act))
 

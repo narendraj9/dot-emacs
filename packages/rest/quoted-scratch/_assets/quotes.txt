@@ -3434,3 +3434,7 @@ don’t get.”
 "To the most trivial actions, attach the devotion and mindfulness of a hundred monks. To
 matters of life and death, attach a sense of humor."
                                                                        - Zhuangzi
+
+“If you don’t get everything you want, think of the things you
+don’t get that you don’t want.”
+                                                                    - Oscar Wilde

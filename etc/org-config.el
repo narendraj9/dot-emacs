@@ -56,8 +56,9 @@ Otherwise, limit to only `org-mode' files."
 (defun search-notes-files ()
   "Search org files using `consult-grep'."
   (interactive)
-  (let ((consult-grep-args (concat consult-grep-args
-                                   " --exclude=*.htm --exclude=*.html")))
+  (require 'consult)
+  (let ((consult-grep-command (concat consult-grep-command
+                                      " --exclude=*.htm --exclude=*.html")))
     (consult-grep org-directory)))
 
 
@@ -68,7 +69,7 @@ Otherwise, limit to only `org-mode' files."
   (org-agenda-redo))
 
 (use-package org
-  :ensure org-plus-contrib
+  :ensure org-contrib
   :demand t
   :bind ( :map org-mode-map ("M-q" . org-fill-paragraph) )
   :init

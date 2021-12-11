@@ -72,6 +72,13 @@ buffer."
 (setq gnus-summary-thread-gathering-function 'gnus-gather-threads-by-references)
 (setq gnus-thread-hide-subtree t)
 
+;;; Groups
+;;
+
+(setq gnus-group-line-format
+      ;; "%M\ %S\ %p\ %P\ %5y:%B%(%g%)\n"
+      "%M\ %S\ %p\ %P\ %5y:%B%(%G%)\n")
+
 
 ;;; Article and thread sorting
 ;; ===========================

@@ -29,7 +29,7 @@
                    :size history-length)
   "Hash table for keeping history per command.")
 
-(defun separate-minhist-wrapper (original-read &rest args)
+(defun minibuffer-command-wrapper-fn (original-read &rest args)
   "Advice for `read-from-minibuffer' to setup and record history for a command.
 `ORIGINAL-READ' is the original `read-from-minibuffer' for this package.
 `ARGS' are arguments that are passed onto `ORIGINAL-READ'."
@@ -45,13 +45,13 @@
   "Setup advice for `read-from-minibuffer' to have history per command."
   (add-function :around
                 (symbol-function 'read-from-minibuffer)
-                #'separate-minhist-wrapper))
+                #'minibuffer-command-wrapper-fn))
 
 ;;;###autoload
 (defun minibuffer-command-history-disable ()
   "Remove advice added by `minibuffer-command-history-enable'."
   (remove-function (symbol-function 'read-from-minibuffer)
-                   #'separate-minhist-wrapper))
+                   #'minibuffer-command-wrapper-fn))
 
 (provide 'minibuffer-command-history)
 ;;; minibuffer-command-history.el ends here
