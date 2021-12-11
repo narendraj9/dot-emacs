@@ -508,8 +508,8 @@ non-empty lines in the block (excluding the line with
              "* TODO %?                                           %^G\n"))
           ("n" "NOTE" entry (file+datetree ,org-default-notes-file)
            ,(concat "* %? %^G\n"
-                    "%i\n\n"
-                    org-config--common-metadata)
+                    org-config--common-metadata
+                    "\n\n%i")
            :tree-type week)
           ("l" "Article" plain (file+headline "habits.org" "Reading List")
            "%(org-cliplink-capture) %?"
@@ -517,7 +517,7 @@ non-empty lines in the block (excluding the line with
            :prepend t
            :immediate-finish t)
           ("j" "Journal" entry (file+olp+datetree "journal.org")
-           ,(concat "* %? %^G           \n\n"
+           ,(concat "* %? %^G           \n"
                     org-config--common-metadata))
           ("c" "Question" entry (file+headline "questions.org" "Questions")
            "* %?\n ")
