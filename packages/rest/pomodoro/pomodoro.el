@@ -114,6 +114,13 @@
   "Face for Pomodoro entries that are shorted than the default
    duration.")
 
+
+(defcustom pomodoro-use-fringe-notifications nil
+  "If set to true, fringe is changed to notify about a
+   pomodoro/break not being active."
+  :group 'pomodoro
+  :type 'boolean)
+
 (defvar pomodoro-default-fringe-style
   (cons fringe-mode
         (face-attribute 'fringe :background)))
@@ -226,8 +233,9 @@
     (play-sound-file pomodoro-notification-file pomodoro-notification-volume)))
 
 (defun pomodoro-notify ()
-  (fringe-mode (cons 2 0))
-  (set-face-attribute 'fringe nil :background "sandy brown")
+  (when pomodoro-use-fringe-notifications
+    (fringe-mode (cons 2 0))
+    (set-face-attribute 'fringe nil :background "sandy brown"))
   (pomodoro-audio-notification)
   (cl-do ((count 1 (1+ count))) ((or (not (sit-for 1))
                                      (<= pomodoro-max-notification-count count)))
@@ -236,8 +244,9 @@
 
 (defun pomodoro-remove-notifications ()
   (interactive)
-  (fringe-mode (car pomodoro-default-fringe-style))
-  (set-face-attribute 'fringe nil :background (cdr pomodoro-default-fringe-style)))
+  (when pomodoro-use-fringe-notifications
+    (fringe-mode (car pomodoro-default-fringe-style))
+    (set-face-attribute 'fringe nil :background (cdr pomodoro-default-fringe-style))))
 
 ;; Summarize my Pomodoros
 ;; ----------------------
