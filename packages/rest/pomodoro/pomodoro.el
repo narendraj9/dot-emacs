@@ -201,13 +201,15 @@
   (pomodoro-remove-notifications)
   (pomodoro-start-timer (if prefix
                             (read-number "Duration (min): ")
-                          pomodoro-default-break)))
+                          pomodoro-default-break))
+  (setq pomodoro-timer nil))
 
 
 (defun pomodoro-start-long-break ()
   (interactive)
   (pomodoro-remove-notifications)
-  (pomodoro-start-timer pomodoro-default-long-break))
+  (pomodoro-start-timer pomodoro-default-long-break)
+  (setq pomodoro-timer nil))
 
 (defun pomodoro-edit-title ()
   "Changes the title of the next pomodoro that will be recorded."
