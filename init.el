@@ -256,8 +256,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; The default font should be properly set by now, make sure that
   ;; each newly created frame uses the same font.
-  (add-to-list 'default-frame-alist
-               `(font . ,(font-xlfd-name (face-attribute 'default :font))))
+  ;; (add-hook 'after-init-hook
+  ;;           (lambda ()
+  ;;             (add-to-list 'default-frame-alist
+  ;;                          `(font . ,(font-xlfd-name (face-attribute 'default :font))))))
 
   ;; Load secrets if available.
   (when (file-exists-p secrets-file)
@@ -472,14 +474,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ──────────────────────────────────────────────────────────────────
 
 (use-package tab-bar
-  :bind (:map tab-prefix-map ("s" . tab-switcher))
+  :bind (:map tab-prefix-map ("s" . tab-bar-new-scratch*))
   :doc
   "This built-in package provides a way to keep a set of window
    configurations around that can be switched to easily."
   :config
   (tab-bar-history-mode +1)
   (setq tab-bar-show nil
-        tab-bar-tab-name-function #'tab-bar-tab-name-all))
+        tab-bar-tab-name-function #'tab-bar-tab-name-all)
+  :preface
+  (defun tab-bar-new-scratch* ()
+    (interactive)
+    (tab-new)
+    (switch-to-buffer "*scratch*")))
 
 (use-package calendar
   :defer t
@@ -1176,6 +1183,7 @@ after doing `symbol-overlay-put'."
   :doc "`dictionary' is a built-in package. It uses
   `dictionary-connection' that provides nice utility functions for
   talking to any TCP server."
+  :commands dictionary-word-at-mouse-event
   :bind ( :map global-map
           ([double-down-mouse-1] . dictionary--word-def*)
 
@@ -1187,8 +1195,9 @@ after doing `symbol-overlay-put'."
   (setq dictionary-server "dict.org")
 
   :preface
-  (defun dictionary--show-def* (event)
+  (defun dictionary--word-def* (event)
     (interactive "e")
+    (message "Called with: %s" event)
     (dictionary--word-def (dictionary-word-at-mouse-event event)))
 
   (defun dictionary--word-def (word)

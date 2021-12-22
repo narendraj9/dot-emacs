@@ -187,6 +187,8 @@
    for the title of the pomodoro. If supplied twice, asks for
    both the title and the duration of the Pomodoro."
   (interactive "P")
+  (when pomodoro-timer
+    (user-error "Pomodoro active: %s" pomodoro-title))
   (pomodoro-remove-notifications)
   (when (not pomodoro-list)
     (pomodoro-load-file))

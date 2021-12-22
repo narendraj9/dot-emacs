@@ -32,6 +32,8 @@
 (require 'defs)
 (require 'f)
 
+(use-package org-web-tools :ensure t)
+
 
 (defun org-agenda-redo-with-days-to-deadline ()
   "Change `org-agenda' buffer and display days to deadline for all tasks."
@@ -57,8 +59,8 @@ Otherwise, limit to only `org-mode' files."
   "Search org files using `consult-grep'."
   (interactive)
   (require 'consult)
-  (let ((consult-grep-command (concat consult-grep-command
-                                      " --exclude=*.htm --exclude=*.html")))
+  (let ((consult-grep-args (concat consult-grep-args
+                                   " --exclude=*.htm --exclude=*.html")))
     (consult-grep org-directory)))
 
 
@@ -69,7 +71,6 @@ Otherwise, limit to only `org-mode' files."
   (org-agenda-redo))
 
 (use-package org
-  :ensure org-contrib
   :demand t
   :bind ( :map org-mode-map ("M-q" . org-fill-paragraph) )
   :init
@@ -79,8 +80,6 @@ Otherwise, limit to only `org-mode' files."
                                      (expand-file-name "_archives/archive.org"
                                                        org-directory))
         org-default-notes-file (expand-file-name "notes.org" org-directory))
-
-  (set-register ?o (cons 'file org-default-notes-file))
 
   :config
   (setq org-cycle-separator-lines 0
@@ -499,7 +498,6 @@ non-empty lines in the block (excluding the line with
   (defconst org-config--common-metadata
     (concat ":METADATA:\n"
             " CREATED: %U         \n"
-            " LOCATION: [[%F][%f]]\n"
             ":END:"))
 
   (setq org-datetree-add-timestamp t)
@@ -507,14 +505,14 @@ non-empty lines in the block (excluding the line with
         `(("i" "TODO" entry (file+headline "capture.org" "Tasks")
            ,(concat
              "* TODO %?                                           %^G\n"))
-          ("n" "NOTE" entry (file+datetree ,org-default-notes-file)
+          ("n" "NOTE" entry (file+olp+datetree ,org-default-notes-file)
            ,(concat "* %? %^G\n"
                     org-config--common-metadata
                     "\n\n%i")
            :tree-type week)
-          ("l" "Article" plain (file+headline "habits.org" "Reading List")
-           "%(org-cliplink-capture) %?"
-           :empty-lines 1
+          ("l" "Article" entry (file "articles.org")
+           "* %(org-cliplink-capture) %?"
+           :empty-lines 0
            :prepend t
            :immediate-finish t)
           ("j" "Journal" entry (file+olp+datetree "journal.org")
@@ -764,6 +762,7 @@ non-empty lines in the block (excluding the line with
       ;; Give the above function some time to execute asynchronously (using
       ;; `emacs-deferred').
       (sit-for 5))))
+
 
 (provide 'org-config)
 ;;; org-config.el ends here

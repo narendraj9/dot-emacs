@@ -58,8 +58,8 @@
 (setq mode-line-compact nil)
 
 ;; Disable `variable-pitch' fonts for `mode-line'.
-(set-face-attribute 'mode-line-inactive nil :inherit 'mode-line)
-(set-face-attribute 'mode-line-active nil :inherit 'mode-line)
+;; (set-face-attribute 'mode-line-inactive nil :inherit 'mode-line)
+;; (set-face-attribute 'mode-line-active nil :inherit 'mode-line)
 
 ;;; Tabs
 
