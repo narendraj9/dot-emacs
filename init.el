@@ -1179,6 +1179,10 @@ after doing `symbol-overlay-put'."
 
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package mouse
+  :init
+  (context-menu-mode +1))
+
 (use-package dictionary
   :doc "`dictionary' is a built-in package. It uses
   `dictionary-connection' that provides nice utility functions for
@@ -1193,6 +1197,8 @@ after doing `symbol-overlay-put'."
 
   :config
   (setq dictionary-server "dict.org")
+  (add-to-list 'context-menu-functions
+               'context-menu-dictionary)
 
   :preface
   (defun dictionary--word-def* (event)
