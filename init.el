@@ -1800,8 +1800,8 @@ after doing `symbol-overlay-put'."
           ("x e"        . pomodoro-edit-title)
           ("x b"        . pomodoro-start-break)
           ("x B"        . pomodoro-start-long-break) )
-  :init
-  (add-hook 'org-agenda-finalize-hook #'pomodoro-append-to-org-agenda)
+  ;; :init
+  ;; (add-hook 'org-agenda-finalize-hook #'pomodoro-append-to-org-agenda)
   :config
   (pomodoro-mode +1))
 
