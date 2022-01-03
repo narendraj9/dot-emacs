@@ -81,6 +81,8 @@ Otherwise, limit to only `org-mode' files."
                                                        org-directory))
         org-default-notes-file (expand-file-name "notes.org" org-directory))
 
+  (set-register ?j (cons 'file org-default-notes-file))
+
   :config
   (setq org-cycle-separator-lines 0
         org-cycle-include-plain-lists 'integrate
@@ -216,6 +218,7 @@ Otherwise, limit to only `org-mode' files."
                                                (file-expand-wildcards "*.org"))))
                          ;; Allow TODO items to be created while writing notes
                          ;; on a subject.
+                         (list org-default-notes-file)
                          (directory-files-recursively (expand-file-name "notes/" org-directory)
                                                       ".*\\.org$"))
 
@@ -500,7 +503,7 @@ non-empty lines in the block (excluding the line with
             " CREATED: %U         \n"
             ":END:"))
 
-  (setq org-datetree-add-timestamp t)
+  (setq org-datetree-add-timestamp nil)
   (setq org-capture-templates
         `(("i" "TODO" entry (file+headline "capture.org" "Tasks")
            ,(concat

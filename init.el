@@ -645,6 +645,7 @@ after doing `symbol-overlay-put'."
 
 (use-package hideshow
   :defer t
+  :bind ( :map hs-minor-mode-map ([backtab] . hs-toggle-hiding) )
   :init
   (add-hook 'hs-minor-mode-hook
             (lambda ()
@@ -674,10 +675,7 @@ after doing `symbol-overlay-put'."
    minor modes."
   :ensure t
   :after outline
-  :bind ( :map outline-minor-mode-map
-          ([C-tab]   . bicycle-cycle)
-          ([backtab] . bicycle-cycle-global)
-          ([S-tab]   . bicycle-cycle-global)) )
+  :bind ( :map outline-minor-mode-map ([C-tab]   . bicycle-cycle)) )
 
 (use-package wrap-region
   :doc
