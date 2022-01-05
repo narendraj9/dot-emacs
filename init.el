@@ -645,7 +645,9 @@ after doing `symbol-overlay-put'."
 
 (use-package hideshow
   :defer t
-  :bind ( :map hs-minor-mode-map ([backtab] . hs-toggle-hiding) )
+  :bind ( :map hs-minor-mode-map
+          ([backtab] . hs-toggle-hiding)
+          ("C-c @ a"   . my-toggle-hideshow-all) )
   :init
   (add-hook 'hs-minor-mode-hook
             (lambda ()
@@ -654,6 +656,15 @@ after doing `symbol-overlay-put'."
   (setq hs-set-up-overlay #'display-code-line-counts)
 
   :preface
+  (defvar my-hs-hide nil "Current state of hideshow for toggling all.")
+  (defun my-toggle-hideshow-all ()
+    "Toggle hideshow all."
+    (interactive)
+    (setq my-hs-hide (not my-hs-hide))
+    (if my-hs-hide
+        (hs-hide-all)
+      (hs-show-all)))
+
   (defun display-code-line-counts (ov)
     (when-let ((line-count (and (eq 'code (overlay-get ov 'hs))
                                 (count-lines (overlay-start ov)
