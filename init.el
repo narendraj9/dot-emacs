@@ -1014,6 +1014,7 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――――――
 
 (use-package pixel-scroll
+  :disabled t
   :init
   (pixel-scroll-mode +1)
   (pixel-scroll-precision-mode +1))
