@@ -1801,6 +1801,7 @@ after doing `symbol-overlay-put'."
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
   :defer 5
+  :diminish pomodoro-mode
   :commands (pomodoro-mode pomodoro-append-to-org-agenda pomodoro-jump-to-org-heading)
   :bind ( :map ctl-m-map
           ("x <return>" . pomodoro-jump-to-org-heading)
