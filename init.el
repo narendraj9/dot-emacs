@@ -149,6 +149,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
           :map ctl-m-map
           ("t" . switch-to-scratch-new-tab)
+          ("k" . swap-ctrl-right-win)
 
           :map ctl-quote-map
           ("w s" . websearch-it)

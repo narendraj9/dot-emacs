@@ -1138,5 +1138,15 @@ search keyword."
                        (lambda () with-selected-date-time)))
               ,@body))))
 
+(defvar swap-ctrl-right-win nil)
+(defun swap-ctrl-right-win ()
+  (interactive)
+  (if (not swap-ctrl-right-win)
+      (progn (shell-command "gsettings set org.gnome.desktop.input-sources xkb-options \"['caps:ctrl_modifier', 'altwin:meta_alt', 'ctrl:swap_rwin_rctl']\"")
+             (message "Enabled: Swap Right Win <-> Right Ctrl"))
+    (shell-command "gsettings set org.gnome.desktop.input-sources xkb-options \"['caps:ctrl_modifier', 'altwin:meta_alt']\"")
+    (message "Disabled: Swap Right Win <-> Right Ctrl"))
+  (setq swap-ctrl-right-win (not swap-ctrl-right-win)))
+
 (provide 'defs)
 ;;; defs.el ends here
