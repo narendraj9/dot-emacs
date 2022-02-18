@@ -1511,10 +1511,12 @@ after doing `symbol-overlay-put'."
           ("C-c C-d" . toggle-eldoc-doc-buffer) )
   :init
   (hook-into-modes #'eglot-ensure
-                   'java-mode 'rust-mode 'c-mode 'c++-mode 'python-mode
-                   'go-mode)
+                   'clojure-mode 'java-mode 'rust-mode
+                   'c-mode 'c++-mode 'python-mode 'go-mode)
   :config
+  (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
+
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
@@ -2199,7 +2201,16 @@ after doing `symbol-overlay-put'."
   (advice-add 'project-find-file :around
               (lambda (p-find-file &rest args)
                 (let ((project-find-functions (list #'project-try-vc)))
-                  (apply p-find-file args)))))
+                  (apply p-find-file args))))
+
+  (add-hook 'project-find-functions #'project-find-clojure-root)
+
+  :preface
+  (defun project-find-clojure-root (dir)
+    (cons 'clojure-project (clojure-project-root-path (or dir default-directory))))
+
+  (cl-defmethod project-root ((project (head clojure-project)))
+    (cdr project)))
 
 (use-package clj-refactor
   :pin melpa
@@ -2240,7 +2251,9 @@ after doing `symbol-overlay-put'."
         cider-eldoc-display-for-symbol-at-point nil
         cider-eldoc-display-context-dependent-info t
 
-        cider-repl-use-content-types t)
+        cider-repl-use-content-types t
+
+        cider-xref-fn-depth 100)
 
   (advice-add 'cider-repl-indent-and-complete-symbol
               :around
