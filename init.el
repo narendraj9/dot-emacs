@@ -1511,8 +1511,8 @@ after doing `symbol-overlay-put'."
           ("C-c C-d" . toggle-eldoc-doc-buffer) )
   :init
   (hook-into-modes #'eglot-ensure
-                   'clojure-mode 'java-mode 'rust-mode
-                   'c-mode 'c++-mode 'python-mode 'go-mode)
+                   'java-mode 'rust-mode 'python-mode
+                   'go-mode 'c-mode 'c++-mode)
   :config
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
