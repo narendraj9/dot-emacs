@@ -347,6 +347,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package quoted-scratch
   :load-path "packages/rest/quoted-scratch"
+  :disabled t
   :init
   (add-hook 'after-init-hook #'quoted-scratch-refresh-quote-when-idle)
   :config
@@ -1518,8 +1519,9 @@ after doing `symbol-overlay-put'."
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
 
-  (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
-                              ((c-mode c++-mode) . ("clangd"))))
+  (dolist (lang-server-spec `((rust-mode         . ("rust-analyzer"))
+                              ((c-mode c++-mode) . ("clangd"))
+                              (java-mode         . (,java-eclipse-jdt-launcher))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
 (use-package eglot-java :ensure t :after eglot)
@@ -1991,21 +1993,13 @@ after doing `symbol-overlay-put'."
   :hook ( (java-mode . company-mode-quicker) )
 
   :init
-  (defcustom eclipse-jdt-jar-path
-    (let ((jar-paths (file-expand-wildcards (concat "~/code/eclipse.jdt.ls/"
-                                                    "org.eclipse.jdt.ls.product/target/"
-                                                    "repository/plugins/org.eclipse.equinox.launcher_*.jar"))))
-      (unless jar-paths
-        (message "Failed to find any JDT jar files."))
-      (when (< 1 (length jar-paths))
-        (message "Multiple Eclipse JDT jar files found."))
-      (expand-file-name (car jar-paths)))
-    "Path to the Eclipse JDT Language Server jar file.")
-
-  (setenv "CLASSPATH"
-          (concat (getenv "CLASSPATH")
-                  path-separator
-                  eclipse-jdt-jar-path)))
+  (defvar java-eclipse-jdt-launcher
+    (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/")))
+      (if (file-exists-p launcher-script)
+          launcher-script
+        (message "Failed to find any JDT jar files.")
+        nil))
+    "Path to Eclipse JDT launcher script."))
 
 (use-package javadoc-lookup
   :ensure t
