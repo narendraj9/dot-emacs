@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: cp_main
+# key: cp_main
+# --
+class Main {
+  public static void main(String[] args) {
+    $0
+  }
+}

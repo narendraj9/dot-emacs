@@ -70,7 +70,7 @@ Required for calculating your age."
   :group 'hledger
   :type 'number)
 
-(defcustom hledger-life-expectancy 100
+(defcustom hledger-life-expectancy 80
   "Age upto which you expect to live."
   :group 'hledger
   :type 'number)
@@ -758,7 +758,7 @@ earn interest on this amount as well."
             "\b • Your liquid assets would last %s and total assets %s with this lifestyle. \b\
  • Your liquid assets are %.2f times your liabilities/debt. \b\
  • %.2f%% of your total assets are borrowed. \b\
- • For the past one year, you have been saving %.2f%% of your average income. \b\
+ • For the past one year, you have been saving %.2f%% (%s %.2f per month) of your average income. \b\
  • Your assets would roughly increase by %s %s in the next %s years making your net worth %s %s.\
  If compounded every %s months at %s%% per annum, your net worth would become %s %s. \b"
             (make-string 80 ?═) "\n")
@@ -770,7 +770,10 @@ earn interest on this amount as well."
                "nan")
            cr
            (* dr 100.0)
+
            (* sr 100.0)
+           hledger-currency-string avg-monthly-savings
+
            hledger-currency-string
            (or (ignore-errors (hledger-group-digits (truncate extrapolated-savings)))
                "nan")
@@ -780,12 +783,11 @@ earn interest on this amount as well."
                "nan")
            hledger-extrapolate-savings-period
            hledger-extrapolate-savings-rate
-           hledger-currency-string
-           (or (ignore-errors
-                 (hledger-group-digits
-                  (truncate
-                   extrapolated-net-worth-with-compounding)))
-               "nan"))))
+           hledger-currency-string (or (ignore-errors
+                                         (hledger-group-digits
+                                          (truncate
+                                           extrapolated-net-worth-with-compounding)))
+                                       "nan"))))
     (mapconcat 'identity
                (mapcar 'hledger-break-lines (split-string summary-string "\b"))
                "\n")))
@@ -820,8 +822,9 @@ earn interest on this amount as well."
 ╔══════════════════════════════════════╦══════════════════════════════════════════╗
 
    Emergency Fund Ratio: %-18.2fSavings Ratio: %.2f
-   Current Ratio: %-25.2fAverage Income: %s %.0f/month
-   Debt Ratio: %-28.2fAverage Expenses: %s %.0f/month
+   Current Ratio: %-25.2fAverage Income:   %s %-6.0f per month
+   Debt Ratio: %-28.2fAverage Expenses: %s %-6.0f per month
+               %-28sAverage Savings:  %s %-6.0f per month
    ──────────────────────────────────────────────────────────────────
    Liquid Assets: %s %-23.2fTotal Assets: %s %.2f
    Liabilities: %s %-25.2fNet Worth: %s %.2f
@@ -836,6 +839,7 @@ earn interest on this amount as well."
                         efr sr
                         cr  hledger-currency-string avg-income
                         dr  hledger-currency-string avg-expenses
+                        " " hledger-currency-string (- avg-income avg-expenses)
                         hledger-currency-string liquid-assets
                         hledger-currency-string total-assets
                         hledger-currency-string liabilities

@@ -629,7 +629,7 @@ after doing `symbol-overlay-put'."
 ;; ─────────────────────────────────────────────────────────────────
 
 (use-package elec-pair :init (electric-pair-mode +1))
-(use-package wgrep :defer t :ensure t)
+(use-package wgrep :ensure t)
 
 (use-package outline-minor-mode
   :defer t
@@ -1505,12 +1505,13 @@ after doing `symbol-overlay-put'."
   :ensure t
   :defer t
   :bind ( :map eglot-mode-map
-          ("C-c M-j" . eglot-reconnect)
+          ("C-c C-j" . eglot-reconnect)
           ("C-c r g" . eglot-code-actions)
           ("C-c r r" . eglot-rename)
           ("C-c C-d" . toggle-eldoc-doc-buffer) )
   :init
   (hook-into-modes #'eglot-ensure
+                   ;; 'clojure-mode
                    'java-mode 'rust-mode 'python-mode
                    'go-mode 'c-mode 'c++-mode)
   :config
@@ -1520,6 +1521,8 @@ after doing `symbol-overlay-put'."
   (dolist (lang-server-spec '((rust-mode         . ("rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
+
+(use-package eglot-java :ensure t :after eglot)
 
 
 (use-package tree-sitter
@@ -2252,8 +2255,7 @@ after doing `symbol-overlay-put'."
         cider-eldoc-display-context-dependent-info t
 
         cider-repl-use-content-types t
-
-        cider-xref-fn-depth 100)
+        cider-use-xref t)
 
   (advice-add 'cider-repl-indent-and-complete-symbol
               :around
