@@ -2204,7 +2204,8 @@ after doing `symbol-overlay-put'."
 
   :preface
   (defun project-find-clojure-root (dir)
-    (cons 'clojure-project (clojure-project-root-path (or dir default-directory))))
+    (when-let ((r (clojure-project-root-path (or dir default-directory))))
+      (cons 'clojure-project r)))
 
   (cl-defmethod project-root ((project (head clojure-project)))
     (cdr project)))
