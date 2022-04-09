@@ -3019,6 +3019,7 @@ after doing `symbol-overlay-put'."
   :load-path "packages/lisp")
 
 (use-package command-log-mode
+  :disabled t
   :doc "Useful to displaying currently executing Emacs commands."
   :commands (clm/open-command-log-buffer global-company-mode)
   :load-path "packages/lisp"
@@ -3027,6 +3028,15 @@ after doing `symbol-overlay-put'."
     (interactive)
     (clm/open-command-log-buffer)
     (global-command-log-mode +1)))
+
+(use-package keycast
+  :doc
+  "This package provides three modes that display the current command and
+   its key or mouse binding.  `keycast-mode' shows the current binding in
+   the mode-line while `keycast-tab-bar-mode' displays it in the tab-bar.
+   `keycast-log-mode' displays a list of recent bindings in a dedicated
+   frame."
+  :ensure t)
 
 (provide 'init)
 ;;; init.el ends here
