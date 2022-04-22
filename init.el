@@ -774,6 +774,28 @@ after doing `symbol-overlay-put'."
         save-interprogram-paste-before-kill t
         kill-do-not-save-duplicates t)
 
+  ;; Temporary
+  ;; ----------------------------------------------------------------------------
+  (defvar kill-ring-modifiers-freq-hashmap
+    (make-hash-table))
+
+  (add-variable-watcher 'kill-ring
+                        (lambda (&rest _args)
+                          (when this-command
+                            (puthash this-command
+                                     (1+ (gethash this-command kill-ring-modifiers-freq-hashmap 0))
+                                     kill-ring-modifiers-freq-hashmap))))
+
+  (defun summarize-kill-ring-modifiers ()
+    (interactive)
+    (let ((items ()))
+      (maphash (lambda (k v) (push (cons k v) items)) kill-ring-modifiers-freq-hashmap)
+      (message-or-box (mapconcat (lambda (command-freq)
+                                   (format "%s: %s" (car command-freq) (cdr command-freq)))
+                                 (sort items (lambda (a b) (> (cdr a) (cdr b))))
+                                 "\n"))))
+  ;; ----------------------------------------------------------------------------
+
   (setq suggest-key-bindings t)
 
   (setq async-shell-command-buffer 'new-buffer
@@ -814,7 +836,7 @@ after doing `symbol-overlay-put'."
                                         user-emacs-directory))
   (setq savehist-save-minibuffer-history t
         savehist-additional-variables
-        '( kill-ring command-history limit-usage ))
+        '( kill-ring command-history limit-usage kill-ring-modifiers-freq-hashmap ))
   (savehist-mode +1)
   ;; https://emacs.stackexchange.com/a/4191/14967
   ;; Prevent `kill-ring' values from causing very long pauses while
