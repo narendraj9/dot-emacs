@@ -1285,8 +1285,10 @@ after doing `symbol-overlay-put'."
 
 (use-package company
   :ensure t
-  :bind ( :map ctl-m-map ("i" . company-complete )
-          :map ctl-m-map ("C-c" . company-complete ))
+  :bind ( :map ctl-m-map
+          (("i" . company-complete)
+           ("C-c" . company-complete)
+           ("u"   . company-complete-unicode)))
   :hook (after-init . global-company-mode)
   :diminish company-mode
   :config
@@ -1317,7 +1319,43 @@ after doing `symbol-overlay-put'."
     "Makes `company-mode' show completions quickly in a buffer."
     (make-local-variable 'company-idle-delay)
     (setq-local company-idle-delay 0.1)
-    (company-mode +1)))
+    (company-mode +1))
+
+  (defmacro company-custom-completing-read (candidates)
+    "Return a company-backend that can complete CANDIDATES.
+
+     If CANDIDATES is an association list, it is used to look up the
+     text that is inserted at point in the buffer.
+
+     Return a symbol that can be used by `company-begin-backend'."
+    (let ((backend-name (gensym "company-backend-with-fixed-candidates-")))
+      `(let ((use-mapping-p (consp (car ,candidates))))
+         (defun ,backend-name (command &optional arg &rest ignored)
+
+           (interactive (list 'interactive))
+           (pcase command
+             (`interactive (company-begin-backend (quote ,backend-name)))
+             (`prefix (company-grab-symbol))
+             (`ignore-case t)
+             (`annotation
+              (when-let ((c (and use-mapping-p
+                                 (assoc-default arg ,candidates #'equal))))
+                (format "  %s  " (if (characterp c) (make-string 1 c) c))))
+             (`candidates
+              (delq nil (mapcar (lambda (c*)
+                                  (let ((c (if use-mapping-p (car c*) c*)))
+                                    (and (string-prefix-p arg c t) c)))
+                                ,candidates)))
+             (`post-completion
+              (when use-mapping-p
+                (delete-region (- (point) (length arg)) (point))
+                (insert (assoc-default arg ,candidates #'equal))))))
+         (quote ,backend-name))))
+
+  (defun company-complete-unicode ()
+    (interactive)
+    (require 'unicode-chars)
+    (company-begin-backend (company-custom-completing-read unicode-chars-alist))))
 
 ;; ──────────────────────────────────────────────────────────────────
 
