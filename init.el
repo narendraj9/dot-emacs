@@ -1352,10 +1352,11 @@ after doing `symbol-overlay-put'."
                 (insert (assoc-default arg ,candidates #'equal))))))
          (quote ,backend-name))))
 
-  (defun company-complete-unicode ()
-    (interactive)
-    (require 'unicode-chars)
-    (company-begin-backend (company-custom-completing-read unicode-chars-alist))))
+  (let ((backend (progn (require 'unicode-chars)
+						(company-custom-completing-read unicode-chars-alist))))
+    (defun company-complete-unicode ()
+      (interactive)
+      (company-begin-backend backend))))
 
 ;; ──────────────────────────────────────────────────────────────────
 
