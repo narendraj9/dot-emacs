@@ -505,8 +505,10 @@ Default direction is anti-clockwise."
   "Surround the symbol at point with string C.
 This works with any mode that supports thingatpt.el for a symbol."
   (interactive "cWrapper char: ")
-  (let ((bounds (bounds-of-thing-at-point 'symbol))
+  (let ((m (point-marker))
+        (bounds (bounds-of-thing-at-point 'symbol))
         (s (make-string 1 c)))
+    (set-marker-insertion-type m t)
     (when bounds
       ;; Insert the second delimiter first to avoid changing the
       ;; starting bound.
@@ -514,7 +516,8 @@ This works with any mode that supports thingatpt.el for a symbol."
       (insert s)
       ;; Now the first delimiter
       (goto-char (car bounds))
-      (insert s))))
+      (insert s))
+    (goto-char (marker-position m))))
 
 
 (defun out-or-onto-calc ()
