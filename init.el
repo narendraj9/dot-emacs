@@ -1706,7 +1706,10 @@ after doing `symbol-overlay-put'."
   :ensure t
   :bind-keymap ("C-x C-." . flycheck-command-map)
   :bind ( :map flycheck-command-map
-          ("C-." . list-linter-errors) )
+          ("C-." . list-linter-errors)
+
+          :map ctl-m-map
+          ("!" . list-linter-errors) )
   :init
   (setq flycheck-indication-mode 'left-margin)
   (setq flycheck-mode-line-prefix "")
