@@ -649,7 +649,9 @@ after doing `symbol-overlay-put'."
   :defer t
   :bind ( :map hs-minor-mode-map
           ([backtab] . hs-toggle-hiding)
-          ("C-c @ a"   . my-toggle-hideshow-all) )
+          ("C-c @ a"  . my-toggle-hideshow-all)
+          ("C-c @ s"  . hs-show-block)
+          ("C-c @ h"  . hs-hide-block))
   :init
   (add-hook 'hs-minor-mode-hook
             (lambda ()
@@ -1589,7 +1591,10 @@ after doing `symbol-overlay-put'."
                               (java-mode         . (,java-eclipse-jdt-launcher))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
-(use-package eglot-java :ensure t :after eglot)
+(use-package eglot-java
+  :disabled t
+  :ensure t
+  :after eglot)
 
 
 (use-package tree-sitter
