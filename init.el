@@ -1353,7 +1353,7 @@ after doing `symbol-overlay-put'."
          (quote ,backend-name))))
 
   (let ((backend (progn (require 'unicode-chars)
-						(company-custom-completing-read unicode-chars-alist))))
+                        (company-custom-completing-read unicode-chars-alist))))
     (defun company-complete-unicode ()
       (interactive)
       (company-begin-backend backend))))
@@ -1572,8 +1572,12 @@ after doing `symbol-overlay-put'."
           ("C-c r r" . eglot-rename)
           ("C-c C-d" . toggle-eldoc-doc-buffer) )
   :init
+  ;; Default: 4KB is too low for LSP servers.
+  ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
+  (setq read-process-output-max (* 1024 1024))
+
   (hook-into-modes #'eglot-ensure
-                   ;; 'clojure-mode
+                   'clojure-mode
                    'java-mode 'rust-mode 'python-mode
                    'go-mode 'c-mode 'c++-mode)
   :config
@@ -2110,7 +2114,7 @@ after doing `symbol-overlay-put'."
   :config
   (setq-default c-block-comment-flag t
                 c-auto-newline t
-                c-basic-offset 2)
+                c-basic-offset 4)
 
   (c-add-style "*java*" '("java"
                           ;; https://github.com/google/styleguide/blob/gh-pages/google-c-style.el
@@ -2258,13 +2262,21 @@ after doing `symbol-overlay-put'."
   :config
   (setq clojure-indent-style :always-align
         clojure-align-forms-automatically t)
-  ;; Workaround for Clojure pojects in a monorepo.
-  (advice-add 'project-find-file :around
-              (lambda (p-find-file &rest args)
-                (let ((project-find-functions (list #'project-try-vc)))
-                  (apply p-find-file args))))
+
+  ;; ;; Workaround for Clojure pojects in a monorepo.
+  ;; (advice-add 'project-find-file :around
+  ;;             (lambda (p-find-file &rest args)
+  ;;               (let ((project-find-functions (list #'project-try-vc)))
+  ;;                 (apply p-find-file args))))
+  ;;
 
   (add-hook 'project-find-functions #'project-find-clojure-root)
+
+  (cl-defmethod eglot-handle-notification
+    (_server (_method (eql $/progress)) &key _type value &allow-other-keys)
+    (when-let ((p  (plist-get value :percentage)))
+
+      (message "Eglot progress: %s%%" p)))
 
   :preface
   (defun project-find-clojure-root (dir)
