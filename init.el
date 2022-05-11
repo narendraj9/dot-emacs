@@ -1588,7 +1588,7 @@ after doing `symbol-overlay-put'."
 
   (dolist (lang-server-spec `((rust-mode         . ("rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))
-                              (java-mode         . (,java-eclipse-jdt-launcher))))
+                              (java-mode         . ,java-eclipse-jdt-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
 (use-package eglot-java
@@ -2069,7 +2069,7 @@ after doing `symbol-overlay-put'."
   (defvar java-eclipse-jdt-launcher
     (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/")))
       (if (file-exists-p launcher-script)
-          launcher-script
+          (list launcher-script "-data" (expand-file-name "~/code/jdt-workspace"))
         (message "Failed to find any JDT jar files.")
         nil))
     "Path to Eclipse JDT launcher script."))
