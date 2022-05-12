@@ -1005,6 +1005,11 @@ after doing `symbol-overlay-put'."
          (completing-read "Find File: ")
          (find-file))))
 
+(use-package project-x
+  :load-path "etc/"
+  :init
+  (add-hook 'project-find-functions #'project-x-try-local -100))
+
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -1035,7 +1040,7 @@ after doing `symbol-overlay-put'."
     (interactive "sBookmark URL: \nsDescription: ")
     (push (cons description
                 `((handler . bookmark-url-handler)
-                  (filename . ,url)    ; for display
+                  (filename . ,url)     ; for display
                   (url . ,url)))
           bookmark-alist)))
 
