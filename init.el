@@ -991,9 +991,19 @@ after doing `symbol-overlay-put'."
   (which-key-mode +1))
 
 (use-package project
+  :bind ( :map project-prefix-map
+          ("o" . git-ls-files-find-file))
   :init
   (setq project-list-file
-        (expand-file-name "var/project-list" user-emacs-directory)))
+        (expand-file-name "var/project-list" user-emacs-directory))
+  :preface
+  (defun git-ls-files-find-file ()
+    (interactive)
+    (->> (shell-command-to-string "git ls-files")
+         (s-lines)
+         (seq-filter #'s-present?)
+         (completing-read "Find File: ")
+         (find-file))))
 
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
@@ -2273,11 +2283,13 @@ after doing `symbol-overlay-put'."
 
   (add-hook 'project-find-functions #'project-find-clojure-root)
 
+  (defvar clojure--mode-lsp-progress (make-progress-reporter "Clojure LSP: "))
   (cl-defmethod eglot-handle-notification
     (_server (_method (eql $/progress)) &key _type value &allow-other-keys)
     (when-let ((p  (plist-get value :percentage)))
-
-      (message "Eglot progress: %s%%" p)))
+      (if (< p 100)
+          (progress-reporter-do-update clojure--mode-lsp-progress p)
+        (progress-reporter-done clojure--mode-lsp-progress))))
 
   :preface
   (defun project-find-clojure-root (dir)
