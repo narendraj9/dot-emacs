@@ -1112,7 +1112,9 @@ after doing `symbol-overlay-put'."
   :bind (("C-M-r" . isearch-backward-other-window)
          ("C-M-s" . isearch-forward-other-window)
          :map isearch-mode-map
-         ("C-S-W" . isearch-yank-symbol))
+         ("C-S-W"     . isearch-yank-symbol)
+         ("<tab>"     . isearch-repeat-forward)
+         ("<backtab>" . isearch-repeat-backward))
 
   :config
   (advice-add 'isearch-mode
@@ -1288,7 +1290,7 @@ after doing `symbol-overlay-put'."
 (use-package company
   :ensure t
   :bind ( :map ctl-m-map
-          (("i" . company-complete)
+          (("i"   . company-complete)
            ("C-c" . company-complete)
            ("u"   . company-complete-unicode)))
   :hook (after-init . global-company-mode)
@@ -1319,6 +1321,7 @@ after doing `symbol-overlay-put'."
   :preface
   (defun company-mode-quicker ()
     "Makes `company-mode' show completions quickly in a buffer."
+    (interactive)
     (make-local-variable 'company-idle-delay)
     (setq-local company-idle-delay 0.1)
     (company-mode +1))
