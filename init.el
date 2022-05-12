@@ -2268,13 +2268,6 @@ after doing `symbol-overlay-put'."
   (setq clojure-indent-style :always-align
         clojure-align-forms-automatically t)
 
-  ;; ;; Workaround for Clojure pojects in a monorepo.
-  ;; (advice-add 'project-find-file :around
-  ;;             (lambda (p-find-file &rest args)
-  ;;               (let ((project-find-functions (list #'project-try-vc)))
-  ;;                 (apply p-find-file args))))
-  ;;
-
   (add-hook 'project-find-functions #'project-find-clojure-root)
 
   (cl-defmethod eglot-handle-notification
