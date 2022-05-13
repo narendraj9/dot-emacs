@@ -2344,7 +2344,8 @@ after doing `symbol-overlay-put'."
         cider-eldoc-display-context-dependent-info t
 
         cider-repl-use-content-types t
-        cider-use-xref t)
+        cider-use-xref t
+        cider-xref-fn-depth 100)
 
   (advice-add 'cider-repl-indent-and-complete-symbol
               :around
