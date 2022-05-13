@@ -1776,8 +1776,25 @@ after doing `symbol-overlay-put'."
   :config
   (setq comint-scroll-show-maximum-output nil))
 
-(use-package term
-  :bind ( "s-<return>" . term ))
+(use-package shell
+  :bind ( "s-<return>" . shell )
+  :init
+  (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
+
+  :preface
+  (defun --shell-mode-kill-buffer-on-exit ()
+    "Augments the existing sentinal function for a buffer process
+     with buffer and window clean up on exit."
+    (let* ((p (get-buffer-process (current-buffer)))
+           (original-sentinal (process-sentinel p)))
+      (set-process-sentinel p
+                            (lambda (process signal)
+                              (funcall original-sentinal process signal)
+                              (when (and (memq (process-status process) '(exit signal))
+                                         (buffer-live-p (process-buffer process)))
+                                (kill-buffer (process-buffer process))
+                                (when (< 1 (count-windows))
+                                  (delete-window))))))))
 
 (use-package eshell
   :bind ( :map ctl-quote-map
