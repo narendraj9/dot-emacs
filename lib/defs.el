@@ -1151,5 +1151,44 @@ search keyword."
     (message "Disabled: Swap Right Win <-> Right Ctrl"))
   (setq swap-ctrl-right-win (not swap-ctrl-right-win)))
 
+
+(defmacro company-custom-completing-read (candidates)
+  "Return a company-backend that can complete CANDIDATES.
+
+     If CANDIDATES is an association list, it is used to look up the
+     text that is inserted at point in the buffer.
+
+     Return a symbol that can be used by `company-begin-backend'."
+  (let ((backend-name (gensym "company-backend-with-fixed-candidates-")))
+    `(let ((use-mapping-p (consp (car ,candidates))))
+       (defun ,backend-name (command &optional arg &rest ignored)
+
+         (interactive (list 'interactive))
+         (pcase command
+           (`interactive (company-begin-backend (quote ,backend-name)))
+           (`prefix (company-grab-symbol))
+           (`ignore-case t)
+           (`annotation
+            (when-let ((c (and use-mapping-p
+                               (assoc-default arg ,candidates #'equal))))
+              (format "  %s  " (if (characterp c) (make-string 1 c) c))))
+           (`candidates
+            (delq nil (mapcar (lambda (c*)
+                                (let ((c (if use-mapping-p (car c*) c*)))
+                                  (and (string-prefix-p arg c t) c)))
+                              ,candidates)))
+           (`post-completion
+            (when use-mapping-p
+              (delete-region (- (point) (length arg)) (point))
+              (insert (assoc-default arg ,candidates #'equal))))))
+       (quote ,backend-name))))
+
+
+(let ((backend (progn (require 'unicode-chars)
+                      (company-custom-completing-read unicode-chars-alist))))
+  (defun company-complete-unicode ()
+    (interactive)
+    (company-begin-backend backend)))
+
 (provide 'defs)
 ;;; defs.el ends here
