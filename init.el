@@ -992,7 +992,8 @@ after doing `symbol-overlay-put'."
 
 (use-package project
   :bind ( :map project-prefix-map
-          ("o" . git-ls-files-find-file))
+          ("o" . git-ls-files-find-file)
+          ("m" . magit-status))
   :init
   (setq project-list-file
         (expand-file-name "var/project-list" user-emacs-directory))
@@ -2021,7 +2022,9 @@ after doing `symbol-overlay-put'."
   :ensure t
   :init (vertico-mode +1))
 
-(use-package embark :ensure t :bind ("C-c C-." . embark-act))
+(use-package embark
+  :ensure t
+  :bind (("C-c C-." . embark-act)))
 
 (use-package consult
   :ensure t
