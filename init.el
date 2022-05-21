@@ -1554,6 +1554,11 @@ after doing `symbol-overlay-put'."
 ;;; Language Server Protocol
 ;;  ------------------------
 
+(use-package lsp-java
+  :doc "Install for some convenience functions but keep it disabled, use
+`eglot' instead."
+  :ensure t)
+
 (use-package eglot
   :ensure t
   :defer t
@@ -1680,6 +1685,9 @@ after doing `symbol-overlay-put'."
   :diminish subword-mode
   :init
   (global-subword-mode +1))
+
+
+(use-package help-mode :custom (help-window-select  t))
 
 (use-package help-at-pt
   :bind ( :map ctl-m-map
