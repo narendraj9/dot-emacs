@@ -1008,6 +1008,7 @@ after doing `symbol-overlay-put'."
 
 (use-package project-x
   :load-path "etc/"
+  :custom (project-x-local-identifier ".project-x")
   :init
   (add-hook 'project-find-functions #'project-x-try-local -100))
 
