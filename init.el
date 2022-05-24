@@ -1566,7 +1566,7 @@ after doing `symbol-overlay-put'."
           ("C-c C-j" . eglot-reconnect)
           ("C-c r g" . eglot-code-actions)
           ("C-c r r" . eglot-rename)
-          ("C-c C-d" . toggle-eldoc-doc-buffer) )
+          ("C-c d"   . toggle-eldoc-doc-buffer) )
   :init
   ;; Default: 4KB is too low for LSP servers.
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
@@ -2286,13 +2286,13 @@ after doing `symbol-overlay-put'."
 
   (add-hook 'project-find-functions #'project-find-clojure-root)
 
-  (defvar clojure--mode-lsp-progress (make-progress-reporter "Clojure LSP: "))
-  (cl-defmethod eglot-handle-notification
-    (_server (_method (eql $/progress)) &key _type value &allow-other-keys)
-    (when-let ((p  (plist-get value :percentage)))
-      (if (< p 100)
-          (progress-reporter-do-update clojure--mode-lsp-progress p)
-        (progress-reporter-done clojure--mode-lsp-progress))))
+  ;; (defvar clojure--mode-lsp-progress (make-progress-reporter "Clojure LSP: "))
+  ;; (cl-defmethod eglot-handle-notification
+  ;;   (_server (_method (eql $/progress)) &key _type value &allow-other-keys)
+  ;;   (when-let ((p  (plist-get value :percentage)))
+  ;;     (if (< p 100)
+  ;;         (progress-reporter-do-update clojure--mode-lsp-progress p)
+  ;;       (progress-reporter-done clojure--mode-lsp-progress))))
 
   :preface
   (defun project-find-clojure-root (dir)
