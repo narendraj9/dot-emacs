@@ -2903,19 +2903,7 @@ after doing `symbol-overlay-put'."
   (advice-add 'abbreviate-file-name :around (lambda (orig-f file-name)
                                               (if file-name
                                                   (funcall orig-f file-name)
-                                                "<buffer-with-no-file>")))
-  ;; There is a circular dependency between `pdf-view.el' and
-  ;; `pdf-cache.el'. `pdf-view' requires `pdf-cache' and `pdf-cache'
-  ;; uses a macro (`pdf-view-current-page') defined in
-  ;; `pdf-view'. This wouldn't have been a problem if it wasn't a
-  ;; macro because then it could be defined later (i.e. after
-  ;; byte-compilation) and the call would work just fine. Once
-  ;; `pdf-cache' compiled, Emacs lisp tries to execute it as a
-  ;; function. That's why I have defined it here as a function instead
-  ;; of a macro:
-  (eval-after-load "pdf-view"
-    '(defun pdf-view-current-page (&optional window)
-       (image-mode-window-get 'page window))))
+                                                "<buffer-with-no-file>"))))
 
 (use-package pdf-view-restore
   :ensure t
