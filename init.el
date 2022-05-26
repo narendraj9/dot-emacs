@@ -1432,6 +1432,21 @@ after doing `symbol-overlay-put'."
 
 ;;; SNIPPETS and ABBREVS
 ;; ――――――――――――――――――――――――――――――――――――――――
+
+(use-package abbrev
+  :diminish abbrev-mode
+  :init
+  (setq-default abbrev-mode t
+                save-abbrevs t
+                abbrev-file-name (expand-file-name "lib/abbrev_defs"
+                                                   user-emacs-directory))
+  (if (file-exists-p abbrev-file-name)
+      (quietly-read-abbrev-file)))
+
+(use-package hippie-exp
+  :bind ([remap dabbrev-expand] . hippie-expand))
+
+
 (use-package yasnippet
   :defer 2
   :ensure t
@@ -1479,16 +1494,6 @@ after doing `symbol-overlay-put'."
 
   :config
   (setd yankpad-file "etc/yankpad.org"))
-
-(use-package abbrev
-  :diminish abbrev-mode
-  :init
-  (setq-default abbrev-mode t
-                save-abbrevs nil
-                abbrev-file-name (expand-file-name "lib/abbrev_defs"
-                                                   user-emacs-directory))
-  (if (file-exists-p abbrev-file-name)
-      (quietly-read-abbrev-file)))
 
 ;;; Personal Finance
 ;; ――――――――――――――――――――――――――――――――――――
