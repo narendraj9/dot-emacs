@@ -1444,7 +1444,17 @@ after doing `symbol-overlay-put'."
                 abbrev-file-name (expand-file-name "lib/abbrevs/abbrev-defs"
                                                    user-emacs-directory))
   (if (file-exists-p abbrev-file-name)
-      (quietly-read-abbrev-file)))
+      (quietly-read-abbrev-file))
+
+
+  :config
+  (advice-add 'abbrev-insert
+              :after-while
+              (lambda (abbrev-symbol _ start _end)
+                (let ((end (+ start (length (symbol-value abbrev-symbol)))))
+                  (pulse-momentary-highlight-region start end)))))
+
+
 
 (use-package yasnippet
   :defer 2
