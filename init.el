@@ -1433,19 +1433,18 @@ after doing `symbol-overlay-put'."
 ;;; SNIPPETS and ABBREVS
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package hippie-exp
+  :bind ([remap dabbrev-expand] . hippie-expand))
+
 (use-package abbrev
   :diminish abbrev-mode
   :init
   (setq-default abbrev-mode t
                 save-abbrevs t
-                abbrev-file-name (expand-file-name "lib/abbrev_defs"
+                abbrev-file-name (expand-file-name "lib/abbrevs/abbrev-defs"
                                                    user-emacs-directory))
   (if (file-exists-p abbrev-file-name)
       (quietly-read-abbrev-file)))
-
-(use-package hippie-exp
-  :bind ([remap dabbrev-expand] . hippie-expand))
-
 
 (use-package yasnippet
   :defer 2
@@ -1885,6 +1884,14 @@ after doing `symbol-overlay-put'."
          ("C-n" . open-org-file)
          ("C-d" . search-notes-files))
   :init
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (let ((typo-abbrevs-file (expand-file-name "lib/abbrevs/typos-defs"
+                                                         user-emacs-directory)))
+                (when (file-exists-p typo-abbrevs-file)
+                  (make-thread (lambda ()
+                                 (quietly-read-abbrev-file typo-abbrevs-file)))))))
+
   (bind-key "C-c a" #'org-agenda)
   (eval-after-load "org" '(require 'org-config))
 
