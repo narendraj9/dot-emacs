@@ -1572,7 +1572,8 @@ after doing `symbol-overlay-put'."
 (use-package lsp-java
   :doc "Install for some convenience functions but keep it disabled, use
 `eglot' instead."
-  :ensure t)
+  :ensure t
+  :defer t)
 
 (use-package eglot
   :ensure t
@@ -3033,6 +3034,31 @@ after doing `symbol-overlay-put'."
 
 ;;; UTILITIES
 ;; ──────────────────────────────────────────────────────────────────
+
+(use-package chart
+  :preface
+  (defun chart-numbers-on-line (&optional arg)
+    (interactive "P")
+    (require 'chart)
+    (save-excursion
+      (let (numbers)
+        (beginning-of-line)
+        (while (re-search-forward "[0-9,]+\\.?[0-9]+" (point-at-eol) t)
+          (push (string-to-number (string-replace "," "" (match-string 0)))
+                numbers))
+        (setq numbers (reverse numbers))
+        (let* ((current-month (decoded-time-month (decode-time (current-time))))
+               (names-list (if arg
+                               (mapcar (lambda (n) (calendar-month-name n t))
+                                       (reverse (-take (length numbers)
+                                                       (-concat (number-sequence current-month 1 -1)
+                                                                (-cycle (number-sequence 12 1 -1))))))
+                             (mapcar #'number-to-string
+                                     (number-sequence 1 (length numbers)))))
+               (chart-face-color-list (list "antiquewhite")))
+          (chart-bar-quickie 'vertical "Plot"
+                             names-list "X"
+                             numbers "Y"))))))
 
 (use-package gnuplot-mode
   :ensure t
