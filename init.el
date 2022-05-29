@@ -1537,7 +1537,11 @@ after doing `symbol-overlay-put'."
   :pin manual
   :load-path "packages/rest/hledger-mode/"
   :mode ("\\.hledger\\'")
-  :bind (("C-c j" . hledger-run-command))
+  :bind (("C-c j" . hledger-run-command)
+
+         :map hledger-view-mode-map
+         ("s" . chart-numbers-on-line)
+         ("z" . calc-store-numbers-on-line))
   :config
 
   (setq hledger-jfile
@@ -3056,18 +3060,18 @@ after doing `symbol-overlay-put'."
     (save-excursion
       (let (numbers)
         (beginning-of-line)
-        (while (re-search-forward "[0-9,]+\\.?[0-9]+" (point-at-eol) t)
+        (while (re-search-forward "[0-9,]+\\.?[0-9]*" (point-at-eol) t)
           (push (string-to-number (string-replace "," "" (match-string 0)))
                 numbers))
         (setq numbers (reverse numbers))
         (let* ((current-month (decoded-time-month (decode-time (current-time))))
                (names-list (if arg
-                               (mapcar (lambda (n) (calendar-month-name n t))
-                                       (reverse (-take (length numbers)
-                                                       (-concat (number-sequence current-month 1 -1)
-                                                                (-cycle (number-sequence 12 1 -1))))))
-                             (mapcar #'number-to-string
-                                     (number-sequence 1 (length numbers)))))
+                               (mapcar #'number-to-string
+                                       (number-sequence 1 (length numbers)))
+                             (mapcar (lambda (n) (calendar-month-name n t))
+                                     (reverse (-take (length numbers)
+                                                     (-concat (number-sequence current-month 1 -1)
+                                                              (-cycle (number-sequence 12 1 -1))))))))
                (chart-face-color-list (list "antiquewhite")))
           (require 'calc-ext)
           (setq var-q0
@@ -3076,9 +3080,16 @@ after doing `symbol-overlay-put'."
                                  (mapcar (lambda (n)
                                            (math-read-expr (number-to-string n)))
                                          numbers)))
-          (chart-bar-quickie 'vertical "Plot"
-                             names-list "X"
-                             numbers "Y"))))))
+          (momentary-string-display
+           (save-window-excursion
+             (let ((inhibit-read-only t))
+               (chart-bar-quickie 'vertical "Plot"
+                                  names-list "X"
+                                  numbers "Y")
+               (add-face-text-property (point-min) (point-max) '(:height 0.8))
+               (buffer-substring (point-min) (point-max))))
+           (point)
+           ?q))))))
 
 (use-package gnuplot-mode
   :ensure t
@@ -3110,7 +3121,20 @@ after doing `symbol-overlay-put'."
     (with-current-buffer calc-gnuplot-input
       (unless (and (boundp 'gnuplot-mode)
                    (not gnuplot-mode))
-        (gnuplot-mode)))))
+        (gnuplot-mode))))
+
+
+  (defun calc-store-numbers-on-line ()
+    (interactive)
+    (require 'calc-ext)
+    (let ((numbers '(vec)))
+      (save-excursion
+        (while (re-search-forward "[0-9,]+\\.?[0-9]*" (point-at-eol) t)
+          (push (math-read-expr (string-replace "," "" (match-string 0)))
+                numbers)))
+      (setq var-q0 (reverse numbers))
+      (calc)
+      (calc-recall 'var-q0))))
 
 (use-package mule-cmds
   :bind (("C-x \\" . set-input-method)
