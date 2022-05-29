@@ -1434,7 +1434,20 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――――――
 
 (use-package hippie-exp
-  :bind ([remap dabbrev-expand] . hippie-expand))
+  :bind ([remap dabbrev-expand] . hippie-expand)
+  :config
+  (setq hippie-expand-try-functions-list
+        '(try-complete-file-name-partially
+          try-complete-file-name
+          try-expand-all-abbrevs
+          try-expand-dabbrev
+          try-expand-dabbrev-all-buffers
+          try-expand-dabbrev-from-kill
+          try-complete-lisp-symbol-partially
+          try-complete-lisp-symbol
+          ;; Placed these at the end.
+          try-expand-list
+          try-expand-line)))
 
 (use-package abbrev
   :diminish abbrev-mode
@@ -3056,6 +3069,13 @@ after doing `symbol-overlay-put'."
                              (mapcar #'number-to-string
                                      (number-sequence 1 (length numbers)))))
                (chart-face-color-list (list "antiquewhite")))
+          (require 'calc-ext)
+          (setq var-q0
+                (seq-concatenate 'list
+                                 (list 'vec)
+                                 (mapcar (lambda (n)
+                                           (math-read-expr (number-to-string n)))
+                                         numbers)))
           (chart-bar-quickie 'vertical "Plot"
                              names-list "X"
                              numbers "Y"))))))
@@ -3070,7 +3090,7 @@ after doing `symbol-overlay-put'."
   (setq calc-settings-file (expand-file-name "calc.el" user-emacs-directory))
 
   :config
-  (setq calc-gnuplot-default-device "wxt")
+  (setq calc-gnuplot-default-device "qt")
 
   (require 'calc-ext)                   ; Modifies the bindings below.
   (define-key calc-mode-map [M-return] #'calc-last-args)
