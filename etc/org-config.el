@@ -622,6 +622,7 @@ non-empty lines in the block (excluding the line with
                                  (sqlite     . t)
                                  (sql        . t)
                                  (lisp       . t)
+                                 (python     . t)
                                  (ipython    . ,(executable-find "jupyter"))
                                  (R          . t)
                                  (ruby       . t)

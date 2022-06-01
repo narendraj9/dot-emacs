@@ -1521,7 +1521,7 @@ after doing `symbol-overlay-put'."
 ;; ――――――――――――――――――――――――――――――――――――
 (use-package ledger-mode
   :ensure t
-  :defer t
+  :defer 5
   :mode "\\.journal\\'"
   :config
   (setq-default ledger-master-file
@@ -1566,9 +1566,18 @@ after doing `symbol-overlay-put'."
 (use-package hledger-input
   :pin manual
   :load-path "packages/rest/hledger-mode/"
-  :bind (("C-c e" . hledger-capture)
-         :map hledger-input-mode-map
-         ("C-c C-b" . popup-balance-at-point))
+  :bind ( ("C-c e" . hledger-capture)
+          :map hledger-input-mode-map
+          ("C-c <tab>" . ledger-input-expand-xact)
+          ("C-c C-b"   . popup-balance-at-point))
+
+  :hook ((hledger-input-post-commit . hledger-show-new-balances)
+         (hledger-input-mode        . auto-fill-mode))
+
+  :config
+  (setq hledger-input-buffer-height 20)
+  (add-hook 'hledger-input-mode-hook #'company-mode-quicker)
+
   :preface
   (defun popup-balance-at-point ()
     "Show balance for account at point in a popup."
@@ -1577,11 +1586,13 @@ after doing `symbol-overlay-put'."
         (message (hledger-shell-command-to-string (format " balance -N %s "
                                                           account)))
       (message "No account at point")))
-  :hook ((hledger-input-post-commit . hledger-show-new-balances)
-         (hledger-input-mode        . auto-fill-mode))
-  :config
-  (setq hledger-input-buffer-height 20)
-  (add-hook 'hledger-input-mode-hook #'company-mode-quicker))
+
+  (defun ledger-input-expand-xact ()
+    (interactive)
+    (let ((s (buffer-substring (point-at-bol) (point-at-eol))))
+      (delete-region (point-at-bol) (point-at-eol))
+      (insert (with-current-buffer (ledger-exec-ledger nil nil "xact" (shell-quote-argument s))
+                (buffer-substring (point-min) (point-max)))))))
 
 ;;; Language Server Protocol
 ;;  ------------------------
