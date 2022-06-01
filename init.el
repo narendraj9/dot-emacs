@@ -2371,9 +2371,7 @@ after doing `symbol-overlay-put'."
   :diminish cider-mode
   :hook (clojure-mode . cider-mode)
   :bind ( :map cider-mode-map
-          ("C-M-." . cider-find-var)
-          :map cider-repl-mode-map
-          ("C-S-t" . cider-repl-toggle-pretty-printing) )
+          ("C-c M-." . cider-find-var) )
   :config
   (setq nrepl-log-messages t
         nrepl-use-ssh-fallback-for-remote-hosts t)
