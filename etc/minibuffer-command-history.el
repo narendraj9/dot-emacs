@@ -30,14 +30,14 @@
   "Hash table for keeping history per command.")
 
 (defun minibuffer-command-wrapper-fn
-    (original-read initial-contents keymap read hist &rest args)
+    (original-read &rest args)
   "Advice for `read-from-minibuffer' to setup and record history for a command.
 `ORIGINAL-READ' is the original `read-from-minibuffer' for this package.
 `ARGS' are arguments that are passed onto `ORIGINAL-READ'."
   (let* ((cmd this-command)
          (cmd-history (gethash cmd minibuffer-command-history))
-         (minibuffer-history (or hist cmd-history minibuffer-history))
-         (input (apply original-read initial-contents keymap read nil args)))
+         (minibuffer-history (or cmd-history minibuffer-history))
+         (input (apply original-read args)))
     (puthash cmd (cons input cmd-history) minibuffer-command-history)
     input))
 

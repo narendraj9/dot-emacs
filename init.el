@@ -1731,7 +1731,25 @@ after doing `symbol-overlay-put'."
   (global-subword-mode +1))
 
 
-(use-package help-mode :custom (help-window-select  t))
+(use-package help-mode
+  :bind ( :map help-mode-map
+          ("C-c C-j" . jump-to-major-mode-section) )
+  :custom
+  (help-window-select  t)
+
+  :init
+  (defvar --help-mode-last-major-mode major-mode)
+  (advice-add 'describe-bindings
+              :before
+              (lambda (&rest _args)
+                (setq --help-mode-last-major-mode major-mode)))
+
+  (defun jump-to-major-mode-section ()
+    (interactive)
+    (search-forward (symbol-name --help-mode-last-major-mode))
+    (beginning-of-line)
+    (recenter 0 t)))
+
 
 (use-package help-at-pt
   :bind ( :map ctl-m-map
@@ -1895,8 +1913,15 @@ after doing `symbol-overlay-put'."
 
 ;;; GRAPHICS
 ;; ──────────────────────────────────────────────────────────────────
-(use-package gnuplot-mode      :defer t :ensure t)
-(use-package graphviz-dot-mode :ensure t :defer t)
+
+(use-package gnuplot-mode
+  :defer t
+  :ensure t
+  :custom (gnuplot-program "gnuplot-wx"))
+
+(use-package graphviz-dot-mode
+  :ensure t
+  :defer t)
 
 ;;; Notes, Journal and Task Manager
 ;;  ─────────────────────────────────────────────────────────────────
@@ -3096,12 +3121,14 @@ after doing `symbol-overlay-put'."
                                          numbers)))
           (momentary-string-display
            (save-window-excursion
-             (let ((inhibit-read-only t))
-               (chart-bar-quickie 'vertical "Plot"
-                                  names-list "X"
-                                  numbers "Y")
-               (add-face-text-property (point-min) (point-max) '(:height 0.8))
-               (buffer-substring (point-min) (point-max))))
+             (let* ((inhibit-read-only t)
+                    (result (progn (chart-bar-quickie 'vertical "Plot"
+                                                      names-list "X"
+                                                      numbers "Y")
+                                   (add-face-text-property (point-min) (point-max) '(:height 0.8))
+                                   (buffer-substring (point-min) (point-max)))))
+               (kill-buffer)
+               result))
            (point)
            ?q))))))
 
@@ -3115,7 +3142,9 @@ after doing `symbol-overlay-put'."
   (setq calc-settings-file (expand-file-name "calc.el" user-emacs-directory))
 
   :config
-  (setq calc-gnuplot-default-device "qt")
+  ;; http://www.gnuplotting.org/plotting-functions/
+  (setq calc-gnuplot-name "gnuplot-wx")
+  (setq calc-gnuplot-default-device "wxt size 350,262 enhanced font 'Verdana,10' persist")
 
   (require 'calc-ext)                   ; Modifies the bindings below.
   (define-key calc-mode-map [M-return] #'calc-last-args)
