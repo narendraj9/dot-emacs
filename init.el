@@ -2062,10 +2062,11 @@ after doing `symbol-overlay-put'."
                   (buffer-substring p (point))))))))
 
 (use-package minibuffer-command-history
-  :disabled t
   :load-path "etc/"
+  :commands minibuffer-command-history
+  :hook (after-init . minibuffer-command-history-enable)
   :config
-  (minibuffer-command-history-enable))
+  (add-to-list 'savehist-additional-variables 'minibuffer-command-history))
 
 (use-package orderless
   :doc
