@@ -3099,7 +3099,7 @@ after doing `symbol-overlay-put'."
     (save-excursion
       (let (numbers)
         (beginning-of-line)
-        (while (re-search-forward "[0-9,]+\\.?[0-9]*" (point-at-eol) t)
+        (while (re-search-forward "-?[0-9,]+\\.?[0-9]*" (point-at-eol) t)
           (push (string-to-number (string-replace "," "" (match-string 0)))
                 numbers))
         (setq numbers (reverse numbers))
@@ -3172,7 +3172,7 @@ after doing `symbol-overlay-put'."
     (require 'calc-ext)
     (let ((numbers '(vec)))
       (save-excursion
-        (while (re-search-forward "[0-9,]+\\.?[0-9]*" (point-at-eol) t)
+        (while (re-search-forward "-?[0-9,]+\\.?[0-9]*" (point-at-eol) t)
           (push (math-read-expr (string-replace "," "" (match-string 0)))
                 numbers)))
       (setq var-q0 (reverse numbers))
