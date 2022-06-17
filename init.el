@@ -96,6 +96,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package dash    :demand t :ensure t)
 (use-package request :defer t :ensure t)
 
+(use-package ednc  :defer t :ensure t)
+(use-package alert :defer t :ensure t)
+
 (use-package re-builder
   :defer t
   :config
