@@ -1220,6 +1220,7 @@ after doing `symbol-overlay-put'."
   declaration. Otherwise, `window' would overwrite the binding for \\[ace-window]]."
   :ensure t
   :doc "Use `ace-window' instead of `other-window'."
+  :custom (aw-keys (list ?s ?d ?f ?j ?k ?l))
   :bind ("C-x o" . ace-window))
 
 ;; ――――――――――――――――――――――――――――――――――――――――
