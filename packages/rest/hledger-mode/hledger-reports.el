@@ -25,6 +25,7 @@
 
 ;;; Code:
 
+(require 'crm)
 (require 'calendar)
 (require 'cl-lib)
 (require 'pulse)
