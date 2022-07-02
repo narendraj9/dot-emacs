@@ -1572,6 +1572,7 @@ after doing `symbol-overlay-put'."
   :load-path "packages/rest/hledger-mode/"
   :bind ( ("C-c e" . hledger-capture)
           :map hledger-input-mode-map
+          ("C-c +"     . hledger-increment-amount)
           ("C-c <tab>" . ledger-input-expand-xact)
           ("C-c C-b"   . popup-balance-at-point))
 

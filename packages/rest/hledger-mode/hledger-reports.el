@@ -45,7 +45,7 @@
                                  "register")
   "Commands that can be passed to `hledger-jdo` function defined below.")
 
-(defcustom hledger-extra-args " --format '%,%25(total)  %2(depth_spacer)%-(account)' --flat --sort-amount"
+(defcustom hledger-extra-args " --no-elide --format '%,%25(total)  %2(depth_spacer)%-(account)' --flat --sort-amount"
   "Extra arguments included while running Hledger for reports, e.g. -S."
   :group 'hledger
   :type 'string)
