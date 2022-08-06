@@ -2026,7 +2026,10 @@ after doing `symbol-overlay-put'."
   :defer t
   :config
   (setq plantuml-jar-path
-        (expand-file-name "~/miscellany/assets/plantuml.jar")))
+        (expand-file-name "~/miscellany/assets/plantuml.jar"))
+
+  (use-package ob-plantuml
+    :custom (org-plantuml-jar-path plantuml-jar-path)))
 
 ;;; Managing Secrets
 ;; ──────────────────────────────────────────────────────────────────

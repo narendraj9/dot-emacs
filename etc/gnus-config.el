@@ -265,6 +265,9 @@ URLs."
 ;;; Searching Mail
 ;; ----------------------------------------------------------------------------
 
+;;; https://www.gnu.org/software/emacs/manual/html_node/gnus/Search-Queries.html
+(setq gnus-search-use-parsed-queries t)
+
 (defun gm-nnir-group-make-gmail-group (query)
   "Use GMail search syntax.
 See https://support.google.com/mail/answer/7190?hl=en for syntax.

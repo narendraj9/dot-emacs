@@ -45,7 +45,7 @@
                                  "register")
   "Commands that can be passed to `hledger-jdo` function defined below.")
 
-(defcustom hledger-extra-args " --no-elide --format '%,%25(total)  %2(depth_spacer)%-(account)' --flat --sort-amount"
+(defcustom hledger-extra-args " --no-elide --pretty --format '%,%25(total)  %2(depth_spacer)%-(account)' --flat --sort-amount"
   "Extra arguments included while running Hledger for reports, e.g. -S."
   :group 'hledger
   :type 'string)
@@ -893,7 +893,7 @@ This is the reason dynamic scoping is cool sometimes."
   (let* ((header-dates (format "%s - %s"
                                (format-time-string "%e %b %Y" beg-time)
                                (format-time-string "%e %b %Y" end-time)))
-         (header-title "Report : ")
+         (header-title "Report: ")
          (header-filler (make-string (+ (length header-dates)
                                         (length header-title))
                                      ?═)))

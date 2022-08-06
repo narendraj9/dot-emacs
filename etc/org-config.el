@@ -618,7 +618,8 @@ non-empty lines in the block (excluding the line with
             'append)
   :config
   (org-babel-do-load-languages 'org-babel-load-languages
-                               `((emacs-lisp . t)
+                               `((plantuml   . t)
+                                 (emacs-lisp . t)
                                  (sqlite     . t)
                                  (sql        . t)
                                  (lisp       . t)
