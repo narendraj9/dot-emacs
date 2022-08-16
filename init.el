@@ -1434,6 +1434,13 @@ after doing `symbol-overlay-put'."
                            (-filter #'stringp)
                            (-filter #'f-directory-p))))))
 
+
+
+(use-package dired-collapse
+  :ensure t
+  :hook (dired-mode . dired-collapse-mode))
+
+
 ;;; SNIPPETS and ABBREVS
 ;; ――――――――――――――――――――――――――――――――――――――――
 
