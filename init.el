@@ -1011,9 +1011,10 @@ after doing `symbol-overlay-put'."
 
 (use-package project-x
   :load-path "etc/"
+  :after project
   :custom (project-x-local-identifier ".project-x")
-  :init
-  (add-hook 'project-find-functions #'project-x-try-local -100))
+  :config
+  (add-hook 'project-find-functions 'project-x-try-local -100))
 
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
@@ -1639,7 +1640,13 @@ after doing `symbol-overlay-put'."
   (dolist (lang-server-spec `((rust-mode         . ("rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))
                               (java-mode         . ,java-eclipse-jdt-launcher)))
-    (add-to-list 'eglot-server-programs lang-server-spec)))
+    (add-to-list 'eglot-server-programs lang-server-spec))
+
+  ;; :preface
+  ;; (cl-defmethod eglot-handle-notification
+  ;;   (_server (_method (eql language/status)) &key _type message &allow-other-keys)
+  ;;   (message "%s" message))
+  )
 
 (use-package eglot-java
   :disabled t
