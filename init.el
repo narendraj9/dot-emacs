@@ -1639,7 +1639,7 @@ after doing `symbol-overlay-put'."
 
   (dolist (lang-server-spec `((rust-mode         . ("rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))
-                              (java-mode         . ,java-eclipse-jdt-launcher)))
+                              (java-mode         . ,#'java-eclipse-jdt-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec))
 
   ;; :preface
@@ -1741,7 +1741,7 @@ after doing `symbol-overlay-put'."
   :doc "Find definitions like the coolest kid."
   :ensure t
   :bind (("M-." . xref-find-definitions)
-         ("M-," . xref-pop-marker-stack)))
+         ("M-," . xref-go-back)))
 
 (use-package subword
   ;; :hook (prog-mode . subword-mode)
@@ -2084,6 +2084,11 @@ after doing `symbol-overlay-put'."
         history-length 1000)
   (minibuffer-depth-indicate-mode +1)
 
+  (add-hook 'minibuffer-setup-hook
+            (lambda ()
+              (when (< 10 (minibuffer-depth))
+                (top-level))))
+
   :init
   ;; `partial-completion' is very useful for `completion-at-point'
   (advice-add 'completion-at-point
@@ -2179,18 +2184,25 @@ after doing `symbol-overlay-put'."
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
 
+(defun java-eclipse-jdt-launcher (_arg)
+  "Returns a command to start Eclipse JDT launcher script `jdtls'."
+  (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/"))
+        (root-directory (project-root (project-current))))
+    (if (file-exists-p launcher-script)
+        (list launcher-script
+              "-data"
+              (expand-file-name (format "%s-%s" (md5 root-directory)
+                                        (file-name-base (directory-file-name root-directory )))
+                                "~/code/jdt-workspace/"))
+      (message "Failed to find any JDT jar files.")
+      nil)))
+
 (use-package java-mode
   :defer t
   :hook ( (java-mode . company-mode-quicker) )
 
   :init
-  (defvar java-eclipse-jdt-launcher
-    (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/")))
-      (if (file-exists-p launcher-script)
-          (list launcher-script "-data" (expand-file-name "~/code/jdt-workspace"))
-        (message "Failed to find any JDT jar files.")
-        nil))
-    "Path to Eclipse JDT launcher script."))
+  )
 
 (use-package javadoc-lookup
   :ensure t
