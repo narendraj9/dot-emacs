@@ -637,6 +637,7 @@ after doing `symbol-overlay-put'."
 
 (use-package outline-minor-mode
   :defer t
+  :custom ((outline-blank-line t))
   :init
   (add-hook 'outline-minor-mode-hook
             (lambda ()
@@ -1647,11 +1648,6 @@ after doing `symbol-overlay-put'."
   ;;   (_server (_method (eql language/status)) &key _type message &allow-other-keys)
   ;;   (message "%s" message))
   )
-
-(use-package eglot-java
-  :disabled t
-  :ensure t
-  :after eglot)
 
 
 (use-package tree-sitter
