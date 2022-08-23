@@ -153,6 +153,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           :map ctl-m-map
           ("t" . switch-to-scratch-new-tab)
           ("k" . swap-ctrl-right-win)
+          ("f" . pretty-format-temporarily)
 
           :map ctl-quote-map
           ("w s" . websearch-it)
@@ -1765,15 +1766,21 @@ after doing `symbol-overlay-put'."
     (beginning-of-line)
     (recenter 0 t)))
 
-
 (use-package help-at-pt
-  :bind ( :map ctl-m-map
-          ("." . display-help-at-pt ) )
+  :bind ( :map ctl-m-map ("." . display-help-at-pt-keymap*) )
+
+  :init
+  (define-prefix-command 'display-help-at-pt-keymap*)
+  (define-key display-help-at-pt-keymap* (kbd ".") #'display-help-at-pt-dwim)
+  (define-key display-help-at-pt-keymap* (kbd "<") #'scan-buf-previous-region)
+  (define-key display-help-at-pt-keymap* (kbd ">") #'scan-buf-next-region)
+
   :preface
-  (defun display-help-at-pt ()
-    (interactive)
-    (require 'popup)
-    (when-let ((help (help-at-pt-kbd-string)))
+  (defun display-help-at-pt-dwim (&optional prefix)
+    (interactive "P")
+    (when-let ((help (or (help-at-pt-kbd-string)
+                         (progn (scan-buf-next-region (if prefix -1 +1))
+                                (help-at-pt-kbd-string)))))
       (popup-tip help
                  :point (point)
                  :around t

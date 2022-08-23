@@ -1167,6 +1167,32 @@ search keyword."
   (setq swap-ctrl-right-win (not swap-ctrl-right-win)))
 
 
+(defun pretty-format-temporarily ()
+  (interactive)
+  (let* ((super-local-keymap (make-sparse-keymap))
+         (start (if (region-active-p) (region-beginning) (point-at-bol)))
+         (end (if (region-active-p) (region-end) (point-at-eol)))
+         (original-string (buffer-substring start end))
+         (pretty-string (->> (buffer-substring start end)
+                             (string-replace "\\n" "\n")))
+         (inhibit-read-only t)
+         (start-marker (set-marker (make-marker) start))
+         (end-marker (set-marker (make-marker) end)))
+
+    (define-key super-local-keymap
+                (kbd "C-c q")
+                (lambda ()
+                  (interactive)
+                  (let ((inhibit-read-only t))
+                    (delete-region start-marker end-marker)
+                    (goto-char start-marker)
+                    (insert original-string))))
+    (delete-region start end)
+    (insert (propertize pretty-string
+                        'face 'highlight
+                        'read-only t
+                        'keymap super-local-keymap))
+    (goto-char start-marker)))
 
 
 (provide 'defs)
