@@ -1775,6 +1775,11 @@ after doing `symbol-overlay-put'."
   (define-key display-help-at-pt-keymap* (kbd "<") #'scan-buf-previous-region)
   (define-key display-help-at-pt-keymap* (kbd ">") #'scan-buf-next-region)
 
+  :config
+  (define-repeat-map ("<" . scan-buf-previous-region)
+                     (">" . scan-buf-next-region)
+                     ("." . display-help-at-pt-dwim))
+
   :preface
   (defun display-help-at-pt-dwim (&optional prefix)
     (interactive "P")
