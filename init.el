@@ -1767,15 +1767,10 @@ after doing `symbol-overlay-put'."
     (recenter 0 t)))
 
 (use-package help-at-pt
-  :bind ( :map ctl-m-map ("." . display-help-at-pt-keymap*) )
-
-  :init
-  (define-prefix-command 'display-help-at-pt-keymap*)
-  (define-key display-help-at-pt-keymap* (kbd ".") #'display-help-at-pt-dwim)
-  (define-key display-help-at-pt-keymap* (kbd "<") #'scan-buf-previous-region)
-  (define-key display-help-at-pt-keymap* (kbd ">") #'scan-buf-next-region)
+  :bind ( :map ctl-m-map ("." . display-help-at-pt-dwim) )
 
   :config
+  (require 'popup)
   (define-repeat-map ("<" . scan-buf-previous-region)
                      (">" . scan-buf-next-region)
                      ("." . display-help-at-pt-dwim))
@@ -2131,7 +2126,7 @@ after doing `symbol-overlay-put'."
 (use-package orderless
   :doc
   "TODO: Opt-in this completion style when needed instead of making it
-   the default because it breaks completion of commans and filenames
+   the default because it breaks completion of commands and filenames
    in minibuffer and eshell.
 
    If anything with completions breaks, this is usually the culprit."
@@ -2209,8 +2204,11 @@ after doing `symbol-overlay-put'."
   :defer t
   :hook ( (java-mode . company-mode-quicker) )
 
-  :init
-  )
+  :config
+  (cl-defmethod eglot-handle-notification
+    (server (_method (eql language/status)) &key type message &allow-other-keys)
+    (when (equal type "ServiceReady")
+      (message "LSP server ready: %s" (eglot-project-nickname server)))))
 
 (use-package javadoc-lookup
   :ensure t
@@ -2407,14 +2405,6 @@ after doing `symbol-overlay-put'."
         clojure-align-forms-automatically t)
 
   (add-hook 'project-find-functions #'project-find-clojure-root)
-
-  ;; (defvar clojure--mode-lsp-progress (make-progress-reporter "Clojure LSP: "))
-  ;; (cl-defmethod eglot-handle-notification
-  ;;   (_server (_method (eql $/progress)) &key _type value &allow-other-keys)
-  ;;   (when-let ((p  (plist-get value :percentage)))
-  ;;     (if (< p 100)
-  ;;         (progress-reporter-do-update clojure--mode-lsp-progress p)
-  ;;       (progress-reporter-done clojure--mode-lsp-progress))))
 
   :preface
   (defun project-find-clojure-root (dir)
