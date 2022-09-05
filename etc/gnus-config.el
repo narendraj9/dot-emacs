@@ -296,6 +296,8 @@ Credits:  https://emacspeak.blogspot.com/2020/09/searching-gmail-from-gnus.html"
 ;;; Hooks
 ;; ----------------------------------------------------------------------------
 
+(setq gnus-topic-display-empty-topics nil)
+
 (add-hook 'gnus-group-mode-hook
           (lambda ()
             (gnus-topic-mode +1)))
