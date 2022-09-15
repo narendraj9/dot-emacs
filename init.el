@@ -163,7 +163,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("c e" . vicarie/eval-print-last-sexp)
           ("c =" . vicarie/eval-replace-last-sexp)
           ("c r" . rename-file-and-buffer)
-          ("C-a" . emacspeak-wizards-execute-asynchronously)
+          ;; ("C-a" . emacspeak-wizards-execute-asynchronously)
           ("M-x" . async-M-x)
 
           :map ctl-period-map

@@ -317,10 +317,10 @@ Otherwise, limit to only `org-mode' files."
 
               ;; Alternative to a constantly highlighted line
               (dolist (org-move-fn '(org-agenda-next-line org-agenda-previous-line))
-                (add-function :after
-                              (symbol-function org-move-fn)
-                              (lambda ()
-                                (pulse-momentary-highlight-one-line (point-at-bol)))))
+                (advice-add org-move-fn
+                            :after
+                            (lambda ()
+                              (pulse-momentary-highlight-one-line (point-at-bol)))))
 
               (bind-keys :map org-agenda-mode-map
                          ("T"       . org-agenda-toggle-toggle-tags-column)
