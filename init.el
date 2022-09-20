@@ -2324,9 +2324,6 @@ after doing `symbol-overlay-put'."
   :config
   (define-key cargo-mode-map (kbd "C-. C-k") #'cargo-process-check))
 
-(use-package py-autopep8
-  :ensure t
-  :hook (python-mode . py-autopep8-enable-on-save))
 
 (use-package python-mode
   :ensure t
@@ -2335,6 +2332,10 @@ after doing `symbol-overlay-put'."
   (setq python-indent-guess-indent-offset-verbose nil
         python-indent-guess-indent-offset nil
         python-indent-offset 2))
+
+(use-package py-autopep8
+  :ensure t
+  :hook (python-mode . py-autopep8-mode))
 
 (use-package prolog
   :mode ("\\.pl\\'" . prolog-mode)
