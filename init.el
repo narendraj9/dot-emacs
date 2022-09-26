@@ -1981,15 +1981,16 @@ after doing `symbol-overlay-put'."
   (bind-key "C-c a" #'org-agenda)
   (eval-after-load "org" '(require 'org-config))
 
-  ;; `org-agenda-get-restriction-and-command' ignores rules for
-  ;; displaying buffers (i.e. `display-buffer-alist'). This advice
-  ;; tries causes `split-window-sensibly' to always split vertically
-  ;; and show the " *Agenda Commands*" buffer below the current buffer.
-  (advice-add 'org-agenda-get-restriction-and-command
-              :around
-              (lambda (original &rest args)
-                (let ((split-window-preferred-function #'split-window-below))
-                  (apply original args)))))
+  ;; ;; `org-agenda-get-restriction-and-command' ignores rules for
+  ;; ;; displaying buffers (i.e. `display-buffer-alist'). This advice
+  ;; ;; tries causes `split-window-sensibly' to always split vertically
+  ;; ;; and show the " *Agenda Commands*" buffer below the current buffer.
+  ;; (advice-add 'org-agenda-get-restriction-and-command
+  ;;             :around
+  ;;             (lambda (original &rest args)
+  ;;               (let ((split-window-preferred-function #'split-window-below))
+  ;;                 (apply original args))))
+  )
 
 
 (use-package pomodoro
@@ -2458,10 +2459,10 @@ after doing `symbol-overlay-put'."
         cider-use-xref t
         cider-xref-fn-depth 100)
 
-  (advice-add 'cider-repl-indent-and-complete-symbol
-              :around
-              (lambda (&rest _args)
-                (completion-at-point)))
+  ;; (advice-add 'cider-repl-indent-and-complete-symbol
+  ;;             :around
+  ;;             (lambda (&rest _args)
+  ;;               (completion-at-point)))
 
   (define-clojure-indent (for-all 1)))
 
