@@ -2447,7 +2447,7 @@ after doing `symbol-overlay-put'."
   :diminish cider-mode
   :hook (clojure-mode . cider-mode)
   :bind ( :map cider-mode-map
-          ("C-c M-." . cider-find-var) )
+          ("M-." . cider-find-var-dwim) )
   :config
   (setq nrepl-log-messages t
         nrepl-use-ssh-fallback-for-remote-hosts t)
@@ -2469,7 +2469,15 @@ after doing `symbol-overlay-put'."
   ;;             (lambda (&rest _args)
   ;;               (completion-at-point)))
 
-  (define-clojure-indent (for-all 1)))
+  (define-clojure-indent (for-all 1))
+
+
+  :preface
+  (defun cider-find-var-dwim ()
+    (interactive)
+    (if (cider-connected-p)
+        (cider-find-var)
+      (xref-find-definitions))))
 
 
 (use-package flycheck-clojure
