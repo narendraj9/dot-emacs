@@ -1444,6 +1444,11 @@ after doing `symbol-overlay-put'."
   :hook (dired-mode . dired-collapse-mode))
 
 
+(use-package discover
+  :ensure t
+  :hook (dired-mode . dired-turn-on-discover))
+
+
 ;;; SNIPPETS and ABBREVS
 ;; ――――――――――――――――――――――――――――――――――――――――
 
@@ -2605,9 +2610,10 @@ after doing `symbol-overlay-put'."
          (html-mode . skewer-html-mode)
          (js2-mode  . skewer-mode)))
 
-(use-package js2-mode    :defer t :ensure t)
-(use-package coffee-mode :defer t :ensure t)
-(use-package elm-mode    :defer t :ensure t)
+(use-package js2-mode        :defer t :ensure t)
+(use-package typescript-mode :ensure t)
+(use-package coffee-mode     :defer t :ensure t)
+(use-package elm-mode        :defer t :ensure t)
 
 ;;; ERLANG AND ELIXIR
 ;; ──────────────────────────────────────────────────────────────────
