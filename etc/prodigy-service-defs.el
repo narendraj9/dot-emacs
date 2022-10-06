@@ -38,7 +38,7 @@
             " docker run "
             " -e 'ZOOKEEPER_CLIENT_PORT=2181' "
             " --net kafka-net "
-            " --name zookeeper "
+            " --name zookeeper-standalone "
             " --publish 2181:2181 "
             " confluentinc/cp-zookeeper "))
   :cwd "/tmp"
@@ -55,13 +55,24 @@
             " docker rm kafka || true; "
             " docker run --hostname localhost "
             " --net kafka-net "
-            " --name kafka "
+            " --name kafka-standalone "
             " --publish 9092:9092 "
             " --publish 7203:7203 "
             " --env KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 "
-            " --env KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 "
+            " --env KAFKA_ZOOKEEPER_CONNECT=zookeeper-standalone:2181 "
             " --env KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092 "
             " confluentinc/cp-kafka "))
+  :cwd "/tmp"
+  :stop-signal 'sigkill
+  :kill-process-buffer-on-stop t)
+
+
+(prodigy-define-service
+  :name "ksql@:8088"
+  :command "docker-compose"
+  :args `("-f" ,(expand-file-name "etc/docker/ksql-docker-compose.yml"
+                                  user-emacs-directory)
+          "up")
   :cwd "/tmp"
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
@@ -72,9 +83,9 @@
   :command "bash"
   :args '("-c"
           " while [ true ]; do
-			  echo 'HTTP/1.1 200 Ok\r\n' | nc -l -p 9191;
-			  echo -e '\n';
-		    done")
+              echo 'HTTP/1.1 200 Ok\r\n' | nc -l -p 9191;
+              echo -e '\n';
+            done")
   :cwd "~"
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
