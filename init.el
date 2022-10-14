@@ -2413,6 +2413,14 @@ after doing `symbol-overlay-put'."
 
   (add-hook 'project-find-functions #'project-find-clojure-root)
 
+  (add-hook 'clojure-mode-hook
+            (lambda ()
+              ;; Default completion is completely broken because of
+              ;; `lisp-indent-line'.
+              (company-mode-quicker)
+              (setq-local completion-at-point-functions
+                          '(cider-complete-at-point eglot-completion-at-point t))))
+
   :preface
   (defun project-find-clojure-root (dir)
     (when-let ((r (clojure-project-root-path (or dir default-directory))))

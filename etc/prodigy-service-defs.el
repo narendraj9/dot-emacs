@@ -33,8 +33,8 @@
   :args `("-c"
           ,(concat
             " docker network create kafka-net || true; "
-            " docker stop zookeeper || true; "
-            " docker rm zookeeper || true; "
+            " docker stop zookeeper-standalone || true; "
+            " docker rm zookeeper-standalone || true; "
             " docker run "
             " -e 'ZOOKEEPER_CLIENT_PORT=2181' "
             " --net kafka-net "
@@ -51,8 +51,8 @@
   :args `("-c"
           ,(concat
             " docker network create kafka-net || true; "
-            " docker stop kafka || true; "
-            " docker rm kafka || true; "
+            " docker stop kafka-standalone || true; "
+            " docker rm kafka-standalone || true; "
             " docker run --hostname localhost "
             " --net kafka-net "
             " --name kafka-standalone "
