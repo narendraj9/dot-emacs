@@ -2510,6 +2510,10 @@ after doing `symbol-overlay-put'."
   :defer t
   :ensure t
   :hook (racket-mode . geiser-mode)
+  :init
+  (use-package geiser-racket :ensure t)
+  (use-package geiser-mit    :ensure t)
+
   :config
   (advice-add 'run-geiser
               :after
@@ -2517,24 +2521,11 @@ after doing `symbol-overlay-put'."
                 (message "Set the scheme impl for buffer with `geiser-set-scheme`.''"))))
 
 (use-package racket-mode
+  :mode "\\.rkt\\'"
   :defer t
   :ensure t
-  :mode "\\.rkt\\'"
-  :bind (:map racket-mode-map
-              ("C-x C-e" . racket-eval-last-sexp))
-  :config
-  (use-package scribble-mode :ensure t)
-  :preface
-  (defun racket-eval-last-sexp ()
-    "Eval the previous sexp asynchronously and `message' the result."
-    (interactive)
-    (require 'cider-overlays)
-    (racket--cmd/async
-     `(eval
-       ,(buffer-substring-no-properties (racket--repl-last-sexp-start)
-                                        (point)))
-     (lambda (v)
-       (cider--make-result-overlay (substring v nil -1) :duration 'command)))))
+  :init
+  (use-package scribble-mode :ensure t))
 
 (use-package slime
   :ensure t
