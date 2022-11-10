@@ -216,6 +216,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq auto-save-list-file-prefix
         (expand-file-name "var/autosaves/" user-emacs-directory))
 
+  (setq delete-by-moving-to-trash t)
+
   ;; Backups of file before current changes
   (setq backup-directory-alist
         `((".*" . ,(expand-file-name "var/backups/"
