@@ -104,11 +104,17 @@
 
 (defun app/font-setup ()
   ;; Setup my favorite fonts [if available]
-  (dolist (font (list "Symbola" "Firacode"))
+  (dolist (font (list "Symbola" "Fira Code"))
     (if (app/font-availablep font)
         (set-fontset-font "fontset-default" nil
                           (font-spec :name font :size 15)
                           nil 'append)))
+
+  ;; Font for coding.
+  (set-face-attribute 'default nil
+                      :family "Fira Code"
+                      :height 143
+                      :weight 'semibold)
 
   ;; Font for reading news
   (cond

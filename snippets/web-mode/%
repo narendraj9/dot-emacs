@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: embedded ruby <% %>
+# key: %
+# --
+<% $0 %>

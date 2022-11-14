@@ -2611,7 +2611,11 @@ after doing `symbol-overlay-put'."
 
   (use-package emmet-mode
     :ensure t
-    :hook (web-mode . emmet-mode)))
+    :hook (web-mode . emmet-mode)
+    :config
+    (define-key emmet-mode-keymap (kbd "C-c TAB") 'emmet-expand-line)
+    (define-key emmet-mode-keymap (kbd "C-j") nil)
+    (define-key emmet-mode-keymap (kbd "<C-return>") nil)))
 
 (use-package skewer-mode
   :ensure t
@@ -2713,7 +2717,13 @@ after doing `symbol-overlay-put'."
              (lambda (&rest args &key error-thrown &allow-other-keys)
                (message "Error: %s" error-thrown)))))
   :bind (:map ruby-mode-map
-              ("C-c C-g" . search-ruby-gems)))
+              ("C-c C-g" . search-ruby-gems))
+
+  :config
+  (eval-after-load 'ruby-mode
+    '(progn
+       (define-key ruby-mode-map (kbd "C-x t") nil)
+       (define-key ruby-mode-map (kbd "C-x T") nil))))
 
 (use-package rinari
   :ensure t

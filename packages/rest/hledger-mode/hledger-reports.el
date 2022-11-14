@@ -112,7 +112,7 @@ I taint entries with a star, to declare that they haven't been effective yet."
   :type 'string)
 
 (defcustom hledger-ratios-liquid-asset-accounts
-  "assets:bank assets:wallet"
+  "assets:bank assets:wallet assets:.*emergency-fund.*"
   "Account names [separated by spaces] that contain your liquid assets."
   :group 'hledger
   :type 'string)
