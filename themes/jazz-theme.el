@@ -46,6 +46,7 @@
 ;; Christian Brassat <crshd@mail.com> (jazz theme initial colors inspiration)
 ;;
 ;;; Code:
+
 (deftheme jazz "The Jazz color theme")
 
 (let ((class '((class color) (min-colors 89)))
@@ -121,12 +122,7 @@
    `(link-visited ((,class (:foreground ,jazz-yellow-2 :underline t :weight normal))))
 
    ;;; basic coloring
-   `(default ((,class (:foreground ,jazz-fg :background ,jazz-bg
-                                   :slant normal
-                                   :weight bold
-                                   :height 113
-                                   :width normal
-                                   :family "mononoki"))))
+   `(default ((,class (:foreground ,jazz-fg :background ,jazz-bg))))
    `(cursor ((,class (:foreground ,jazz-fg :background ,jazz-fg))))
    `(escape-glyph-face ((,class (:foreground ,jazz-red))))
    `(fringe ((,class (:foreground ,jazz-fg+1 :background ,jazz-bg))))
