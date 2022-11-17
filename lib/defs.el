@@ -1195,5 +1195,17 @@ search keyword."
     (goto-char start-marker)))
 
 
+(defun prepare-frame-for-meeting-notes ()
+  (interactive)
+  (let ((height 11)
+        (width 96)
+        (x 326)
+        (y 764))
+    (set-frame-parameter (selected-frame) 'fullscreen nil)
+    (set-frame-height (selected-frame) height)
+    (set-frame-width (selected-frame) width)
+    (set-frame-position (selected-frame) x y)))
+
+
 (provide 'defs)
 ;;; defs.el ends here
