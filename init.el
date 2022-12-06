@@ -1661,8 +1661,18 @@ after doing `symbol-overlay-put'."
 (use-package tree-sitter
   :ensure t
   :defer t
+  :diminish tree-sitter-mode
+  :init
+  (global-tree-sitter-mode +1)
+  (hook-into-modes #'tree-sitter-hl-mode
+                   'python-mode)
   :config
-  (use-package tree-sitter-langs :ensure t))
+  (use-package tree-sitter-langs
+    :load-path "~/code/tree-sitter-langs/"
+    :defer 5
+    :init
+    (setq tree-sitter-langs-git-dir
+          (expand-file-name "~/code/tree-sitter-langs"))))
 
 
 ;;; ----------------------------------------------------------------------------
