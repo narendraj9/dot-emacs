@@ -2497,7 +2497,7 @@ after doing `symbol-overlay-put'."
     (interactive)
     (if (cider-connected-p)
         (cider-find-var)
-      (xref-find-definitions))))
+      (call-interactively #'xref-find-definitions))))
 
 
 (use-package flycheck-clojure
