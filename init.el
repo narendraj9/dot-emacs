@@ -321,6 +321,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("<C-m>" . mode-line-config-flash-cleaner-line) )
   :demand t
   :load-path "etc/"
+  :config
+  (set-face-attribute 'mode-line-active nil :inherit 'mode-line)
+  (set-face-attribute 'mode-line-inactive nil :inherit 'mode-line)
+
   :preface
   (defun mode-line-config-flash-cleaner-line ()
     (interactive)
