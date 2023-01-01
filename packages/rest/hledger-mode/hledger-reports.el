@@ -308,8 +308,10 @@ non-nil, it lands us in the `hledger-mode' ."
        (delete-other-windows))
 
       (`"balancesheet"
-       (hledger-jdo (concat "balancesheet --end "
-                            (hledger-end-date (current-time)))))
+       (hledger-jdo (format "balancesheet --end %s " (hledger-end-date (current-time)))
+                    nil
+                    nil
+                    " --pretty --format '%,%25(total)  %2(depth_spacer)%-(account)' --tree --sort-amount "))
 
       (`"cashflow"
        (hledger-jdo (format "cashflow --begin %s --end %s"
