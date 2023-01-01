@@ -399,7 +399,23 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setq battery-mode-line-format
         (propertize "%b%p%% " 'face 'mode-line-battery-face))
-  (display-battery-mode +1))
+  (display-battery-mode +1)
+
+  (run-with-timer 60 60 #'battery-protection-notifications)
+
+  :preface
+  (defun battery-protection-notifications ()
+    (let* ((status (funcall battery-status-function))
+           (percentage (string-to-number (alist-get ?p status)))
+           (charging-status (alist-get ?b status)))
+      (when (and (string= charging-status "+")
+                 (< 80 percentage))
+        (notifications-notify :title "Battery Protection"
+                              :body "You need to remove the charger."))
+      (when (and (not (string= charging-status "+"))
+                 (< percentage 60))
+        (notifications-notify :title "Battery Protection"
+                              :body "Start charging your battery.")))))
 
 (use-package ibuffer
   :bind (:map ctl-x-map ("C-b" . ibuffer-other-window) )
