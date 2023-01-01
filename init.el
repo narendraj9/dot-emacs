@@ -3064,14 +3064,28 @@ after doing `symbol-overlay-put'."
               ("k" . image-previous-line)
               ("J" . pdf-view-next-line-or-next-page)
               ("K" . pdf-view-previous-line-or-previous-page))
+  :config
+  (eval-after-load 'pdf-view
+    '(progn
+       (define-key pdf-view-mode-map (kbd "<") #'image-scroll-down)
+       (define-key pdf-view-mode-map (kbd ">") #'image-scroll-up)
+       (define-key pdf-view-mode-map (kbd "n") #'--pdf-view-next-page-top-edge)))
+
   :init
   ;; `abbreviate-file-name' doesn't handle `nil' values. For buffer that do not
   ;; have associated files, this fails. I had been facing this while opening PDF
   ;; files in Gnus.
-  (advice-add 'abbreviate-file-name :around (lambda (orig-f file-name)
-                                              (if file-name
-                                                  (funcall orig-f file-name)
-                                                "<buffer-with-no-file>"))))
+  (advice-add 'abbreviate-file-name
+              :around (lambda (orig-f file-name)
+                        (if file-name
+                            (funcall orig-f file-name)
+                          "<buffer-with-no-file>")))
+
+  :preface
+  (defun --pdf-view-next-page-top-edge ()
+    (interactive)
+    (pdf-view-next-page)
+    (image-scroll-down)))
 
 (use-package pdf-view-restore
   :ensure t
