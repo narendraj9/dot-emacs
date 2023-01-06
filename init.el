@@ -3090,6 +3090,12 @@ after doing `symbol-overlay-put'."
        (define-key pdf-view-mode-map (kbd ">") #'image-scroll-up)
        (define-key pdf-view-mode-map (kbd "n") #'--pdf-view-next-page-top-edge)))
 
+  (defvar --pdf-last-page-number nil)
+  (add-hook 'pdf-view-after-change-page-hook #'display-pdf-page-number)
+  (add-hook 'pdf-view-before-change-page-hook
+            (lambda () (setq --pdf-last-page-number (pdf-view-current-page))))
+
+
   :init
   ;; `abbreviate-file-name' doesn't handle `nil' values. For buffer that do not
   ;; have associated files, this fails. I had been facing this while opening PDF
@@ -3104,7 +3110,21 @@ after doing `symbol-overlay-put'."
   (defun --pdf-view-next-page-top-edge ()
     (interactive)
     (pdf-view-next-page)
-    (image-scroll-down)))
+    (image-scroll-down))
+
+  (defun display-pdf-page-number ()
+    (let* ((message-width 20)
+           (tooltip-y (/ (frame-pixel-height) 2))
+           (tooltip-x (- (frame-pixel-width)
+                         (string-pixel-width (make-string message-width ? ))))
+           (tooltip-hide-delay 2)
+           (tooltip-frame-parameters
+            (cons (cons 'left tooltip-x)
+                  (cons (cons 'top tooltip-y) tooltip-frame-parameters))))
+      (tooltip-show (format "Page: %s -> %s"
+                            --pdf-last-page-number
+                            (pdf-view-current-page))
+                    nil 'tooltip))))
 
 (use-package pdf-view-restore
   :ensure t
