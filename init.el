@@ -404,18 +404,37 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (run-with-timer 60 60 #'battery-protection-notifications)
 
   :preface
+  (defun battery-protection-pause ()
+    (interactive)
+    (put 'battery-protection-notifications
+         :enabler-timer
+         (run-with-timer 7200 nil
+                         (lambda ()
+                           (put 'battery-protection-notifications :paused nil)))))
+
+
+  (defun battery-protection-resume ()
+    (interactive)
+    (when-let ((timer (get 'battery-protection-notifications :enabler-timer)))
+      (cancel-timer timer)
+      (put 'battery-protection-notifications :enabler-timer nil)))
+
+
   (defun battery-protection-notifications ()
     (let* ((status (funcall battery-status-function))
+           (lowest-percentage 50)
+           (highest-percentage 85)
            (percentage (string-to-number (alist-get ?p status)))
            (charging-status (alist-get ?b status)))
-      (when (and (string= charging-status "+")
-                 (< 80 percentage))
-        (notifications-notify :title "Battery Protection"
-                              :body "You need to remove the charger."))
-      (when (and (not (string= charging-status "+"))
-                 (< percentage 60))
-        (notifications-notify :title "Battery Protection"
-                              :body "Start charging your battery.")))))
+      (when (not (get 'battery-protection-notifications :enabler-timer))
+        (when (and (string= charging-status "+")
+                   (< highest-percentage percentage))
+          (notifications-notify :title "Battery Protection"
+                                :body "You need to remove the charger."))
+        (when (and (not (string= charging-status "+"))
+                   (< percentage lowest-percentage))
+          (notifications-notify :title "Battery Protection"
+                                :body "Start charging your battery."))))))
 
 (use-package ibuffer
   :bind (:map ctl-x-map ("C-b" . ibuffer-other-window) )
