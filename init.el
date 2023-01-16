@@ -1685,7 +1685,7 @@ after doing `symbol-overlay-put'."
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
 
-  (dolist (lang-server-spec `((rust-mode         . ("rust-analyzer"))
+  (dolist (lang-server-spec `((rust-mode         . ("rustup" "run" "stable" "rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))
                               (java-mode         . ,#'java-eclipse-jdt-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec))
@@ -1869,7 +1869,11 @@ after doing `symbol-overlay-put'."
      ((memq 'flymake-mode local-minor-modes)
       (flymake-show-diagnostics-buffer))
 
-     (t (flycheck-list-errors)))))
+     (memq 'flycheck-mode local-minor-modes)
+     (flycheck-list-errors)
+
+     t
+     (message "No minor mode to run a linter."))))
 
 (use-package highlight-indent-guides
   :ensure t
