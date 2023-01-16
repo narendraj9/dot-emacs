@@ -658,9 +658,9 @@ after doing `symbol-overlay-put'."
     "Pulse highlight symbol at point."
     (let ((bounds (bounds-of-thing-at-point 'symbol))
           (pulse-delay 0.01))
+      (symbol-overlay-remove-all-timer (current-buffer))
       (pulse-momentary-highlight-region (car bounds)
-                                        (cdr bounds))
-      (symbol-overlay-remove-all-timer (current-buffer))))
+                                        (cdr bounds))))
 
   :init
   (advice-add 'symbol-overlay-jump-call :after #'flash-current-symbol))
