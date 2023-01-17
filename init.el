@@ -693,15 +693,15 @@ after doing `symbol-overlay-put'."
 
 (use-package hideshow
   :defer t
+  :diminish hs-minor-mode
   :bind ( :map hs-minor-mode-map
           ([backtab] . hs-toggle-hiding)
           ("C-c @ a"  . my-toggle-hideshow-all)
           ("C-c @ s"  . hs-show-block)
           ("C-c @ h"  . hs-hide-block))
   :init
-  (add-hook 'hs-minor-mode-hook
-            (lambda ()
-              (diminish 'hs-minor-mode)))
+  (add-hook 'prog-mode-hook #'hs-minor-mode)
+
   :config
   (setq hs-set-up-overlay #'display-code-line-counts)
 
@@ -721,22 +721,13 @@ after doing `symbol-overlay-put'."
                                              (overlay-end ov)))))
       (overlay-put ov
                    'display
-                   (propertize (format "  +%s \n" line-count)
+                   (propertize (format "  +%s " line-count)
                                'face 'highlight))
       (overlay-put ov
                    'before-string
                    (propertize " "
                                'display
                                '(left-fringe right-arrow highlight))))))
-
-(use-package bicycle
-  :doc
-  "Implemented using `hs-minor-mode' and `outline-mode' (which uses
-  `selective-display'). To configure this mode, configure those two
-   minor modes."
-  :ensure t
-  :after outline
-  :bind ( :map outline-minor-mode-map ([C-tab]   . bicycle-cycle)) )
 
 (use-package wrap-region
   :doc
