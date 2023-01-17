@@ -1711,10 +1711,11 @@ after doing `symbol-overlay-put'."
   :bind ( :map ctl-period-map
           ([\C-m] . display-line-numbers-and-column-indicator) )
   :preface
-  (defun display-line-numbers-and-column-indicator ()
-    (interactive)
+  (defun display-line-numbers-and-column-indicator (arg)
+    (interactive "P")
     (call-interactively #'display-line-numbers-mode)
-    (call-interactively #'display-fill-column-indicator-mode)))
+    (when (not arg)
+      (call-interactively #'display-fill-column-indicator-mode))))
 
 (use-package type-break
   :disabled t
@@ -2009,6 +2010,8 @@ after doing `symbol-overlay-put'."
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
+         ("C-c n" . org-next-link)
+         ("C-c p" . org-previous-link)
 
          ;; Bindings for using the Timer
          :map ctl-m-map
