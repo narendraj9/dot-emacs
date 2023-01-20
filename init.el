@@ -422,8 +422,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun battery-protection-notifications ()
     (let* ((status (funcall battery-status-function))
-           (lowest-percentage 50)
-           (highest-percentage 85)
+           (lowest-percentage 20)
+           (highest-percentage 101)
            (percentage (string-to-number (alist-get ?p status)))
            (charging-status (alist-get ?b status)))
       (when (not (get 'battery-protection-notifications :enabler-timer))
