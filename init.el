@@ -1689,6 +1689,7 @@ after doing `symbol-overlay-put'."
 
 
 (use-package tree-sitter
+  :disabled t
   :ensure t
   :defer t
   :diminish tree-sitter-mode
@@ -2890,6 +2891,7 @@ after doing `symbol-overlay-put'."
   (global-auto-revert-mode +1))
 
 (use-package transient
+  :disabled t
   :ensure t
   :defer 10
   :config
