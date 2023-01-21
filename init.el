@@ -2202,23 +2202,6 @@ after doing `symbol-overlay-put'."
 (use-package consult
   :ensure t
   :custom (consult-preview-key (kbd "M-."))
-  :preface
-  (defun consult-grep-dwim ()
-    (interactive)
-    (let ((p (project-current)))
-      (cond
-       ;; No project
-       ((not p)
-        (consult-grep))
-
-       ;; A git project
-       ((eq 'Git (vc-responsible-backend (project-root p)))
-        (consult-git-grep (project-root p)))
-
-       ;; A non-git project
-       (t (consult-grep (project-root p))))))
-
-
   :bind ( :map global-map
           ("M-s a" . consult-grep-dwim)
           ("C-x b" . consult-buffer)
@@ -2237,7 +2220,23 @@ after doing `symbol-overlay-put'."
           ("C-'" . consult-imenu)
 
           :map ctl-period-map
-          ("C-s" . consult-line)) )
+          ("C-s" . consult-line))
+  :preface
+  (defun consult-grep-dwim ()
+    (interactive)
+    (let ((p (project-current)))
+      (cond
+       ;; No project
+       ((not p)
+        (consult-grep))
+
+       ;; A git project
+       ((eq 'Git (vc-responsible-backend (project-root p)))
+        (consult-git-grep (project-root p)))
+
+       ;; A non-git project
+       (t (consult-grep (project-root p)))))))
+
 
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
