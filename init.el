@@ -1034,6 +1034,10 @@ after doing `symbol-overlay-put'."
   :init
   (setq project-list-file
         (expand-file-name "var/project-list" user-emacs-directory))
+
+  :config
+  (autoload #'magit-status "magit" nil t)
+
   :preface
   (defun git-ls-files-find-file ()
     (interactive)
@@ -2926,9 +2930,7 @@ after doing `symbol-overlay-put'."
 
   (add-hook 'git-commit-mode-hook 'turn-on-flyspell))
 
-(use-package magit-annex
-  :ensure t
-  :after magit-mode)
+(use-package magit-annex :disabled t :ensure t :after magit-mode)
 
 (use-package add-log
   :defer t
