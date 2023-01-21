@@ -2448,7 +2448,7 @@ after doing `symbol-overlay-put'."
               k))
 
   :config
-  (dolist (k (list "M-r" "M-s" "M-?"))
+  (dolist (k (list "M-r" "M-s" "M-?" "RET"))
     (define-key paredit-mode-map (kbd k) nil)))
 
 (use-package clojure-mode
