@@ -1045,10 +1045,26 @@ respective files."
                                           ))))))
 
 
-(defun backward-delete-word ()
-  "Delete word before point without putting it into the `kill-ring'."
-  (interactive)
-  (delete-region (point) (progn (forward-word -1) (point))))
+(defun backward-delete-dwim (arg)
+  "Delete word before point without putting it into the `kill-ring'.
+   With a prefix argument, delete the symbol at point."
+  (interactive "P")
+  (catch 'done
+    (when (eq major-mode 'minibuffer-mode)
+      (let* ((bounds (bounds-of-thing-at-point 'filename))
+             (path (thing-at-point 'filename))
+             (path-parts (remove "" (file-name-split path)))
+             (parent-path (string-join (take (1- (length path-parts)) path-parts) "/")))
+        (when (not (string-blank-p parent-path))
+          (setq parent-path (concat parent-path "/")))
+        (delete-region (+ (car bounds) (length parent-path)) (cdr bounds)))
+      (throw 'done t))
+
+    (when-let ((bounds (and arg (bounds-of-thing-at-point 'symbol))))
+      (delete-region (car bounds) (cdr bounds))
+      (throw 'done t))
+
+    (delete-region (point) (progn (forward-word -1) (point)))))
 
 
 (defun websearch-it (&optional base-url)

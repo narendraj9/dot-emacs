@@ -774,7 +774,7 @@ after doing `symbol-overlay-put'."
   :demand t
   :diminish auto-fill-function
   :bind (("M-q"   . fill-or-unfill)
-         ("M-["   . backward-delete-word)
+         ("M-["   . backward-delete-dwim)
          ("S-SPC" . upcase-last-symbol-and-space)
 
          :map ctl-period-map
@@ -2452,7 +2452,7 @@ after doing `symbol-overlay-put'."
               k))
 
   :config
-  (dolist (k (list "M-r" "M-s" "M-?" "RET"))
+  (dolist (k (list "M-r" "M-s" "M-?" "RET" "C-d"))
     (define-key paredit-mode-map (kbd k) nil)))
 
 (use-package clojure-mode
