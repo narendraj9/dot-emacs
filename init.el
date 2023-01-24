@@ -1718,9 +1718,9 @@ after doing `symbol-overlay-put'."
   :preface
   (defun display-line-numbers-and-column-indicator (arg)
     (interactive "P")
-    (call-interactively #'display-line-numbers-mode)
+    (display-line-numbers-mode (if display-line-numbers-mode -1 +1))
     (when (not arg)
-      (call-interactively #'display-fill-column-indicator-mode))))
+      (display-fill-column-indicator-mode (if display-fill-column-indicator-mode -1 +1)))))
 
 (use-package type-break
   :disabled t
@@ -3060,7 +3060,8 @@ after doing `symbol-overlay-put'."
   :init
   (setd gnus-init-file "etc/gnus-config.el"
         gnus-home-directory "~/miscellany/gnus"
-        gnus-directory "~/miscellany/gnus"
+        gnus-startup-file "~/miscellany/gnus/.newsrc.eld"
+        gnus-directory "~/miscellany/gnus/News"
         gnus-kill-files-directory gnus-directory)
 
   (hook-into-modes #'hl-line-mode 'gnus-summary-mode 'gnus-group-mode)
