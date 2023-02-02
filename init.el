@@ -1076,7 +1076,9 @@ after doing `symbol-overlay-put'."
                   (string-match "{{\\([^}]+\\)}}" url start-index))
         (setq start-index (match-end 0)
               url (string-replace (match-string 0 url)
-                                  (read-string (concat (match-string 1 url) ": "))
+                                  (if (region-active-p)
+                                      (buffer-substring (region-beginning) (region-end))
+                                    (read-string (concat (match-string 1 url) ": ")))
                                   url)))
       (browse-url url)))
 
