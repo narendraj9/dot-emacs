@@ -174,6 +174,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("d" . duplicate-current-line)
           ("s" . surround-symbol-with) ))
 
+
+(use-package custom-registers
+  :load-path "etc"
+  :bind ( :map ctl-x-r-map ("U" . custom-registers-url-to-register) ))
+
 (use-package no-littering
   :ensure t
   :init
