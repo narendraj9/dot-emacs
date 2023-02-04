@@ -216,7 +216,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Buffer contents auto-saved post initial file contents
   (setq auto-save-list-file-prefix
-        (expand-file-name "var/autosaves/" user-emacs-directory))
+        (expand-file-name "var/autosaves/.saves-" user-emacs-directory))
 
   (setq delete-by-moving-to-trash t)
 
@@ -1267,15 +1267,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind ("C-x o" . ace-window))
 
 ;; ――――――――――――――――――――――――――――――――――――――――
+
 (use-package recentf
-  :defer t
-  :config
-  (setq recentf-auto-cleanup 'never
-        recentf-keep '(file-remote-p file-readable-p)
-        recentf-exclude '("\.gpg$")
-        recentf-max-saved-items 1000
-        recentf-save-file (expand-file-name "var/recentf"
-                                            user-emacs-directory))
+  :custom ( (recentf-auto-cleanup 'never)
+            (recentf-keep '(file-remote-p file-readable-p))
+            (recentf-exclude '("\.gpg$"))
+            (recentf-max-saved-items 1000)
+            (recentf-save-file (expand-file-name "var/recentf"
+                                                 user-emacs-directory)) )
+  :init
   (recentf-mode +1))
 
 
