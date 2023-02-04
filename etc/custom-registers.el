@@ -58,7 +58,7 @@
   (interactive (list (register-read-with-preview "URL to register:")
                      current-prefix-arg))
   (let* ((url (if (region-active-p)
-                  (buffer-substring start end)
+                  (buffer-substring (region-beginning) (region-end))
                 (read-string "URL: " nil nil (thing-at-point 'url))))
          (description (read-string "Description: " nil nil url)))
     (set-register register
