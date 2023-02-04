@@ -627,14 +627,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package symbol-overlay
   :ensure t
-  :bind (
-         :map global-map
-         ("M-n" . symbol-overlay-put*)
-         ("M-p" . symbol-overlay-put*)
+  :bind ( :map global-map
+          ("M-n" . symbol-overlay-put*)
+          ("M-p" . symbol-overlay-put*)
 
-         :map symbol-overlay-map
-         ("M-n" . symbol-overlay-jump-next)
-         ("M-p" . symbol-overlay-jump-prev))
+          :map symbol-overlay-map
+          ("M-n" . symbol-overlay-jump-next)
+          ("M-p" . symbol-overlay-jump-prev) )
+
+  :init
+  (advice-add 'symbol-overlay-jump-call :after #'flash-current-symbol)
+
   :preface
   (defvar symbol-overlay-remove-all-timer nil)
   (defun symbol-overlay-remove-all-timer (buffer)
@@ -649,7 +652,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun symbol-overlay-put* ()
     "Jump to the next or previous occurrence of symbol at point
-after doing `symbol-overlay-put'."
+     after doing `symbol-overlay-put'."
     (interactive)
     (symbol-overlay-put)
     (when-let ((command (lookup-key symbol-overlay-map
@@ -659,13 +662,10 @@ after doing `symbol-overlay-put'."
   (defun flash-current-symbol (&rest _)
     "Pulse highlight symbol at point."
     (let ((bounds (bounds-of-thing-at-point 'symbol))
-          (pulse-delay 0.01))
+          (pulse-delay 0.02))
       (symbol-overlay-remove-all-timer (current-buffer))
       (pulse-momentary-highlight-region (car bounds)
-                                        (cdr bounds))))
-
-  :init
-  (advice-add 'symbol-overlay-jump-call :after #'flash-current-symbol))
+                                        (cdr bounds)))))
 
 (use-package crux
   :ensure t
