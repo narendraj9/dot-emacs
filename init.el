@@ -46,12 +46,9 @@
 
 ;;; PACKAGE ARCHIVES
 ;;  ─────────────────────────────────────────────────────────────────
+
 (require 'package)
-(setq package-archives
-      '(("gnu"          . "https://elpa.gnu.org/packages/")
-        ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
-        ("melpa"        . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")))
+(add-to-list 'package-archives (cons "melpa" "https://melpa.org/packages/"))
 (setq package-native-compile t)
 
 ;;; USE-PACKAGE
@@ -2000,7 +1997,7 @@ after doing `symbol-overlay-put'."
 ;;; GRAPHICS
 ;; ──────────────────────────────────────────────────────────────────
 
-(use-package gnuplot-mode
+(use-package gnuplot
   :defer t
   :ensure t
   :custom (gnuplot-program "gnuplot-wx"))
@@ -2213,7 +2210,7 @@ after doing `symbol-overlay-put'."
 
 (use-package consult
   :ensure t
-  :custom (consult-preview-key (kbd "M-."))
+  :custom (consult-preview-key "M-.")
   :bind ( :map global-map
           ("M-s a" . consult-grep-dwim)
           ("C-x b" . consult-buffer)
