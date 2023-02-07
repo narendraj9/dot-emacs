@@ -59,8 +59,8 @@ Otherwise, limit to only `org-mode' files."
   "Search org files using `consult-grep'."
   (interactive)
   (require 'consult)
-  (let ((consult-grep-args (concat consult-grep-args
-                                   " --exclude=*.htm --exclude=*.html")))
+  (let ((consult-grep-args (append consult-grep-args
+                                   (list " --exclude=*.htm --exclude=*.html"))))
     (consult-grep org-directory)))
 
 

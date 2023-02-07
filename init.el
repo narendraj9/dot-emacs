@@ -1399,6 +1399,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;; ──────────────────────────────────────────────────────────────────
 
+(use-package dired :custom (dired-kill-when-opening-new-dired-buffer t))
 (use-package dired-x
   :bind (("C-x C-j" . dired-jump)
          :map dired-mode-map
