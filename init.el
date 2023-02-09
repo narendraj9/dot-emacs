@@ -62,9 +62,11 @@
 
 (eval-and-compile
   (add-to-list 'use-package-keywords :doc t)
+  (add-to-list 'use-package-keywords :git nil)
+
   (defun use-package-handler/:doc (name-symbol _keyword _docstring rest state)
     "An identity handler for :doc.
-Currently, the value for this keyword is being ignore.  In the
+Currently, the value for this keyword is just ignored.  In the
 future, I might want to add its value to name-symbol's
 documentation string.
 
@@ -75,6 +77,23 @@ Argument REST is the list of rest of the  keywords.
 Argument STATE is maintained by `use-package' as it processes symbols."
     (let ((body (use-package-process-keywords name-symbol rest state)))
       body)))
+
+(defun use-package-normalize/:git (name keyword args)
+  ;; No error handling yet.
+  (car args))
+
+(defun use-package-handler/:git (name-symbol _keyword git-url rest state)
+  (let* ((body (use-package-process-keywords name-symbol rest state))
+         (package-directory (file-name-base git-url))
+         (package-path (expand-file-name (format "packages/git/%s" package-directory)
+                                         user-emacs-directory)))
+    (use-package-concat
+     `((eval-and-compile (add-to-list 'load-path ,package-path))
+       (when (or (not (file-exists-p ,package-path))
+                 (directory-empty-p ,package-path))
+         (message "Cloning %s" ,git-url)
+         (shell-command ,(format "git clone %s %s" git-url package-path))))
+     body)))
 
 ;;; Emacs Lisp Compilation
 
@@ -1697,22 +1716,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   )
 
 
-(use-package tree-sitter
-  :disabled t
-  :ensure t
+(use-package treesit
   :defer t
-  :diminish tree-sitter-mode
-  :init
-  (global-tree-sitter-mode +1)
-  (hook-into-modes #'tree-sitter-hl-mode
-                   'python-mode)
-  :config
-  (use-package tree-sitter-langs
-    :load-path "~/code/tree-sitter-langs/"
-    :defer 5
-    :init
-    (setq tree-sitter-langs-git-dir
-          (expand-file-name "~/code/tree-sitter-langs"))))
+  :doc "[2023-02-08 Wed 22:48] Tree-sitter support is now built into Emacs.")
+
+(use-package combobulate
+  :git "https://github.com/mickeynp/combobulate")
 
 
 ;;; ----------------------------------------------------------------------------
