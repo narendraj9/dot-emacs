@@ -480,8 +480,8 @@ This has been taken from http://whattheemacsd.com/."
         (let ((first-win (selected-window)))
           (funcall splitter)
           (if this-win-2nd (other-window 1))
-          (set-window-buffer (selected-window) this-win-buffer)
-          (set-window-buffer (next-window) next-win-buffer)
+          (set-window-buffer (selected-window) next-win-buffer)
+          (set-window-buffer (next-window) this-win-buffer)
           (select-window first-win)
           (if this-win-2nd (other-window 1))))))
 

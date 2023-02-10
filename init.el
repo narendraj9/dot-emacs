@@ -1167,8 +1167,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (setq winner-dont-bind-my-keys t)
   (winner-mode +1)
-  (define-repeat-map (">" . winner-redo)
-                     ("<" . winner-undo)))
+  :config
+  (define-key winner-repeat-map ">" #'winner-redo)
+  (define-key winner-repeat-map "<" #'winner-undo))
 
 (use-package exwm
   :disabled t
@@ -1774,7 +1775,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (if-let ((w (some-window (lambda (w) (eq (window-buffer w)
                                              eldoc--doc-buffer)))))
         (delete-window w)
-      (eldoc-doc-buffer))))
+      (display-buffer (eldoc-doc-buffer)))))
 
 (use-package which-func
   :disabled t
@@ -1903,7 +1904,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :defer t
   :diminish aggressive-indent-mode
-  :hook ((emacs-lisp-mode clojure-mode racket-mode scheme-mode cc-mode) . aggressive-indent-mode))
+  :hook ((emacs-lisp-mode clojure-mode racket-mode scheme-mode cc-mode rust-mode) . aggressive-indent-mode))
 
 (use-package comint
   :defer t
