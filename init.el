@@ -92,7 +92,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
        (when (or (not (file-exists-p ,package-path))
                  (directory-empty-p ,package-path))
          (message "Cloning %s" ,git-url)
-         (shell-command ,(format "git clone %s %s" git-url package-path))))
+         (shell-command ,(format "git clone %s %s"
+                                 (shell-quote-argument git-url)
+                                 (shell-quote-argument package-path)))))
      body)))
 
 ;;; Emacs Lisp Compilation
