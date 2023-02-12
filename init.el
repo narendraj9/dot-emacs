@@ -2598,11 +2598,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (unless (executable-find "clj-kondo")
     (async-shell-command
      (concat "cd /tmp;"
-             "curl -s \"https://api.github.com/repos/borkdude/clj-kondo/releases\""
-             "| grep browser"
-             "| grep linux-amd64.tar.gz"
-             "| head -n 1 | cut -d '\"' -f4 | xargs curl -sL | tar -xz;"
-             "mv /var/clj-kondo ~/.local/bin;"))))
+             "curl -sLO https://raw.githubusercontent.com/clj-kondo/clj-kondo/master/script/install-clj-kondo;"
+             "chmod +x install-clj-kondo;"
+             "./install-clj-kondo --dir ~/.local/bin/;"))))
 
 (use-package geiser
   :defer t
