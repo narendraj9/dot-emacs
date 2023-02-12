@@ -1720,11 +1720,34 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 
 (use-package treesit
+  :doc
+  "[2023-02-08 Wed 22:48] Tree-sitter support is now built into Emacs.
+   The directory where shared libraries for language grammars are
+   installed is not configurable yet (fixed to tree-sitter under
+   `user-emacs-directory'."
   :defer t
-  :doc "[2023-02-08 Wed 22:48] Tree-sitter support is now built into Emacs.")
+  :custom (treesit-)
+  :config
+  (dolist (grammar
+           '((css "https://github.com/tree-sitter/tree-sitter-css")
+             (rust "https://github.com/tree-sitter/tree-sitter-rust")
+             (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
+             (python "https://github.com/tree-sitter/tree-sitter-python")
+             (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+             (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+    (add-to-list 'treesit-language-source-alist grammar)
 
-(use-package combobulate
-  :git "https://github.com/mickeynp/combobulate")
+    :preface
+    (defun install-tree-sitter-grammer-if-required (language &optional quiet)
+      "Given a language symbol install tree-sitter grammer if not
+       already avaialble."
+      (if (treesit-language-available-p language)
+          (unless quiet
+            (message "Tree-sitter grammar for %s already installed." language))
+        (treesit-install-language-grammar language)))))
+
+
+(use-package combobulate :git "https://github.com/mickeynp/combobulate")
 
 
 ;;; ----------------------------------------------------------------------------
@@ -2384,10 +2407,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package rust-mode
   :defer t
   :ensure t
+  :bind ( :map rust-mode-map ("RET" . newline-and-indent) )
   :hook ((rust-mode . eldoc-mode)
-         (rust-mode . cargo-minor-mode))
-  :bind ( :map rust-mode-map
-          ("RET" . newline-and-indent) ))
+         (rust-mode . cargo-minor-mode)
+         (rust-mode . combobulate))
+  :init
+  (add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
+
+  :config
+  (install-tree-sitter-grammer-if-required 'rust t))
 
 (use-package flycheck-rust
   :hook (rust-mode . flycheck-rust-setup)
