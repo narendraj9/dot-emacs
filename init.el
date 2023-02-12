@@ -1699,15 +1699,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
   (setq read-process-output-max (* 1024 1024))
 
-  (hook-into-modes #'eglot-ensure
-                   'clojure-mode
-                   'java-mode 'rust-mode 'python-mode
-                   'go-mode 'c-mode 'c++-mode)
+  (hook-into-modes
+   #'eglot-ensure
+   'clojure-mode 'java-mode 'rust-mode 'rust-ts-mode
+   'python-mode 'go-mode 'c-mode 'c++-mode)
   :config
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
 
   (dolist (lang-server-spec `((rust-mode         . ("rustup" "run" "stable" "rust-analyzer"))
+                              (rust-ts-mode      . ("rustup" "run" "stable" "rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))
                               (java-mode         . ,#'java-eclipse-jdt-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec))
