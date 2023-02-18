@@ -784,12 +784,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defmacro define-repeat-map (&rest bindings)
     (declare (indent 0))
-    (let ((m (make-sparse-keymap))
-          (name (gensym "repeat-map--")))
-      (dolist (binding bindings)
-        (define-key m (kbd (car binding)) (cdr binding))
-        (put (cdr binding) 'repeat-map name))
-      (list 'defvar name (list 'quote m)))))
+    ;; Use gensym just for the name of the symbol, let the generated
+    ;; symbol be garbage collected. `intern' then creates a new symbol
+    ;; that is used and remains valid globally.
+    (let ((keymap-symbol (intern (symbol-name (gensym "repeat-map--")))))
+      `(let* ((m (make-sparse-keymap)))
+         (dolist (binding (quote ,bindings))
+           (define-key m (kbd (car binding)) (cdr binding))
+           (put (cdr binding) 'repeat-map (quote ,keymap-symbol)))
+         (defvar ,keymap-symbol m)))))
 
 (use-package select :init (setq select-enable-clipboard t))
 (use-package simple
