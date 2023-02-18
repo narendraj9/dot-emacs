@@ -1577,7 +1577,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Keep personal snippets away from existing default snippets.
   (push (expand-file-name "snippets/" user-emacs-directory)
         yas-snippet-dirs)
-  (yas-global-mode +1))
+  (yas-global-mode +1)
+
+  ;; Tree Sitter major modes and their corresponding non-tree-sitter modes
+  ;; should share the same snippets.
+  (add-hook 'python-ts-mode
+            (lambda () (yas-activate-extra-mode 'python-mode)))
+  (add-hook 'rust-ts-mode
+            (lambda () (yas-activate-extra-mode 'rust-mode))))
 
 (use-package yasnippet-snippets
   :doc
