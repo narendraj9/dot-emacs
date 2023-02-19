@@ -1713,6 +1713,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    #'eglot-ensure
    'clojure-mode 'java-mode 'rust-mode 'rust-ts-mode
    'python-mode 'go-mode 'c-mode 'c++-mode)
+
+  ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
+  ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
+  ;; separately in a hook.
+  (setq eglot-stay-out-of '(eldoc-documentation-strategy))
+
   :config
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
@@ -1721,13 +1727,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               (rust-ts-mode      . ("rustup" "run" "stable" "rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))
                               (java-mode         . ,#'java-eclipse-jdt-launcher)))
-    (add-to-list 'eglot-server-programs lang-server-spec))
-
-  ;; :preface
-  ;; (cl-defmethod eglot-handle-notification
-  ;;   (_server (_method (eql language/status)) &key _type message &allow-other-keys)
-  ;;   (message "%s" message))
-  )
+    (add-to-list 'eglot-server-programs lang-server-spec)))
 
 
 (use-package treesit
@@ -1804,6 +1804,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setq eldoc-echo-area-use-multiline-p nil)
   (global-eldoc-mode +1)
+  (setq-default eldoc-documentation-strategy
+                #'eldoc-documentation-compose-eagerly)
+
   :preface
   (defun toggle-eldoc-doc-buffer ()
     "Depends upon internal details of `eldoc-mode'."
