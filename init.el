@@ -1734,13 +1734,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 
 (use-package treesit
+  :defer t
+  :when (treesit-available-p)
   :doc
   "[2023-02-08 Wed 22:48] Tree-sitter support is now built into Emacs.
    The directory where shared libraries for language grammars are
    installed is not configurable yet (fixed to tree-sitter under
    `user-emacs-directory'."
-  :defer t
-  :custom (treesit-)
+
+  :init
+  (add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
+
   :config
   (dolist (grammar
            '((css "https://github.com/tree-sitter/tree-sitter-css")
@@ -2428,11 +2433,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :hook ((rust-mode . eldoc-mode)
          (rust-mode . cargo-minor-mode)
          (rust-mode . combobulate))
-  :init
-  (add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
 
   :config
-  (install-tree-sitter-grammer-if-required 'rust t))
+  (when (treesit-available-p)
+    (install-tree-sitter-grammer-if-required 'rust t)))
 
 (use-package flycheck-rust
   :hook (rust-mode . flycheck-rust-setup)
