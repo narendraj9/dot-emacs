@@ -1154,7 +1154,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                (window-height   . 10))) )
     (add-to-list 'display-buffer-alist display-spec))
 
-  (dolist (buffer-regex '("\\`\\*eldoc\\*\\'" "\\`magit: .*\\'" "\\`\\*cider-doc\\*\\'"))
+  (dolist (buffer-regex '("\\` ?\\*eldoc\\*\\'" "\\`magit: .*\\'" "\\`\\*cider-doc\\*\\'"))
     (add-to-list 'display-buffer-alist
                  `(,buffer-regex display-buffer-in-direction
                                  (window . main)
