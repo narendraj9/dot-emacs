@@ -3415,20 +3415,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :commands backlight)
 
 (use-package proced
-  :bind (
-         :map ctl-quote-map
-         ("s t" . proced)
-         :map proced-mode-map
-         ("w"   . delete-other-windows)
-         ("q"   . kill-buffer-and-window))
+  :custom (proced-auto-update-flag nil)
+  :bind ( :map ctl-quote-map
+          ("s t" . proced)
+          :map proced-mode-map
+          ("w"   . delete-other-windows)
+          ("q"   . kill-buffer-and-window) )
 
   :config
-  (setq-default proced-auto-update-flag t)
-
   (define-key proced-mode-map
-    [remap proced-toggle-tree] #'proced-toggle-marks)
+              [remap proced-toggle-tree] #'proced-toggle-marks)
   (define-key proced-mode-map
-    [remap proced-toggle-marks] #'proced-toggle-tree))
+              [remap proced-toggle-marks] #'proced-toggle-tree))
 
 (use-package forecast
   :load-path "packages/lisp"
