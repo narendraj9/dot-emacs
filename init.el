@@ -2432,7 +2432,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind ( :map rust-mode-map ("RET" . newline-and-indent) )
   :hook ((rust-mode . eldoc-mode)
          (rust-mode . cargo-minor-mode)
-         (rust-mode . combobulate))
+         (rust-mode . combobulate-setup))
 
   :config
   (when (treesit-available-p)
