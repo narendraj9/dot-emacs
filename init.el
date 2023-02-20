@@ -1703,7 +1703,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c C-j" . eglot-reconnect)
           ("C-c r g" . eglot-code-actions)
           ("C-c r r" . eglot-rename)
-          ("C-c d"   . toggle-eldoc-doc-buffer) )
+          ("C-c d"   . toggle-eldoc-doc-buffer)
+
+          :map ctl-m-map
+          ("l"   . eglot-code-actions) )
   :init
   ;; Default: 4KB is too low for LSP servers.
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
