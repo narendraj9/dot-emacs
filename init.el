@@ -484,6 +484,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Utilities
 ;; ──────────────────────────────────────────────────────────────────
 
+(use-package sql
+  :defer t
+  :bind ( :map sql-interactive-mode-map
+          ("S-SPC" . upcase-last-symbol-and-space) ))
+
+
 (use-package wtf
   :load-path "packages/lisp/"
   :commands wtf-is)
@@ -801,7 +807,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :diminish auto-fill-function
   :bind (("M-q"   . fill-or-unfill)
          ("M-["   . backward-delete-dwim)
-         ("S-SPC" . upcase-last-symbol-and-space)
 
          :map ctl-period-map
          ("C-u" . delete-indentation)
@@ -2429,6 +2434,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package rust-mode
   :defer t
   :ensure t
+  :custom (rust-format-on-save t)
   :bind ( :map rust-mode-map ("RET" . newline-and-indent) )
   :hook ((rust-mode . eldoc-mode)
          (rust-mode . cargo-minor-mode)
