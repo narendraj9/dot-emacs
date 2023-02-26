@@ -1790,7 +1790,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (treesit-install-language-grammar language)))))
 
 
-(use-package combobulate :git "https://github.com/mickeynp/combobulate")
+(use-package combobulate :git "https://github.com/mickeynp/combobulate.git")
+(use-package ts-movement :git "https://github.com/haritkapadia/ts-movement.git")
 
 
 ;;; ----------------------------------------------------------------------------
@@ -2456,8 +2457,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom (rust-format-on-save t)
   :bind ( :map rust-mode-map ("RET" . newline-and-indent) )
   :hook ((rust-mode . eldoc-mode)
-         (rust-mode . cargo-minor-mode)
-         (rust-mode . combobulate-setup))
+         (rust-mode . cargo-minor-mode))
 
   :config
   (when (treesit-available-p)
