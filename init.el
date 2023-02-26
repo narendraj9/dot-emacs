@@ -789,6 +789,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :preface
   (defmacro define-repeat-map (&rest bindings)
+    ;; TODO: add a keyword argument to provide a name for the keymap instead of
+    ;; the auto-generated name.
     (declare (indent 0))
     ;; Use gensym just for the name of the symbol, let the generated
     ;; symbol be garbage collected. `intern' then creates a new symbol
@@ -1159,7 +1161,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                (window-height   . 10))) )
     (add-to-list 'display-buffer-alist display-spec))
 
-  (dolist (buffer-regex '("\\` ?\\*eldoc\\*\\'" "\\`magit: .*\\'" "\\`\\*cider-doc\\*\\'"))
+  (dolist (buffer-regex '("\\` ?\\*eldoc\\*\\'"
+                          "\\` ?\\*Dictionary\\*\\'"
+                          "\\`magit: .*\\'"
+                          "\\`\\*cider-doc\\*\\'"))
     (add-to-list 'display-buffer-alist
                  `(,buffer-regex display-buffer-in-direction
                                  (window . main)
@@ -1319,7 +1324,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "`dictionary' is a built-in package. It uses
   `dictionary-connection' that provides nice utility functions for
   talking to any TCP server."
-  :commands dictionary-word-at-mouse-event
+  :commands (dictionary-word-at-mouse-event dictionary-definition)
   :bind ( :map global-map
           ([double-down-mouse-1] . dictionary--word-def*)
 
@@ -1335,17 +1340,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun dictionary--word-def* (event)
     (interactive "e")
-    (message "Called with: %s" event)
     (dictionary--word-def (dictionary-word-at-mouse-event event)))
 
-  (defun dictionary--word-def (word)
-    (interactive (list (read-string "Word: " (word-at-point))))
-    (if-let ((meaning (and word (dictionary-definition word))))
-        ;; I need this delay so that the tooltip isn't immediately removed
-        ;; because of the mouse event itself.
-        (run-with-timer 1 nil (lambda ()
-                                (let ((x-gtk-use-system-tooltips nil))
-                                  (tooltip-show meaning)))))))
+  (defun dictionary--word-def (prefix)
+    (interactive "P")
+    (let* ((word (or (word-at-point) (read-string "Word: ")))
+           (popup-text (or (and word (dictionary-definition word))
+                           (format "No meaning found for word: %s" word))))
+      (if prefix
+          (select-window (get-buffer-window (with-output-to-temp-buffer "*Dictionary*"
+                                              (print popup-text)
+                                              (current-buffer))))
+        (let ((popup-instance (popup-tip popup-text
+                                         :around t
+                                         :nowait t
+                                         :scroll-bar t)))
+          (run-with-timer 5 nil (lambda () (popup-delete popup-instance))))))))
 
 (use-package flyspell
   :diminish flyspell-mode
@@ -1376,7 +1386,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;; ──────────────────────────────────────────────────────────────────
 
-(use-package popup :defer t :ensure t)
+(use-package popup
+  ;; Only to add an autoload for this function (which isn't a command).
+  :commands (popup-tip popup-clear-all-popups)
+  :defer t
+  :ensure t
+  :preface
+  (defun popup-clear-all-popups ()
+    (interactive)
+    (dolist (popup popup-instances)
+      (popup-delete popup))))
 
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
