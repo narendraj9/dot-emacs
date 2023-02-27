@@ -696,6 +696,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package crux
   :ensure t
+  :commands (crux-swap-windows crux-transpose-windows)
   :bind (("C-<backspace>" . crux-kill-line-backwards)
          ("S-<return>"    . crux-switch-to-previous-buffer))
   :hook (after-init . crux-reopen-as-root-mode))
@@ -1140,8 +1141,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (pixel-scroll-precision-mode +1))
 
 (use-package window
-  ;; There is no mnemonic here, it's just convenient to type.
-  :bind (:map ctl-period-map ("e" . fit-window-to-buffer*) )
+  :bind ( :map window-prefix-map
+          ("-" . fit-window-to-buffer*)
+          ("k" . crux-swap-windows)
+          ("j" . crux-transpose-windows)
+          ("t" . toggle-window-split) )
   :init
   ;; Adds an entry to `emulation-mode-map-alists' which take precedence over all
   ;; active minor-mode keymaps and the active major-mode keymap in a buffer.
@@ -2454,7 +2458,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package rust-mode
   :defer t
   :ensure t
-  :custom (rust-format-on-save t)
+  :custom (rust-format-on-save nil)
   :bind ( :map rust-mode-map ("RET" . newline-and-indent) )
   :hook ((rust-mode . eldoc-mode)
          (rust-mode . cargo-minor-mode))
