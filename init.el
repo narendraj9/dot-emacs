@@ -1142,7 +1142,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package window
   :bind ( :map window-prefix-map
-          ("-" . fit-window-to-buffer*)
+          ("+" . fit-window-to-buffer*)
           ("k" . crux-swap-windows)
           ("j" . crux-transpose-windows)
           ("t" . toggle-window-split) )
@@ -1178,7 +1178,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun fit-window-to-buffer* (arg)
     (interactive "P")
-    (fit-window-to-buffer (if arg (other-window 1) (selected-window)))))
+    (fit-window-to-buffer (other-window 1))))
 
 
 (use-package winner
