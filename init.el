@@ -170,8 +170,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
           :map ctl-m-map
           ("t" . switch-to-scratch-new-tab)
-          ("k" . swap-ctrl-right-win)
-          ("f" . pretty-format-temporarily)
 
           :map ctl-quote-map
           ("w s" . websearch-it)
@@ -357,7 +355,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           (mode-line-buffer-identification nil)
           (header-line-format (string-trim (pomodoro-status))))
       (force-mode-line-update)
-      (sit-for 2)
+      (sit-for 5)
       (force-mode-line-update))))
 
 (use-package fringe
@@ -2968,6 +2966,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :ensure t
   :mode "\\.yml\\'")
+
+;;; Infra
+;;  ─────────────────────────────────────────────────────────────────
+
+(use-package terraform-mode
+  :ensure t
+  :defer t
+  :mode "\\.tf\\(vars\\)?\\'")
+(use-package ansible        :ensure t :defer t)
+
 
 ;;; Version Control
 ;;  ─────────────────────────────────────────────────────────────────
