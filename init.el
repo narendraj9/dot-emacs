@@ -2230,12 +2230,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package minibuffer
   :bind ( :map minibuffer-mode-map
           ("C-w" . yank-symbol-to-minibuffer-or-kill-region ) )
-  :config
-  (setq enable-recursive-minibuffers t
-        history-delete-duplicates t
-        history-length 1000)
-  (minibuffer-depth-indicate-mode +1)
+  :custom ( enable-recursive-minibuffers t
+            history-delete-duplicates t
+            history-length 1000
+            read-file-name-completion-ignore-case t)
 
+  :config
+  (minibuffer-depth-indicate-mode +1)
   (add-hook 'minibuffer-setup-hook
             (lambda ()
               (when (< 10 (minibuffer-depth))
