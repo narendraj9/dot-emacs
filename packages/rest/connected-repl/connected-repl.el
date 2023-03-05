@@ -31,7 +31,9 @@
     (java-mode . ("jshell> " "jshell" "-q"))
 
     (rust-ts-mode . (">> "  "evcxr"))
-    (rust-mode . (">> "  "evcxr")) )
+    (rust-mode . (">> "  "evcxr"))
+
+    (python-ts-mode . (">>> " "python3")) )
   "Configuration of commands to start REPLs, value is an association list.
 
   Each item of the association list follows the following format:
@@ -41,13 +43,13 @@
   where arg1, arg2, ... argN represent arguments to command to
   start a REPL session.")
 
-
 (defvar connected-repl--buffer)
 (make-local-variable 'connected-repl--buffer)
 
 (defvar connected-repl--last-output)
 (make-local-variable 'connected-repl--last-output)
 
+(defvar connected-repl-prompt-regexp)
 
 (defun connected-repl-collect-output (s)
   (setq connected-repl--last-output
@@ -83,7 +85,7 @@
    instead of the ones defined in `connected-repl-commands'."
   (interactive "P")
   (let* ((repl-entry-for-mode (assoc-default major-mode connected-repl-commands))
-         (connected-repl-prompt (car repl-entry-for-mode))
+         (connected-repl-prompt-regexp (car repl-entry-for-mode))
          (connected-repl-command (cadr repl-entry-for-mode))
          (switches (cddr repl-entry-for-mode)))
     (unless connected-repl-command

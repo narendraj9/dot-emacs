@@ -1849,7 +1849,28 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (if-let ((w (some-window (lambda (w) (eq (window-buffer w)
                                              eldoc--doc-buffer)))))
         (delete-window w)
-      (display-buffer (eldoc-doc-buffer)))))
+      (display-buffer (eldoc-doc-buffer))))
+
+  (defun eldoc-documentation-using-link-at-point (cb)
+    (let (url)
+      (when-let ((url-at-point (or (and (fboundp 'markdown-link-url)
+                                        (markdown-link-url)))))
+        (setq url url-at-point))
+      (when url
+        (request url
+          :parser
+          (lambda ()
+            (shr-render-region (point-min) (point-max))
+            (buffer-substring (point-min) (point-max)))
+
+          :success
+          (cl-function
+           (lambda (&key data &allow-other-keys)
+             (funcall cb data)))
+
+          :error (lambda () (message "Failed to fetch url: " url)))
+        ;; Expect a response asynchronously when `:success' callback is executed.
+        t))))
 
 (use-package which-func
   :disabled t
