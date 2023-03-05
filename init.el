@@ -841,7 +841,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; Make text copied/cut from outside Emacs part of Emacs kill-ring on first
   ;; kill inside Emacs.
-  (setq kill-ring-max 1000
+  (setq kill-ring-max 10240
         save-interprogram-paste-before-kill t
         kill-do-not-save-duplicates t)
 

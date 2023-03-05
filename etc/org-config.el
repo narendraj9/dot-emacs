@@ -91,9 +91,11 @@ Otherwise, limit to only `org-mode' files."
         '((heading . nil) (plain-list-item . nil))
         org-image-actual-width nil
 
-        ;; Un-Hide all blocks on startup
-        ;; Hiding blocks feels unnatural.
+        ;; Blocks and Drawers
         org-hide-block-startup nil
+        org-cycle-hide-block-startup nil
+        org-cycle-hide-drawer-startup t
+        org-hide-drawer-startup t
 
         org-startup-with-latex-preview nil
         org-preview-latex-image-directory
