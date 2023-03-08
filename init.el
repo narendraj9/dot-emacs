@@ -3358,6 +3358,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; UTILITIES
 ;; ──────────────────────────────────────────────────────────────────
 
+(use-package poke-mode :ensure t :defer t)
+(use-package poke :ensure t :defer t)
+
 (use-package chart
   :preface
   (defun chart-numbers-on-line (&optional arg)
