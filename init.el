@@ -1065,7 +1065,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("m" . magit-status))
   :init
   (setq project-list-file
-        (expand-file-name "var/project-list" user-emacs-directory))
+        (expand-file-name "var/project-list" user-emacs-directory)
+
+        project-vc-extra-root-markers
+        (list ".project" "pom.xml"))
 
   :config
   (autoload #'magit-status "magit" nil t)
@@ -1080,6 +1083,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          (find-file))))
 
 (use-package project-x
+  :disabled t
   :load-path "etc/"
   :after project
   :custom (project-x-local-identifier ".project-x")
@@ -3358,8 +3362,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; UTILITIES
 ;; ──────────────────────────────────────────────────────────────────
 
-(use-package poke-mode :ensure t :defer t)
-(use-package poke :ensure t :defer t)
+(use-package poke-mode
+  :ensure t
+  :defer t)
+
+(use-package poke
+  :ensure t
+  :defer t
+  :commands poke
+  :config
+  (poke-frame-layout-1))
 
 (use-package chart
   :preface
