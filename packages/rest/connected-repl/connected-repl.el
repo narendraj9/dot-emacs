@@ -46,7 +46,7 @@
 (defvar connected-repl--buffer)
 (make-local-variable 'connected-repl--buffer)
 
-(defvar connected-repl--last-output)
+(defvar connected-repl--last-output "")
 (make-local-variable 'connected-repl--last-output)
 
 (defvar connected-repl-prompt-regexp)
@@ -54,6 +54,13 @@
 (defun connected-repl-collect-output (s)
   (setq connected-repl--last-output
         (concat connected-repl--last-output s)))
+
+
+(defun connected-repl-add-local-bindings ()
+  (let ((m (current-local-map)))
+    (define-key m (kbd "C-c C-k") #'connected-repl-send-region)
+    (define-key m (kbd "C-x C-e") #'connected-repl-send-statement)
+    (define-key m (kbd "C-c C-z") #'connected-repl-display-buffer)))
 
 
 (define-derived-mode connected-repl-mode comint-mode "connected-repl"
@@ -65,10 +72,11 @@
                #'connected-repl-collect-output))
 
 
-(defun inferior-lisp--send-string (s)
-  (setq connected-repl--last-output "")
-  (comint-send-string (get-buffer-process connected-repl--buffer)
-                      (if (string-suffix-p "\n" s) s (concat s "\n"))))
+(defun connected-repl--send-string (s)
+  (with-current-buffer (get-buffer connected-repl--buffer)
+    (setq connected-repl--last-output "")
+    (comint-send-string (get-buffer-process (current-buffer))
+                        (if (string-suffix-p "\n" s) s (concat s "\n")))))
 
 
 (defun connected-repl-display-buffer ()
@@ -97,6 +105,7 @@
                        connected-repl-command
                        nil
                        (if prefix (read-string "Flags: ") switches)))
+    (connected-repl-add-local-bindings)
     (with-current-buffer connected-repl--buffer
       (connected-repl-mode))
     (connected-repl-display-buffer)))
@@ -109,7 +118,15 @@
   (unless (and (buffer-live-p connected-repl--buffer)
                (eq 'run (process-status (get-buffer-process connected-repl--buffer))))
     (user-error "Connected REPL buffer doesn't exist. Use `connected-repl-run'."))
-  (inferior-lisp--send-string (buffer-substring begin end)))
+  (connected-repl--send-string (buffer-substring begin end)))
+
+
+(defun connected-repl-send-statement ()
+  (interactive)
+  (unless (and (buffer-live-p connected-repl--buffer)
+               (eq 'run (process-status (get-buffer-process connected-repl--buffer))))
+    (user-error "Connected REPL buffer doesn't exist. Use `connected-repl-run'."))
+  (connected-repl--send-string (buffer-substring (line-beginning-position) (line-end-position))))
 
 
 (defun connected-repl-interrupt ()
