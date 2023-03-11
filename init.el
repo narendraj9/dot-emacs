@@ -2361,6 +2361,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
 
+(use-package connected-repl
+  :load-path "packages/rest/connected-repl/"
+  :commands (connected-repl-run))
+
 (defun java-eclipse-jdt-launcher (_arg)
   "Returns a command to start Eclipse JDT launcher script `jdtls'."
   (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/"))
@@ -3371,7 +3375,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :commands poke
   :config
-  (poke-frame-layout-1))
+  (poke-frame-layout-1)
+  :custom ( poke-settings-pretty-print "yes"
+            poke-setting-omode "tree" ))
 
 (use-package chart
   :preface
