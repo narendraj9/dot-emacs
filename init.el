@@ -1742,10 +1742,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
   (setq read-process-output-max (* 1024 1024))
 
-  (hook-into-modes
-   #'eglot-ensure
-   'clojure-mode 'java-mode 'rust-mode 'rust-ts-mode
-   'python-mode 'go-mode 'c-mode 'c++-mode)
+  (hook-into-modes #'eglot-ensure
+      'clojure-mode 'java-mode 'rust-mode 'rust-ts-mode
+      'python-mode 'go-mode 'c-mode 'c++-mode 'ruby-mode)
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
@@ -2901,7 +2900,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :after ruby-mode
   :bind (:map ruby-mode-map
-              ("C-c i" . rinari-insert-erb-skeletion))
+              ("C-c r" . rinari-insert-erb-skeletion))
   :config
   (global-rinari-mode))
 

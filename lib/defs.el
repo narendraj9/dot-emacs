@@ -65,6 +65,7 @@
 
 (defsubst hook-into-modes (func &rest modes)
   "Add FUNC to mode-hooks for MODES.  Credits: John Whigley."
+  (declare (indent 4))
   (dolist (mode modes) (add-hook (intern (format "%s-hook" mode))
                                  func)))
 
