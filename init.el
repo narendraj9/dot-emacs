@@ -1332,7 +1332,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   talking to any TCP server."
   :commands (dictionary-word-at-mouse-event dictionary-definition)
   :bind ( :map global-map
-          ([double-down-mouse-1] . dictionary--word-def*)
+          ;; ([double-down-mouse-1] . dictionary--word-def*)
 
           :map ctl-quote-map
           ("l d" . dictionary--word-def)
@@ -1808,7 +1808,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (defun display-line-numbers-and-column-indicator (arg)
     (interactive "P")
     (display-line-numbers-mode (if display-line-numbers-mode -1 +1))
-    (when (not arg)
+    (when arg
       (display-fill-column-indicator-mode (if display-fill-column-indicator-mode -1 +1)))))
 
 (use-package type-break
