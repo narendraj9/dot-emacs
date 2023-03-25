@@ -919,20 +919,48 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package vcursor
   :bind ( :map ctl-m-map
-          ("v" . vcursor-use-vcursor-map) )
+          ("v" . vcursor-use-vcursor-map-quietly)
+          ("V" . vcursor-toggle-copy)
+          ("@" . vcursor-expand-region-expand) )
+  :custom (vcursor-key-bindings t)
   :init
-  (defvar vcursor-use-vcursor-map--wc)
   (add-hook 'vcursor-use-vcursor-map-hook
-            (lambda ()
-              (if vcursor-use-vcursor-map
-                  (progn (fringe-set-louder)
-                         (setq vcursor-use-vcursor-map--wc
-                               (current-window-configuration))
-                         (save-excursion
-                           (previous-line)
-                           (vcursor-move (point))))
-                (fringe-restore-default)
-                (set-window-configuration vcursor-use-vcursor-map--wc)))))
+            #'vcursor-toggle-vcursor-config-in-buffer)
+  :preface
+  (defun vcursor-use-vcursor-map-quietly ()
+    (interactive)
+    (require 'vcursor)
+    (quietly (call-interactively #'vcursor-use-vcursor-map)))
+
+  ;; These two commands interact in a contrived way to fit exactly the workflow
+  ;; that I need to copy regions present at a place in the buffer to the
+  ;; position from where I start the whole process.
+  (defun vcursor-expand-region-expand ()
+    (interactive)
+    (unless (eq last-command 'vcursor-expand-region)
+      (let ((p (point)))
+        (vcursor-goto t)
+        (vcursor-move p)))
+    (call-interactively #'er/expand-region))
+
+  (let ((vcursor-use-vcursor-map--wc nil))
+    (defun vcursor-toggle-vcursor-config-in-buffer ()
+      (let ((selected-text (when (region-active-p)
+                             (buffer-substring (region-beginning)
+                                               (region-end)))))
+        (if vcursor-use-vcursor-map
+            (progn (fringe-set-louder)
+                   (setq vcursor-use-vcursor-map--wc
+                         (current-window-configuration))
+                   (save-excursion
+                     (previous-line)
+                     (vcursor-move (point))))
+          (fringe-restore-default)
+          (when selected-text
+            (vcursor-swap-point)
+            (insert selected-text))
+          (vcursor-disable)
+          (set-window-configuration vcursor-use-vcursor-map--wc))))))
 
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors."
@@ -2829,6 +2857,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;;; RUBY MODE
 ;;  ─────────────────────────────────────────────────────────────────
+
 (use-package ruby-mode
   :defer t
   :preface
@@ -2896,16 +2925,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
        (define-key ruby-mode-map (kbd "C-x t") nil)
        (define-key ruby-mode-map (kbd "C-x T") nil))))
 
+(use-package inf-ruby
+  :after ruby-mode
+  :bind ( :map inf-ruby-minor-mode-map
+          ("C-c C-l" . ruby-load-current-file) ))
+
 (use-package rinari
   :ensure t
   :after ruby-mode
   :bind (:map ruby-mode-map
-              ("C-c r" . rinari-insert-erb-skeletion))
+              ("C-c R" . rinari-insert-erb-skeletion))
   :config
   (global-rinari-mode))
 
 (use-package robe
   :ensure t
+  :disabled t
   :defer t
   :init
   (add-hook 'ruby-mode-hook #'robe-mode))

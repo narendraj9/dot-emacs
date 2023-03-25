@@ -100,7 +100,7 @@ buffer."
 ;; (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
 (setq gnus-summary-display-arrow t
       ;; Use the default gnus summary line.
-      ;; gnus-summary-line-format "%U %2B%(%-18,18f  %) %s\n"
+      ;; gnus-summary-line-format "%&user-date; %U%R%z%I%(%[%4L: %-23,23f%]%) %s\n"
       gnus-sum-thread-tree-single-indent " "
       gnus-sum-thread-tree-root "ŧ "
       gnus-sum-thread-tree-single-leaf "⤷ "
