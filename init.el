@@ -1366,7 +1366,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("l d" . dictionary--word-def)
           ("l D" . dictionary-search ) )
 
-  :config
+  :init
   (setq dictionary-server "dict.org")
   (add-to-list 'context-menu-functions
                'context-menu-dictionary)
@@ -2351,6 +2351,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom (consult-preview-key "M-.")
   :bind ( :map global-map
           ("M-s a" . consult-grep-dwim)
+          ("M-s f" . consult-find)
           ("C-x b" . consult-buffer)
           ("M-y"   . yank-pop)
 
@@ -2408,7 +2409,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package java-mode
   :defer t
   :hook ( (java-mode . company-mode-quicker) )
-
   :config
   (cl-defmethod eglot-handle-notification
     (server (_method (eql language/status)) &key type message &allow-other-keys)
