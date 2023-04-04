@@ -2782,7 +2782,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               ;; 1. Graphics in `ob-ipython' do not work if we remove trailing
               ;;    newlines. So, this should be excluded for buffers in
               ;;    `image-mode'.
-              (when (not (memq major-mode '(markdown-mode image-mode)))
+              (when (not (memq major-mode '(markdown-mode image-mode pdf-view-mode)))
                 (whitespace-cleanup)
                 (delete-trailing-whitespace)))))
 
