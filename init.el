@@ -30,7 +30,9 @@
 ;;; Avoid garbage collection during Emacs startup. Garbage collection when
 ;;; Emacs loses focus.
 (setq gc-cons-threshold most-positive-fixnum)
-(add-hook 'after-init-hook (lambda () (setq gc-cons-threshold (* 10 1024 1024))))
+(add-hook 'after-init-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 100 1024 1024))))
 
 ;; Try to make `.emacs.d` relocatable
 (setq user-emacs-directory
@@ -1090,7 +1092,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package project
   :bind ( :map project-prefix-map
           ("o" . git-ls-files-find-file)
-          ("m" . magit-status))
+          ("m" . magit-status)
+
+          :map global-map
+          ("M-RET" . project-find-file) )
   :init
   (setq project-list-file
         (expand-file-name "var/project-list" user-emacs-directory)
@@ -1489,8 +1494,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("C-c u" . dired-up-directory)
          ("M-<"   . dired-to-first-entry)
          ("M->"   . dired-to-last-entry)
-         ("a"     . consult-grep-dwim)
-         ("r"     . consult-ripgrep)
          ("z"     . kill-buffer-delete-window)
          ("j"     . dired-x-find-file)
          ("f"     . project-find-file)
@@ -2349,41 +2352,35 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package consult
   :ensure t
   :custom (consult-preview-key "M-.")
-  :bind ( :map global-map
-          ("M-s a" . consult-grep-dwim)
-          ("M-s f" . consult-find)
-          ("C-x b" . consult-buffer)
-          ("M-y"   . yank-pop)
+  :bind
+  ( :map global-map
+    ("M-s a" . consult-grep-dwim)
+    ("M-s f" . consult-find)
+    ("C-x b" . consult-buffer)
+    ("M-y"   . yank-pop)
 
-          :map isearch-mode-map
-          ("C-." . consult-line)
+    :map isearch-mode-map
+    ("C-." . consult-line)
 
-          :map minibuffer-local-map
-          ("M-r" . consult-history)
+    :map minibuffer-local-map
+    ("M-r" . consult-history)
 
-          :map ctl-m-map
-          ("z" . consult-complex-command)
+    :map ctl-m-map
+    ("z" . consult-complex-command)
 
-          :map ctl-quote-map
-          ("C-'" . consult-imenu)
+    :map ctl-quote-map
+    ("C-'" . consult-imenu)
 
-          :map ctl-period-map
-          ("C-s" . consult-line))
-  :preface
-  (defun consult-grep-dwim ()
-    (interactive)
-    (let ((p (project-current)))
-      (cond
-       ;; No project
-       ((not p)
-        (consult-grep))
+    :map ctl-period-map
+    ("C-s" . consult-line)
 
-       ;; A git project
-       ((eq 'Git (vc-responsible-backend (project-root p)))
-        (consult-git-grep (project-root p)))
+    :map dired-mode-map
+    ("a"     . consult-grep-dwim)
+    ("r"     . consult-ripgrep)
 
-       ;; A non-git project
-       (t (consult-grep (project-root p)))))))
+    :map project-prefix-map
+    ("f" . consult-find)
+    ("g" . consult-regexp) ))
 
 
 ;;; Programming Languages
