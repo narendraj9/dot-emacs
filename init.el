@@ -149,11 +149,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Some ergonomic alternatives
   (define-key input-decode-map
               ;; Default: \C-i => TAB
-              "\C-i" "\C-c")
+              "\C-i" "\C-x")
 
   (define-key input-decode-map
               ;; Default: \C-[ => ESC
-              "\C-[" "\C-x")
+              "\C-[" "\C-c")
 
   (define-key input-decode-map
               ;; Default: \C-m => RET
