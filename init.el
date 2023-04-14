@@ -3572,5 +3572,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    frame."
   :ensure t)
 
+(use-package c3po
+  :git "https://github.com/d1egoaz/c3po.el"
+  :init
+  (when (boundp 'openai-secret-key)
+    (setq c3po-api-key openai-secret-key)))
+
+
 (provide 'init)
 ;;; init.el ends here
