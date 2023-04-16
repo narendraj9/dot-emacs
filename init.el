@@ -1839,19 +1839,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; ----------------------------------------------------------------------------
 
 (use-package display-line-numbers
-  :bind ( :map ctl-period-map
-          ([\C-m] . display-line-numbers-and-column-indicator) )
+  :bind ( :map ctl-period-map ([\C-m] . display-line-columns-dwim) )
   :preface
-  (defun display-line-numbers-and-column-indicator (arg)
-    (interactive "P")
+  (defun display-line-columns-dwim (arg)
+    (interactive "p")
     (display-line-numbers-mode (if display-line-numbers-mode -1 +1))
-    (when arg
-      (display-fill-column-indicator-mode (if display-fill-column-indicator-mode -1 +1)))))
+    (when (= 4 arg)
+      (display-fill-column-indicator-mode (if display-fill-column-indicator-mode -1 +1)))
+    (when (= 16 arg)
+      (display-fill-column-indicator-mode -1)
+      (display-line-numbers-mode -1))))
 
 (use-package type-break
-  :disabled t
-  :bind (:map ctl-quote-map
-              ("b" . type-break))
+  :bind (:map ctl-quote-map ("b" . type-break) )
   :init
   (setq type-break-file-name nil)
   (setq type-break-mode-line-message-mode t)
@@ -2360,7 +2360,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom (consult-preview-key "M-.")
   :bind
   ( :map global-map
-    ("M-s a" . consult-grep-dwim)
     ("M-s f" . consult-find)
     ("C-x b" . consult-buffer)
     ("M-y"   . yank-pop)
@@ -2381,7 +2380,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ("C-s" . consult-line)
 
     :map dired-mode-map
-    ("a"     . consult-grep-dwim)
     ("r"     . consult-ripgrep)
 
     :map project-prefix-map
@@ -3554,29 +3552,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package gif-screencast
   :defer t
-  :doc
-  "A better alternative to my `start-recording-window' command."
+  :doc "A better alternative to my `start-recording-window' command."
   :load-path "packages/lisp")
 
-(use-package command-log-mode
-  :disabled t
-  :doc "Useful to displaying currently executing Emacs commands."
-  :commands (clm/open-command-log-buffer global-company-mode)
-  :load-path "packages/lisp"
-  :preface
-  (defun show-emacs-commands ()
-    (interactive)
-    (clm/open-command-log-buffer)
-    (global-command-log-mode +1)))
-
-(use-package keycast
-  :doc
-  "This package provides three modes that display the current command and
-   its key or mouse binding.  `keycast-mode' shows the current binding in
-   the mode-line while `keycast-tab-bar-mode' displays it in the tab-bar.
-   `keycast-log-mode' displays a list of recent bindings in a dedicated
-   frame."
-  :ensure t)
+(use-package keycast :ensure t :defer t)
+(use-package exercism :ensure t :defer t)
 
 (use-package c3po
   :git "https://github.com/d1egoaz/c3po.el"
