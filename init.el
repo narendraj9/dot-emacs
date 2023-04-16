@@ -1095,7 +1095,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("m" . magit-status)
 
           :map global-map
-          ("M-RET" . project-find-file) )
+          ("M-RET" . project-find-file)
+
+          :map ctl-m-map
+          ("f" . git-ls-files-find-file) )
+
   :init
   (setq project-list-file
         (expand-file-name "var/project-list" user-emacs-directory)
@@ -1109,11 +1113,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun git-ls-files-find-file ()
     (interactive)
-    (->> (shell-command-to-string "git ls-files")
-         (s-lines)
-         (seq-filter #'s-present?)
-         (completing-read "Find File: ")
-         (find-file))))
+    (let ((default-directory (project-root (project-current))))
+      (->> (shell-command-to-string "git ls-files")
+           (s-lines)
+           (seq-filter #'s-present?)
+           (completing-read "Find File: ")
+           (find-file)))))
 
 (use-package project-x
   :disabled t
@@ -1573,6 +1578,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package discover
   :ensure t
+  :disabled t
   :hook (dired-mode . dired-turn-on-discover))
 
 
