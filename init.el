@@ -2361,9 +2361,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind
   ( :map global-map
     ("M-s f"   . consult-find)
-    ("M-s M-s" . consult-grep)
+    ("M-s M-s" . consult-grep-dwim)
     ("C-x b"   . consult-buffer)
     ("M-y"     . yank-pop)
+
+    :map ctl-x-map
+    ("<C-m>" . consult-grep-dwim)
 
     :map isearch-mode-map
     ("C-." . consult-line)
@@ -2385,7 +2388,20 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
     :map project-prefix-map
     ("f" . consult-find)
-    ("g" . consult-regexp) ))
+    ("g" . consult-regexp) )
+
+  :preface
+  (defun consult-grep-dwim ()
+    (interactive)
+    (let ((directory (project-root (project-current)))
+          (initial (when (region-active-p)
+                     (buffer-substring (region-beginning) (region-end)))))
+      (cond
+       ((eq 'Git (vc-deduce-backend))
+        (consult-git-grep directory initial))
+
+       (t
+        (consult-grep directory initial))))))
 
 
 ;;; Programming Languages
