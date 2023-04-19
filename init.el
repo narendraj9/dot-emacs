@@ -2360,9 +2360,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom (consult-preview-key "M-.")
   :bind
   ( :map global-map
-    ("M-s f" . consult-find)
-    ("C-x b" . consult-buffer)
-    ("M-y"   . yank-pop)
+    ("M-s f"   . consult-find)
+    ("M-s M-s" . consult-grep)
+    ("C-x b"   . consult-buffer)
+    ("M-y"     . yank-pop)
 
     :map isearch-mode-map
     ("C-." . consult-line)
