@@ -484,6 +484,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Utilities
 ;; ──────────────────────────────────────────────────────────────────
 
+
+
+(use-package net-utils
+  :bind ( :map net-utils-mode-map ("G" . netutils--revert-buffer) )
+  :preface
+  (defun netutils--revert-buffer ()
+    "Revert buffer and get back to the same line number."
+    (interactive)
+    (let ((line (1+ (count-lines (point-min) (point))))
+          (buffer (buffer-name (current-buffer))))
+      (revert-buffer)
+      (add-hook 'after-revert-hook
+                (lambda ()
+                  (forward-line line))))))
+
 (use-package sql
   :defer t
   :bind ( :map sql-interactive-mode-map
@@ -2046,8 +2061,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setq comint-scroll-show-maximum-output nil))
 
+(use-package vterm :bind ( "s-<return>" . vterm ) )
+
 (use-package shell
-  :bind ( "s-<return>" . shell )
+  ;; :bind ( "s-<return>" . shell )
   :init
   (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
 
