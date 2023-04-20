@@ -3608,5 +3608,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key)))
 
+(use-package openai
+  :git "https://github.com/emacs-openai/openai"
+  :init
+  (use-package tblui :ensure t)
+  (when (boundp 'openai-secret-key)
+    (setq openai-key openai-secret-key)))
+
+(use-package chatgpt :git "https://github.com/emacs-openai/chatgpt")
+(use-package codegpt :git "https://github.com/emacs-openai/codegpt")
+
+
 (provide 'init)
 ;;; init.el ends here
