@@ -3101,6 +3101,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (use-package transient-defs :load-path "etc/"))
 
+(use-package browse-at-remote :ensure t)
+
 (use-package magit
   :ensure t
   :defer t
@@ -3593,11 +3595,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package exercism :ensure t :defer t)
 
 (use-package c3po
+  :disabled t
   :git "https://github.com/d1egoaz/c3po.el"
   :init
   (when (boundp 'openai-secret-key)
     (setq c3po-api-key openai-secret-key)))
 
+(use-package gptel
+  :git "https://github.com/karthink/gptel"
+  :init
+  (setq gptel-use-curl nil)
+  (when (boundp 'openai-secret-key)
+    (setq gptel-api-key openai-secret-key)))
 
 (provide 'init)
 ;;; init.el ends here
