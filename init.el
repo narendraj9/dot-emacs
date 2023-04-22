@@ -1714,10 +1714,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (("C-c j" . hledger-run-command)
 
          :map hledger-view-mode-map
+         ("_" . hledger-view-selective-display)
+         ("+" . set-selective-display)
          ("s" . chart-numbers-on-line)
          ("z" . calc-store-numbers-on-line))
   :config
-
   (setq hledger-jfile
         (expand-file-name "~/miscellany/personal/finance/accounting.journal"))
 
@@ -1734,7 +1735,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               (lambda ()
                                 (when (get-buffer-window hledger-reporting-buffer-name)
                                   (with-current-buffer hledger-reporting-buffer-name
-                                    (center-text-for-reading))))))))
+                                    (center-text-for-reading)))))))
+
+  :preface
+  (defun hledger-view-selective-display ()
+    (interactive)
+    (let ((column (save-excursion
+                    (beginning-of-line)
+                    (re-search-forward "[[:alnum:]]")
+                    (current-column))))
+      (set-selective-display (1+ column)))))
 
 
 (use-package hledger-input
