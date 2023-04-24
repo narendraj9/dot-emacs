@@ -2792,6 +2792,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :ensure t)
 
+
+(use-package julia-mode :ensure t)
+
 ;;; [WO]MAN-MODE
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package man
