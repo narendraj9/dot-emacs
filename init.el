@@ -2071,7 +2071,20 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setq comint-scroll-show-maximum-output nil))
 
-(use-package vterm :bind ( "s-<return>" . vterm ) )
+(use-package vterm
+  :bind ( :map global-map ( "s-<return>" . vterm )
+
+          :map vterm-mode-map
+          ("M-p" . --vterm-ctrl-p)
+          ("M-n" . --vterm-ctrl-n) )
+  :preface
+  (defun --vterm-ctrl-p ()
+    (interactive)
+    (vterm-send-key "p" nil nil t))
+
+  (defun --vterm-ctrl-n ()
+    (interactive)
+    (vterm-send-key "n" nil nil t)))
 
 (use-package shell
   ;; :bind ( "s-<return>" . shell )
@@ -3625,6 +3638,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :git "https://github.com/emacs-openai/openai"
   :init
   (use-package tblui :ensure t)
+  (setq openai-user (user-full-name))
   (when (boundp 'openai-secret-key)
     (setq openai-key openai-secret-key)))
 

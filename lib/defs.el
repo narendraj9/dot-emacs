@@ -1061,6 +1061,11 @@ respective files."
         (delete-region (+ (car bounds) (length parent-path)) (cdr bounds)))
       (throw 'done t))
 
+    (when (and (eq major-mode 'vterm-mode)
+               (fboundp 'vterm-send-meta-backspace))
+      (vterm-send-meta-backspace)
+      (throw 'done t))
+
     (when-let ((bounds (and arg (bounds-of-thing-at-point 'symbol))))
       (delete-region (car bounds) (cdr bounds))
       (throw 'done t))
