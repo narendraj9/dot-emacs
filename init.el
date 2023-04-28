@@ -99,6 +99,36 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                  (shell-quote-argument package-path)))))
      body)))
 
+
+(defun use-package-update-git-repos ()
+  (interactive)
+  (let ((update-report "")
+        (processes (list)))
+    (dolist (file-path (directory-files (expand-file-name "packages/git" user-emacs-directory)
+                                        t
+                                        "^[^\.]"))
+      (when (file-directory-p file-path)
+        (let ((default-directory file-path)
+              (update-buffer (get-buffer-create " *use-package git pull*")))
+          (with-current-buffer update-buffer
+            (insert (format ">>> Starting git pull for: %s\n\n" file-path)))
+          (push (make-process :name "git-pull"
+                              :buffer update-buffer
+                              :command (list "git" "pull")
+                              :sentinel
+                              (lambda (p status)
+                                (setq update-report (format "%s Update [%s]: %s"
+                                                            update-report
+                                                            (directory-file-name file-path)
+                                                            status))))
+                processes))))
+    (while (seq-filter (lambda (p) (eq 'run (process-status p)))
+                       processes)
+      (message "Waiting for %s to finish..." this-command)
+      (sit-for 1))
+    (message "%s finished." this-command)
+    (message-box "%s" update-report)))
+
 ;;; Emacs Lisp Compilation
 
 (setq load-prefer-newer t)
@@ -3638,7 +3668,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :git "https://github.com/emacs-openai/openai"
   :init
   (use-package tblui :ensure t)
-  (setq openai-user (user-full-name))
+  ;; (setq openai-user (sha1 (user-full-name)))
   (when (boundp 'openai-secret-key)
     (setq openai-key openai-secret-key)))
 
