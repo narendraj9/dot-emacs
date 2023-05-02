@@ -3651,8 +3651,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package exercism :ensure t :defer t)
 
 (use-package c3po
-  :disabled t
   :git "https://github.com/d1egoaz/c3po.el"
+  :defer t
   :init
   (when (boundp 'openai-secret-key)
     (setq c3po-api-key openai-secret-key)))
@@ -3668,7 +3668,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :git "https://github.com/emacs-openai/openai"
   :init
   (use-package tblui :ensure t)
-  ;; (setq openai-user (sha1 (user-full-name)))
+  ;; The same variable sets up the user role.
+  ;; (setq openai-user (user-full-name))
   (when (boundp 'openai-secret-key)
     (setq openai-key openai-secret-key)))
 
