@@ -3664,6 +3664,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key)))
 
+(use-package tblui :ensure t)
 (use-package openai
   :git "https://github.com/emacs-openai/openai"
   :init
