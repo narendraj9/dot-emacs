@@ -2699,6 +2699,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :mode "\\.clj\\'"
   :config
+  (unless (executable-find "clojure-lsp")
+    (async-shell-command
+     (concat "cd /tmp;"
+             "curl -o install-clojure-lsp -sLO https://raw.githubusercontent.com/clojure-lsp/clojure-lsp/master/install;"
+             "chmod +x install-clojure-lsp;"
+             "./install-clojure-lsp --dir ~/.local/bin/;")))
+
   (setq clojure-indent-style :always-align
         clojure-align-forms-automatically t)
 
