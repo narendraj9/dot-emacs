@@ -340,14 +340,19 @@
 
 ;;;###autoload
 (defun pomodoro-status ()
-  (if pomodoro-timer
-      (format "Current (%s): %s\n\n"
-              (string-trim (org-timer-value-string))
-              pomodoro-title)
-    (format "Last Pomodoro: %s ago\n\n"
-            (pomodoro--format-duration
-             (pomodoro--duration-mins (current-time)
-                                      (cadar pomodoro-list))))))
+  (cond
+   (pomodoro-timer
+    (format "Current (%s): %s\n\n"
+            (string-trim (org-timer-value-string))
+            pomodoro-title))
+
+   ((and (not pomodoro-timer) org-timer-countdown-timer)
+    (format "Break: %s\n\n" (string-trim (org-timer-value-string))))
+
+   (t (format "Last Pomodoro: %s ago\n\n"
+              (pomodoro--format-duration
+               (pomodoro--duration-mins (current-time)
+                                        (cadar pomodoro-list)))))))
 
 ;;;###autoload
 (defun pomodoro-summary ()

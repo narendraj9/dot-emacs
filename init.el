@@ -1825,10 +1825,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c C-j" . eglot-reconnect)
           ("C-c r g" . eglot-code-actions)
           ("C-c r r" . eglot-rename)
-          ("C-c d"   . toggle-eldoc-doc-buffer)
 
           :map ctl-m-map
-          ("l"   . eglot-code-actions) )
+          ("l" . eglot-code-actions)
+          ("d" . toggle-eldoc-doc-buffer) )
   :init
   ;; Default: 4KB is too low for LSP servers.
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
@@ -1943,7 +1943,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (if-let ((w (some-window (lambda (w) (eq (window-buffer w)
                                              eldoc--doc-buffer)))))
-        (delete-window w)
+        (progn (delete-window w)
+               (when-let ((last-window-configuration (get this-command :window-configuration)))
+                 (set-window-configuration last-window-configuration)))
+      (put this-command :window-configuration (current-window-configuration))
+      (delete-other-windows)
       (display-buffer (eldoc-doc-buffer))))
 
   (defun eldoc-documentation-using-link-at-point (cb)
