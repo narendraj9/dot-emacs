@@ -2448,6 +2448,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :preface
   (defun consult-grep-dwim ()
+    (require 'vc)
     (interactive)
     (let ((directory (project-root (project-current)))
           (initial (when (region-active-p)

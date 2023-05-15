@@ -1191,6 +1191,7 @@ search keyword."
                            (shell-quote-argument (string-replace "\"" "'" (json-encode-array new-xkb-optoins)))))
     (message "%s swap Right window with Right control." (if enabled? "Disabled" "Enabled"))))
 
+
 (defun pretty-format-temporarily ()
   (interactive)
   (let* ((super-local-keymap (make-sparse-keymap))
