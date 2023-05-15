@@ -1178,16 +1178,18 @@ search keyword."
                        (lambda () with-selected-date-time)))
               ,@body))))
 
-(defvar swap-ctrl-right-win nil)
 (defun swap-ctrl-right-win ()
   (interactive)
-  (if (not swap-ctrl-right-win)
-      (progn (shell-command "gsettings set org.gnome.desktop.input-sources xkb-options \"['caps:ctrl_modifier', 'altwin:meta_alt', 'ctrl:swap_rwin_rctl']\"")
-             (message "Enabled: Swap Right Win <-> Right Ctrl"))
-    (shell-command "gsettings set org.gnome.desktop.input-sources xkb-options \"['caps:ctrl_modifier', 'altwin:meta_alt']\"")
-    (message "Disabled: Swap Right Win <-> Right Ctrl"))
-  (setq swap-ctrl-right-win (not swap-ctrl-right-win)))
-
+  (let* ((xkb-options-str (shell-command-to-string "gsettings get org.gnome.desktop.input-sources xkb-options"))
+         (xkb-options (json-read-from-string (string-replace "'" "\"" xkb-options-str)))
+         (swap-rwin-rctl? (lambda (option) (string-equal option "ctrl:swap_rwin_rctl")))
+         (enabled? (seq-find swap-rwin-rctl? xkb-options))
+         (new-xkb-optoins (if enabled?
+                              (seq-filter (lambda (option) (not (funcall swap-rwin-rctl? option))) xkb-options)
+                            (vconcat xkb-options ["ctrl:swap_rwin_rctl"]))))
+    (shell-command (format "gsettings set org.gnome.desktop.input-sources xkb-options %s"
+                           (shell-quote-argument (string-replace "\"" "'" (json-encode-array new-xkb-optoins)))))
+    (message "%s swap Right window with Right control." (if enabled? "Disabled" "Enabled")))))
 
 (defun pretty-format-temporarily ()
   (interactive)
@@ -1235,6 +1237,13 @@ search keyword."
         (set-frame-width frame width)
         (set-frame-position frame x y)
         (put this-command :original-parameters original-params)))))
+
+
+(defun run-in-other-window ()
+  "Runs command bound to read key sequence in other window."
+  (interactive)
+  (with-selected-window (other-window-for-scrolling)
+    (call-interactively (key-binding (read-key-sequence "")))))
 
 
 (provide 'defs)

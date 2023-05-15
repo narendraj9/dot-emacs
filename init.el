@@ -202,6 +202,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
           :map ctl-m-map
           ("t" . switch-to-scratch-new-tab)
+          ("o" . run-in-other-window)
 
           :map ctl-quote-map
           ("w s" . websearch-it)
@@ -215,7 +216,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-x" . async-M-x)
 
           :map ctl-period-map
-          ("k" . compile)
+          ("k" . project-compile)
           ("K" . recompile)
           ("$" . selective-display-beyond-col)
           ("u" . underline-text)
@@ -595,7 +596,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ──────────────────────────────────────────────────────────────────
 
 (use-package tab-bar
-  :bind (:map tab-prefix-map ("s" . tab-bar-new-scratch*))
+  :bind ( :map tab-prefix-map
+          ("s" . tab-bar-new-scratch*)
+          ("S" . tab-switcher) )
   :doc
   "This built-in package provides a way to keep a set of window
    configurations around that can be switched to easily."
@@ -1827,7 +1830,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c r r" . eglot-rename)
 
           :map ctl-m-map
-          ("l" . eglot-code-actions)
+          ("g" . eglot-code-actions)
           ("d" . toggle-eldoc-doc-buffer) )
   :init
   ;; Default: 4KB is too low for LSP servers.
@@ -3687,7 +3690,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package chatgpt :git "https://github.com/emacs-openai/chatgpt")
 (use-package codegpt :git "https://github.com/emacs-openai/codegpt")
-
 
 (provide 'init)
 ;;; init.el ends here

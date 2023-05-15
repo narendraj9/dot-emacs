@@ -208,16 +208,18 @@
 (defun pomodoro-start-break (&optional prefix)
   (interactive "P")
   (pomodoro-remove-notifications)
-  (pomodoro-start-timer (if prefix
-                            (read-number "Duration (min): ")
-                          pomodoro-default-break))
-  (setq pomodoro-timer nil))
+  (let ((break-minutes (if prefix
+                           (read-number "Duration (min): ")
+                         pomodoro-default-break)))
+    (pomodoro-start-timer break-minutes)
+    (message "Break started for %s minutes" break-minutes)))
 
 
 (defun pomodoro-start-long-break ()
   (interactive)
   (pomodoro-remove-notifications)
   (pomodoro-start-timer pomodoro-default-long-break)
+  (message "Break started for %s minutes" pomodoro-default-long-break)
   (setq pomodoro-timer nil))
 
 (defun pomodoro-edit-title ()
