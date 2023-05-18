@@ -32,7 +32,8 @@
 (setq gc-cons-threshold most-positive-fixnum)
 (add-hook 'after-init-hook
           (lambda ()
-            (setq gc-cons-threshold (* 100 1024 1024))))
+            (garbage-collect)
+            (setq gc-cons-threshold (* 128 1024 1024))))
 
 ;; Try to make `.emacs.d` relocatable
 (setq user-emacs-directory
@@ -205,10 +206,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("o" . run-in-other-window)
 
           :map ctl-quote-map
-          ("w s" . websearch-it)
+          ("g"   . websearch-it)
           ("l l" . search-linguee)
           ("l t" . translate-with-linguee)
-          ("d ." . insert-date-time-at-point)
+          ("."   . insert-date-time-at-point)
           ("c e" . vicarie/eval-print-last-sexp)
           ("c =" . vicarie/eval-replace-last-sexp)
           ("c r" . rename-file-and-buffer)
@@ -1421,33 +1422,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ;; ([double-down-mouse-1] . dictionary--word-def*)
 
           :map ctl-quote-map
-          ("l d" . dictionary--word-def)
-          ("l D" . dictionary-search ) )
+          ("d" . dictionary-search) )
 
   :init
   (setq dictionary-server "dict.org")
-  (add-to-list 'context-menu-functions
-               'context-menu-dictionary)
-
-  :preface
-  (defun dictionary--word-def* (event)
-    (interactive "e")
-    (dictionary--word-def (dictionary-word-at-mouse-event event)))
-
-  (defun dictionary--word-def (prefix)
-    (interactive "P")
-    (let* ((word (or (word-at-point) (read-string "Word: ")))
-           (popup-text (or (and word (dictionary-definition word))
-                           (format "No meaning found for word: %s" word))))
-      (if prefix
-          (select-window (get-buffer-window (with-output-to-temp-buffer "*Dictionary*"
-                                              (print popup-text)
-                                              (current-buffer))))
-        (let ((popup-instance (popup-tip popup-text
-                                         :around t
-                                         :nowait t
-                                         :scroll-bar t)))
-          (run-with-timer 5 nil (lambda () (popup-delete popup-instance))))))))
+  (add-to-list 'context-menu-functions 'context-menu-dictionary))
 
 (use-package flyspell
   :diminish flyspell-mode
@@ -3686,7 +3665,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; The same variable sets up the user role.
   ;; (setq openai-user (user-full-name))
   (when (boundp 'openai-secret-key)
-    (setq openai-key openai-secret-key)))
+    (setq openai-key openai-secret-key))
+
+  :config
+  (require 'openai-edit))
 
 (use-package chatgpt :git "https://github.com/emacs-openai/chatgpt")
 (use-package codegpt :git "https://github.com/emacs-openai/codegpt")

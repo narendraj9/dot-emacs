@@ -1189,7 +1189,7 @@ search keyword."
                             (vconcat xkb-options ["ctrl:swap_rwin_rctl"]))))
     (shell-command (format "gsettings set org.gnome.desktop.input-sources xkb-options %s"
                            (shell-quote-argument (string-replace "\"" "'" (json-encode-array new-xkb-optoins)))))
-    (message "%s swap Right window with Right control." (if enabled? "Disabled" "Enabled")))))
+    (message "%s swap Right window with Right control." (if enabled? "Disabled" "Enabled"))))
 
 (defun pretty-format-temporarily ()
   (interactive)
