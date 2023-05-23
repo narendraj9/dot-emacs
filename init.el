@@ -1932,6 +1932,25 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (delete-other-windows)
       (display-buffer (eldoc-doc-buffer))))
 
+
+  (defun freeze-eldoc-buffer ()
+    "Capture the current contents of the *eldoc* buffer. Make sure
+     that the newly created buffer is visible at all times instead of
+     the default *eldoc* buffer."
+    (interactive)
+    (with-current-buffer eldoc--doc-buffer
+      (let ((contents (buffer-substring (point-min)
+                                        (point-max)))
+            (doc-buffer (get-buffer-create "*Doc Buffer*"))
+            (eldoc-buffer-window (car (get-buffer-window-list))))
+        (with-current-buffer doc-buffer
+          (let ((inhibit-read-only t))
+            (erase-buffer)
+            (insert contents))
+          (goto-char (point-min))
+          (help-mode))
+        (set-window-buffer eldoc-buffer-window doc-buffer))))
+
   (defun eldoc-documentation-using-link-at-point (cb)
     (let (url)
       (when-let ((url-at-point (or (and (fboundp 'markdown-link-url)
