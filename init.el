@@ -1809,8 +1809,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c r r" . eglot-rename)
 
           :map ctl-m-map
-          ("g" . eglot-code-actions)
-          ("d" . toggle-eldoc-doc-buffer) )
+          ("g" . eglot-code-actions) )
   :init
   ;; Default: 4KB is too low for LSP servers.
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
@@ -1913,6 +1912,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package eldoc
   :diminish eldoc-mode
+  :bind ( :map ctl-m-map
+          ("d" . toggle-eldoc-doc-buffer)
+          ("D" . freeze-eldoc-buffer) )
   :config
   (setq eldoc-echo-area-use-multiline-p nil)
   (global-eldoc-mode +1)
