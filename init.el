@@ -2109,6 +2109,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq comint-scroll-show-maximum-output nil))
 
 (use-package vterm
+  :disabled t
+  :ensure t
   :custom (vterm-max-scrollback 100000)
   :bind ( :map global-map ( "s-<return>" . vterm )
 
@@ -2125,7 +2127,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (vterm-send-key "n" nil nil t)))
 
 (use-package shell
-  ;; :bind ( "s-<return>" . shell )
+  :bind ( "s-<return>" . shell )
   :init
   (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
 
