@@ -1247,5 +1247,35 @@ search keyword."
     (call-interactively (key-binding (read-key-sequence "")))))
 
 
+(defun watch (command period)
+  "Runs a command periodically and updates the result at point."
+  (interactive "sCommand: \nnRepeat every [seconds]: ")
+  (let* ((overlay (make-overlay (point) (point)))
+         (current-overlays (get this-command :overlays))
+         (current-timers (get this-command :timers))
+         (buffer (current-buffer))
+         (update-timer
+          (run-with-timer 0
+                          period
+                          (lambda ()
+                            (overlay-put overlay
+                                         'before-string
+                                         (propertize (format "Last Updated: %s\n" (format-time-string "%FT%T%z"))
+                                                     'face 'highlight))
+                            (overlay-put overlay
+                                         'after-string
+                                         (shell-command-to-string command))))))
+    (put this-command :timers (push update-timer current-timers))
+    (put this-command :overlays (push overlay current-overlays))))
+
+
+(defun unwatch-all ()
+  (interactive)
+  (dolist (timer (get 'watch :timers))
+    (cancel-timer timer ))
+  (dolist (overlay (get 'watch :overlays))
+    (delete-overlay overlay)))
+
+
 (provide 'defs)
 ;;; defs.el ends here
