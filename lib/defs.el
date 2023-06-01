@@ -1272,7 +1272,7 @@ search keyword."
 (defun unwatch-all ()
   (interactive)
   (dolist (timer (get 'watch :timers))
-    (cancel-timer timer ))
+    (cancel-timer timer))
   (dolist (overlay (get 'watch :overlays))
     (delete-overlay overlay)))
 

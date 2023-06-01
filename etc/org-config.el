@@ -740,6 +740,7 @@ non-empty lines in the block (excluding the line with
 
 (use-package org-gcal
   :ensure t
+  :disabled t
   :bind ( :map org-agenda-mode-map ("C-c g" . org-gcal-fetch* ) )
   :when (and (boundp 'gcal-client-id)
              (boundp 'gcal-client-secret))
