@@ -49,7 +49,7 @@ Otherwise, limit to only `org-mode' files."
   (interactive "P")
   (let ((default-directory (expand-file-name org-directory)))
     (->> (f-entries default-directory
-                    (if arg #'f-file? (lambda (f) (f-ext-p f "org")))
+                    (if arg (lambda (f) (f-ext-p f "org")) #'f-file?)
                     t)
          (mapcar (lambda (f) (propertize f 'display (f-relative f org-directory))))
          (completing-read "Select org file: ")
