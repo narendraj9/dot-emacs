@@ -1135,7 +1135,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand 2
   :diminish which-key-mode
   :config
-  (setq which-key-max-description-length nil)
+  (setq which-key-max-description-length nil
+        which-key-preserve-window-configuration t)
+
   (which-key-mode +1))
 
 (use-package project
@@ -1147,14 +1149,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-RET" . project-find-file)
 
           :map ctl-m-map
-          ("f" . git-ls-files-find-file) )
+          ("C-f" . git-ls-files-find-file)
+          ("f"   . git-ls-files-find-file) )
 
   :init
   (setq project-list-file
         (expand-file-name "var/project-list" user-emacs-directory)
 
+        ;; Useful for marking sub-directories inside a version controlled
+        ;; project but doesn't work without version control.
         project-vc-extra-root-markers
-        (list ".project" "pom.xml"))
+        (list ".project" "pom.xml" "Cargo.toml"))
 
   :config
   (autoload #'magit-status "magit" nil t)
