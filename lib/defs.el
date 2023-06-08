@@ -1258,13 +1258,15 @@ search keyword."
           (run-with-timer 0
                           period
                           (lambda ()
-                            (overlay-put overlay
-                                         'before-string
-                                         (propertize (format "Last Updated: %s\n" (format-time-string "%FT%T%z"))
-                                                     'face 'highlight))
-                            (overlay-put overlay
-                                         'after-string
-                                         (shell-command-to-string command))))))
+                            (make-thread
+                             (lambda ()
+                               (overlay-put overlay
+                                            'before-string
+                                            (propertize (format "Last Updated: %s\n" (format-time-string "%FT%T%z"))
+                                                        'face 'highlight))
+                               (overlay-put overlay
+                                            'after-string
+                                            (shell-command-to-string command))))))))
     (put this-command :timers (push update-timer current-timers))
     (put this-command :overlays (push overlay current-overlays))))
 
