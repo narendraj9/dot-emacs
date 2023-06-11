@@ -192,7 +192,7 @@ buffer."
                                 (summary 0.25 point)
                                 (article 1.0)))
 (defvar skimming-view `(vertical 1.0
-                                 (summary 0.75 point)
+                                 (summary .80 point)
                                  (article 1.0)))
 
 (gnus-add-configuration (list 'article reading-view))

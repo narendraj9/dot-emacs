@@ -42,6 +42,12 @@
         (org-deadline-warning-days most-positive-fixnum))
     (org-agenda-redo-all)))
 
+
+(defun after-org-agenda-selection-move-to-heading ()
+  (org-id-goto (org-id-get-create))
+  (org-narrow-to-subtree))
+
+
 (defun open-org-file (arg)
   "Quick open a notes org file.
 If a prefix ARG is provided, then run a `project-find-file'.
@@ -54,6 +60,7 @@ Otherwise, limit to only `org-mode' files."
          (mapcar (lambda (f) (propertize f 'display (f-relative f org-directory))))
          (completing-read "Select org file: ")
          (find-file))))
+
 
 (defun search-notes-files ()
   "Search org files using `consult-grep'."
@@ -69,6 +76,7 @@ Otherwise, limit to only `org-mode' files."
   (interactive)
   (setq org-agenda-remove-tags (not org-agenda-remove-tags))
   (org-agenda-redo))
+
 
 (use-package org
   :demand t
@@ -199,6 +207,7 @@ Otherwise, limit to only `org-mode' files."
   (setq org-file-apps
         (assoc-delete-all "\\.pdf\\'" org-file-apps)))
 
+
 (use-package org-agenda
   :after org
   :init
@@ -273,8 +282,10 @@ Otherwise, limit to only `org-mode' files."
           (tags . " %i %-12:c")
           (search . " %i %-12:c"))
 
-        org-lowest-priority ?E
-        org-default-priority ?E
+        org-priority-highest ?A
+        org-priority-lowest ?D
+        org-priority-default ?C
+        org-priority-start-cycle-with-default t
 
         ;; Custom agenda vews
         org-agenda-custom-commands
@@ -342,6 +353,8 @@ Otherwise, limit to only `org-mode' files."
 
   ;; (add-hook 'org-agenda-finalize-hook
   ;;           #'org-agenda-delete-empty-blocks)
+  (add-hook 'org-agenda-after-show-hook #'after-org-agenda-selection-move-to-heading)
+
   :preface
   (defun with-no-drawer (func &rest args)
     (interactive "P")
@@ -463,6 +476,7 @@ non-empty lines in the block (excluding the line with
           (delete-region (point) (point-at-eol)))))
     (setq buffer-read-only t)))
 
+
 (use-package org-cliplink
   :ensure t
   :defer t
@@ -484,12 +498,14 @@ non-empty lines in the block (excluding the line with
   :bind (:map org-mode-map
               ("C-c M-l" . org-cliplink-dwim)))
 
+
 (defun read-happiness-rating ()
   "Inspired by https://www.trackinghappiness.com/about/method/."
   (completing-read "Happiness Rating: "
                    (map 'list #'number-to-string (number-sequence 1 10))
                    nil
                    t))
+
 
 (use-package org-capture
   :defer t
@@ -550,12 +566,14 @@ non-empty lines in the block (excluding the line with
   ;;           #'org-set-created-property)
   )
 
+
 (use-package org-colview
   :doc "Column view shows `org-mode' entries in a table."
   :defer t
   :init
   (setq org-columns-default-format
         "%TODO  %3PRIORITY %TAGS %60ITEM(Task) %10EFFORT(Estimated Effort) {:} %10CLOCKSUM(Time Spent)"))
+
 
 (use-package ob-ipython
   :doc "Org-babel with IPython."
@@ -566,8 +584,10 @@ non-empty lines in the block (excluding the line with
   (setq ob-ipython-resources-dir
         (expand-file-name "data/obipy-resources" org-directory)))
 
+
 (use-package ob-elixir :ensure t :defer t)
 (use-package ob-go     :ensure t :defer t)
+
 
 (use-package ob-ditaa
   :after ob
@@ -596,6 +616,7 @@ non-empty lines in the block (excluding the line with
 
         org-ditaa-jar-path
         (expand-file-name "~/miscellany/assets/ditaa/ditaa.jar")))
+
 
 (use-package ob
   :after org
@@ -639,6 +660,7 @@ non-empty lines in the block (excluding the line with
                                  (haskell    . t)
                                  (ditaa      . t))))
 
+
 (use-package org-habit
   :after org-agenda
   :init
@@ -647,6 +669,7 @@ non-empty lines in the block (excluding the line with
         ;; resolution.
         org-habit-preceding-days 28
         org-habit-show-done-always-green t))
+
 
 (use-package org-clock
   :after org-agenda
@@ -666,6 +689,7 @@ non-empty lines in the block (excluding the line with
         org-clock-heading-function
         (lambda ()
           (s-truncate 30 (nth 4 (org-heading-components))))))
+
 
 (use-package org-attach
   :after org
@@ -688,6 +712,7 @@ non-empty lines in the block (excluding the line with
   (setq org-attach-directory
         (expand-file-name "data/" org-directory)))
 
+
 (use-package ox-reveal
   :ensure t
   :defer t
@@ -696,12 +721,14 @@ non-empty lines in the block (excluding the line with
         org-reveal-slide-number nil
         org-reveal-title-slide nil))
 
+
 (use-package ox-gfm
   :doc
   "Github-flovered markdown export backend for org-export."
   :after org
   :defer t
   :ensure t)
+
 
 (use-package org-noter
   :doc "Planning to move to `org-noter' from `interleave'."
@@ -717,6 +744,7 @@ non-empty lines in the block (excluding the line with
   :config
   (setq org-noter-always-create-frame nil)
   (advice-add 'org-noter :before #'org-noter-add-attachment-path))
+
 
 (use-package org-blog
   :disabled t
