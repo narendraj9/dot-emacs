@@ -2245,7 +2245,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq timeclock-file
         (expand-file-name "timelog" emacs-assets-directory)))
 
+(use-package org)
 (use-package org-config
+  :after org
   :load-path "etc/"
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)

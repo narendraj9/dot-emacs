@@ -33,12 +33,10 @@
   :pin gnu
   :init
   ;; Disable mixed fonts in modus themes
-  (setq modus-themes-no-mixed-fonts t
-        modus-themes-hl-line '(intense)
-        modus-themes-mode-line '(3d accented))
+  (setq modus-themes-mixed-fonts nil)
 
-  ;; No fringe colors.
-  (setq modus-themes-fringes nil))
+  (setq modus-operandi-palette-overrides
+        '((fringe "GhostWhite"))))
 
 (defvar app/light-theme 'modus-operandi)
 (defvar app/dark-theme 'jazz)
