@@ -1433,6 +1433,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq dictionary-server "dict.org")
   (add-to-list 'context-menu-functions 'context-menu-dictionary))
 
+(use-package wiki-summary
+  :load-path "etc/"
+  :bind ( :map ctl-quote-map ("w" . wiki-summary) )
+  :ensure t
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\*wiki" display-buffer-in-direction
+                 (window . main)
+                 (direction . right)
+                 (window-width . 0.5))))
+
 (use-package flyspell
   :diminish flyspell-mode
   :bind (:map ctl-period-map
@@ -1836,6 +1847,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (dolist (lang-server-spec `((rust-mode         . ("rustup" "run" "stable" "rust-analyzer"))
                               (rust-ts-mode      . ("rustup" "run" "stable" "rust-analyzer"))
                               ((c-mode c++-mode) . ("clangd"))
+                              (ruby-mode         . ("bundle" "exec" "ruby-lsp"))
                               (java-mode         . ,#'java-eclipse-jdt-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
@@ -2976,6 +2988,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package ruby-mode
   :defer t
+  :bind (:map ruby-mode-map ("C-c C-g" . search-ruby-gems))
+  :config (eval-after-load 'ruby-mode
+            '(progn
+               (define-key ruby-mode-map (kbd "C-x t") nil)
+               (define-key ruby-mode-map (kbd "C-x T") nil)))
   :preface
   (defun insert-latest-gemspec (gem)
     "Print the latest version of GEM.
@@ -2984,62 +3001,66 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive "sGem: ")
     (message "Talking to RubyGems...")
     (request
-     (format "https://rubygems.org/api/v1/versions/%s/latest.json" gem)
-     :parser #'json-read
-     :success
-     (cl-function
-      (lambda (&key data &allow-other-keys)
-        (let* ((full-version-str (assoc-default 'version data))
-               (minor-version-str (replace-regexp-in-string "\\.[0-9]+$"
-                                                            ""
-                                                            full-version-str))
-               (gemspec (format "gem '%s', '~> %s', '>= %s'"
-                                gem
-                                minor-version-str
-                                full-version-str)))
-          (insert gemspec)
-          (message "--> %s" gemspec))))
-     :error
-     (cl-function
-      (lambda (&rest args &key error-thrown &allow-other-keys)
-        (message "Failed with : %s" error-thrown)))))
+      (format "https://rubygems.org/api/v1/versions/%s/latest.json" gem)
+      :parser #'json-read
+      :success
+      (cl-function
+       (lambda (&key data &allow-other-keys)
+         (let* ((full-version-str (assoc-default 'version data))
+                (minor-version-str (replace-regexp-in-string "\\.[0-9]+$"
+                                                             ""
+                                                             full-version-str))
+                (gemspec (format "gem '%s', '~> %s', '>= %s'"
+                                 gem
+                                 minor-version-str
+                                 full-version-str)))
+           (insert gemspec)
+           (message "--> %s" gemspec))))
+      :error
+      (cl-function
+       (lambda (&rest args &key error-thrown &allow-other-keys)
+         (message "Failed with : %s" error-thrown)))))
 
   (defun search-ruby-gems (search-term)
     "Search for GEM at Rubygems."
     (interactive "sSearch: ")
     (message "Talking to RubyGems...")
     (request
-     "https://rubygems.org/api/v1/search.json"
-     :params `(("query" . ,search-term))
-     :parser #'json-read
-     :success
-     (cl-function
-      (lambda (&key data &allow-other-keys)
-        (let* ((completions-alist
-                (mapcar
-                 (lambda (gem)
-                   (let ((gem-name (assoc-default 'name gem))
-                         (gem-info (assoc-default 'info gem)))
-                     (cons (format "%s : %s"
-                                   gem-name
-                                   (truncate-string-to-width gem-info 80 0 nil t))
-                           gem-name)))
-                 data))
-               (chosen-gem (assoc-default (completing-read "Select: "
-                                                           completions-alist)
-                                          completions-alist)))
-          (insert-latest-gemspec chosen-gem))))
-     :error (cl-function
-             (lambda (&rest args &key error-thrown &allow-other-keys)
-               (message "Error: %s" error-thrown)))))
-  :bind (:map ruby-mode-map
-              ("C-c C-g" . search-ruby-gems))
+      "https://rubygems.org/api/v1/search.json"
+      :params `(("query" . ,search-term))
+      :parser #'json-read
+      :success
+      (cl-function
+       (lambda (&key data &allow-other-keys)
+         (let* ((completions-alist
+                 (mapcar
+                  (lambda (gem)
+                    (let ((gem-name (assoc-default 'name gem))
+                          (gem-info (assoc-default 'info gem)))
+                      (cons (format "%s : %s"
+                                    gem-name
+                                    (truncate-string-to-width gem-info 80 0 nil t))
+                            gem-name)))
+                  data))
+                (chosen-gem (assoc-default (completing-read "Select: "
+                                                            completions-alist)
+                                           completions-alist)))
+           (insert-latest-gemspec chosen-gem))))
+      :error (cl-function
+              (lambda (&rest args &key error-thrown &allow-other-keys)
+                (message "Error: %s" error-thrown))))))
 
+(use-package yari
+  :doc "Suggested by https://prelude.emacsredux.com/en/stable/modules/ruby/"
+  :ensure t
+  :after ruby-mode
+  :bind ( :map ruby-mode-map ("C-c y" . yari) )
   :config
-  (eval-after-load 'ruby-mode
-    '(progn
-       (define-key ruby-mode-map (kbd "C-x t") nil)
-       (define-key ruby-mode-map (kbd "C-x T") nil))))
+  (add-to-list 'display-buffer-alist
+               '("\\*yari " display-buffer-in-direction
+                 (window . main)
+                 (direction . right)
+                 (window-width . 0.5))))
 
 (use-package inf-ruby
   :after ruby-mode
@@ -3066,6 +3087,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "RVM doesn't work out of the box with eshell."
   :ensure t
   :defer t)
+
 
 ;;; GO MODE
 ;; ──────────────────────────────────────────────────────────────────

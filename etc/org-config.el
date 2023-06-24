@@ -677,7 +677,8 @@ non-empty lines in the block (excluding the line with
   (setq org-clock-idle-time 5)
 
   :config
-  (setq org-show-notification-handler
+  (setq org-agenda-clock-report-header "Clock Report\n============"
+        org-show-notification-handler
         (lambda (msg)
           (alert-libnotify-notify (list :title "Org@Emacs"
                                         :message msg))))
