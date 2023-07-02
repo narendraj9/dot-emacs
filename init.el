@@ -1844,11 +1844,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
 
-  (dolist (lang-server-spec `((rust-mode         . ("rustup" "run" "stable" "rust-analyzer"))
-                              (rust-ts-mode      . ("rustup" "run" "stable" "rust-analyzer"))
-                              ((c-mode c++-mode) . ("clangd"))
-                              (ruby-mode         . ("bundle" "exec" "ruby-lsp"))
-                              (java-mode         . ,#'java-eclipse-jdt-launcher)))
+  (dolist (lang-server-spec `(((rust-mode rust-ts-mode) . ("rustup" "run" "stable" "rust-analyzer"))
+                              ((c-mode c++-mode)        . ("clangd"))
+                              ((ruby-mode ruby-ts-mode) . ("bundle" "exec" "solargraph" "stdio"))
+                              (java-mode                . ,#'java-eclipse-jdt-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
 
@@ -1862,12 +1861,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    `user-emacs-directory'."
 
   :init
-  (add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
+  (dolist (mode-remap-entry '((rust-mode   . rust-ts-mode)
+                              (python-mode . python-ts-mode)
+                              (ruby-mode   . ruby-ts-mode)))
+    (add-to-list 'major-mode-remap-alist mode-remap-entry))
 
   :config
   (dolist (grammar
            '((css "https://github.com/tree-sitter/tree-sitter-css")
+             (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
              (rust "https://github.com/tree-sitter/tree-sitter-rust")
              (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
              (python "https://github.com/tree-sitter/tree-sitter-python")
@@ -3054,7 +3056,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "Suggested by https://prelude.emacsredux.com/en/stable/modules/ruby/"
   :ensure t
   :after ruby-mode
-  :bind ( :map ruby-mode-map ("C-c y" . yari) )
+  :bind ( :map ruby-mode-map ("C-c y" . yari)
+          :map ruby-ts-mode-map ("C-c y" . yari) )
   :config
   (add-to-list 'display-buffer-alist
                '("\\*yari " display-buffer-in-direction

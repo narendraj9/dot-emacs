@@ -155,6 +155,9 @@ buffer."
                (nnimap-streaming t)
                (nnimap-split-methods ,nnmail-split-fancy)))
 
+(setq gnus-secondary-select-methods
+      '((nntp "gmane.io" (nntp-address "news.gmane.io"))))
+
 (setq gnus-parameters '((".*" (gcc-self . t))))
 
 ;; Pre-fetch for speed

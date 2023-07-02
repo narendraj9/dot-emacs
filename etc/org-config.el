@@ -298,8 +298,8 @@ Otherwise, limit to only `org-mode' files."
                                                    "BLOCKED")))))
             (todo "NEXT"
                   ((org-agenda-overriding-header "  Next Tasks:")))
-            (todo "BLOCKED"
-                  ((org-agenda-overriding-header "  Blocked Tasks:")))
+            ;; (todo "BLOCKED"
+            ;;       ((org-agenda-overriding-header "  Blocked Tasks:")))
             ;; (tags "+project+LEVEL=2|+project+LEVEL=1"
             ;;       ((org-agenda-overriding-header " Themes:")))
             (todo "TODO"
