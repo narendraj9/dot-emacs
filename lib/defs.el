@@ -1279,5 +1279,22 @@ search keyword."
     (delete-overlay overlay)))
 
 
+(defun import-icalendar-urls (ical-urls)
+  "Fetch each input url in ICAL-URLS with `url-copy-file' and import
+   the contents into Emacs `diary'. This function is useful to
+   fetch entries from Google calendar into `org-agenda'.
+
+   To make these entries visible in `org-agenda', set
+   `org-agenda-include-diary' to `t'."
+  (let ((ics-directory (expand-file-name "icalendar" org-directory)))
+    (unless (file-exists-p ics-directory)
+      (make-directory ics-directory))
+    (dolist (ical-url ical-urls)
+      (let* ((target-ical-filename (format "%s-%s" (sha1 ical-url) (url-file-nondirectory ical-url)))
+             (target-ical-filepath (expand-file-name target-ical-filename ics-directory)))
+        (url-copy-file ical-url target-ical-filepath t)
+        (icalendar-import-file target-ical-filepath diary-file)))))
+
+
 (provide 'defs)
 ;;; defs.el ends here

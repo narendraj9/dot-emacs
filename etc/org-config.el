@@ -239,6 +239,7 @@ Otherwise, limit to only `org-mode' files."
 
   (setq org-agenda-restore-windows-after-quit t
 
+        org-agenda-include-diary t
         org-agenda-span 7
         org-agenda-start-on-weekday nil
         org-deadline-warning-days 14

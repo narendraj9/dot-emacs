@@ -1250,6 +1250,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (dolist (display-spec
            '( ("\\`\\*e?shell" display-buffer-at-bottom)
+              ("\\*vterm\\*" display-buffer-at-bottom)
               ("\\*Calendar\\*" display-buffer-at-bottom)
               ("\\*Async Shell Command\\*" display-buffer-no-window)
               ("\\`\\*Flycheck errors\\*\\'" (display-buffer-reuse-window
