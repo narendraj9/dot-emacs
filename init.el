@@ -2279,7 +2279,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
          :map ctl-quote-map
          ("C-n" . open-org-file)
-         ("C-d" . search-notes-files))
+         ("C-d" . search-notes-files)
+
+         :map org-agenda-mode-map
+         ("C-c g" . google-calendar-import-to-org) )
   :init
   (add-hook 'org-mode-hook
             (lambda ()
@@ -2292,16 +2295,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (bind-key "C-c a" #'org-agenda)
   (eval-after-load "org" '(require 'org-config))
 
-  ;; ;; `org-agenda-get-restriction-and-command' ignores rules for
-  ;; ;; displaying buffers (i.e. `display-buffer-alist'). This advice
-  ;; ;; tries causes `split-window-sensibly' to always split vertically
-  ;; ;; and show the " *Agenda Commands*" buffer below the current buffer.
-  ;; (advice-add 'org-agenda-get-restriction-and-command
-  ;;             :around
-  ;;             (lambda (original &rest args)
-  ;;               (let ((split-window-preferred-function #'split-window-below))
-  ;;                 (apply original args))))
-  )
+  :preface
+  (defun google-calendar-import-to-org ()
+    (interactive)
+    (when (boundp 'personal-google-calendar-url)
+      (import-icalendar-urls (list personal-google-calendar-url)))))
 
 
 (use-package pomodoro

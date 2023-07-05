@@ -231,7 +231,13 @@ Otherwise, limit to only `org-mode' files."
                          ;; on a subject.
                          (list org-default-notes-file)
                          (directory-files-recursively (expand-file-name "notes/" org-directory)
-                                                      ".*\\.org$"))
+                                                      ".*\\.org$")
+
+                         ;; Org files imported from iCalendar using the
+                         ;; `ical2org.awk' script.
+                         (directory-files (expand-file-name "icalendar" org-directory)
+                                          t
+                                          ".*\\.org$"))
 
         ;; Text search all org files under `org-directory' recursively.
         org-agenda-text-search-extra-files
