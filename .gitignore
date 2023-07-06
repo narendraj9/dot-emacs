@@ -9,6 +9,9 @@
 !test-startup.sh
 !update-subtrees.sh
 
+!bin/
+!bin/*
+
 !etc/
 !etc/*
 !etc/*/*
