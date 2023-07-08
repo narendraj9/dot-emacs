@@ -628,6 +628,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         '(propertize (format "%s %d/%d" (calendar-month-name month) month year)
                      'font-lock-face 'calendar-month-header)))
 
+(use-package calfw       :ensure t :after org)
+(use-package calfw-diary :ensure t :after org)
+(use-package calfw-org   :ensure t :after org)
+
 (use-package holidays
   :defer t
   :config
