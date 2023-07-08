@@ -41,14 +41,6 @@
 (require 'message)
 (require 'mml)
 
-(use-package messages-are-flowing
-  :doc
-  "Defines command
-`messages-are-flowing-use-and-mark-hard-newlines' that can be
-called for displaying soft and hard newlines in a message
-buffer."
-  :load-path "etc/")
-
 (setq user-mail-address "narendraj9@gmail.com"
       user-full-name "Narendra Joshi"
       message-signature "Narendra Joshi")

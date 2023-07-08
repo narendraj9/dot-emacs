@@ -629,7 +629,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                      'font-lock-face 'calendar-month-header)))
 
 (use-package calfw       :ensure t :after org)
-(use-package calfw-diary :ensure t :after org)
 (use-package calfw-org   :ensure t :after org)
 
 (use-package holidays
@@ -3368,6 +3367,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package gnus
   :defer t
   :hook ((gnus-article-mode . goto-address-mode))
+  :config
+  (use-package messages-are-flowing
+    :doc
+    "Defines command
+`messages-are-flowing-use-and-mark-hard-newlines' that can be
+called for displaying soft and hard newlines in a message
+buffer."
+    :load-path "etc/")
+
+
   :init
   (setd gnus-init-file "etc/gnus-config.el"
         gnus-home-directory "~/miscellany/gnus"
