@@ -3712,13 +3712,6 @@ buffer."
 (use-package keycast :ensure t :defer t)
 (use-package exercism :ensure t :defer t)
 
-(use-package c3po
-  :git "https://github.com/d1egoaz/c3po.el"
-  :defer t
-  :init
-  (when (boundp 'openai-secret-key)
-    (setq c3po-api-key openai-secret-key)))
-
 (use-package gptel
   :git "https://github.com/karthink/gptel"
   :init
@@ -3726,8 +3719,17 @@ buffer."
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key)))
 
-(use-package tblui :ensure t)
+(use-package c3po
+  :disabled t
+  :git "https://github.com/d1egoaz/c3po.el"
+  :defer t
+  :init
+  (when (boundp 'openai-secret-key)
+    (setq c3po-api-key openai-secret-key)))
+
+(use-package tblui :disabled t :ensure t)
 (use-package openai
+  :disabled t
   :git "https://github.com/emacs-openai/openai"
   :init
   (use-package tblui :ensure t)
@@ -3739,8 +3741,8 @@ buffer."
   :config
   (require 'openai-edit))
 
-(use-package chatgpt :git "https://github.com/emacs-openai/chatgpt")
-(use-package codegpt :git "https://github.com/emacs-openai/codegpt")
+(use-package chatgpt :disabled t :git "https://github.com/emacs-openai/chatgpt")
+(use-package codegpt :disabled t :git "https://github.com/emacs-openai/codegpt")
 
 (provide 'init)
 ;;; init.el ends here
