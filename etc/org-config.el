@@ -245,7 +245,7 @@ Otherwise, limit to only `org-mode' files."
 
   (setq org-agenda-restore-windows-after-quit t
 
-        org-agenda-include-diary t
+        org-agenda-include-diary nil
         org-agenda-span 7
         org-agenda-start-on-weekday nil
         org-deadline-warning-days 14
@@ -265,8 +265,8 @@ Otherwise, limit to only `org-mode' files."
         ;; Dependencies and blocked TODOs
         org-agenda-dim-blocked-tasks 'invisible
 
-        org-agenda-compact-blocks t
-        org-agenda-block-separator (propertize (make-string 80 ?-)
+        org-agenda-compact-blocks nil
+        org-agenda-block-separator (propertize (make-string 80 ?═)
                                                'face '(:foreground "DeepSkyBlue"
                                                                    :height 1.2))
         org-agenda-clockreport-parameter-plist
@@ -296,7 +296,14 @@ Otherwise, limit to only `org-mode' files."
 
         ;; Custom agenda vews
         org-agenda-custom-commands
-        '(("o" "My Agenda"
+        '(("i" "My Agenda"
+           ((agenda "TODO"
+                    ((org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'todo
+                                                 '("ONGOING" "NEXT" "BLOCKED")))))
+            (todo "NEXT"
+                  ((org-agenda-overriding-header "  Next Tasks:")))))
+          ("o" "All Tasks"
            ((agenda "TODO"
                     ((org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'todo

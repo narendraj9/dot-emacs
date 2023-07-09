@@ -2280,6 +2280,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("x S" . org-timer-stop)
          ("x c" . org-timer-set-timer)
          ("x ." . org-timer)
+         ("e"   . org-agenda)
 
          :map ctl-quote-map
          ("C-n" . open-org-file)

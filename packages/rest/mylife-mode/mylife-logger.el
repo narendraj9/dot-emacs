@@ -27,7 +27,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl))
+  (require 'cl-lib))
 
 (defcustom mylife-logger-logfile
   (expand-file-name "~/miscellany/assets/mylife-observable.log")

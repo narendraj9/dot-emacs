@@ -17,7 +17,7 @@
 ;;;
 ;;; Based on the Squeak hack by Scott Wallace.
 
-(require 'cl)
+(require 'cl-lib)
 
 (defvar lively-overlays nil "List of all overlays representing lively text.")
 (defvar lively-timer    nil "Idle timer for updating lively text.")
