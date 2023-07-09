@@ -620,13 +620,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
 
-  (setq diary-file (expand-file-name "diary" emacs-assets-directory)
-        ;; Weeks start on Monday.
-        calendar-week-start-day 1
-        ;; Month header show the month of the year.
-        calendar-month-header
-        '(propertize (format "%s %d/%d" (calendar-month-name month) month year)
-                     'font-lock-face 'calendar-month-header)))
+  (setq
+   ;; Weeks start on Monday.
+   calendar-week-start-day 1
+
+   ;; Month header show the month of the year.
+   calendar-month-header
+   '(propertize (format "%s %d/%d" (calendar-month-name month) month year)
+                'font-lock-face 'calendar-month-header)))
 
 (use-package calfw       :ensure t :after org)
 (use-package calfw-org   :ensure t :after org)
@@ -2286,6 +2287,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
          :map org-agenda-mode-map
          ("C-c g" . google-calendar-import-to-org) )
+  :config
+  ;; Set `diary-file' after `org-directory' has been set properly.
+  (setq diary-file (expand-file-name "diary" org-directory))
+
   :init
   (add-hook 'org-mode-hook
             (lambda ()
