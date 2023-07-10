@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: prlink
+# key: prlink
+# expand-env: ((yas-indent-line 'fixed))
+# --
+- ${1: Description}
+[${2:PR Number}](https://github.com/${3:`(if (not (boundp '--github-org)) (setq --github-org (read-string "Org: " )) --github-org)`}/${4:`(if (not (boundp '--github-project)) (setq --github-project (read-string "Project: " )) --github-project)`}/pull/$2)
+$0
