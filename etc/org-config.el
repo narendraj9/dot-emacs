@@ -541,7 +541,7 @@ non-empty lines in the block (excluding the line with
            ,(concat
              "* TODO %?                                           %^G\n"))
           ("n" "NOTE" entry (file+olp+datetree ,org-default-notes-file)
-           ,(concat "* %? %^G\n"
+           ,(concat "* %? \n"
                     org-config--common-metadata
                     "\n\n%i")
            :tree-type week)
