@@ -2271,6 +2271,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
+         ("C-c i" . org-custom-agenda)
          ("C-c n" . org-next-link)
          ("C-c p" . org-previous-link)
 
@@ -2305,6 +2306,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (eval-after-load "org" '(require 'org-config))
 
   :preface
+  (defun org-custom-agenda ()
+    (interactive)
+    (org-agenda nil "i"))
+
   (defun google-calendar-import-to-org ()
     (interactive)
     (when (boundp 'personal-google-calendar-url)
