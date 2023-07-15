@@ -38,6 +38,10 @@
   (setq modus-operandi-palette-overrides
         '((fringe "GhostWhite"))))
 
+(defcustom app/enable-time-based-theme-switching nil
+  "Set to t to enable switching between `app/light-theme' and
+`app/dark-theme' based on time of the day.")
+
 (defvar app/light-theme 'modus-operandi)
 (defvar app/dark-theme 'jazz)
 
@@ -135,7 +139,10 @@
   "Load the correct theme based on the current time and setup a
 timer for changing the theme next."
   (app/font-setup)
-  (app/daytime-switch-theme)
+
+  (if app/enable-time-based-theme-switching
+      (app/daytime-switch-theme)
+    (app/switch-theme app/dark-theme))
 
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)
