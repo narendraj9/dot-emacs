@@ -2104,11 +2104,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      ((memq 'flymake-mode local-minor-modes)
       (flymake-show-diagnostics-buffer))
 
-     (memq 'flycheck-mode local-minor-modes)
-     (flycheck-list-errors)
+     ((memq 'flycheck-mode local-minor-modes)
+      (flycheck-list-errors))
 
-     t
-     (message "No minor mode to run a linter."))))
+     (t (message "No minor mode to run a linter.")))))
 
 (use-package highlight-indent-guides
   :ensure t
