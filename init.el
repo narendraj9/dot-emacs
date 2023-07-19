@@ -1159,6 +1159,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("f"   . git-ls-files-find-file) )
 
   :init
+  (setq find-program
+        (expand-file-name "bin/find-wrapper.sh" user-emacs-directory))
+
   (setq project-list-file
         (expand-file-name "var/project-list" user-emacs-directory)
 
@@ -2502,7 +2505,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ("r"     . consult-ripgrep)
 
     :map project-prefix-map
-    ("f" . consult-find)
+    ("f" . project-find-file)
     ("g" . consult-regexp) )
 
   :preface
