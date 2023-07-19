@@ -871,6 +871,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
          :map ctl-quote-map
          (":"   . set-variable)
+         ("s l" . list-processes)
          ("s >" . shell-command-on-region)
          ("s |" . shell-command-on-region)
          ("s s" . shell-command)
@@ -3069,6 +3070,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (lambda (&rest args &key error-thrown &allow-other-keys)
                 (message "Error: %s" error-thrown))))))
 
+
+(use-package ruby-end
+  :ensure t
+  :hook ((ruby-ts-mode . ruby-end-mode)
+         (ruby-mode . ruby-end-mode)))
+
 (use-package yari
   :doc "Suggested by https://prelude.emacsredux.com/en/stable/modules/ruby/"
   :ensure t
@@ -3479,8 +3486,8 @@ buffer."
 (use-package server
   :demand t
   :config
-  (unless (server-running-p)
-    (server-start))
+  ;; (unless (server-running-p)
+  ;;   (server-start))
 
   (pcase system-type
     (`windows-nt
@@ -3699,7 +3706,8 @@ buffer."
   :commands backlight)
 
 (use-package proced
-  :custom (proced-auto-update-flag nil)
+  :custom ( (proced-auto-update-flag t)
+            (proced-filter 'emacs) )
   :bind ( :map ctl-quote-map
           ("s t" . proced)
           :map proced-mode-map
