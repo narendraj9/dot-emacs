@@ -216,7 +216,8 @@ Otherwise, limit to only `org-mode' files."
         org-extend-today-until 1)
 
   (defvar org-agenda-known-files
-    (list "journal.org" "main.org" "remember.org" "habits.org" "work.org" "calendar.org")
+    (list "journal.org" "main.org" "remember.org" "habits.org"
+          "work.org" "calendar.org" "appointments.org")
     "Files recognized as agenda files.")
 
   (setq org-agenda-skip-unavailable-files t)
@@ -539,12 +540,17 @@ non-empty lines in the block (excluding the line with
   (setq org-capture-templates
         `(("i" "TODO" entry (file+headline "capture.org" "Tasks")
            ,(concat
-             "* TODO %?                                           %^G\n"))
+             "* TODO %?                                           %^G\n"
+             org-config--common-metadata))
           ("n" "NOTE" entry (file+olp+datetree ,org-default-notes-file)
            ,(concat "* %? \n"
                     org-config--common-metadata
                     "\n\n%i")
            :tree-type week)
+          ("t" "Appointment" entry (file "appointments.org")
+           ,(concat "* %? \n"
+                    org-config--common-metadata
+                    "\n%^T"))
           ("l" "Article" entry (file "articles.org")
            "* %(org-cliplink-capture) %?"
            :empty-lines 0
@@ -813,6 +819,17 @@ non-empty lines in the block (excluding the line with
       ;; Give the above function some time to execute asynchronously (using
       ;; `emacs-deferred').
       (sit-for 5))))
+
+(use-package org-edna :ensure t)
+
+(use-package org-transclusion :ensure t)
+(use-package org-remark
+  :ensure t
+  :commands (org-remark-global-tracking-mode org-remark-mode)
+  :custom (org-remark-notes-display-buffer-action
+           `((display-buffer-at-bottom)))
+  ;; (org-remark-global-tracking-mode +1)
+  )
 
 
 (provide 'org-config)

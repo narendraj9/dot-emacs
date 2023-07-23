@@ -25,6 +25,10 @@
 ;;; Code:
 
 ;;; The Epoch
+
+;;; This shouldn't be required in the (hopefully near) future.
+(setq byte-compile-warnings '(cl-functions))
+
 (defconst emacs-start-time (current-time))
 
 ;;; Avoid garbage collection during Emacs startup. Garbage collection when
@@ -827,11 +831,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (wrap-region-global-mode +1)
   (wrap-region-remove-wrapper "<" 'org-mode))
 
-(use-package region-bindings-mode
-  :diminish region-bindings-mode
+(use-package selected
+  :diminish selected-minor-mode
   :ensure t
   :config
-  (region-bindings-mode-enable))
+  (selected-global-mode +1))
 
 (use-package repeat
   :init
@@ -1039,7 +1043,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    :map mc/keymap
    ("M-y" . yank-pop)
 
-   :map region-bindings-mode-map
+   :map selected-keymap
    ("C-x $" . mc-hide-unmatched-lines-mode)
    ("C-x !" . mc/mark-all-like-this)
 
@@ -1897,7 +1901,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
             (message "Tree-sitter grammar for %s already installed." language))
         (treesit-install-language-grammar language)))))
 
-
 (use-package combobulate :git "https://github.com/mickeynp/combobulate.git")
 (use-package ts-movement :git "https://github.com/haritkapadia/ts-movement.git")
 
@@ -2269,7 +2272,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq timeclock-file
         (expand-file-name "timelog" emacs-assets-directory)))
 
-(use-package org)
+(use-package org :demand t)
 (use-package org-config
   :after org
   :load-path "etc/"
@@ -2319,6 +2322,30 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (when (boundp 'personal-google-calendar-url)
       (import-icalendar-urls (list personal-google-calendar-url)))))
+
+
+(use-package xeft
+  :after org-config
+  :ensure t
+  :bind ("M-s x" . xeft)
+  :custom-face
+  ;; Thanks to @jwiegley:
+  (xeft-excerpt-body
+   ((t (:inherit default :foreground "grey80"))))
+  (xeft-excerpt-title
+   ((t (:inherit (bold underline) :foreground "sky blue"))))
+  (xeft-inline-highlight
+   ((t (:inherit underline :extend t :foreground "DarkOliveGreen2"))))
+
+  :init
+  (setq xeft-directory org-directory
+        xeft-default-extension "org"
+        xeft-recursive t
+        xeft-database (expand-file-name "xeft.db" emacs-assets-directory)
+        xeft-file-filter
+        (lambda (file-path)
+          (string-equal "org" (file-name-extension file-path)))))
+
 
 
 (use-package pomodoro
