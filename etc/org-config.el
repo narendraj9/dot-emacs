@@ -303,7 +303,7 @@ Otherwise, limit to only `org-mode' files."
                       '(org-agenda-skip-entry-if 'todo
                                                  '("ONGOING" "NEXT" "BLOCKED")))))
             (todo "NEXT"
-                  ((org-agenda-overriding-header "  Next Tasks:")))))
+                  ((org-agenda-overriding-header "  Next Tasks:\n  ══════════")))))
           ("o" "All Tasks"
            ((agenda "TODO"
                     ((org-agenda-skip-function
@@ -312,14 +312,14 @@ Otherwise, limit to only `org-mode' files."
                                                    "NEXT"
                                                    "BLOCKED")))))
             (todo "NEXT"
-                  ((org-agenda-overriding-header "  Next Tasks:")))
+                  ((org-agenda-overriding-header "  Next Tasks:\n  ══════════")))
             ;; (todo "BLOCKED"
             ;;       ((org-agenda-overriding-header "  Blocked Tasks:")))
             ;; (tags "+project+LEVEL=2|+project+LEVEL=1"
             ;;       ((org-agenda-overriding-header " Themes:")))
             (todo "TODO"
                   ;; Tasks for which I haven't thought about at all.q
-                  ((org-agenda-overriding-header "  Backlog: ")
+                  ((org-agenda-overriding-header "  Backlog:\n  ═══════")
                    (org-agenda-todo-ignore-scheduled 'all)
                    (org-agenda-todo-ignore-deadlines 'all)
                    (org-agenda-todo-ignore-timestamp 'all)
@@ -552,7 +552,8 @@ non-empty lines in the block (excluding the line with
                     org-config--common-metadata
                     "\n%^T"))
           ("l" "Article" entry (file "articles.org")
-           "* %(org-cliplink-capture) %?"
+           "* %(let ((url (org-cliplink-capture)))
+                  (run-with-timer 1 nil (lambda () (message \"%s\" url))) url) %?"
            :empty-lines 0
            :prepend t
            :immediate-finish t)

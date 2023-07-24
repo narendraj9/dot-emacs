@@ -184,7 +184,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Some ergonomic alternatives
   (define-key input-decode-map
               ;; Default: \C-i => TAB
-              "\C-i" "\C-x")
+              "\C-i" "\C-c")
 
   (define-key input-decode-map
               ;; Default: \C-[ => ESC
@@ -263,7 +263,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq buffer-file-coding-system 'utf-8)
 
   (setq large-file-warning-threshold
-        (* 30 1024 1024))
+        (* 100 1024 1024))
 
   ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
@@ -3272,8 +3272,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :bind ( :map magit-mode-map
           ("C-c C-r" . magit-change-repository)
-          :map ctl-period-map
-          ("C-x" . magit-status) )
+          :map global-map
+          ("C-c g" . magit-file-dispatch) )
 
   :init
   (setq magit-define-global-key-bindings nil)
