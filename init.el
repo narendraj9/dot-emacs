@@ -188,7 +188,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (define-key input-decode-map
               ;; Default: \C-[ => ESC
-              "\C-[" "\C-c")
+              "\C-[" "\C-x")
 
   (define-key input-decode-map
               ;; Default: \C-m => RET
@@ -2290,6 +2290,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
          ;; Bindings for using the Timer
          :map ctl-m-map
+         ("C-o" . org-toggle-custom-agenda)
          ("x s" . org-timer-start)
          ("x S" . org-timer-stop)
          ("x c" . org-timer-set-timer)
@@ -2319,9 +2320,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (eval-after-load "org" '(require 'org-config))
 
   :preface
-  (defun org-custom-agenda ()
+  (defun org-toggle-custom-agenda ()
     (interactive)
-    (org-agenda nil "i"))
+    (if (eq major-mode 'org-agenda-mode)
+        (org-agenda-quit)
+      (org-agenda nil "i")))
 
   (defun google-calendar-import-to-org ()
     (interactive)
@@ -3510,6 +3513,18 @@ buffer."
   (setd pdf-view-restore-filename "var/pdf-view-restore.el")
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
 
+(use-package nov
+  :ensure t
+  :defer t
+  :mode ("\\.epub\\'" . nov-mode))
+
+(use-package nov-xwidget
+  :git "https://github.com/chenyanming/nov-xwidget.git"
+  :after nov
+  :init
+  (define-key nov-mode-map (kbd "o") 'nov-xwidget-view)
+  (add-hook 'nov-mode-hook 'nov-xwidget-inject-all-files)  )
+
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package erc-config :commands erc-start! :load-path "etc/" :defer 10)
@@ -3770,10 +3785,28 @@ buffer."
 
 (use-package gptel
   :git "https://github.com/karthink/gptel"
+  :bind ( :map ctl-quote-map ("t c" . gptel) )
   :init
   (setq gptel-use-curl nil)
   (when (boundp 'openai-secret-key)
-    (setq gptel-api-key openai-secret-key)))
+    (setq gptel-api-key openai-secret-key))
+
+  :config
+  (add-hook 'gptel-response-filter-functions
+            (lambda (response _buffer)
+              (mapconcat
+               (lambda (line)
+                 (s-concat (propertize ">"
+                                       'display
+                                       '(left-fringe right-triangle))
+                           line))
+               (s-lines response)
+               "\n")))
+  (add-hook 'gptel-post-response-hook
+            (lambda ()
+              (end-of-buffer)
+              (re-search-backward (gptel-prompt-string))
+              (end-of-line))))
 
 (use-package c3po
   :disabled t
