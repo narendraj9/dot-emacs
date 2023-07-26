@@ -1847,8 +1847,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq read-process-output-max (* 1024 1024))
 
   (hook-into-modes #'eglot-ensure
-      'clojure-mode 'java-mode 'rust-mode 'rust-ts-mode
-      'python-mode 'go-mode 'c-mode 'c++-mode 'ruby-mode)
+      'clojure-mode 'java-ts-mode 'rust-ts-mode
+    'python-ts-mode 'go-ts-mode 'c-mode 'c-ts-mode
+    'c++-mode 'c++-ts-mode 'ruby-mode 'ruby-ts-mode)
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
@@ -1877,8 +1878,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :init
   (dolist (mode-remap-entry '((rust-mode   . rust-ts-mode)
+                              (go-mode     . go-ts-mode)
+                              (c-mode      . c-ts-mode)
+                              (c++-mode    . c++-ts-mode)
                               (python-mode . python-ts-mode)
-                              (ruby-mode   . ruby-ts-mode)))
+                              (ruby-mode   . ruby-ts-mode)
+                              (java-mode   . java-ts-mode)))
     (add-to-list 'major-mode-remap-alist mode-remap-entry))
 
   :config
@@ -2530,11 +2535,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ("C-s" . consult-line)
 
     :map dired-mode-map
-    ("r"     . consult-ripgrep)
-
-    :map project-prefix-map
-    ("f" . project-find-file)
-    ("g" . consult-regexp) )
+    ("r"     . consult-ripgrep) )
 
   :preface
   (defun consult-grep-dwim ()
@@ -3100,6 +3101,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package ruby-end
   :ensure t
+  :diminish ruby-end-mode
   :hook ((ruby-ts-mode . ruby-end-mode)
          (ruby-mode . ruby-end-mode)))
 
@@ -3272,8 +3274,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :bind ( :map magit-mode-map
           ("C-c C-r" . magit-change-repository)
+
           :map global-map
-          ("C-c g" . magit-file-dispatch) )
+          ("C-c g" . magit-file-dispatch)
+
+          :map ctl-period-map
+          ("C-c" . magit-file-dispatch) )
 
   :init
   (setq magit-define-global-key-bindings nil)
