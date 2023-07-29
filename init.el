@@ -225,7 +225,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("K" . recompile)
           ("$" . selective-display-beyond-col)
           ("u" . underline-text)
-          ("d" . duplicate-current-line)
           ("s" . surround-symbol-with) ))
 
 
@@ -621,6 +620,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package calendar
   :defer t
+  :custom (calendar-date-style 'iso)
   :bind (:map ctl-quote-map
               ("c c" . calendar))
   :init
@@ -635,8 +635,38 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    '(propertize (format "%s %d/%d" (calendar-month-name month) month year)
                 'font-lock-face 'calendar-month-header)))
 
-(use-package calfw       :ensure t :after org)
-(use-package calfw-org   :ensure t :after org)
+(use-package calfw
+  :ensure t
+  :after org
+  :config
+  (setq cfw:render-line-breaker #'cfw:render-line-breaker-wordwrap)
+  (setq cfw:fchar-junction ?╬
+        cfw:fchar-vertical-line ?║
+        cfw:fchar-horizontal-line ?═
+        cfw:fchar-left-junction ?╠
+        cfw:fchar-right-junction ?╣
+        cfw:fchar-top-junction ?╦
+        cfw:fchar-top-left-corner ?╔
+        cfw:fchar-top-right-corner ?╗))
+
+(use-package calfw-org
+  :ensure t
+  :bind ( :map org-agenda-mode-map
+          ("C-c d" . cfw:open-agenda-on-calendar) )
+  :after org
+  :preface
+  (defun cfw:open-agenda-on-calendar ()
+    ;; Depends on internal details and might stop working some day.
+    (interactive)
+    (select-frame (make-frame '((name . "Agenda"))))
+    (set-face-attribute 'default (selected-frame) :height 80)
+    (cfw:open-org-calendar)
+    (run-with-timer 1 nil (lambda () (cfw:refresh-calendar-buffer nil)))
+    (with-current-buffer (get-buffer "*cfw-calendar*")
+      (define-key (current-local-map) (kbd "q")
+                  (lambda () (interactive)
+                    (kill-buffer)
+                    (delete-frame))))))
 
 (use-package holidays
   :defer t
@@ -670,6 +700,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (advice-add 'appt-disp-window :around #'show-appt-notifications))
 
+
+(use-package xwidget
+  :custom (xwidget-webkit-cookie-file
+           (expand-file-name "webkit-cookies.txt" emacs-assets-directory))
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\*xwidget-webkit:" display-buffer-in-direction
+                 (direction . right)
+                 (window-width . 0.5))))
+
 (use-package eww
   :custom ((eww-auto-rename-buffer 'title)
            (eww-browse-url-new-window-is-tab nil))
@@ -684,6 +724,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (cond
    ((executable-find "firefox")
     (setq browse-url-browser-function 'browse-url-firefox))
+   ((featurep 'xwidget-internal)
+    (setq browse-url-browser-function 'xwidget-webkit-browse-url))
    ((executable-find "chromium")
     (setq browse-url-browser-function 'browse-url-chromium))
    ((executable-find "google-chrome")
@@ -861,6 +903,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
            (define-key m (kbd (car binding)) (cdr binding))
            (put (cdr binding) 'repeat-map (quote ,keymap-symbol)))
          (defvar ,keymap-symbol m)))))
+
+
+(use-package misc
+  :bind ( :map ctl-period-map ("d" . duplicate-dwim) )
+  :custom ( duplicate-line-final-position -1
+            duplicate-region-final-position -1) )
 
 (use-package select :init (setq select-enable-clipboard t))
 (use-package simple
@@ -1856,6 +1904,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; separately in a hook.
   (setq eglot-stay-out-of '(eldoc-documentation-strategy))
 
+  (setq eglot-inlay-hints-mode nil)
+
   :config
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
@@ -1888,26 +1938,37 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :config
   (dolist (grammar
-           '((css "https://github.com/tree-sitter/tree-sitter-css")
+           '((c "https://github.com/tree-sitter/tree-sitter-c")
+             (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+             (css "https://github.com/tree-sitter/tree-sitter-css")
+             (go "https://github.com/tree-sitter/tree-sitter-go")
+             (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+             (python "https://github.com/tree-sitter/tree-sitter-python")
              (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
              (rust "https://github.com/tree-sitter/tree-sitter-rust")
-             (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
-             (python "https://github.com/tree-sitter/tree-sitter-python")
-             (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
-             (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-    (add-to-list 'treesit-language-source-alist grammar)
+             (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+             (yaml "https://github.com/ikatyang/tree-sitter-yaml")
+             (java "https://github.com/tree-sitter/tree-sitter-java")))
+    (install-tree-sitter-grammer-if-required (car grammar) t)
+    (add-to-list 'treesit-language-source-alist grammar))
 
-    :preface
-    (defun install-tree-sitter-grammer-if-required (language &optional quiet)
-      "Given a language symbol install tree-sitter grammer if not
+  :preface
+  (defun install-tree-sitter-grammer-if-required (language &optional quiet)
+    "Given a language symbol install tree-sitter grammer if not
        already avaialble."
-      (if (treesit-language-available-p language)
-          (unless quiet
-            (message "Tree-sitter grammar for %s already installed." language))
-        (treesit-install-language-grammar language)))))
+    (if (treesit-language-available-p language)
+        (unless quiet
+          (message "Tree-sitter grammar for %s already installed." language))
+      (message "Installing tree-sitter grammar for %s" language)
+      (treesit-install-language-grammar language))))
 
-(use-package combobulate :git "https://github.com/mickeynp/combobulate.git")
-(use-package ts-movement :git "https://github.com/haritkapadia/ts-movement.git")
+(use-package combobulate
+  :git "https://github.com/mickeynp/combobulate.git"
+  :disabled t)
+
+(use-package ts-movement
+  :git "https://github.com/haritkapadia/ts-movement.git"
+  :disabled t)
 
 
 ;;; ----------------------------------------------------------------------------
@@ -1925,6 +1986,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (display-line-numbers-mode -1))))
 
 (use-package type-break
+  :disabled t
   :bind (:map ctl-quote-map ("b" . type-break) )
   :init
   (setq type-break-file-name nil)
@@ -1934,6 +1996,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package compile
   :defer t
+  :bind ( :map compilation-mode-map ("u" . rename-uniquely ))
   :preface
   (defun compilation-escape-colors-to-ansi-colors ()
     "Colorize from `compilation-filter-start' to `point'.
@@ -1946,7 +2009,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (require 'ansi-color)
 
-  (setq compilation-scroll-output t))
+  (setq compilation-scroll-output t
+        compilation-always-kill t)
+
+  (add-to-list 'display-buffer-alist
+               '("\\*compilation\\*" display-buffer-in-direction
+                 (window . main)
+                 (direction . right)
+                 (window-width . 0.5)))
+
+  ;; Switch to compilation buffer after starting compilation
+  ;; (add-hook 'compilation-start-hook
+  ;;           (lambda (process)
+  ;;             (when-let ((w (get-buffer-window (process-buffer process))))
+  ;;               (select-window w))))
+  )
 
 (use-package eldoc
   :diminish eldoc-mode
@@ -2284,7 +2361,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
-         ("C-c i" . org-custom-agenda)
          ("C-c n" . org-next-link)
          ("C-c p" . org-previous-link)
 
@@ -2324,12 +2400,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (if (eq major-mode 'org-agenda-mode)
         (org-agenda-quit)
-      (org-agenda nil "i")))
-
-  (defun google-calendar-import-to-org ()
-    (interactive)
-    (when (boundp 'personal-google-calendar-url)
-      (import-icalendar-urls (list personal-google-calendar-url)))))
+      (org-agenda nil "i"))))
 
 
 (use-package xeft
@@ -2465,19 +2536,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 (let ((completion-styles '(basic partial-completion)))
                   (apply compl-at-point args))))
   :preface
-  (defvar yank-symbol-to-minibuffer-or-kill-region)
   (defun yank-symbol-to-minibuffer-or-kill-region (&optional arg)
     (interactive "P")
     (if (region-active-p)
         (call-interactively #'kill-region)
       (insert (with-minibuffer-selected-window
                 (let ((starting-point (if (eq last-command this-command)
-                                          yank-symbol-to-minibuffer-or-kill-region
-                                        (setf yank-symbol-to-minibuffer-or-kill-region (point))))
+                                          (get this-command :starting-point)
+                                        (put this-command :starting-point (point))))
                       (p (point)))
-                  (if arg
-                      (forward-word 1)
-                    (forward-symbol 1))
+                  (if arg (forward-word 1) (forward-symbol 1))
                   (pulse-momentary-highlight-region starting-point (point))
                   (buffer-substring p (point))))))))
 
@@ -2590,7 +2658,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq javadoc-lookup-completing-read-function completing-read-function)
   (add-hook 'java-mode-hook
             (lambda ()
-              (setq-local browse-url-browser-function 'eww-browse-url)
+              (setq-local browse-url-browser-function
+                          (if (featurep 'xwidget-internal)
+                              #'xwidget-webkit-browse-url
+                            #'eww-browse-url))
               (define-key java-mode-map (kbd "C-c ; d")  #'javadoc-lookup)
               (define-key java-mode-map (kbd "C-c ; i")  #'javadoc-add-import)
               (define-key java-mode-map (kbd "C-c ; s")  #'javadoc-sort-imports))))
@@ -3129,10 +3200,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package rinari
   :ensure t
   :after ruby-mode
-  :bind (:map ruby-mode-map
-              ("C-c R" . rinari-insert-erb-skeletion))
+  :bind ( :map rinari-minor-mode-map
+          ("C-c =" . rinari-insert-erb-skeleton)
+          ("C-c -" . rinari-insert-no-equals) )
   :config
-  (global-rinari-mode))
+  (global-rinari-mode)
+
+  :preface
+  (defun rinari-insert-no-equals ()
+    (interactive)
+    (insert "<%  %>")
+    (backward-char 3)))
 
 (use-package robe
   :ensure t
@@ -3569,6 +3647,16 @@ buffer."
        ))))
 
 ;;; ──────────────────────────────────────────────────────────────────
+
+(use-package devdocs
+  :ensure t
+  :bind ( :map ctl-h-x-map ("d" . devdocs-lookup) )
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\*devdocs\\*\\'" display-buffer-in-direction
+                 (direction . right)
+                 (window-width . 0.5))))
+
 (use-package highlight :ensure t :defer t)
 (use-package tldr
   :load-path "packages/lisp/"
@@ -3586,7 +3674,7 @@ buffer."
       (require 's)
       (insert (s-trim text))))
 
-  :bind (("C-h t" . tldr))
+  :bind ( :map ctl-h-x-map ("t" . tldr) )
 
   :init
   ;; There should be no trailing / here!

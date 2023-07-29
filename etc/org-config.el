@@ -32,8 +32,38 @@
 (require 'defs)
 (require 'f)
 
-(use-package org-web-tools :ensure t)
+(defun import-icalendar-urls (ical-urls)
+  "Fetch each input url in ICAL-URLS with `url-copy-file' and place
+into org files using `ical2org.awk' script.
 
+This function is useful to fetch entries from Google calendar
+into `org-agenda'.
+
+To make these entries visible in `org-agenda', set
+`org-agenda-include-diary' to `t'."
+  (let ((ics-directory (expand-file-name "icalendar" org-directory))
+        (ical2org-script (expand-file-name "bin/ical2org.awk" user-emacs-directory)))
+    (unless (file-exists-p ics-directory)
+      (make-directory ics-directory))
+    (dolist (ical-url ical-urls)
+      (let* ((url (url-generic-parse-url ical-url))
+             (target-org-file (format "ical-%s-%s.org" (url-host url) (url-file-nondirectory ical-url)))
+             (target-ical-filepath (make-temp-file "ical-import-"))
+             (target-org-filepath (expand-file-name target-org-file ics-directory)))
+        (unwind-protect
+            (progn
+              (url-copy-file ical-url target-ical-filepath t)
+              (call-process-shell-command (format "%s %s > %s" (shell-quote-argument ical2org-script)
+                                                  (shell-quote-argument target-ical-filepath)
+                                                  (shell-quote-argument target-org-filepath))))
+          (delete-file target-ical-filepath))))))
+
+(defun google-calendar-import-to-org ()
+  (interactive)
+  (when (boundp 'personal-google-calendar-url)
+    (import-icalendar-urls (list personal-google-calendar-url))))
+
+(use-package org-web-tools :ensure t)
 
 (defun org-agenda-redo-with-days-to-deadline ()
   "Change `org-agenda' buffer and display days to deadline for all tasks."
@@ -267,9 +297,10 @@ Otherwise, limit to only `org-mode' files."
         org-agenda-dim-blocked-tasks 'invisible
 
         org-agenda-compact-blocks nil
-        org-agenda-block-separator (propertize (make-string 80 ?═)
-                                               'face '(:foreground "DeepSkyBlue"
-                                                                   :height 1.2))
+        org-agenda-block-separator
+        (propertize (make-string 80 ?═)
+                    'face '(:foreground "gainsboro" :height 1.2))
+
         org-agenda-clockreport-parameter-plist
         '(:link t :max-level 4 :fileskip0 t :compact t :narrow 80)
 
@@ -297,7 +328,7 @@ Otherwise, limit to only `org-mode' files."
 
         ;; Custom agenda vews
         org-agenda-custom-commands
-        '(("i" "My Agenda"
+        '(("a" "My Agenda"
            ((agenda "TODO"
                     ((org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'todo
@@ -695,7 +726,8 @@ non-empty lines in the block (excluding the line with
 (use-package org-clock
   :after org-agenda
   :init
-  (setq org-clock-idle-time 5)
+  (setq org-clock-idle-time 5
+        org-clock-report-include-clocking-task t)
 
   :config
   (setq org-agenda-clock-report-header "\nClock Report\n──────────── "

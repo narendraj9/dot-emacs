@@ -1279,32 +1279,5 @@ search keyword."
     (delete-overlay overlay)))
 
 
-(defun import-icalendar-urls (ical-urls)
-  "Fetch each input url in ICAL-URLS with `url-copy-file' and place
-into org files using `ical2org.awk' script.
-
-This function is useful to fetch entries from Google calendar
-into `org-agenda'.
-
-To make these entries visible in `org-agenda', set
-`org-agenda-include-diary' to `t'."
-  (let ((ics-directory (expand-file-name "icalendar" org-directory))
-        (ical2org-script (expand-file-name "bin/ical2org.awk" user-emacs-directory)))
-    (unless (file-exists-p ics-directory)
-      (make-directory ics-directory))
-    (dolist (ical-url ical-urls)
-      (let* ((url (url-generic-parse-url ical-url))
-             (target-org-file (format "ical-%s-%s.org" (url-host url) (url-file-nondirectory ical-url)))
-             (target-ical-filepath (make-temp-file "ical-import-"))
-             (target-org-filepath (expand-file-name target-org-file ics-directory)))
-        (unwind-protect
-            (progn
-              (url-copy-file ical-url target-ical-filepath t)
-              (call-process-shell-command (format "%s %s > %s" (shell-quote-argument ical2org-script)
-                                                  (shell-quote-argument target-ical-filepath)
-                                                  (shell-quote-argument target-org-filepath))))
-          (delete-file target-ical-filepath))))))
-
-
 (provide 'defs)
 ;;; defs.el ends here
