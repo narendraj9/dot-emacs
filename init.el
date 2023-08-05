@@ -2309,6 +2309,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
             ;; Or filter ANSI escape sequences with 'ansi-color-filter-apply
             'ansi-color-apply))
 
+(use-package eat
+  :disabled t
+  :ensure t
+  :diminish eat-eshell-mode
+  :custom ( eat-kill-buffer-on-exit t
+            eshell-visual-commands (list))
+  :init
+  (eat-eshell-mode))
+
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -2401,6 +2410,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (if (eq major-mode 'org-agenda-mode)
         (org-agenda-quit)
       (org-agenda nil "i"))))
+
+
+(use-package org-timeblock
+  :disabled t
+  :after org
+  :git "https://github.com/ichernyshovvv/org-timeblock"
+  :init
+  (use-package org-ql :ensure t :defer t))
 
 
 (use-package xeft
