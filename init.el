@@ -1133,11 +1133,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   that with a keymap bound to a key sequence, it doesn't work the
   first time you press the key sequence. @TODO"
   :config
-  :bind (:map ctl-quote-map
-              ("C-f a" . footnote-add-footnote)
-              ("C-f b" . footnote-back-to-message)
-              ("C-f d" . footnote-delete-footnote)
-              ("C-f g" . footnote-goto-footnote)))
+  :bind ( :map ctl-quote-map
+          ("o a" . footnote-add-footnote)
+          ("o b" . footnote-back-to-message)
+          ("o d" . footnote-delete-footnote)
+          ("o g" . footnote-goto-footnote)) )
 
 (use-package csv-mode      :defer t :ensure t)
 (use-package markdown-mode :defer t :ensure t)
@@ -2617,6 +2617,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ("z" . consult-complex-command)
 
     :map ctl-quote-map
+    ("o n" . org-record-a-note!)
     ("C-'" . consult-imenu)
 
     :map ctl-period-map
@@ -2637,7 +2638,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (consult-git-grep directory initial))
 
        (t
-        (consult-grep directory initial))))))
+        (consult-grep directory initial)))))
+
+
+  (defun org-record-a-note! ()
+    (interactive)
+    (let ((org-use-property-inheritance nil)
+          (org-use-tag-inheritance nil))
+      (consult-org-heading "+note_target" 'agenda)
+      (org-narrow-to-subtree)
+      (org-fold-show-subtree)
+      (forward-line 1)
+      (open-line 1)
+      (insert "- Noted on ")
+      (org-insert-time-stamp (current-time) t t)
+      (insert "\n  "))))
 
 
 ;;; Programming Languages
