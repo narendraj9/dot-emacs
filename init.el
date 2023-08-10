@@ -2641,18 +2641,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (consult-grep directory initial)))))
 
 
-  (defun org-record-a-note! ()
-    (interactive)
+  (defun org-record-a-note! (prefix-arg)
+    (interactive "P")
     (let ((org-use-property-inheritance nil)
           (org-use-tag-inheritance nil))
       (consult-org-heading "+note_target" 'agenda)
       (org-narrow-to-subtree)
       (org-fold-show-subtree)
-      (forward-line 1)
-      (open-line 1)
-      (insert "- Noted on ")
-      (org-insert-time-stamp (current-time) t t)
-      (insert "\n  "))))
+      (unless prefix-arg
+        (forward-line 1)
+        (open-line 1)
+        (insert "- Noted on ")
+        (org-insert-time-stamp (current-time) t t)
+        (insert "\n  ")))))
 
 
 ;;; Programming Languages
