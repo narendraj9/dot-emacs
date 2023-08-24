@@ -64,6 +64,7 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
+(use-package use-package-ensure-system-package)
 (use-package diminish :ensure t :demand t)
 (use-package bind-key :ensure t)
 
@@ -3114,6 +3115,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package typescript-mode :ensure t)
 (use-package coffee-mode     :defer t :ensure t)
 (use-package elm-mode        :defer t :ensure t)
+
+
+(use-package prettier
+  :disabled t
+  :ensure t
+  :init
+  (global-prettier-mode +1))
 
 ;;; ERLANG AND ELIXIR
 ;; ──────────────────────────────────────────────────────────────────
