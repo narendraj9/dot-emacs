@@ -3,5 +3,5 @@
 # key: _prlink
 # expand-env: ((yas-indent-line 'fixed))
 # --
--[${1:PR Number}](https://github.com/${2:`(if (not (boundp '--github-org)) (setq --github-org (read-string "Org: " )) --github-org)`}/${3:`(if (not (boundp '--github-project)) (setq --github-project (read-string "Project: " )) --github-project)`}/pull/$2)
+[${1:PR Number}](https://github.com/${2:`(if (not (boundp '--github-org)) (setq --github-org (read-string "Org: " )) --github-org)`}/${3:`(if (not (boundp '--github-project)) (setq --github-project (read-string "Project: " )) --github-project)`}/pull/$1)
 $0

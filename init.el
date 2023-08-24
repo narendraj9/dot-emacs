@@ -1782,6 +1782,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setd yankpad-file "etc/yankpad.org"))
 
+;;;
+
+(use-package langtool
+  :ensure t)
+
 ;;; Personal Finance
 ;; ――――――――――――――――――――――――――――――――――――
 (use-package ledger-mode
