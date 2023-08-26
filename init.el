@@ -3744,7 +3744,7 @@ buffer."
 
 (use-package ace-link
   :ensure t
-  :bind ("C-c M-o" . ace-link-addr)
+  :bind ("C-c M-o" . ace-link)
   :config
   (ace-link-setup-default))
 

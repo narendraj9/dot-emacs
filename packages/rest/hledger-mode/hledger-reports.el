@@ -45,7 +45,14 @@
                                  "register")
   "Commands that can be passed to `hledger-jdo` function defined below.")
 
-(defcustom hledger-extra-args " --no-elide --pretty --format '%,%25(total)  %2(depth_spacer)%-(account)' --flat --sort-amount"
+
+(defcustom hledger-show-all-commodities nil
+  "Toggle display of individual commodities instead of showing the
+   exchanged value in `hledger-currency-string'."
+  :group 'hledger
+  :type 'boolean)
+
+(defcustom hledger-extra-args " --no-elide --pretty --format '%^%25(total)  %2(depth_spacer)%-(account)' --flat --sort-amount"
   "Extra arguments included while running Hledger for reports, e.g. -S."
   :group 'hledger
   :type 'string)
@@ -311,7 +318,9 @@ non-nil, it lands us in the `hledger-mode' ."
        (hledger-jdo (format "balancesheet --end %s " (hledger-end-date (current-time)))
                     nil
                     nil
-                    " --pretty --format '%,%25(total)  %2(depth_spacer)%-(account)' --tree --sort-amount "))
+                    (concat  (unless hledger-show-all-commodities
+                               (format " --infer-market-prices -X%s " hledger-currency-string))
+                             " --pretty --format '%_%25(total)  %2(depth_spacer)%-(account)' --tree --sort-amount ")))
 
       (`"cashflow"
        (hledger-jdo (format "cashflow --begin %s --end %s"
@@ -406,10 +415,11 @@ easily."
                                hledger-last-run-command
                                append-string)))
 
-(defun hledger-redo ()
+(defun hledger-redo (&optional prefix)
   "Repeat the last command."
-  (interactive)
-  (hledger-jdo-redo-with ""))
+  (interactive "P")
+  (let ((hledger-show-all-commodities (or prefix hledger-show-all-commodities)))
+    (hledger-jdo-redo-with "")))
 
 (defvar hledger--ic 0
   "Variable to track increments in width for register command.")
@@ -562,7 +572,8 @@ Optional argument END end date string for journal entries to consider."
                           " --end " (or end date-now)
                           " --depth 1"
                           " --no-total "
-                          " -V "        ; Require P directives are present.
+                          ;; Requires P directives to be present.
+                          (format " -X%s --infer-market-prices" hledger-currency-string)
                           " --format "
                           (shell-quote-argument "\"%(account)\" \"%(total)\" "))))
          (elisp-string (concat "(" (replace-regexp-in-string "," "" output) ")"))
