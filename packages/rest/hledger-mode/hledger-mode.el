@@ -114,6 +114,8 @@ COMMAND, ARG and IGNORED the regular meanings."
                                                   "incomestatement"))
     (define-key map (kbd "d") (hledger-as-command hledger-daily-report*
                                                   "daily"))
+    (define-key map (kbd "I") (hledger-as-command hledger-investments*
+                                                  "investments"))
     (define-key map (kbd "b") (hledger-as-command hledger-balancesheet*
                                                   "balancesheet"))
     (define-key map (kbd "c") (hledger-as-command hledger-ledger-cashflow*

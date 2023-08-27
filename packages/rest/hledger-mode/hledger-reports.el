@@ -42,11 +42,13 @@
                                  "print"
                                  "accounts"
                                  "balance"
-                                 "register")
+                                 "register"
+                                 "commodities"
+                                 "investments")
   "Commands that can be passed to `hledger-jdo` function defined below.")
 
 
-(defcustom hledger-show-all-commodities nil
+(defcustom hledger-show-in-main-currency nil
   "Toggle display of individual commodities instead of showing the
    exchanged value in `hledger-currency-string'."
   :group 'hledger
@@ -304,7 +306,11 @@ non-nil, it lands us in the `hledger-mode' ."
   ;; Help other functions keep track of history.
   (setq hledger-last-run-command command)
   (hledger-ask-and-save-buffer)
-  (let ((inhibit-read-only t))
+  (let ((inhibit-read-only t)
+        (balance-extra-args
+         (concat  (if hledger-show-in-main-currency
+                      (format " --infer-market-prices -X%s " hledger-currency-string))
+                  " --pretty --format '%^%25(total)  %2(depth_spacer)%-(account)' --tree --sort-amount ")))
     (pcase command
       (`"incomestatement" (hledger-monthly-incomestatement))
       (`"daily" (hledger-daily-report))
@@ -314,13 +320,15 @@ non-nil, it lands us in the `hledger-mode' ."
        (pop-to-buffer hledger-reporting-buffer-name)
        (delete-other-windows))
 
+      (`"investments"
+       (hledger-jdo "balancesheet investments" nil nil balance-extra-args))
+
       (`"balancesheet"
-       (hledger-jdo (format "balancesheet --end %s " (hledger-end-date (current-time)))
+       ;; Exclude investments from regular balancesheet.
+       (hledger-jdo (format "balancesheet --end %s not:'assets:investments' " (hledger-end-date (current-time)))
                     nil
                     nil
-                    (concat  (unless hledger-show-all-commodities
-                               (format " --infer-market-prices -X%s " hledger-currency-string))
-                             " --pretty --format '%_%25(total)  %2(depth_spacer)%-(account)' --tree --sort-amount ")))
+                    balance-extra-args))
 
       (`"cashflow"
        (hledger-jdo (format "cashflow --begin %s --end %s"
@@ -418,7 +426,8 @@ easily."
 (defun hledger-redo (&optional prefix)
   "Repeat the last command."
   (interactive "P")
-  (let ((hledger-show-all-commodities (or prefix hledger-show-all-commodities)))
+  (let ((hledger-show-in-main-currency
+         (if prefix (not hledger-show-in-main-currency) hledger-show-in-main-currency)))
     (hledger-jdo-redo-with "")))
 
 (defvar hledger--ic 0
