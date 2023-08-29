@@ -28,6 +28,8 @@
 (require 'seq)
 (require 'solar)
 
+(use-package ef-themes :ensure t :defer t)
+
 (use-package modus-themes
   :ensure t
   :pin gnu
@@ -140,9 +142,8 @@
 timer for changing the theme next."
   (app/font-setup)
 
-  (if app/enable-time-based-theme-switching
-      (app/daytime-switch-theme)
-    (app/switch-theme app/dark-theme))
+  (when app/enable-time-based-theme-switching
+    (app/daytime-switch-theme))
 
   ;; Show long lines as continuations.
   (setq-default truncate-lines nil)

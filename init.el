@@ -375,7 +375,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                (expand-file-name "themes/"
                                  user-emacs-directory))
   :config
-  (appearance-init))
+  (let ((appearance-enable-time-based-theme-switching nil))
+    (appearance-init))
+  (load-theme 'ef-dark))
 
 (use-package mode-line-config
   :bind ( :map ctl-m-map
