@@ -28,7 +28,12 @@
 (require 'seq)
 (require 'solar)
 
-(use-package ef-themes :ensure t :defer t)
+(use-package ef-themes
+  :ensure t
+  :defer t
+  :config
+  (setq ef-dark-palette-overrides
+        '((bg-main "#151515"))))
 
 (use-package modus-themes
   :ensure t

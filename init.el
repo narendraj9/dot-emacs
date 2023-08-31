@@ -380,8 +380,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (load-theme 'ef-dark))
 
 (use-package mode-line-config
-  :bind ( :map ctl-m-map
-          ("<C-m>" . mode-line-config-flash-cleaner-line) )
   :demand t
   :load-path "etc/"
   :config
@@ -1309,6 +1307,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Adds an entry to `emulation-mode-map-alists' which take precedence over all
   ;; active minor-mode keymaps and the active major-mode keymap in a buffer.
   (bind-key* [C-return] #'other-window)
+  (bind-key* [C-m C-m] #'delete-window)
 
   (setq fit-window-to-buffer-horizontally t
         window-resize-pixelwise t)
@@ -3932,7 +3931,7 @@ buffer."
             (lambda (response _buffer)
               (mapconcat
                (lambda (line)
-                 (s-concat (propertize ">"
+                 (s-concat (propertize " "
                                        'display
                                        '(left-fringe right-triangle))
                            line))
