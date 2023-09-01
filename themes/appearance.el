@@ -28,12 +28,39 @@
 (require 'seq)
 (require 'solar)
 
+(use-package jazz-theme :load-path "themes/")
 (use-package ef-themes
   :ensure t
   :defer t
   :config
-  (setq ef-dark-palette-overrides
-        '((bg-main "#151515"))))
+  (setq ef-dark-palette-overrides '((bg-main "gray15")))
+
+  :init
+  (add-hook 'ef-themes-post-load-hook #'my-ef-themes-mode-line)
+  (defun my-ef-themes-mode-line ()
+    "Tweak the style of the mode lines."
+    (with-jazz-theme-palette
+        (custom-set-faces
+         `(mode-line ((,class (:foreground ,jazz-fg-1 :background ,jazz-bg :box (:line-width 5 :color ,jazz-bg)))))
+         `(mode-line-buffer-id ((,class (:foreground ,jazz-yellow :weight bold))))
+         `(mode-line-highlight ((,class (:foreground ,jazz-blue))))
+         `(mode-line-inactive
+           ((,class (:inherit mode-line :foreground ,jazz-bg+2
+                              :background ,jazz-bg-1
+                              :box (:line-width 5 :color ,jazz-bg-1)))))
+         `(mode-line-folder-face ((,class (:foreground ,jazz-bg+2))) t)
+         `(mode-line-modified-face ((,class (:foreground ,jazz-red))) t)
+         `(mode-line-ro-modified-face ((,class (:foreground ,jazz-blue))) t)
+         `(mode-line-buffer-name ((,class (:foreground ,jazz-yellow))) t)
+         ;; --
+         `(mode-line-size-face ((,class (:foreground ,jazz-yellow))) t)
+         `(mode-line-mode-name ((,class (:foreground ,jazz-blue+2))) t t)
+         `(mode-line-minor-mode-face ((,class (:foreground ,jazz-blue-6 :height 120 :bold t))) t)
+         `(mode-line-delim ((,class (:foreground ,jazz-orange-2 :box nil :height 130))) t)
+         `(mode-line-battery-face ((,class (:foreground ,jazz-orange-2 :box nil :height 130))))
+         ;; --
+         `(mode-line-mode-string ((,class (:foreground ,jazz-bg+3))) t)
+         `(mode-line-vc-mode ((,class (:foreground ,jazz-magenta))) t)))))
 
 (use-package modus-themes
   :ensure t
