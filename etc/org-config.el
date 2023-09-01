@@ -578,6 +578,10 @@ non-empty lines in the block (excluding the line with
                     org-config--common-metadata
                     "\n\n%i")
            :tree-type week)
+          ("e" "Event" entry (file "main.org")
+           ,(concat "* %? \n"
+                    org-config--common-metadata
+                    "\n%^T"))
           ("t" "Appointment" entry (file "appointments.org")
            ,(concat "* %? \n"
                     org-config--common-metadata

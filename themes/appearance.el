@@ -29,18 +29,37 @@
 (require 'solar)
 
 (use-package jazz-theme :load-path "themes/")
+
 (use-package ef-themes
   :ensure t
   :defer t
   :config
-  (setq ef-dark-palette-overrides '((bg-main "gray15")))
+  (setq ef-dark-palette-overrides
+        '((yellow "burlywood")
+          (bg-main "#160f0f")
+          (cursor "floral white")
+          (builtin "light coral")))
+
+  (setq ef-trio-dark-palette-overrides
+        '((cursor "floral white")
+          (builtin "light coral")
+          ;; Replace with colors that you like more.
+          ;; (magenta "#7fa5f6")
+          ;; (magenta-warmer "#8895ff")
+          ;; (magenta-intense "#72afff")
+          ))
 
   :init
   (add-hook 'ef-themes-post-load-hook #'my-ef-themes-mode-line)
+
+  :preface
   (defun my-ef-themes-mode-line ()
     "Tweak the style of the mode lines."
     (with-jazz-theme-palette
         (custom-set-faces
+         `(header-line ((,class (:foreground ,jazz-yellow
+                                             :background ,jazz-bg-1
+                                             :box (:line-width -1 :color ,jazz-bg :style released-button)))))
          `(mode-line ((,class (:foreground ,jazz-fg-1 :background ,jazz-bg :box (:line-width 5 :color ,jazz-bg)))))
          `(mode-line-buffer-id ((,class (:foreground ,jazz-yellow :weight bold))))
          `(mode-line-highlight ((,class (:foreground ,jazz-blue))))

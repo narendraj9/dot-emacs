@@ -284,8 +284,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         backup-by-copying t
         version-control t
         delete-old-versions t
-        kept-new-versions 5
-        kept-old-versions 5)
+        kept-new-versions 10
+        kept-old-versions 10)
 
   (setq confirm-kill-emacs
         (lambda (prompt)
@@ -369,8 +369,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "`use-package' doesn't throw an error for non-existent packages"
   :load-path "themes/"
   :init
-  (setq appearance-enable-time-based-theme-switching t)
-
   (add-to-list 'custom-theme-load-path
                (expand-file-name "themes/"
                                  user-emacs-directory))
