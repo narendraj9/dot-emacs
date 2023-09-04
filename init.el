@@ -1900,9 +1900,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq read-process-output-max (* 1024 1024))
 
   (hook-into-modes #'eglot-ensure
-      'clojure-mode 'java-ts-mode 'rust-ts-mode
-    'python-ts-mode 'go-ts-mode 'c-mode 'c-ts-mode
-    'c++-mode 'c++-ts-mode 'ruby-mode 'ruby-ts-mode)
+      'clojure-mode 'clojure-ts-mode
+      'java-mode 'java-ts-mode
+      'rust-mode 'rust-ts-mode
+      'python-mode 'python-ts-mode
+      'go-mode 'go-ts-mode
+      'c-mode 'c-ts-mode
+      'c++-mode 'c++-ts-mode
+      'ruby-mode 'ruby-ts-mode)
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
