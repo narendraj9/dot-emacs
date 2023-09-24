@@ -222,11 +222,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-x" . async-M-x)
 
           :map ctl-period-map
-          ("k" . project-compile)
-          ("K" . recompile)
-          ("$" . selective-display-beyond-col)
-          ("u" . underline-text)
-          ("s" . surround-symbol-with) ))
+          ("k"   . project-compile)
+          ("C-k" . project-compile)
+          ("K"   . recompile)
+          ("$"   . selective-display-beyond-col)
+          ("u"   . underline-text)
+          ("s"   . surround-symbol-with) ))
 
 
 (use-package custom-registers
@@ -2351,7 +2352,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :hook ((haskell-mode . haskell-doc-mode)
          (haskell-mode . haskell-indentation-mode)))
 
-(use-package proof-general :defer t :ensure t)
+(use-package proof-general
+  :defer t
+  :ensure t
+  :custom (proof-splash-enable nil))
 
 ;;; GRAPHICS
 ;; ──────────────────────────────────────────────────────────────────

@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: Rails Stimulus Controller
+# key: stimulus
+# --
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  connect() {
+    $0
+  }
+}
