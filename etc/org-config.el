@@ -723,7 +723,8 @@ non-empty lines in the block (excluding the line with
   (setq org-habit-graph-column 80
         ;; Use `customize-variable' depending on the screen size and
         ;; resolution.
-        org-habit-preceding-days 28
+        org-habit-preceding-days 42
+        org-habit-following-days 14
         org-habit-show-done-always-green t))
 
 

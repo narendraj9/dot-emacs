@@ -3925,11 +3925,16 @@ buffer."
 (use-package keycast :ensure t :defer t)
 (use-package exercism :ensure t :defer t)
 
+
+;;; LLMs
+;; ----------------------------------------------------------------------------
+
 (use-package gptel
   :git "https://github.com/karthink/gptel"
   :bind ( :map ctl-quote-map ("t c" . gptel) )
+  :custom ((gptel-use-curl nil)
+           (gptel-model "gpt-4"))
   :init
-  (setq gptel-use-curl nil)
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
 
@@ -3974,6 +3979,8 @@ buffer."
 
 (use-package chatgpt :disabled t :git "https://github.com/emacs-openai/chatgpt")
 (use-package codegpt :disabled t :git "https://github.com/emacs-openai/codegpt")
+
+;; ----------------------------------------------------------------------------
 
 (provide 'init)
 ;;; init.el ends here
