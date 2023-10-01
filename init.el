@@ -1944,7 +1944,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               (c++-mode    . c++-ts-mode)
                               (python-mode . python-ts-mode)
                               (ruby-mode   . ruby-ts-mode)
-                              (java-mode   . java-ts-mode)))
+                              (java-mode   . java-ts-mode)
+                              (js-mode     . js-ts-mode)))
     (add-to-list 'major-mode-remap-alist mode-remap-entry))
 
   :config
@@ -3963,10 +3964,9 @@ buffer."
   (when (boundp 'openai-secret-key)
     (setq c3po-api-key openai-secret-key)))
 
-(use-package tblui :disabled t :ensure t)
 (use-package openai
-  :disabled t
   :git "https://github.com/emacs-openai/openai"
+  :bind ( :map ctl-quote-map ("t TAB" . openai-complete-text) )
   :init
   (use-package tblui :ensure t)
   ;; The same variable sets up the user role.
@@ -3975,12 +3975,58 @@ buffer."
     (setq openai-key openai-secret-key))
 
   :config
-  (require 'openai-edit))
+  (require 'openai-edit)
+  (require 'openai-completion)
+
+  :preface
+  (defun openai--display-result-as-overlay (data)
+    (let* ((choices (openai--data-choices data))
+           (choice-count (length choices))
+           (current-index 0)
+           (completion-keymap (make-sparse-keymap))
+           (completion-overlay (make-overlay (point) (point) nil t t))
+           (select-current-choice (lambda ()
+                                    (interactive)
+                                    (delete-overlay completion-overlay)
+                                    (insert (nth current-index choices))
+                                    (delete-overlay completion-overlay)))
+           (show-next-choice
+            (lambda ()
+              (interactive)
+              (overlay-put completion-overlay
+                           'after-string
+                           (format "%s [%s/%s] "
+                                   (propertize (nth current-index choices)
+                                               'face 'shadow)
+                                   (propertize (number-to-string (1+ current-index))
+                                               'face 'highlight)
+                                   (propertize (number-to-string choice-count)
+                                               'face 'highlight)))
+              (setq current-index (mod (1+ current-index)
+                                       choice-count)))))
+      (define-key completion-keymap (kbd "TAB") show-next-choice)
+      (define-key completion-keymap (kbd "RET") select-current-choice)
+      (set-transient-map completion-keymap
+                         t
+                         (lambda ()
+                           (delete-overlay completion-overlay)))
+      (unless (zerop choice-count)
+        (funcall show-next-choice))))
+
+  (defun openai-complete-text ()
+    (interactive)
+    (let ((prompt-text (save-excursion
+                         (buffer-substring-no-properties (progn (start-of-paragraph-text)
+                                                                (point))
+                                                         (progn (end-of-paragraph-text)
+                                                                (point))))))
+      (openai-completion prompt-text #'openai--display-result-as-overlay))))
 
 (use-package chatgpt :disabled t :git "https://github.com/emacs-openai/chatgpt")
 (use-package codegpt :disabled t :git "https://github.com/emacs-openai/codegpt")
 
 ;; ----------------------------------------------------------------------------
+
 
 (provide 'init)
 ;;; init.el ends here
