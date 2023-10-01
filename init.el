@@ -3997,7 +3997,8 @@ buffer."
                            'after-string
                            (format "%s [%s/%s] "
                                    (propertize (nth current-index choices)
-                                               'face 'shadow)
+                                               'face 'shadow
+                                               'cursor t)
                                    (propertize (number-to-string (1+ current-index))
                                                'face 'highlight)
                                    (propertize (number-to-string choice-count)
