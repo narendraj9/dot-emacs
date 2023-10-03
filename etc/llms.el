@@ -28,9 +28,54 @@
 (require 'json)
 (require 'auth-source)
 
+(defun llms--display-choices-as-overlay (choices)
+  (let* ((choice-count (length choices))
+         (current-index -1)
+         (completion-keymap (make-sparse-keymap))
+         (completion-overlay (make-overlay (point) (point) nil t t))
+         (select-current-choice (lambda ()
+                                  (interactive)
+                                  (delete-overlay completion-overlay)
+                                  (insert (nth current-index choices))
+                                  (delete-overlay completion-overlay)))
+         (show-next-choice
+          (lambda ()
+            (interactive)
+            (setq current-index (mod (1+ current-index) choice-count))
+            (overlay-put completion-overlay
+                         'after-string
+                         (format "%s [%s/%s] "
+                                 (propertize (nth current-index choices)
+                                             'face 'shadow
+                                             'cursor t)
+                                 (propertize (number-to-string (1+ current-index))
+                                             'face 'highlight)
+                                 (propertize (number-to-string choice-count)
+                                             'face 'highlight))))))
+    (define-key completion-keymap (kbd "TAB") show-next-choice)
+    (define-key completion-keymap (kbd "RET") select-current-choice)
+    (set-transient-map completion-keymap
+                       t
+                       (lambda ()
+                         (delete-overlay completion-overlay)))
+    (unless (zerop choice-count)
+      (funcall show-next-choice))))
+
+
+(defun llms-prompt-text ()
+  (if (region-active-p)
+      (buffer-substring-no-properties (region-beginning)
+                                      (region-end)))
+  (save-excursion
+    (buffer-substring-no-properties (progn (start-of-paragraph-text)
+                                           (point))
+                                    (progn (end-of-paragraph-text)
+                                           (point)))))
+
+
 (use-package gptel
   :git "https://github.com/karthink/gptel"
-  :bind ( :map ctl-quote-map ("t c" . gptel) )
+  :bind ( :map ctl-quote-map ("t c" . gptel-menu) )
   :demand t
   :custom ((gptel-use-curl nil)
            (gptel-model "gpt-4"))
@@ -38,22 +83,14 @@
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
 
+  (require 'gptel-transient)
   :config
-  (add-hook 'gptel-response-filter-functions
-            (lambda (response _buffer)
-              (mapconcat
-               (lambda (line)
-                 (s-concat (propertize " "
-                                       'display
-                                       '(left-fringe right-triangle))
-                           line))
-               (s-lines response)
-               "\n")))
   (add-hook 'gptel-post-response-hook
             (lambda ()
               (end-of-buffer)
               (re-search-backward (gptel-prompt-string))
               (end-of-line))))
+
 
 (use-package c3po
   :disabled t
@@ -62,6 +99,7 @@
   :init
   (when (boundp 'openai-secret-key)
     (setq c3po-api-key openai-secret-key)))
+
 
 (use-package chatgpt :disabled t :git "https://github.com/emacs-openai/chatgpt")
 (use-package codegpt :disabled t :git "https://github.com/emacs-openai/codegpt")
@@ -77,67 +115,29 @@
   (require 'openai-edit)
   (require 'openai-chat))
 
-(defun llms--display-choices-as-overlay (choices)
-  (let* ((choice-count (length choices))
-         (current-index 0)
-         (completion-keymap (make-sparse-keymap))
-         (completion-overlay (make-overlay (point) (point) nil t t))
-         (select-current-choice (lambda ()
-                                  (interactive)
-                                  (delete-overlay completion-overlay)
-                                  (insert (nth current-index choices))
-                                  (delete-overlay completion-overlay)))
-         (show-next-choice
-          (lambda ()
-            (interactive)
-            (overlay-put completion-overlay
-                         'after-string
-                         (format "%s [%s/%s] "
-                                 (propertize (nth current-index choices)
-                                             'face 'shadow
-                                             'cursor t)
-                                 (propertize (number-to-string (1+ current-index))
-                                             'face 'highlight)
-                                 (propertize (number-to-string choice-count)
-                                             'face 'highlight)))
-            (setq current-index (mod (1+ current-index)
-                                     choice-count)))))
-    (define-key completion-keymap (kbd "TAB") show-next-choice)
-    (define-key completion-keymap (kbd "RET") select-current-choice)
-    (set-transient-map completion-keymap
-                       t
-                       (lambda ()
-                         (delete-overlay completion-overlay)))
-    (unless (zerop choice-count)
-      (funcall show-next-choice))))
-
-
-(defun llm-prompt-text ()
-  (save-excursion
-    (buffer-substring-no-properties (progn (start-of-paragraph-text)
-                                           (point))
-                                    (progn (end-of-paragraph-text)
-                                           (point)))))
-
 
 ;;;###autoload
 (defun openai-complete-text (arg)
   (interactive "P")
-  (let ((instruction
-         (if arg
-             (read-string "Instruction: ")
-           "Complete the following sentence: "))
+  (let ((prompt-text (llms-prompt-text))
+        (instruction (if arg
+                         (read-string "Instruction: ")
+                       (concat "You are a helpful assistant."
+                               "Try to complete the following sentence, only"
+                               "if you are sure you can confidently guess what should follow."
+                               "Make sure that the combined sentence is"
+                               "coherent and logically correct."))))
 
-        (prompt-text (llm-prompt-text)))
-
-    (openai-chat `[(("role"    . "user")
-                    ("content" . ,(concat instruction "\n" prompt-text)))]
+    (openai-chat `[(("role"    . "system")
+                    ("content" . ,instruction))
+                   (("role"    . "user")
+                    ("content" . ,prompt-text))]
                  (lambda (data)
                    (let ((choices (let-alist data .choices)))
                      (llms--display-choices-as-overlay (mapcar (lambda (choice)
                                                                  (let-alist choice
                                                                    (let-alist .message
-                                                                     .content)))
+                                                                     (concat " " .content))))
                                                                choices))))
                  :model "gpt-4"
                  :max-tokens 30
@@ -150,7 +150,7 @@
 (defun hugging-face-complete ()
   (interactive)
   (let ((auth-token (auth-source-pick-first-password :host "huggingface.co"))
-        (prompt (llm-prompt-text)))
+        (prompt (llms-prompt-text)))
     (request "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-v0.1"
       :type "POST"
       :headers `(("Content-Type" . "application/json")

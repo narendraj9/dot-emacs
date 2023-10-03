@@ -2256,7 +2256,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (vterm-send-key "n" nil nil t)))
 
 (use-package shell
-  :bind ( "s-<return>" . shell )
   :init
   (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
 
@@ -2325,13 +2324,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
             'ansi-color-apply))
 
 (use-package eat
-  :disabled t
   :ensure t
+  :bind ( "s-<return>" . eat )
+
   :diminish eat-eshell-mode
   :custom ( eat-kill-buffer-on-exit t
-            eshell-visual-commands (list))
-  :init
-  (eat-eshell-mode))
+            eshell-visual-commands (list) ))
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
@@ -3928,7 +3926,6 @@ buffer."
 
 (use-package keycast :ensure t :defer t)
 (use-package exercism :ensure t :defer t)
-
 
 (use-package llms
   :bind ( :map ctl-quote-map
