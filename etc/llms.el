@@ -24,6 +24,10 @@
 
 ;;; Code:
 
+(require 'request)
+(require 'json)
+(require 'auth-source)
+
 (use-package gptel
   :git "https://github.com/karthink/gptel"
   :bind ( :map ctl-quote-map ("t c" . gptel) )
@@ -73,7 +77,7 @@
   (require 'openai-edit)
   (require 'openai-chat))
 
-(defun openai--display-result-as-overlay (choices)
+(defun llms--display-choices-as-overlay (choices)
   (let* ((choice-count (length choices))
          (current-index 0)
          (completion-keymap (make-sparse-keymap))
@@ -108,6 +112,14 @@
       (funcall show-next-choice))))
 
 
+(defun llm-prompt-text ()
+  (save-excursion
+    (buffer-substring-no-properties (progn (start-of-paragraph-text)
+                                           (point))
+                                    (progn (end-of-paragraph-text)
+                                           (point)))))
+
+
 ;;;###autoload
 (defun openai-complete-text (arg)
   (interactive "P")
@@ -116,27 +128,43 @@
              (read-string "Instruction: ")
            "Complete the following sentence: "))
 
-        (prompt-text
-         (save-excursion
-           (buffer-substring-no-properties (progn (start-of-paragraph-text)
-                                                  (point))
-                                           (progn (end-of-paragraph-text)
-                                                  (point))))))
+        (prompt-text (llm-prompt-text)))
 
     (openai-chat `[(("role"    . "user")
                     ("content" . ,(concat instruction "\n" prompt-text)))]
                  (lambda (data)
                    (let ((choices (let-alist data .choices)))
-                     (openai--display-result-as-overlay (mapcar (lambda (choice)
-                                                                  (let-alist choice
-                                                                    (let-alist .message
-                                                                      .content)))
-                                                                choices))))
+                     (llms--display-choices-as-overlay (mapcar (lambda (choice)
+                                                                 (let-alist choice
+                                                                   (let-alist .message
+                                                                     .content)))
+                                                               choices))))
                  :model "gpt-4"
                  :max-tokens 30
                  :temperature openai-chat-temperature
                  :n 3
                  :user (unless (string= openai-user "user") openai-user))))
+
+
+;;;###autoload
+(defun hugging-face-complete ()
+  (interactive)
+  (let ((auth-token (auth-source-pick-first-password :host "huggingface.co"))
+        (prompt (llm-prompt-text)))
+    (request "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-v0.1"
+      :type "POST"
+      :headers `(("Content-Type" . "application/json")
+                 ("Authorization". ,(concat "Bearer " auth-token)))
+      :parser 'json-read
+      :data (json-encode `(("inputs" . ,prompt)))
+      :success (cl-function
+                (lambda (&key data &allow-other-keys)
+                  (llms--display-choices-as-overlay
+                   (mapcar (lambda (choice)
+                             (string-remove-prefix prompt
+                                                   (assoc-default 'generated_text
+                                                                  choice)))
+                           data)))))))
 
 (provide 'llms)
 ;;; llms.el ends here

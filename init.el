@@ -3933,7 +3933,8 @@ buffer."
 (use-package llms
   :bind ( :map ctl-quote-map
           (("t TAB" . openai-complete-text)
-           ("t c" . gptel)) )
+           ("t c"   . gptel)
+           ("t l"   . hugging-face-complete )) )
   :load-path "etc/")
 
 
