@@ -731,6 +731,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    ((executable-find "google-chrome")
     (setq browse-url-browser-function 'browse-url-chrome))))
 
+
+(use-package atomic-chrome :ensure t :disabled t)
+
 (use-package paren
   :config
   (setq show-paren-style 'parenthesis)
@@ -3927,106 +3930,11 @@ buffer."
 (use-package exercism :ensure t :defer t)
 
 
-;;; LLMs
-;; ----------------------------------------------------------------------------
-
-(use-package gptel
-  :git "https://github.com/karthink/gptel"
-  :bind ( :map ctl-quote-map ("t c" . gptel) )
-  :custom ((gptel-use-curl nil)
-           (gptel-model "gpt-4"))
-  :init
-  (when (boundp 'openai-secret-key)
-    (setq gptel-api-key openai-secret-key))
-
-  :config
-  (add-hook 'gptel-response-filter-functions
-            (lambda (response _buffer)
-              (mapconcat
-               (lambda (line)
-                 (s-concat (propertize " "
-                                       'display
-                                       '(left-fringe right-triangle))
-                           line))
-               (s-lines response)
-               "\n")))
-  (add-hook 'gptel-post-response-hook
-            (lambda ()
-              (end-of-buffer)
-              (re-search-backward (gptel-prompt-string))
-              (end-of-line))))
-
-(use-package c3po
-  :disabled t
-  :git "https://github.com/d1egoaz/c3po.el"
-  :defer t
-  :init
-  (when (boundp 'openai-secret-key)
-    (setq c3po-api-key openai-secret-key)))
-
-(use-package openai
-  :git "https://github.com/emacs-openai/openai"
-  :bind ( :map ctl-quote-map ("t TAB" . openai-complete-text) )
-  :init
-  (use-package tblui :ensure t)
-  ;; The same variable sets up the user role.
-  ;; (setq openai-user (user-full-name))
-  (when (boundp 'openai-secret-key)
-    (setq openai-key openai-secret-key))
-
-  :config
-  (require 'openai-edit)
-  (require 'openai-completion)
-
-  :preface
-  (defun openai--display-result-as-overlay (data)
-    (let* ((choices (openai--data-choices data))
-           (choice-count (length choices))
-           (current-index 0)
-           (completion-keymap (make-sparse-keymap))
-           (completion-overlay (make-overlay (point) (point) nil t t))
-           (select-current-choice (lambda ()
-                                    (interactive)
-                                    (delete-overlay completion-overlay)
-                                    (insert (nth current-index choices))
-                                    (delete-overlay completion-overlay)))
-           (show-next-choice
-            (lambda ()
-              (interactive)
-              (overlay-put completion-overlay
-                           'after-string
-                           (format "%s [%s/%s] "
-                                   (propertize (nth current-index choices)
-                                               'face 'shadow
-                                               'cursor t)
-                                   (propertize (number-to-string (1+ current-index))
-                                               'face 'highlight)
-                                   (propertize (number-to-string choice-count)
-                                               'face 'highlight)))
-              (setq current-index (mod (1+ current-index)
-                                       choice-count)))))
-      (define-key completion-keymap (kbd "TAB") show-next-choice)
-      (define-key completion-keymap (kbd "RET") select-current-choice)
-      (set-transient-map completion-keymap
-                         t
-                         (lambda ()
-                           (delete-overlay completion-overlay)))
-      (unless (zerop choice-count)
-        (funcall show-next-choice))))
-
-  (defun openai-complete-text ()
-    (interactive)
-    (let ((prompt-text (save-excursion
-                         (buffer-substring-no-properties (progn (start-of-paragraph-text)
-                                                                (point))
-                                                         (progn (end-of-paragraph-text)
-                                                                (point))))))
-      (openai-completion prompt-text #'openai--display-result-as-overlay))))
-
-(use-package chatgpt :disabled t :git "https://github.com/emacs-openai/chatgpt")
-(use-package codegpt :disabled t :git "https://github.com/emacs-openai/codegpt")
-
-;; ----------------------------------------------------------------------------
+(use-package llms
+  :bind ( :map ctl-quote-map
+          (("t TAB" . openai-complete-text)
+           ("t c" . gptel)) )
+  :load-path "etc/")
 
 
 (provide 'init)
