@@ -29,15 +29,24 @@
 (require 'auth-source)
 
 (defun llms--display-choices-as-overlay (choices)
-  (let* ((choice-count (length choices))
+  (let* ((prompt-region (llms-prompt-region))
+         (choice-count (length choices))
          (current-index -1)
          (completion-keymap (make-sparse-keymap))
          (completion-overlay (make-overlay (point) (point) nil t t))
-         (select-current-choice (lambda ()
-                                  (interactive)
-                                  (delete-overlay completion-overlay)
-                                  (insert (nth current-index choices))
-                                  (delete-overlay completion-overlay)))
+         (select-current-choice
+          (lambda ()
+            (interactive)
+            (insert (nth current-index choices))
+            (delete-overlay completion-overlay)))
+         (replace-with-choice
+          (lambda ()
+            (interactive)
+            (delete-overlay completion-overlay)
+            (replace-region-contents (car prompt-region)
+                                     (cdr prompt-region)
+                                     (lambda ()
+                                       (nth current-index choices)))))
          (show-next-choice
           (lambda ()
             (interactive)
@@ -52,25 +61,30 @@
                                              'face 'highlight)
                                  (propertize (number-to-string choice-count)
                                              'face 'highlight))))))
+
     (define-key completion-keymap (kbd "TAB") show-next-choice)
     (define-key completion-keymap (kbd "RET") select-current-choice)
-    (set-transient-map completion-keymap
-                       t
-                       (lambda ()
-                         (delete-overlay completion-overlay)))
+    (define-key completion-keymap (kbd "!") replace-with-choice)
+    (set-transient-map completion-keymap t (lambda ()
+                                             (delete-overlay completion-overlay)))
     (unless (zerop choice-count)
       (funcall show-next-choice))))
 
 
-(defun llms-prompt-text ()
+(defun llms-prompt-region ()
   (if (region-active-p)
-      (buffer-substring-no-properties (region-beginning)
-                                      (region-end)))
-  (save-excursion
-    (buffer-substring-no-properties (progn (start-of-paragraph-text)
-                                           (point))
-                                    (progn (end-of-paragraph-text)
-                                           (point)))))
+      (cons (region-beginning) (region-end))
+    (save-excursion
+      (cons (progn (start-of-paragraph-text)
+                   (point))
+            (progn (end-of-paragraph-text)
+                   (point))))))
+
+
+(defun llms-prompt-text ()
+  (let ((prompt-region (llms-prompt-region)))
+    (buffer-substring-no-properties (car prompt-region)
+                                    (cdr prompt-region))))
 
 
 (use-package gptel
@@ -134,11 +148,12 @@
                     ("content" . ,prompt-text))]
                  (lambda (data)
                    (let ((choices (let-alist data .choices)))
-                     (llms--display-choices-as-overlay (mapcar (lambda (choice)
-                                                                 (let-alist choice
-                                                                   (let-alist .message
-                                                                     (concat " " .content))))
-                                                               choices))))
+                     (llms--display-choices-as-overlay
+                      (mapcar (lambda (choice)
+                                (let-alist choice
+                                  (let-alist .message
+                                    (concat " " .content))))
+                              choices))))
                  :model "gpt-4"
                  :max-tokens 30
                  :temperature openai-chat-temperature

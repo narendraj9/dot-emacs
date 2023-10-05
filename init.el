@@ -539,6 +539,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package sql
   :defer t
   :bind ( :map sql-interactive-mode-map
+          ("S-SPC" . upcase-last-symbol-and-space)
+
+          :map sql-mode-map
           ("S-SPC" . upcase-last-symbol-and-space) ))
 
 
@@ -2226,6 +2229,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         highlight-indent-guides-auto-even-face-perc 3
         highlight-indent-guides-auto-character-face-perc 3))
 
+(use-package indent-bars
+  :git "https://github.com/jdtsmith/indent-bars"
+  :custom
+  (indent-bars-treesit-support t)
+  (indent-bars-no-descend-string t)
+  (indent-bars-treesit-ignore-blank-lines-types '("module"))
+  (indent-bars-treesit-wrap '((python argument_list parameters ; for python, as an example
+                                      list list_comprehension
+                                      dictionary dictionary_comprehension
+                                      parenthesized_expression subscript)))
+  :hook ((python-base-mode yaml-mode) . indent-bars-mode))
+
 (use-package aggressive-indent
   :ensure t
   :defer t
@@ -2916,7 +2931,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
             (lambda ()
               ;; Default completion is completely broken because of
               ;; `lisp-indent-line'.
-              (company-mode-quicker)
               (setq-local completion-at-point-functions
                           '(cider-complete-at-point eglot-completion-at-point t))))
 
