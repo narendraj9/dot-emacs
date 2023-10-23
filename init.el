@@ -1914,7 +1914,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       'go-mode 'go-ts-mode
       'c-mode 'c-ts-mode
       'c++-mode 'c++-ts-mode
-      'ruby-mode 'ruby-ts-mode)
+      'ruby-mode 'ruby-ts-mode
+      'typescript-mode 'typescript-ts-mode)
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
@@ -2623,7 +2624,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package embark
   :ensure t
-  :bind (("C-c C-." . embark-act)))
+  :bind ( ("C-c C-." . embark-act)
+
+          :map minibuffer-mode-map
+          ("C-c C-o" . embark-collect)
+          ("C-c C-e" . embark-export)) )
 
 (use-package consult
   :ensure t
@@ -2685,6 +2690,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (insert "- Noted on ")
         (org-insert-time-stamp (current-time) t t)
         (insert "\n  ")))))
+
+(use-package embark-consult :ensure t :after embark)
 
 
 ;;; Programming Languages
