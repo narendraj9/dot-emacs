@@ -635,9 +635,9 @@ embedded in the line.
   (interactive "p")
   (let* ((original-point (point))
          (underline-char
-          (replace-regexp-in-string "[[:cntrl:][:space:]]" "="
+          (replace-regexp-in-string "[[:cntrl:][:space:]]" "-"
                                     (if (= arg 1)
-                                        "="
+                                        "-"
                                       (char-to-string
                                        (read-char "What character to underline with?")))))
          (original-point-is-eol

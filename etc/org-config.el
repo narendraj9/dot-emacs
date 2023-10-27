@@ -631,14 +631,14 @@ non-empty lines in the block (excluding the line with
         "%TODO  %3PRIORITY %TAGS %60ITEM(Task) %10EFFORT(Estimated Effort) {:} %10CLOCKSUM(Time Spent)"))
 
 
-(use-package ob-ipython
-  :doc "Org-babel with IPython."
-  :if (executable-find "jupyter")
-  :ensure t
-  :defer t
-  :config
-  (setq ob-ipython-resources-dir
-        (expand-file-name "data/obipy-resources" org-directory)))
+;; (use-package ob-ipython
+;;   :doc "Org-babel with IPython."
+;;   :if (executable-find "jupyter")
+;;   :disabled t
+;;   :defer t
+;;   :config
+;;   (setq ob-ipython-resources-dir
+;;         (expand-file-name "data/obipy-resources" org-directory)))
 
 
 (use-package ob-elixir :ensure t :defer t)
@@ -703,7 +703,7 @@ non-empty lines in the block (excluding the line with
                                  (sql        . t)
                                  (lisp       . t)
                                  (python     . t)
-                                 (ipython    . ,(executable-find "jupyter"))
+                                 ;; (ipython    . ,(executable-find "jupyter"))
                                  (R          . t)
                                  (ruby       . t)
                                  (gnuplot    . t)
