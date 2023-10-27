@@ -3673,16 +3673,9 @@ buffer."
   :defer t
   :mode ("\\.epub\\'" . nov-mode))
 
-(use-package nov-xwidget
-  :git "https://github.com/chenyanming/nov-xwidget.git"
-  :after nov
-  :init
-  (define-key nov-mode-map (kbd "o") 'nov-xwidget-view)
-  (add-hook 'nov-mode-hook 'nov-xwidget-inject-all-files)  )
-
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────
-(use-package erc-config :commands erc-start! :load-path "etc/" :defer 10)
+(use-package erc-config :commands erc-start! :load-path "etc/" :defer t)
 
 ;;; EMACS-SERVER
 ;;  ─────────────────────────────────────────────────────────────────
@@ -3954,7 +3947,6 @@ buffer."
            ("t c"   . gptel)
            ("t l"   . hugging-face-complete )) )
   :load-path "etc/")
-
 
 (provide 'init)
 ;;; init.el ends here

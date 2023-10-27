@@ -171,7 +171,8 @@
       :headers `(("Content-Type" . "application/json")
                  ("Authorization". ,(concat "Bearer " auth-token)))
       :parser 'json-read
-      :data (json-encode `(("inputs" . ,prompt)))
+      :data (json-encode `(("inputs" . ,prompt)
+                           ("parameters" . (("num_return_sequences" . 3)))))
       :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (llms--display-choices-as-overlay
