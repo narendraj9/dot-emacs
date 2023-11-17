@@ -1616,9 +1616,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("j"     . dired-x-find-file)
          ("f"     . project-find-file)
          ("~"     . dired-go-home))
-  :hook ((dired-after-readin . dired-hide-details-mode)
-         (dired-mode         . hl-line-mode)
-         (dired-mode         . dired-omit-mode))
+  :hook ( (dired-after-readin . dired-hide-details-mode)
+          (dired-mode         . hl-line-mode)
+          (dired-mode         . dired-omit-mode) )
   :init
   (setq dired-dwim-target t
         dired-hide-details-hide-symlink-targets nil
@@ -1660,34 +1660,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (dired-jump nil (expand-file-name "~/"))))
 
-(use-package dired-recent
-  :ensure t
-  :bind (
-         :map global-map
-         ("C-x C-d" . dired-recent-open)
-         :map dired-mode-map
-         ("C-x C-d" . dired-recent-open)
-         )
-  :hook (dired-mode . dired-recent-mode)
-  :config
-  (advice-add 'dired-recent-save-list
-              :before
-              (lambda (&rest _args)
-                (require 'f)
-                (setq dired-recent-directories
-                      (->> (and (boundp 'projectile-known-projects)
-                                projectile-known-projects)
-                           (-concat dired-recent-directories)
-                           -distinct
-                           (-filter #'stringp)
-                           (-filter #'f-directory-p))))))
-
-
-
 (use-package dired-collapse
   :ensure t
   :hook (dired-mode . dired-collapse-mode))
-
 
 (use-package discover
   :ensure t
