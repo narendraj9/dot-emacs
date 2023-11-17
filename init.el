@@ -1527,7 +1527,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :hook ( (( markdown-mode latex-mode TeX-mode message-mode
              org-mode)
            . enable-flyspell)
-          (prog-mode . flyspell-prog-mode))
+
+          ;; (prog-mode . flyspell-prog-mode)
+
+          )
   :init
   (setq flyspell-auto-correct-binding (kbd "C-:"))
 
