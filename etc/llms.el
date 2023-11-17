@@ -127,7 +127,8 @@
     (setq openai-key openai-secret-key))
 
   (require 'openai-edit)
-  (require 'openai-chat))
+  (require 'openai-chat)
+  (require 'openai-image))
 
 
 ;;;###autoload

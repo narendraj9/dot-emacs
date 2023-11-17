@@ -2999,6 +2999,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (define-clojure-indent (for-all 1))
 
+  (add-hook 'cider-repl-mode-hook
+            (lambda ()
+              (define-key cider-repl-mode-map (kbd "M-s") nil)))
 
   :preface
   (defun cider-find-var-dwim ()
@@ -3945,7 +3948,8 @@ buffer."
   :bind ( :map ctl-quote-map
           (("t TAB" . openai-complete-text)
            ("t c"   . gptel)
-           ("t l"   . hugging-face-complete )) )
+           ("t m"   . gptel-menu)
+           ("t l"   . hugging-face-complete)) )
   :load-path "etc/")
 
 (provide 'init)
