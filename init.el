@@ -1930,7 +1930,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               (python-mode . python-ts-mode)
                               (ruby-mode   . ruby-ts-mode)
                               (java-mode   . java-ts-mode)
-                              (js-mode     . js-ts-mode)))
+                              (js-mode     . js-ts-mode)
+                              (elixir-mode . elixir-ts-mode)))
     (add-to-list 'major-mode-remap-alist mode-remap-entry))
 
   :config
@@ -1945,9 +1946,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
              (rust "https://github.com/tree-sitter/tree-sitter-rust")
              (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
              (yaml "https://github.com/ikatyang/tree-sitter-yaml")
-             (java "https://github.com/tree-sitter/tree-sitter-java")))
-    (install-tree-sitter-grammer-if-required (car grammar) t)
-    (add-to-list 'treesit-language-source-alist grammar))
+             (java "https://github.com/tree-sitter/tree-sitter-java")
+             (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main")))
+    (add-to-list 'treesit-language-source-alist grammar)
+    (install-tree-sitter-grammer-if-required (car grammar) t))
 
   :preface
   (defun install-tree-sitter-grammer-if-required (language &optional quiet)
@@ -3137,8 +3139,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;;; ERLANG AND ELIXIR
 ;; ──────────────────────────────────────────────────────────────────
-(use-package erlang :defer t :ensure t)
-(use-package elixir-mode
+(use-package erlang :ensure t :defer t)
+(use-package elixir-ts-mode
   :ensure t
   :defer t
   :config
