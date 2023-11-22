@@ -1893,7 +1893,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       'c-mode 'c-ts-mode
       'c++-mode 'c++-ts-mode
       'ruby-mode 'ruby-ts-mode
-      'typescript-mode 'typescript-ts-mode)
+      'typescript-mode 'typescript-ts-mode
+      'elixir-ts-mode)
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
@@ -1909,7 +1910,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (dolist (lang-server-spec `(((rust-mode rust-ts-mode) . ("rustup" "run" "stable" "rust-analyzer"))
                               ((c-mode c++-mode)        . ("clangd"))
                               ((ruby-mode ruby-ts-mode) . ("bundle" "exec" "solargraph" "stdio"))
-                              (java-mode                . ,#'java-eclipse-jdt-launcher)))
+                              (java-mode                . ,#'java-eclipse-jdt-launcher)
+                              (elixir-ts-mode           . ,#'elixir-lsp-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
 
@@ -1947,7 +1949,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
              (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
              (yaml "https://github.com/ikatyang/tree-sitter-yaml")
              (java "https://github.com/tree-sitter/tree-sitter-java")
-             (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main")))
+             (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main")
+             (heex "https://github.com/phoenixframework/tree-sitter-heex" "main")))
     (add-to-list 'treesit-language-source-alist grammar)
     (install-tree-sitter-grammer-if-required (car grammar) t))
 
@@ -2681,19 +2684,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :load-path "packages/rest/connected-repl/"
   :commands (connected-repl-run))
 
-(defun java-eclipse-jdt-launcher (_arg)
-  "Returns a command to start Eclipse JDT launcher script `jdtls'."
-  (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/"))
-        (root-directory (project-root (project-current))))
-    (if (file-exists-p launcher-script)
-        (list launcher-script
-              "-data"
-              (expand-file-name (format "%s-%s" (md5 root-directory)
-                                        (file-name-base (directory-file-name root-directory )))
-                                "~/code/jdt-workspace/"))
-      (message "Failed to find any JDT jar files.")
-      nil)))
-
 (use-package java-mode
   :defer t
   :hook ( (java-mode . company-mode-quicker) )
@@ -2701,7 +2691,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (cl-defmethod eglot-handle-notification
     (server (_method (eql language/status)) &key type message &allow-other-keys)
     (when (equal type "ServiceReady")
-      (message "LSP server ready: %s" (eglot-project-nickname server)))))
+      (message "LSP server ready: %s" (eglot-project-nickname server))))
+
+  :preface
+  (defun java-eclipse-jdt-launcher (_arg)
+    "Returns a command to start Eclipse JDT launcher script `jdtls'."
+    (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/"))
+          (root-directory (project-root (project-current))))
+      (if (file-exists-p launcher-script)
+          (list launcher-script
+                "-data"
+                (expand-file-name (format "%s-%s" (md5 root-directory)
+                                          (file-name-base (directory-file-name root-directory )))
+                                  "~/code/jdt-workspace/"))
+        (message "Failed to find any JDT jar files.")
+        nil))))
 
 (use-package javadoc-lookup
   :ensure t
@@ -3144,15 +3148,25 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :defer t
   :config
-  (bind-keys :map elixir-mode-map
+  (bind-keys :map elixir-ts-mode-map
              ("C-M-e" . elixir-end-of-defun)
-             ("C-M-a" . elixir-beginning-of-defun)))
+             ("C-M-a" . elixir-beginning-of-defun))
+
+  :preface
+  (defun elixir-lsp-launcher (_arg)
+    "Returns a command to start Elixir LSP server."
+    (let ((launcher-script (expand-file-name "./scripts/language_server.sh" "~/code/elixir-ls/release/language_server.sh"))
+          (root-directory (project-root (project-current))))
+      (if (file-exists-p launcher-script)
+          (list launcher-script)
+        (message "Clone https://github.com/elixir-lsp/elixir-ls.git and place it under ~/code.")
+        nil))))
 
 (use-package alchemist
   :ensure t
-  :after elixir-mode
-  :hook (elixir-mode . alchemist-mode)
-  :bind (:map elixir-mode-map
+  :after elixir-ts-mode
+  :hook (elixir-ts-mode . alchemist-mode)
+  :bind (:map elixir-ts-mode-map
               ("C-x C-e" . alchemist-eval-current-line))
   :init
   (setq alchemist-key-command-prefix (kbd "C-;")
