@@ -92,7 +92,7 @@
   :bind ( :map ctl-quote-map ("t c" . gptel-menu) )
   :demand t
   :custom ((gptel-use-curl nil)
-           (gptel-model "gpt-4"))
+           (gptel-model "gpt-4-vision-preview"))
   :init
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))

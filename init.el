@@ -1915,6 +1915,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
 
+(use-package dape
+  :git "https://github.com/svaante/dape.git"
+  :commands dape
+  :defer t)
+
 (use-package treesit
   :defer t
   :when (treesit-available-p)
