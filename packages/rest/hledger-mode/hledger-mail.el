@@ -142,20 +142,11 @@ HEADERS is an assoc-list with the headers of the request.
           (hledger-make-multipart-url-data multipart-boundary
                                            (assq-delete-all 'authorization
                                                             headers))))
-    ;; This is a hack until
-    ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2016-08/msg00031.html
-    ;; is fixed.
-    (let ((_ (defadvice string-bytes (around fake-string-bytes (s))
-               (setq ad-return-value (length s))))
-          (_ (ad-activate 'string-bytes))
-          (url-buffer (url-retrieve-synchronously url))
-          (_ (ad-deactivate 'string-bytes)))
-      ;; Ugly hack ends!
-      (if (not url-buffer)
-          nil
-        (with-current-buffer url-buffer
-          (url-http-parse-response)
-          (= url-http-response-status 200))))))
+    (if (not url-buffer)
+        nil
+      (with-current-buffer url-buffer
+        (url-http-parse-response)
+        (= url-http-response-status 200))))))
 
 (defun hledger-send-text-email (url user-and-password from to subject text)
   "Send an email with text body.
