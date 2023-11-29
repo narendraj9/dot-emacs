@@ -183,5 +183,60 @@
                                                                   choice)))
                            data)))))))
 
+
+;;;###autoload
+(defun openai-insert-image (prompt)
+  "Use PROMPT to ask for image, and insert results in the current buffer."
+  (interactive (list (read-string "Describe image: ")))
+  (let ((target-buffer (current-buffer)))
+    (openai-image prompt
+                  (lambda (data)
+                    (let-alist data
+                      (mapc (lambda (images)
+                              (dolist (image images)
+                                (with-current-buffer target-buffer
+                                  (insert-image (create-image (url-file-local-copy (cdr image) target-temp-file t))))))
+                            .data))
+                    :size "256x256"
+                    :n 1
+                    :response-format "url"))))
+
+
+(defvar gptel-quick-proofreader--history nil)
+
+;;;###autoload
+(defun gptel-quick-proofreader ()
+  (interactive)
+  (let ((prompt (if (region-active-p)
+                    (buffer-substring-no-properties (region-beginning) (region-end))
+                  (read-string "Text: "
+                               nil
+                               gptel-quick-proofreader--history)))
+        (progress-reporter
+         (make-progress-reporter "Communicating to OpenAI API..." 0  1)))
+    (when (string= prompt "") (user-error "A prompt is required."))
+    (gptel-request prompt
+                   :system "I want you act as a proofreader. Please format your replies as
+text in markdown format and for readability on an 80-columns
+display. I will provide you texts and I would like you to review
+them for any spelling, grammar, or punctuation errors. Once you
+have finished reviewing the text, provide me with any necessary
+corrections or suggestions for improve the text."
+                   :callback
+                   (lambda (response info)
+                     (progress-reporter-done progress-reporter)
+                     (if (not response)
+                         (message "gptel-quick failed with message: %s" (plist-get info :status))
+                       (with-current-buffer (get-buffer-create "*gptel-quick*")
+                         (let ((inhibit-read-only t))
+                           (erase-buffer)
+                           (insert response)
+                           (gfm-view-mode))
+                         (special-mode)
+                         (display-buffer (current-buffer)
+                                         `((display-buffer-in-side-window)
+                                           (side . right)
+                                           (window-width . 80)))))))))
+
 (provide 'llms)
 ;;; llms.el ends here

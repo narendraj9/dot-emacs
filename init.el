@@ -3947,7 +3947,8 @@ buffer."
           (("t TAB" . openai-complete-text)
            ("t c"   . gptel)
            ("t m"   . gptel-menu)
-           ("t l"   . hugging-face-complete)) )
+           ("t l"   . hugging-face-complete)
+           ("t p"   . gptel-quick-proofreader)) )
   :load-path "etc/")
 
 (provide 'init)
