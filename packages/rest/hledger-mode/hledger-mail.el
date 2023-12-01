@@ -146,7 +146,7 @@ HEADERS is an assoc-list with the headers of the request.
         nil
       (with-current-buffer url-buffer
         (url-http-parse-response)
-        (= url-http-response-status 200))))))
+        (= url-http-response-status 200)))))
 
 (defun hledger-send-text-email (url user-and-password from to subject text)
   "Send an email with text body.
