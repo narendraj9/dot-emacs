@@ -238,5 +238,40 @@ corrections or suggestions for improve the text."
                                            (side . right)
                                            (window-width . 80)))))))))
 
+
+;;;###autoload
+(defun openai-interpret-image (file-path)
+  (interactive "fFile: ")
+  (let ((instruction
+         (read-string "Instruction: "))
+
+        (progress-reporter
+         (make-progress-reporter "Sending request to OpenAI..." 0 1))
+
+        (base64-image-data
+         (format "data:image/jpeg;base64,%s"
+                 (shell-command-to-string (format "base64 %s"
+                                                  (shell-quote-argument (expand-file-name file-path)))))))
+    (openai-chat `[;; (("role"    . "system")
+                   ;;  ("content" . ,instruction))
+                   (("role"    . "user")
+                    ("content" . [(("type" . "text")
+                                   ("text" . ,instruction))
+                                  (("type" . "image_url")
+                                   ("image_url" . (("url" . ,base64-image-data))))]))]
+                 (lambda (data)
+                   (progress-reporter-done progress-reporter)
+                   (let ((choices (let-alist data .choices)))
+                     (dolist (item (mapcar (lambda (choice)
+                                             (let-alist choice
+                                               (let-alist .message
+                                                 (concat " " .content))))
+                                           choices))
+                       (insert item)
+                       (insert "\n-"))))
+
+                 :max-tokens 3000
+                 :model "gpt-4-vision-preview")))
+
 (provide 'llms)
 ;;; llms.el ends here
