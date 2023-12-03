@@ -195,7 +195,7 @@
                       (mapc (lambda (images)
                               (dolist (image images)
                                 (with-current-buffer target-buffer
-                                  (insert-image (create-image (url-file-local-copy (cdr image) target-temp-file t))))))
+                                  (insert-image (create-image (url-file-local-copy (cdr image)))))))
                             .data))
                     :size "256x256"
                     :n 1
