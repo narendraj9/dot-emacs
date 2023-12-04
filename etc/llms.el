@@ -130,6 +130,28 @@
   (require 'openai-chat)
   (require 'openai-image))
 
+(use-package chatgpt-shell
+  :ensure t
+  :custom
+  (chatgpt-shell-openai-key openai-secret-key)
+  (chatgpt-shell-model-version "gpt-4-vision-preview")
+
+  :init
+  ;; Used by `chatgpt-shell-load-awesome-prompts'
+  (use-package pcsv :ensure t)
+
+  :bind ( :map ctl-quote-map
+          ("t C" . chatgpt-shell)
+          ("t u" . chatgpt-shell-generate-unit-test)
+          ("t e" . chatgpt-shell-explain-code)
+          ("t i" . chatgpt-shell-interrupt)
+          ("t p" . chatgpt-shell-proofread-region)
+          ("t S" . chatgpt-shell-send-region)
+          ("t d" . chatgpt-shell-describe-code)
+          ("t r" . chatgpt-shell-refactor-code)
+          ("t g" . chatgpt-shell-write-git-commit)
+          ("t s" . chatgpt-shell-send-and-review-region)
+          ("t R" . chatgpt-shell-restore-session-from-transcript) ))
 
 ;;;###autoload
 (defun openai-complete-text (arg)

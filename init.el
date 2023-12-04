@@ -3943,6 +3943,7 @@ buffer."
 (use-package exercism :ensure t :defer t)
 
 (use-package llms
+  :defer 10
   :bind ( :map ctl-quote-map
           (("t TAB" . openai-complete-text)
            ("t c"   . gptel)
