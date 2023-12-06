@@ -134,7 +134,7 @@
   :ensure t
   :custom
   (chatgpt-shell-openai-key openai-secret-key)
-  (chatgpt-shell-model-version "gpt-4-vision-preview")
+  (chatgpt-shell-model-version "gpt-4-1106-preview")
 
   :init
   ;; Used by `chatgpt-shell-load-awesome-prompts'

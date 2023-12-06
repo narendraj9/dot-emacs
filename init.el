@@ -3057,6 +3057,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 
 (use-package julia-mode :ensure t)
+(use-package julia-snail :ensure t)
 
 ;;; [WO]MAN-MODE
 ;;  ─────────────────────────────────────────────────────────────────
