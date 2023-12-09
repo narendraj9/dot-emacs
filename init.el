@@ -2332,7 +2332,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :diminish eat-eshell-mode
   :custom ( eat-kill-buffer-on-exit t
-            eshell-visual-commands (list) ))
+            eshell-visual-commands (list) )
+
+  :init
+  (eat-eshell-mode +1)
+  (eat-eshell-visual-command-mode +1))
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────

@@ -155,12 +155,13 @@ COMMAND, ARG and IGNORED the regular meanings."
   ;; Make an overlay for current entry if enabled
   (when hledger-enable-current-overlay
     (add-hook 'post-command-hook 'hledger-update-current-entry-overlay))
-  (async-start `(lambda ()
-                  (split-string (shell-command-to-string (concat "hledger -f"
-                                                                 ,hledger-jfile
-                                                                 " accounts "))))
-               (lambda (accounts)
-                 (setq hledger-accounts-cache accounts))))
+  (let ((async-prompt-for-password nil))
+    (async-start `(lambda ()
+                    (split-string (shell-command-to-string (concat "hledger -f"
+                                                                   ,hledger-jfile
+                                                                   " accounts "))))
+                 (lambda (accounts)
+                   (setq hledger-accounts-cache accounts)))))
 
 ;;;###autoload
 (define-derived-mode hledger-mode fundamental-mode "HLedger" ()
