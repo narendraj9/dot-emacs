@@ -143,6 +143,14 @@ COMMAND, ARG and IGNORED the regular meanings."
                                     st)
   "Syntax table for hledger mode.")
 
+(defvar hledger--acounts-process-filter nil)
+(defun hledger--acounts-process-filter (proc new-data)
+  (setq hledger--acounts-process-filter (concat hledger--acounts-process-filter new-data))
+  (unless (process-live-p proc)
+    (setq hledger-accounts-cache
+          (cl-remove-duplicates (split-string hledger--acounts-process-filter)
+                                :test #'equal))))
+
 (defun hledger-mode-init ()
   "Function that does initial setup in the \"major-mode\" function."
   (setq font-lock-defaults hledger-font-lock-defaults)
@@ -155,13 +163,15 @@ COMMAND, ARG and IGNORED the regular meanings."
   ;; Make an overlay for current entry if enabled
   (when hledger-enable-current-overlay
     (add-hook 'post-command-hook 'hledger-update-current-entry-overlay))
-  (let ((async-prompt-for-password nil))
-    (async-start `(lambda ()
-                    (split-string (shell-command-to-string (concat "hledger -f"
-                                                                   ,hledger-jfile
-                                                                   " accounts "))))
-                 (lambda (accounts)
-                   (setq hledger-accounts-cache accounts)))))
+  (let ((hledger-process
+         (start-process-shell-command "*hledger-accounts*"
+                                      nil
+                                      (format "hledger -f %s accounts"
+                                              (shell-quote-argument hledger-jfile)))))
+    ;; Emacs is single-threaded so the above process's output hasn't yet reached
+    ;; Emacs.
+    (setq hledger--acounts-process-filter "")
+    (set-process-filter hledger-process #'hledger--acounts-process-filter)))
 
 ;;;###autoload
 (define-derived-mode hledger-mode fundamental-mode "HLedger" ()
