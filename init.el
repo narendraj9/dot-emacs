@@ -2361,10 +2361,158 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :hook ((haskell-mode . haskell-doc-mode)
          (haskell-mode . haskell-indentation-mode)))
 
+
+;;; Proofs
+;; ──────────────────────────────────────────────────────────────────
+
 (use-package proof-general
-  :defer t
+  :doc "https://github.com/jwiegley/dot-emacs/blob/master/init.org#proof-general"
   :ensure t
-  :custom (proof-splash-enable nil))
+  :demand t
+  :custom
+  (proof-auto-action-when-deactivating-scripting 'retract)
+  (proof-autosend-enable nil)
+  (proof-electric-terminator-enable t)
+  (proof-fast-process-buffer nil)
+  (proof-script-fly-past-comments t)
+  (proof-shell-fiddle-frames nil)
+  (proof-splash-enable nil)
+  (proof-sticky-errors t)
+  (proof-tidy-response t)
+
+  :custom-face
+  (proof-eager-annotation-face ((t nil)))
+  (proof-locked-face ((t (:background "#180526"))))
+  (proof-omitted-proof-face ((t (:extend t :background "#23103c"))))
+  (proof-queue-face ((t (:background "#431807"))))
+  (proof-script-sticky-error-face ((t (:background "#50110e"))))
+  (proof-warning-face ((t (:background "orange4"))))
+
+  :functions
+  ( proof-layout-windows proof-prf )
+
+  :preface
+  (defun my-layout-proof-windows ()
+    (interactive)
+    (proof-layout-windows)
+    (proof-prf))
+
+  :config
+  (use-package coq-mode
+    :bind (:map coq-mode-map
+                ("M-RET"       . proof-goto-point)
+                ("RET"         . newline-and-indent)
+                ("C-c h")
+                ("C-c C-p"     . my-layout-proof-windows)
+                ("C-c C-a C-s" . coq-Search)
+                ("C-c C-a C-a" . coq-Search)
+                ("C-c C-a C-r" . coq-SearchRewrite))
+
+    :custom
+    (coq-compile-auto-save 'save-coq)
+    (coq-compile-before-require t)
+    (coq-compile-parallel-in-background t)
+    (coq-holes-minor-mode nil)
+    (coq-maths-menu-enable t)
+    (coq-one-command-per-line nil)
+    (coq-prefer-top-of-conclusion t)
+    (coq-prog-args '("-emacs"))
+
+    :custom-face
+    (coq-symbol-face ((t (:inherit default-face))))
+
+    :preface
+    (eval-when-compile (defvar proof-assistant nil))
+
+    :config
+    (add-hook 'coq-mode-hook
+              #'(lambda ()
+                  (set-input-method "Agda")
+                  (holes-mode -1)
+                  (abbrev-mode -1)
+
+                  (bind-key "A-g" #'(lambda () (interactive) (insert "Γ")) 'coq-mode-map)
+                  (bind-key "A-t" #'(lambda () (interactive) (insert "τ")) 'coq-mode-map)
+                  (bind-key "A-r" #'(lambda () (interactive) (insert "ρ")) 'coq-mode-map)
+                  (bind-key "A-k" #'(lambda () (interactive) (insert "κ")) 'coq-mode-map)
+
+                  (set (make-local-variable 'fill-nobreak-predicate)
+                       #'(lambda ()
+                           (pcase (get-text-property (point) 'face)
+                             ('font-lock-comment-face nil)
+                             ((and (pred listp)
+                                   x (guard (memq 'font-lock-comment-face x)))
+                              nil)
+                             (_ t)))))))
+
+  ;; (use-package pg-user
+  ;;   :defer t
+  ;;   :config
+  ;;   (defadvice proof-retract-buffer
+  ;;       (around my-proof-retract-buffer activate)
+  ;;     (condition-case err ad-do-it
+  ;;       (error (shell-command "killall coqtop")))))
+  )
+
+
+(use-package company-coq
+  :after coq
+  :ensure t
+  :commands company-coq-mode
+  :bind (:map company-coq-map
+              ;; ("<tab>" . company-complete)
+              ("M-<return>"))
+  :bind (:map coq-mode-map
+              ("C-M-h" . company-coq-toggle-definition-overlay))
+  :hook (coq-mode . company-coq-mode)
+  :custom
+  (company-coq-disabled-features
+   '(hello prettify-symbols smart-subscripts dynamic-symbols-backend))
+  (company-coq-prettify-symbols-alist
+   '(("|-"     . 8866)
+     ("True"   . 8868)
+     ("False"  . 8869)
+     ("->"     . 8594)
+     ("-->"    . 10230)
+     ("<-"     . 8592)
+     ("<--"    . 10229)
+     ("<->"    . 8596)
+     ("<-->"   . 10231)
+     ("==>"    . 10233)
+     ("<=="    . 10232)
+     ("++>"    . 10239)
+     ("<++"    . 11059)
+     ("fun"    . 955)
+     ("forall" . 8704)
+     ("exists" . 8707)
+     ("/\\"    . 8743)
+     ("\\/"    . 8744)
+     ("~"      . 172)
+     ("+-"     . 177)
+     ("<="     . 8804)
+     (">="     . 8805)
+     ("<>"     . 8800)
+     ("*"      . 215)
+     ("++"     . 10746)
+     ("nat"    . 120029)
+     ("Z"      . 8484)
+     ("N"      . 8469)
+     ("Q"      . 8474)
+     ("Real"   . 8477)
+     ("bool"   . 120121)
+     ("Prop"   . 120031)))
+  :custom-face
+  (company-coq-features/code-folding-bullet-face ((t (:weight bold))))
+  :functions (cape-company-to-capf)
+  :config
+  (add-hook 'company-coq-mode-hook
+            #'(lambda ()
+                ;; (company-mode -1)
+                (require 'cape)
+                (setq-local completion-at-point-functions
+                            (mapcar #'cape-company-to-capf
+                                    company-coq-enabled-backends)))))
+
 
 ;;; GRAPHICS
 ;; ──────────────────────────────────────────────────────────────────
