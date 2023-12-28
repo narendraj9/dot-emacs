@@ -2370,6 +2370,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :demand t
   :custom
+  (proof-three-window-mode-policy 'hybrid)
   (proof-auto-action-when-deactivating-scripting 'retract)
   (proof-autosend-enable nil)
   (proof-electric-terminator-enable t)
@@ -2394,8 +2395,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun my-layout-proof-windows ()
     (interactive)
-    (proof-layout-windows)
-    (proof-prf))
+    (if (< 1 (length (window-list)))
+        (progn
+          (switch-to-buffer proof-script-buffer)
+          (delete-other-windows))
+      (let ((window (selected-window)))
+        (split-window-right)
+        (switch-to-buffer proof-response-buffer)
+        (split-window-below)
+        (switch-to-buffer proof-goals-buffer)
+        (select-window window)
+        (proof-prf))))
 
   :config
   (use-package coq-mode
@@ -2424,35 +2434,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     :preface
     (eval-when-compile (defvar proof-assistant nil))
 
-    :config
+    :init
     (add-hook 'coq-mode-hook
-              #'(lambda ()
-                  (set-input-method "Agda")
-                  (holes-mode -1)
-                  (abbrev-mode -1)
-
-                  (bind-key "A-g" #'(lambda () (interactive) (insert "Γ")) 'coq-mode-map)
-                  (bind-key "A-t" #'(lambda () (interactive) (insert "τ")) 'coq-mode-map)
-                  (bind-key "A-r" #'(lambda () (interactive) (insert "ρ")) 'coq-mode-map)
-                  (bind-key "A-k" #'(lambda () (interactive) (insert "κ")) 'coq-mode-map)
-
-                  (set (make-local-variable 'fill-nobreak-predicate)
-                       #'(lambda ()
-                           (pcase (get-text-property (point) 'face)
-                             ('font-lock-comment-face nil)
-                             ((and (pred listp)
-                                   x (guard (memq 'font-lock-comment-face x)))
-                              nil)
-                             (_ t)))))))
-
-  ;; (use-package pg-user
-  ;;   :defer t
-  ;;   :config
-  ;;   (defadvice proof-retract-buffer
-  ;;       (around my-proof-retract-buffer activate)
-  ;;     (condition-case err ad-do-it
-  ;;       (error (shell-command "killall coqtop")))))
-  )
+              (lambda ()
+                (holes-mode -1)
+                (abbrev-mode -1)
+                (sub-paredit-mode -1)))))
 
 
 (use-package company-coq
@@ -2743,6 +2730,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :hook (after-init . minibuffer-command-history-enable)
   :config
   (add-to-list 'savehist-additional-variables 'minibuffer-command-history))
+
+(use-package cape :ensure t)
 
 (use-package orderless
   :doc

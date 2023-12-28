@@ -870,5 +870,13 @@ non-empty lines in the block (excluding the line with
   )
 
 
+(use-package org-pomodoro
+  :ensure t
+  :custom
+  (org-pomodoro-format "")
+  (org-pomodoro-finished-sound (expand-file-name "audio/quite-impressed.wav"
+                                                 emacs-assets-directory)))
+
+
 (provide 'org-config)
 ;;; org-config.el ends here
