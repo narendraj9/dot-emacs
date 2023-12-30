@@ -2398,7 +2398,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (if (< 1 (length (window-list)))
         (progn
           (switch-to-buffer proof-script-buffer)
-          (delete-other-windows))
+          (proof-prf))
       (let ((window (selected-window)))
         (split-window-right)
         (switch-to-buffer proof-response-buffer)
@@ -2416,7 +2416,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 ("C-c C-p"     . my-layout-proof-windows)
                 ("C-c C-a C-s" . coq-Search)
                 ("C-c C-a C-a" . coq-Search)
-                ("C-c C-a C-r" . coq-SearchRewrite))
+                ("C-c C-a C-r" . coq-SearchRewrite)
+                ("C-c q"       . my-add-qed))
 
     :custom
     (coq-compile-auto-save 'save-coq)
@@ -2433,6 +2434,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
     :preface
     (eval-when-compile (defvar proof-assistant nil))
+
+    (defun my-add-qed ()
+      (interactive)
+      (unless (looking-back (rx-to-string '(+ space))
+                            (line-beginning-position))
+        (newline-and-indent))
+      (insert "Qed")
+      (call-interactively (key-binding "."))
+      (sleep-for 0.2)
+      (call-interactively indent-line-function)
+      (newline-and-indent))
 
     :init
     (add-hook 'coq-mode-hook
