@@ -146,10 +146,9 @@ COMMAND, ARG and IGNORED the regular meanings."
 (defvar hledger--acounts-process-filter nil)
 (defun hledger--acounts-process-filter (proc new-data)
   (setq hledger--acounts-process-filter (concat hledger--acounts-process-filter new-data))
-  (unless (process-live-p proc)
-    (setq hledger-accounts-cache
-          (cl-remove-duplicates (split-string hledger--acounts-process-filter)
-                                :test #'equal))))
+  (setq hledger-accounts-cache
+        (cl-remove-duplicates (split-string hledger--acounts-process-filter)
+                              :test #'equal)))
 
 (defun hledger-mode-init ()
   "Function that does initial setup in the \"major-mode\" function."

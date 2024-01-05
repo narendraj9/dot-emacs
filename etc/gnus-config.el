@@ -49,8 +49,7 @@
 (setq gnus-always-read-dribble-file t)
 
 (setq smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 587
-      gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]")
+      smtpmail-smtp-service 587)
 
 ;; (require 'supercite)
 ;; (add-hook 'mail-citation-hook 'sc-cite-original)
@@ -59,7 +58,7 @@
       message-send-mail-function 'smtpmail-send-it)
 
 (setq gnus-visible-headers
-      "^From:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Followup-To:\\|^Reply-To:\\|^Summary:\\|^Keywords:\\|^To:\\|^[BGF]?Cc:\\|^Posted-To:\\|^Mail-Copies-To:\\|^Mail-Followup-To:\\|^Apparently-To:\\|^Gnus-Warning:\\|^Resent-From:\\|^X-Sent:\\|^User-Agent:\\|^X-Mailer:\\|^X-Newsreader:")
+      "^From:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Followup-To:\\|^Reply-To:\\|^Summary:\\|^Keywords:\\|^To:\\|^[BGF]?Cc:\\|^Posted-To:\\|^Mail-Copies-To:\\|^Mail-Followup-To:\\|^Apparently-To:\\|^Gnus-Warning:\\|^Resent-From:\\|^X-Sent:\\|^User-Agent:\\|^X-Mailer:\\|^X-Newsreader:\\|^X-GM-LABELS:")
 
 (setq gnus-summary-thread-gathering-function 'gnus-gather-threads-by-references)
 (setq gnus-thread-hide-subtree t)

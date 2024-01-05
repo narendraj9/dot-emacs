@@ -2398,7 +2398,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (if (< 1 (length (window-list)))
         (progn
           (switch-to-buffer proof-script-buffer)
-          (proof-prf))
+          (delete-other-windows)
+          (my-layout-proof-windows))
       (let ((window (selected-window)))
         (split-window-right)
         (switch-to-buffer proof-response-buffer)
@@ -2417,7 +2418,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 ("C-c C-a C-s" . coq-Search)
                 ("C-c C-a C-a" . coq-Search)
                 ("C-c C-a C-r" . coq-SearchRewrite)
-                ("C-c q"       . my-add-qed))
+                ("C-c q"       . my-add-qed)
+                ("C-c d"       . my-toggle-coq-diffs))
 
     :custom
     (coq-compile-auto-save 'save-coq)
@@ -2437,14 +2439,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
     (defun my-add-qed ()
       (interactive)
-      (unless (looking-back (rx-to-string '(+ space))
+      (unless (looking-back (rx-to-string '(seq line-start (* space)))
                             (line-beginning-position))
-        (newline-and-indent))
+        (open-line 1)
+        (next-line))
       (insert "Qed")
       (call-interactively (key-binding "."))
       (sleep-for 0.2)
-      (call-interactively indent-line-function)
-      (newline-and-indent))
+      (call-interactively indent-line-function))
+
+    (defun my-toggle-coq-diffs ()
+      (interactive)
+      (setq coq-diffs (if (eq coq-diffs 'off) 'on 'off))
+      (proof-prf))
 
     :init
     (add-hook 'coq-mode-hook
