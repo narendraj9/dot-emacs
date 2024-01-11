@@ -2338,6 +2338,29 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (eat-eshell-mode +1)
   (eat-eshell-visual-command-mode +1))
 
+
+(use-package yequake
+  :ensure t
+  :demand t
+  :custom
+  (yequake-frames
+   '(("org-capture"
+      (buffer-fns . (yequake-org-capture))
+      (width . 0.75)
+      (height . 0.5)
+      (alpha . 1.0)
+      (frame-parameters . ((undecorated . t)
+                           (skip-taskbar . t)
+                           (sticky . t))))
+     ("shell"
+      (buffer-fns . (eat))
+      (width . 0.75)
+      (height . 0.1)
+      (alpha . 1.0)
+      (frame-parameters . ((undecorated . t)
+                           (skip-taskbar . t)
+                           (sticky . t)))))))
+
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
 
