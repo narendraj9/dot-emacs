@@ -153,6 +153,13 @@
           ("t s" . chatgpt-shell-send-and-review-region)
           ("t R" . chatgpt-shell-restore-session-from-transcript) ))
 
+
+(use-package copilot
+  :git "https://github.com/copilot-emacs/copilot.el.git"
+  :demand t
+  :init
+  (use-package editorconfig :ensure t))
+
 ;;;###autoload
 (defun openai-complete-text (arg)
   (interactive "P")
