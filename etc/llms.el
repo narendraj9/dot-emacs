@@ -157,8 +157,10 @@
 (use-package copilot
   :git "https://github.com/copilot-emacs/copilot.el.git"
   :demand t
+  :bind ( :map copilot-completion-map ("SPC" . copilot-accept-completion) )
   :init
   (use-package editorconfig :ensure t))
+
 
 ;;;###autoload
 (defun openai-complete-text (arg)

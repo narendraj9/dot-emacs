@@ -4133,7 +4133,8 @@ buffer."
            ("t c"   . gptel)
            ("t m"   . gptel-menu)
            ("t l"   . hugging-face-complete)
-           ("t p"   . gptel-quick-proofreader)) )
+           ("t p"   . gptel-quick-proofreader)
+           ("t t"   . copilot-mode)) )
   :load-path "etc/")
 
 (provide 'init)
