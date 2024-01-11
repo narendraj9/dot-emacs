@@ -208,7 +208,7 @@ timer for changing the theme next."
 
   ;; Maximize emacs on startup
   (when (window-system)
-    (add-to-list 'default-frame-alist
+    (add-to-list 'initial-frame-alist
                  '(fullscreen . maximized))))
 
 
