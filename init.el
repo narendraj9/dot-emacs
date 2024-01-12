@@ -122,11 +122,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               :buffer update-buffer
                               :command (list "git" "pull")
                               :sentinel
-                              (lambda (p status)
-                                (setq update-report (format "%s Update [%s]: %s"
+                              (lambda (p _status)
+                                (setq update-report (format "%s Update [%s]: %s\n"
                                                             update-report
                                                             (directory-file-name file-path)
-                                                            status))))
+                                                            (if (zerop (process-exit-status p))
+                                                                (propertize "✓" 'face 'success)
+                                                              (propertize "❌" 'face 'error))))))
                 processes))))
     (while (seq-filter (lambda (p) (eq 'run (process-status p)))
                        processes)
