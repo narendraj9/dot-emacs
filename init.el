@@ -1231,7 +1231,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         ;; Useful for marking sub-directories inside a version controlled
         ;; project but doesn't work without version control.
         project-vc-extra-root-markers
-        (list ".project-x" "pom.xml" "Cargo.toml"))
+        (list ".project-x" "Cargo.toml"
+              ;; Projects with multiple `pom.xml' files encounter issues with
+              ;; the following:
+              ;; "pom.xml"
+              ))
 
   :config
   (autoload #'magit-status "magit" nil t)
@@ -2994,7 +2998,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (cl-defmethod eglot-handle-notification
     (server (_method (eql language/status)) &key type message &allow-other-keys)
-    (when (equal type "ServiceReady")
+    (when (equal type "Started")
       (message "LSP server ready: %s" (eglot-project-nickname server))))
 
   :preface
