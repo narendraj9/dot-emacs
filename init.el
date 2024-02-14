@@ -1229,7 +1229,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         ;; Useful for marking sub-directories inside a version controlled
         ;; project but doesn't work without version control.
         project-vc-extra-root-markers
-        (list ".project" "pom.xml" "Cargo.toml"))
+        (list ".project-x" "pom.xml" "Cargo.toml"))
 
   :config
   (autoload #'magit-status "magit" nil t)
@@ -1299,10 +1299,29 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ――――――――――――――――――――――――――――――――――――――――
 
 (use-package pixel-scroll
-  :disabled t
+  :bind ( :map ctl-m-map
+          ("j" . --scroll-up-other-window)
+          ("k" . --scroll-down-other-window) )
   :init
   (pixel-scroll-mode +1)
-  (pixel-scroll-precision-mode +1))
+  (pixel-scroll-precision-mode +1)
+
+  (put '--scroll-down-other-window 'repeat-exit-timeout 4)
+  (put '--scroll-up-other-window 'repeat-exit-timeout 4)
+
+  (define-repeat-map ("j" . --scroll-up-other-window)
+                     ("k" . --scroll-down-other-window))
+
+  :preface
+  (defun --scroll-down-other-window ()
+    (interactive)
+    (with-selected-window (next-window (selected-window))
+      (pixel-scroll-down)))
+
+  (defun --scroll-up-other-window ()
+    (interactive)
+    (with-selected-window (next-window (selected-window))
+      (pixel-scroll-up))))
 
 (use-package window
   :bind ( :map window-prefix-map
@@ -1311,6 +1330,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("j" . crux-transpose-windows)
           ("t" . toggle-window-split) )
   :init
+  (setq switch-to-buffer-obey-display-actions t
+        next-screen-context-lines 4)
+
   ;; Adds an entry to `emulation-mode-map-alists' which take precedence over all
   ;; active minor-mode keymaps and the active major-mode keymap in a buffer.
   (bind-key* [C-return] #'other-window)
@@ -1318,6 +1340,26 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (setq fit-window-to-buffer-horizontally t
         window-resize-pixelwise t)
+
+  ;; I think I will mostly want the pointer to go to the end with M-r
+  ;; And then I would do a M-l to re-center it. Since both of them use
+  ;; `recenter-positions'. I am using advices.
+  (setq recenter-positions '(bottom top middle))
+  (advice-add 'recenter-top-bottom
+              :around (lambda (f &rest args)
+                        (let ((recenter-positions '(middle top bottom)))
+                          (apply f args))))
+
+  (def-echoing next-buffer)
+  (def-echoing previous-buffer)
+
+  (setq fit-window-to-buffer-horizontally t)
+
+  (advice-add #'split-window-below :filter-return #'select-window)
+  (advice-add #'split-window-right :filter-return #'select-window)
+
+  ;; (advice-add #'scroll-other-window :before #'highlight-context-lines-before-scroll)
+  ;; (advice-add #'scroll-up-command :before #'highlight-context-lines-before-scroll)
 
   (dolist (display-spec
            '( ("\\`\\*e?shell" display-buffer-at-bottom)
@@ -1342,9 +1384,26 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                  (window-width . 0.5))))
 
   :preface
+  (defun highlight-context-lines-before-scroll (&rest _args)
+    (let ((window (if (eq this-command 'scroll-other-window)
+                      (next-window (selected-window))
+                    (selected-window))))
+      (with-current-buffer (window-buffer window)
+        (let* ((region-start (window-end window))
+               (region-end (save-excursion
+                             (goto-char (window-end window))
+                             (forward-line (- (1+ next-screen-context-lines)))
+                             (beginning-of-line)
+                             (point)))
+               (overlay (make-overlay region-start region-end)))
+          (overlay-put overlay 'face 'highlight)
+          (redisplay t)
+          (sleep-for 0.2)
+          (run-with-timer 1 nil (lambda () (delete-overlay overlay)))))))
+
   (defun fit-window-to-buffer* (arg)
     (interactive "P")
-    (fit-window-to-buffer (other-window 1))))
+    (fit-window-to-buffer (next-window))))
 
 
 (use-package winner
@@ -1440,27 +1499,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("C-M-l" . windmove-right))
   :config
   (setq windmove-wrap-around t))
-
-(use-package "window"
-  :preface
-
-  :config
-  ;; I think I will mostly want the pointer to go to the end with M-r
-  ;; And then I would do a M-l to re-center it. Since both of them use
-  ;; `recenter-positions'. I am using advices.
-  (setq recenter-positions '(bottom top middle))
-  (advice-add 'recenter-top-bottom
-              :around (lambda (f &rest args)
-                        (let ((recenter-positions '(middle top bottom)))
-                          (apply f args))))
-
-  (def-echoing next-buffer)
-  (def-echoing previous-buffer)
-
-  (setq fit-window-to-buffer-horizontally t)
-
-  (advice-add #'split-window-below :filter-return #'select-window)
-  (advice-add #'split-window-right :filter-return #'select-window))
 
 (use-package ace-window
   :doc
@@ -2722,7 +2760,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :init
   (setq shr-width 90
-        shr-use-fonts nil
+        shr-use-fonts t
         ;; Gnus Article buffers look better with this.
         shr-use-colors nil
         ;; These are not used when `shr-use-colors' is `nil'.
@@ -2871,7 +2909,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package connected-repl
   :load-path "packages/rest/connected-repl/"
-  :commands (connected-repl-run))
+  :commands (connected-repl-run connected-repl-run-on-project)
+  :config
+  (add-to-list 'connected-repl-commands
+               '(elixir-ts-mode . ("iex> " "iex" "-S" "mix"))))
 
 (use-package java-mode
   :defer t
@@ -3181,7 +3222,31 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (if (cider-connected-p)
         (cider-find-var)
-      (call-interactively #'xref-find-definitions))))
+      (call-interactively #'xref-find-definitions)))
+  (autoload 'cider--make-result-overlay "cider-overlays")
+
+  (defun endless/eval-overlay (value point)
+    (cider--make-result-overlay (format "%S" value)
+      :where point
+      :duration 'command)
+    ;; Preserve the return value.
+    value)
+
+  (advice-add 'eval-region :around
+              (lambda (f beg end &rest r)
+                (endless/eval-overlay
+                 (apply f beg end r)
+                 end)))
+
+  (advice-add 'eval-last-sexp :filter-return
+              (lambda (r)
+                (endless/eval-overlay r (point))))
+
+  (advice-add 'eval-defun :filter-return
+              (lambda (r)
+                (endless/eval-overlay r
+                                      (save-excursion (end-of-defun)
+                                                      (point))))))
 
 
 (use-package flycheck-clojure
@@ -3345,7 +3410,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun elixir-lsp-launcher (_arg)
     "Returns a command to start Elixir LSP server."
-    (let ((launcher-script (expand-file-name "./scripts/language_server.sh" "~/code/elixir-ls/release/language_server.sh"))
+    (let ((launcher-script (expand-file-name "~/code/elixir-ls/release/language_server.sh"))
           (root-directory (project-root (project-current))))
       (if (file-exists-p launcher-script)
           (list launcher-script)
@@ -3355,13 +3420,20 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package alchemist
   :ensure t
   :after elixir-ts-mode
-  :hook (elixir-ts-mode . alchemist-mode)
+  ;; :hook (elixir-ts-mode . alchemist-mode)
   :bind (:map elixir-ts-mode-map
               ("C-x C-e" . alchemist-eval-current-line))
   :init
   (setq alchemist-key-command-prefix (kbd "C-;")
         alchemist-goto-elixir-source-dir (expand-file-name "~/code/elixir/")
         alchemist-goto-erlang-source-dir (expand-file-name "~/code/otp/"))
+
+  (add-to-list 'display-buffer-alist
+               '("\\*alchemist-eval-mode\\*" display-buffer-in-direction
+                 (window . main)
+                 (direction . right)
+                 (window-width . 0.5)))
+
   (add-hook 'alchemist-help-minor-mode-hook
             (lambda ()
               (bind-keys :map alchemist-help-minor-mode-map

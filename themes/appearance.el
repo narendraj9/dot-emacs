@@ -176,16 +176,23 @@
 
   ;; Font for reading news
   (cond
-   ((app/font-availablep "Carlito")
+   ;; Fonts on a dark background require a lighter weight compared to the weight
+   ;; required on brighter backgrounds.
+   ((app/font-availablep "Symbola")
     ;; It would have been great if I could set the background to white
     ;; while reading anything other than code. Emacs doesn't support
     ;; buffer-local themes and doing this would require nasty tricks
     ;; with hooks.
     (set-face-attribute 'variable-pitch nil
-                        :family "Carlito"
-                        :height 130
-                        :weight 'normal
-                        :width 'ultraexpanded))))
+                        :family "Symbola"
+                        :height 1.6
+                        :weight 'normal))
+
+   ((app/font-availablep "Noto Sans Regular")
+    (set-face-attribute 'variable-pitch nil
+                        :family "Noto Sans Regular"
+                        :height 1.6
+                        :weight 'normal))))
 
 ;;;###autoload
 (defun app/init ()

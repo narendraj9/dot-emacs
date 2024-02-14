@@ -86,6 +86,7 @@
                        connected-repl--buffer)))
 
 
+;;;###autoload
 (defun connected-repl-run (&optional prefix)
   "Start an inferior process running command defined for
    `major-mode' in `connected-repl-commands' and show it in the
@@ -109,6 +110,13 @@
     (with-current-buffer connected-repl--buffer
       (connected-repl-mode))
     (connected-repl-display-buffer)))
+
+
+;;;###autoload
+(defun connected-repl-run-on-project (&optional prefix)
+  (interactive)
+  (let ((default-directory (project-root (project-current))))
+    (connected-repl-run prefix)))
 
 
 (defun connected-repl-send-region (begin end)
