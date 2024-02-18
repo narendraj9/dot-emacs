@@ -719,7 +719,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom ((eww-auto-rename-buffer 'title)
            (eww-browse-url-new-window-is-tab nil))
   :config
-  (add-hook 'eww-after-render-hook #'eww-readable))
+  (add-hook 'eww-after-render-hook #'eww-readable)
+  :custom (eww-bookmarks-directory emacs-assets-directory))
 
 (use-package browse-url
   :defer t
@@ -1331,7 +1332,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("t" . toggle-window-split) )
   :init
   (setq switch-to-buffer-obey-display-actions t
-        next-screen-context-lines 4)
+        next-screen-context-lines 2)
 
   ;; Adds an entry to `emulation-mode-map-alists' which take precedence over all
   ;; active minor-mode keymaps and the active major-mode keymap in a buffer.
@@ -1506,7 +1507,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   declaration. Otherwise, `window' would overwrite the binding for \\[ace-window]]."
   :ensure t
   :doc "Use `ace-window' instead of `other-window'."
-  :custom (aw-keys (list ?s ?d ?f ?j ?k ?l))
+  :custom ( (aw-keys (list ?s ?d ?f ?j ?k ?l))
+            (aw-char-position 'left) )
   :bind ("C-x o" . ace-window))
 
 ;; ――――――――――――――――――――――――――――――――――――――――
@@ -2216,7 +2218,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :diminish flymake-mode
   :bind ( :map flymake-mode-map
           ("M-g n" . flymake-goto-next-error)
-          ("M-g p" . flymake-goto-prev-error) ))
+          ("M-g p" . flymake-goto-prev-error) )
+  :custom ( flymake-no-changes-timeout 1.0) )
 
 (use-package flycheck
   :ensure t
@@ -2714,9 +2717,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :disabled t
   :init
   (desktop-save-mode +1)
+
   :config
   (desktop-auto-save-enable))
 
+(use-package desktop+
+  :ensure t
+  :init
+  (setq desktop+-base-dir (expand-file-name "var/desktops/"
+                                            user-emacs-directory)))
 
 ;;; Regions
 ;;; ----------------------------------------------------------------------------
@@ -3230,23 +3239,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       :where point
       :duration 'command)
     ;; Preserve the return value.
-    value)
-
-  (advice-add 'eval-region :around
-              (lambda (f beg end &rest r)
-                (endless/eval-overlay
-                 (apply f beg end r)
-                 end)))
-
-  (advice-add 'eval-last-sexp :filter-return
-              (lambda (r)
-                (endless/eval-overlay r (point))))
-
-  (advice-add 'eval-defun :filter-return
-              (lambda (r)
-                (endless/eval-overlay r
-                                      (save-excursion (end-of-defun)
-                                                      (point))))))
+    value))
 
 
 (use-package flycheck-clojure
@@ -4197,8 +4190,8 @@ buffer."
   :doc "A better alternative to my `start-recording-window' command."
   :load-path "packages/lisp")
 
-(use-package keycast :ensure t :defer t)
-(use-package exercism :ensure t :defer t)
+(use-package keycast :disabled t :ensure t :defer t)
+(use-package exercism :disabled t :ensure t :defer t)
 
 (use-package llms
   :defer 10
