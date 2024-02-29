@@ -134,6 +134,7 @@
   :ensure t
   :custom
   (chatgpt-shell-openai-key openai-secret-key)
+  (chatgpt-shell-system-prompt 2)
   (chatgpt-shell-model-version "gpt-4-0125-preview")
 
   :init

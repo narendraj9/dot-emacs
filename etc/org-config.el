@@ -173,11 +173,12 @@ Otherwise, limit to only `org-mode' files."
   (setq org-todo-keywords
         ;; state logging for org-habit (! => with timestamp) (@ => timestamp
         ;; + note)
-        '((sequence "TODO" "NEXT" "|" "DONE(d!)" "NOT_DONE(x@)")
+        '((sequence "TODO" "NEXT" "PARKED(p!)" "|" "DONE(d!)" "NOT_DONE(x@)")
           (sequence "BLOCKED(b@)" "|" "CANCELLED(c@)")
           (sequence "TRACKING(r)" "TRACKED(g@)"))
         org-todo-keyword-faces
         '(("TODO"      (:foreground "red" :weight bold))
+          ("PARKED"    (:foreground "IndianRed" :weight bold))
           ("NEXT"      (:foreground "OrangeRed" :weight bold))
           ("BLOCKED"   (:foreground "orange" :weight bold))
           ("DONE"      (:foreground "forest green" :weight bold))
@@ -299,7 +300,7 @@ Otherwise, limit to only `org-mode' files."
         org-agenda-compact-blocks nil
         org-agenda-block-separator
         (propertize (make-string 80 ?═)
-                    'face '(:foreground "gainsboro" :height 1.2))
+                    'face '(:foreground "grey19" :height 1.2))
 
         org-agenda-clockreport-parameter-plist
         '(:link t :max-level 4 :fileskip0 t :compact t :narrow 80)
@@ -332,7 +333,9 @@ Otherwise, limit to only `org-mode' files."
            ((agenda "TODO"
                     ((org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'todo
-                                                 '("ONGOING" "NEXT" "BLOCKED")))))
+                                                 '("ONGOING" "NEXT" "PARKED" "BLOCKED")))))
+            (todo "PARKED"
+                  ((org-agenda-overriding-header "  Parked Tasks:\n  ════════════")))
             (todo "NEXT"
                   ((org-agenda-overriding-header "  Next Tasks:\n  ══════════")))))
           ("o" "All Tasks"
@@ -397,8 +400,7 @@ Otherwise, limit to only `org-mode' files."
                          ("C-c C-s" . org-schedule-and-todo)
                          ("C-c C-d" . org-deadline-and-todo))))
 
-  ;; (add-hook 'org-agenda-finalize-hook
-  ;;           #'org-agenda-delete-empty-blocks)
+  (add-hook 'org-agenda-finalize-hook #'org-agenda-delete-empty-blocks)
   (add-hook 'org-agenda-after-show-hook #'after-org-agenda-selection-move-to-heading)
 
   :preface
@@ -487,40 +489,29 @@ Otherwise, limit to only `org-mode' files."
        ((and a-has-tag (not b-has-tag)) -1)
        ((and b-has-tag (not a-has-tag)) +1))))
 
-;;; Thanks to
-;;; https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html
   (defun org-agenda-delete-empty-blocks ()
     "Remove empty agenda blocks.
-A block is identified as empty if there are fewer than 2
-non-empty lines in the block (excluding the line with
-`org-agenda-block-separator' characters)."
+
+     A block is identified as empty if there are fewer than 3 non-empty
+     lines in the block (excluding the line with
+     `org-agenda-block-separator' characters).  Thanks to
+     https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html"
     (when org-agenda-compact-blocks
       (user-error "Cannot delete empty compact blocks"))
-    (setq buffer-read-only nil)
-    (save-excursion
-      (goto-char (point-min))
-      (let* ((blank-line-re "^\\s-*$")
-             (content-line-count (if (looking-at-p blank-line-re) 0 1))
-             (start-pos (point))
-             (block-re (format "%s" org-agenda-block-separator)))
-        (while (and (not (eobp)) (forward-line))
-          (cond
-           ((looking-at-p block-re)
-            (when (< content-line-count 2)
-              (delete-region start-pos (point-at-bol)))
-            (setq start-pos (point))
-            (forward-line)
-            (setq content-line-count (if (looking-at-p blank-line-re) 0 1)))
-           ((not (looking-at-p blank-line-re))
-            (setq content-line-count (1+ content-line-count)))))
-        (when (< content-line-count 2)
-          (delete-region start-pos (point-max)))
+    (let ((buffer-read-only t)
+          (minimum-content-line-count 3))
+      (save-excursion
         (goto-char (point-min))
-        ;; The above strategy can leave a separator line at the beginning
-        ;; of the buffer.
-        (when (looking-at-p block-re)
-          (delete-region (point) (point-at-eol)))))
-    (setq buffer-read-only t)))
+        (let* ((minimum-section-line-count 5)
+               (block-re (format "%s" org-agenda-block-separator))
+               (separator-positions (list)))
+          (while (and (not (eobp)) (forward-line))
+            (when (looking-at-p block-re)
+              (push (line-beginning-position) separator-positions)))
+          (dolist (section (-zip separator-positions (cdr separator-positions)))
+            (when (< (count-lines (car section) (cdr section))
+                     minimum-section-line-count)
+              (put-text-property (car section) (cdr section) 'invisible t))))))))
 
 
 (use-package org-cliplink

@@ -1303,6 +1303,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind ( :map ctl-m-map
           ("j" . --scroll-up-other-window)
           ("k" . --scroll-down-other-window) )
+  :custom (pixel-scroll-precision-use-momentum t)
   :init
   (pixel-scroll-mode +1)
   (pixel-scroll-precision-mode +1)
@@ -2722,6 +2723,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (desktop-auto-save-enable))
 
 (use-package desktop+
+  :disabled t
   :ensure t
   :init
   (setq desktop+-base-dir (expand-file-name "var/desktops/"
