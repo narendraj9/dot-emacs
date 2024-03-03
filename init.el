@@ -1791,7 +1791,29 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc
   "Extra snippets for yas-snippet!"
   :ensure t
-  :after yasnippet)
+  :after yasnippet
+
+  :preface
+  ;; Use tree-siter to precisely figure out when these snippets need to be
+  ;; expanded.
+  (defvar auto-expand-snippets-list (list "do")
+    "List of snippets that we try to expand.")
+  (defvar auto-expand-trigger-events (list ?  'return))
+  (make-variable-buffer-local 'auto-expand-snippets-list)
+
+  (defun auto-expand-snippets-expand ()
+    (interactive)
+    (when (and auto-expand-snippets-list
+               (memql last-input-event auto-expand-trigger-events)
+               (looking-back (rx-to-string `(seq (or ,@auto-expand-snippets-list)
+                                                 (* space)))))
+      (re-search-backward (rx-to-string '(not space)))
+      (forward-char 1)
+      (yas-expand)))
+
+  (defun enable-auto-expand-snippets (snippets)
+    (setq-local auto-expand-snippets-list snippets)
+    (add-hook 'post-self-insert-hook #'auto-expand-snippets-expand)))
 
 (use-package yankpad
   :doc
@@ -2360,7 +2382,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-hook 'eshell-mode-hook
             (lambda ()
               ;; `orderless' doesn't make much sense for shell completion.
-              (setq-local completion-styles '(basic partial-completion emacs22))))
+              (setq-local completion-styles '(basic partial-completion emacs22))
+              ;; Disable pixel scrolling to make sure that prompt is always
+              ;; fully visible even when it is present at the bottom edge of the
+              ;; screen.
+              (pixel-scroll-mode -1)
+              (pixel-scroll-precision-mode -1)))
 
   ;; (eval-after-load 'em-cmpl
   ;;   '(define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common))
@@ -3401,6 +3428,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (bind-keys :map elixir-ts-mode-map
              ("C-M-e" . elixir-end-of-defun)
              ("C-M-a" . elixir-beginning-of-defun))
+
+  (add-hook 'elixir-ts-mode-hook
+            (lambda ()
+              (enable-auto-expand-snippets (list "do" "fn"))))
 
   :preface
   (defun elixir-lsp-launcher (_arg)
