@@ -82,7 +82,8 @@
 (defun connected-repl-display-buffer ()
   (interactive)
   (save-excursion
-    (set-window-buffer (split-window-right)
+    (set-window-buffer (or (split-window-sensibly)
+                           (split-window-below))
                        connected-repl--buffer)))
 
 
