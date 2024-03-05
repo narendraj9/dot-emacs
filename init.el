@@ -1331,17 +1331,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("k" . crux-swap-windows)
           ("j" . crux-transpose-windows)
           ("t" . toggle-window-split) )
-  :init
-  (setq switch-to-buffer-obey-display-actions t
-        next-screen-context-lines 2)
+  :custom ( (fit-window-to-buffer-horizontally t)
+            (switch-to-buffer-obey-display-actions t)
+            (window-resize-pixelwise t)
+            (next-screen-context-lines 2)
+            (split-width-threshold (1- (frame-width)))
+            (split-height-threshold (1- (frame-height))) )
 
+  :init
   ;; Adds an entry to `emulation-mode-map-alists' which take precedence over all
   ;; active minor-mode keymaps and the active major-mode keymap in a buffer.
   (bind-key* [C-return] #'other-window)
   (bind-key* [C-m C-m] #'delete-window)
-
-  (setq fit-window-to-buffer-horizontally t
-        window-resize-pixelwise t)
 
   ;; I think I will mostly want the pointer to go to the end with M-r
   ;; And then I would do a M-l to re-center it. Since both of them use
@@ -1354,8 +1355,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (def-echoing next-buffer)
   (def-echoing previous-buffer)
-
-  (setq fit-window-to-buffer-horizontally t)
 
   (advice-add #'split-window-below :filter-return #'select-window)
   (advice-add #'split-window-right :filter-return #'select-window)
@@ -1413,6 +1412,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (setq winner-dont-bind-my-keys t)
   (winner-mode +1)
+
   :config
   (define-key winner-repeat-map ">" #'winner-redo)
   (define-key winner-repeat-map "<" #'winner-undo))
@@ -2741,6 +2741,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Sessions
 ;;; ----------------------------------------------------------------------------
 
+(use-package burly
+  :ensure t)
+
 (use-package desktop
   :disabled t
   :init
@@ -2755,7 +2758,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (setq desktop+-base-dir (expand-file-name "var/desktops/"
                                             user-emacs-directory)))
-
 ;;; Regions
 ;;; ----------------------------------------------------------------------------
 (use-package delsel :init (delete-selection-mode +1))
