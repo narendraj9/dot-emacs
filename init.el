@@ -1155,6 +1155,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :pin gnu
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :ensure t
+  :demand t
   :init
   (use-package company-math
     :ensure t
@@ -3445,6 +3446,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (message "Clone https://github.com/elixir-lsp/elixir-ls.git and place it under ~/code.")
         nil))))
 
+(use-package mix :ensure t)
+
 (use-package alchemist
   :ensure t
   :after elixir-ts-mode
@@ -3899,7 +3902,8 @@ buffer."
   compared to those by `docview-mode'."
   :ensure t
   :mode ("\\.pdf\\'" . pdf-view-mode)
-  :hook (pdf-view-mode . pdf-tools-enable-minor-modes)
+  :hook ( (pdf-view-mode . pdf-tools-enable-minor-modes)
+          (pdf-view-mode . pdf-view-themed-minor-mode) )
   :bind (:map pdf-view-mode-map
               ("j" . image-next-line)
               ("k" . image-previous-line)
@@ -3919,6 +3923,7 @@ buffer."
 
 
   :init
+  (add-hook 'pdf-view-mode-hook (lambda () (blink-cursor-mode -1)))
   ;; `abbreviate-file-name' doesn't handle `nil' values. For buffer that do not
   ;; have associated files, this fails. I had been facing this while opening PDF
   ;; files in Gnus.
@@ -4237,7 +4242,13 @@ buffer."
            ("t l"   . hugging-face-complete)
            ("t p"   . gptel-quick-proofreader)
            ("t t"   . copilot-mode)) )
-  :load-path "etc/")
+  :load-path "etc/"
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\*chatgpt\\*" display-buffer-in-direction
+                 (window . main)
+                 (direction . right)
+                 (window-width . 0.5))))
 
 (provide 'init)
 ;;; init.el ends here

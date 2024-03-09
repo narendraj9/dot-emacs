@@ -323,8 +323,8 @@ Otherwise, limit to only `org-mode' files."
           (search . " %i %-12:c"))
 
         org-priority-highest ?A
-        org-priority-lowest ?D
-        org-priority-default ?C
+        org-priority-lowest ?Z
+        org-priority-default ?D
         org-priority-start-cycle-with-default t
 
         ;; Custom agenda vews
