@@ -311,14 +311,13 @@ Use when on console."
   (org-insert-time-stamp (current-time) t 'inactive))
 
 
-(defun notify (msg &optional font-size duration)
+(defun notify (msg)
   "Notify me with a MSG of size FONT-SIZE for DURATION seconds.
-Requires that dzen is installed."
-  (start-process-shell-command "dzen" nil
-                               (format "echo %s | dzen2 -l 200 -fn 'Comic Sans MS:size=%s' -p %s"
-                                       (shell-quote-argument msg)
-                                       (or font-size 25)
-                                       (or duration 5))))
+Requires that zenity is installed."
+  (start-process-shell-command "zenity"
+                               nil
+                               (format "zenity --info --text=\"%s\" "
+                                       (shell-quote-argument msg))))
 
 
 ;; Setup an emacs window into 70-30% horizontally.

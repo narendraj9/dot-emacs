@@ -92,7 +92,7 @@
   :bind ( :map ctl-quote-map ("t c" . gptel-menu) )
   :demand t
   :custom ((gptel-use-curl nil)
-           (gptel-model "gpt-4-vision-preview"))
+           (gptel-model "gpt-4-turbo-preview"))
   :init
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
@@ -272,10 +272,9 @@ corrections or suggestions for improve the text."
 
 
 ;;;###autoload
-(defun openai-interpret-image (file-path)
+(defun openai-interpret-image (file-path &optional instruction notify)
   (interactive "fFile: ")
-  (let ((instruction
-         (read-string "Instruction: "))
+  (let ((instruction (or instruction (read-string "Instruction: ")))
 
         (progress-reporter
          (make-progress-reporter "Sending request to OpenAI..." 0 1))
@@ -283,10 +282,9 @@ corrections or suggestions for improve the text."
         (base64-image-data
          (format "data:image/jpeg;base64,%s"
                  (shell-command-to-string (format "base64 %s"
-                                                  (shell-quote-argument (expand-file-name file-path)))))))
-    (openai-chat `[;; (("role"    . "system")
-                   ;;  ("content" . ,instruction))
-                   (("role"    . "user")
+                                                  (shell-quote-argument (expand-file-name file-path))))))
+        (result ""))
+    (openai-chat `[(("role"    . "user")
                     ("content" . [(("type" . "text")
                                    ("text" . ,instruction))
                                   (("type" . "image_url")
@@ -299,11 +297,22 @@ corrections or suggestions for improve the text."
                                                (let-alist .message
                                                  (concat " " .content))))
                                            choices))
-                       (insert item)
-                       (insert "\n-"))))
-
+                       (setq result (format "%s %s\n" result item))))
+                   (if notify
+                       (notify result)
+                     (insert result)))
                  :max-tokens 3000
                  :model "gpt-4-vision-preview")))
+
+;;;###autoload
+(defun llms-explain-image-with-context ()
+  (interactive)
+  (let ((temp-file (make-temp-file "image-with-context-" nil ".jpg")))
+    (shell-command (format "scrot -p -q 20 -o %s" (shell-quote-argument temp-file)))
+    (openai-interpret-image temp-file
+                            "Very important: be concise! Tell me more about the word closest to the
+position of the cursor in the image."
+                            t)))
 
 (provide 'llms)
 ;;; llms.el ends here

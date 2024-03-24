@@ -3974,8 +3974,8 @@ buffer."
 (use-package server
   :demand t
   :config
-  ;; (unless (server-running-p)
-  ;;   (server-start))
+  (unless (server-running-p)
+    (server-start))
 
   (pcase system-type
     (`windows-nt
