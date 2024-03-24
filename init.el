@@ -2431,6 +2431,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (alpha . 1.0)
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
+                           (sticky . t))))
+
+     ("LLM"
+      (buffer-fns . (llms-explain-image-with-context))
+      (width . 0.75)
+      (height . 0.30)
+      (alpha . 0.8)
+      (frame-parameters . ((undecorated . t)
+                           (skip-taskbar . t)
                            (sticky . t)))))))
 
 ;;; DevOps
@@ -4246,6 +4255,12 @@ buffer."
   :config
   (add-to-list 'display-buffer-alist
                '("\\*chatgpt\\*" display-buffer-in-direction
+                 (window . main)
+                 (direction . right)
+                 (window-width . 0.5)))
+
+  (add-to-list 'display-buffer-alist
+               '("\\*Anthropic\\*" display-buffer-in-direction
                  (window . main)
                  (direction . right)
                  (window-width . 0.5))))

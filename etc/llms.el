@@ -89,21 +89,33 @@
 
 (use-package gptel
   :git "https://github.com/karthink/gptel"
-  :bind ( :map ctl-quote-map ("t c" . gptel-menu) )
   :demand t
+  :bind ( :map gptel-mode-map ("C-j" . gptel-send) )
   :custom ((gptel-use-curl nil)
-           (gptel-model "gpt-4-turbo-preview"))
+           (gptel-model "claude-3-opus-20240229"))
   :init
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
 
   (require 'gptel-transient)
   :config
+  (require 'gptel-anthropic)
+
+  (setq gptel-backend
+        (gptel-make-anthropic "Anthropic" :key #'gptel--anthropic-key))
+
   (add-hook 'gptel-post-response-hook
-            (lambda ()
-              (end-of-buffer)
-              (re-search-backward (gptel-prompt-string))
-              (end-of-line))))
+            (lambda (_start end)
+              (when end (goto-char end))
+              (end-of-line)
+              (visual-line-mode +1)))
+
+  :preface
+  (defun gptel--anthropic-key ()
+    (-> (auth-source-search :host "api.anthropic.com")
+        (car)
+        (plist-get :secret)
+        (funcall))))
 
 
 (use-package c3po
@@ -288,7 +300,7 @@ corrections or suggestions for improve the text."
                     ("content" . [(("type" . "text")
                                    ("text" . ,instruction))
                                   (("type" . "image_url")
-                                   ("image_url" . (("url" . ,base64-image-data))))]))]
+                                   ("image_url" . (("url" . ,base64-image-data) ("detail" . ""))))]))]
                  (lambda (data)
                    (progress-reporter-done progress-reporter)
                    (let ((choices (let-alist data .choices)))
@@ -307,12 +319,17 @@ corrections or suggestions for improve the text."
 ;;;###autoload
 (defun llms-explain-image-with-context ()
   (interactive)
-  (let ((temp-file (make-temp-file "image-with-context-" nil ".jpg")))
-    (shell-command (format "scrot -p -q 20 -o %s" (shell-quote-argument temp-file)))
-    (openai-interpret-image temp-file
-                            "Very important: be concise! Tell me more about the word closest to the
-position of the cursor in the image."
-                            t)))
+  (let ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
+        (llm-buffer (get-buffer-create " *LLM Interpretation*")))
+    (with-current-buffer llm-buffer
+      (visual-line-mode +1)
+      (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file)))
+      (openai-interpret-image temp-file
+                              "Very important: be concise! Tell me more about the word closest to the
+position of the cursor in the image. Please include the whole article
+and its text in trying to explain the word in context.")
+      (delete-file temp-file))
+    llm-buffer))
 
 (provide 'llms)
 ;;; llms.el ends here
