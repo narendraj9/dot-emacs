@@ -320,7 +320,9 @@ corrections or suggestions for improve the text."
                            (setq result (format "%s %s\n" result item))))
                        (if notify
                            (notify result)
-                         (insert result)))
+                         (let ((inhibit-read-only t))
+                           (insert result)
+                           (font-lock-fontify-buffer))))
                      :max-tokens 3000
                      :model "gpt-4-vision-preview")))
 
@@ -344,7 +346,8 @@ corrections or suggestions for improve the text."
       :headers `(("x-api-key" . ,(anthropic-api-key))
                  ("anthropic-version" . "2023-06-01")
                  ("content-type" . "application/json"))
-      :data (json-encode `(("model" . "claude-3-opus-20240229")
+      ;; Use Anthropic's fastest model for usual image interpretation
+      :data (json-encode `(("model" . "claude-3-haiku-20240307")
                            ("max_tokens" . 1024)
                            ("messages" . [,image-message])))
       :parser 'json-read
@@ -359,7 +362,6 @@ corrections or suggestions for improve the text."
                         ;; (push `(("role" . "assistant")
                         ;;         ("content" . ,.text))
                         ;;       llms--interpret-image-history)
-                        (gfm-view-mode)
                         (font-lock-fontify-buffer))))))
       :error (cl-function
               (lambda (&key error-thrown &allow-other-keys)
@@ -374,26 +376,39 @@ corrections or suggestions for improve the text."
          "For a non-native English reader, collect words that might be new or
 difficult to understand in the context of the articles in the screenshot
 and create a glossary in markdown with concise explanations. Have enough
-space between words for readability. Pay particular attention of terms
-related to Finance and Economics. Use examples whenever possible to make
-explanations more concrete.
+space between words for readability. Use examples whenever possible to
+make explanations more concrete.
 
-Example Output:
+Remember to avoid adding extra header and footer text with suggestions
+or questions to me.
+
+Example Output Format:
 
 ## Word
 
-<Explanation>
+Concise Explanation about the above Word
 
 "))
     (with-current-buffer llm-buffer
-      (read-only-mode -1)
-      (visual-line-mode +1)
       (end-of-buffer)
-      (insert (format "%s\n─[%s ]─\n\n" (substring page-delimiter 1) (current-time-string)))
+      (let ((inhibit-read-only t))
+        (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string))))
+      (gfm-view-mode)
+      (visual-line-mode +1)
       (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file)))
       (message "Sending request to LLM API...")
       (claude-opus-interpret-image temp-file prompt nil llm-buffer)
-      (delete-file temp-file))
+      (delete-file temp-file)
+      (define-key (current-local-map) (kbd "q") #'lower-frame)
+      (add-hook 'kill-buffer-hook
+                (lambda ()
+                  (when (eq (current-buffer) llm-buffer)
+                    (append-to-file (point-min)
+                                    (point-max)
+                                    (expand-file-name "var/llm-interpretation.log"
+                                                      user-emacs-directory))))
+                nil
+                t))
     llm-buffer))
 
 ;;; Advice to HACK gptel to include an image in the beginning.

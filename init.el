@@ -2445,8 +2445,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
      ("LLM"
       (buffer-fns . (llms-explain-image-with-context))
-      (left . 0.95)
-      (width . 0.25)
+      (left . 1.0)
+      (width . 0.30)
       (height . 1.0)
       (alpha . 0.9)
       (frame-parameters . ((undecorated . t)
@@ -2680,6 +2680,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("x c" . org-timer-set-timer)
          ("x ." . org-timer)
          ("e"   . org-agenda)
+         ("l"   . lower-frame)
 
          :map ctl-quote-map
          ("C-n" . open-org-file)
