@@ -2415,32 +2415,33 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :demand t
   :custom
-  (yequake-frames
-   '(("org-capture"
-      (buffer-fns . (yequake-org-capture))
-      (width . 0.75)
-      (height . 0.5)
-      (alpha . 1.0)
-      (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (sticky . t))))
-     ("shell"
-      (buffer-fns . (eat))
-      (width . 0.75)
-      (height . 0.1)
-      (alpha . 1.0)
-      (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (sticky . t))))
+  (yequake-frames '(("org-capture"
+                     (buffer-fns . (yequake-org-capture))
+                     (width . 0.75)
+                     (height . 0.5)
+                     (alpha . 1.0)
+                     (frame-parameters . ((undecorated . t)
+                                          (skip-taskbar . t)
+                                          (sticky . t))))
+                    ("shell"
+                     (buffer-fns . (eat))
+                     (width . 0.75)
+                     (height . 0.1)
+                     (alpha . 1.0)
+                     (frame-parameters . ((undecorated . t)
+                                          (skip-taskbar . t)
+                                          (sticky . t))))
 
-     ("LLM"
-      (buffer-fns . (llms-explain-image-with-context))
-      (width . 0.75)
-      (height . 0.30)
-      (alpha . 0.8)
-      (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (sticky . t)))))))
+                    ("LLM"
+                     (buffer-fns . (llms-explain-image-with-context))
+                     (left . 0.95)
+                     (width . 0.25)
+                     (height . 1.0)
+                     (alpha . 0.8)
+                     (frame-parameters . ((undecorated . t)
+                                          (skip-taskbar . t)
+                                          (visibility . t)
+                                          (sticky . t)))))))
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────

@@ -28,6 +28,13 @@
 (require 'json)
 (require 'auth-source)
 
+
+(defun anthropic-api-key ()
+  (-> (auth-source-search :host "api.anthropic.com")
+      (car)
+      (plist-get :secret)
+      (funcall)))
+
 (defun llms--display-choices-as-overlay (choices)
   (let* ((prompt-region (llms-prompt-region))
          (choice-count (length choices))
@@ -102,20 +109,13 @@
   (require 'gptel-anthropic)
 
   (setq gptel-backend
-        (gptel-make-anthropic "Anthropic" :key #'gptel--anthropic-key))
+        (gptel-make-anthropic "Anthropic" :key #'anthropic-api-key))
 
   (add-hook 'gptel-post-response-hook
             (lambda (_start end)
               (when end (goto-char end))
               (end-of-line)
-              (visual-line-mode +1)))
-
-  :preface
-  (defun gptel--anthropic-key ()
-    (-> (auth-source-search :host "api.anthropic.com")
-        (car)
-        (plist-get :secret)
-        (funcall))))
+              (visual-line-mode +1))))
 
 
 (use-package c3po
@@ -293,14 +293,17 @@ corrections or suggestions for improve the text."
 
         (base64-image-data
          (format "data:image/jpeg;base64,%s"
-                 (shell-command-to-string (format "base64 %s"
-                                                  (shell-quote-argument (expand-file-name file-path))))))
+                 (with-temp-buffer
+                   (insert-file-contents-literally (expand-file-name file-path))
+                   (base64-encode-region (point-min) (point-max) t)
+                   (buffer-substring-no-properties (point-min) (point-max)))))
+
         (result ""))
     (openai-chat `[(("role"    . "user")
                     ("content" . [(("type" . "text")
                                    ("text" . ,instruction))
                                   (("type" . "image_url")
-                                   ("image_url" . (("url" . ,base64-image-data) ("detail" . ""))))]))]
+                                   ("image_url" . (("url" . ,base64-image-data))))]))]
                  (lambda (data)
                    (progress-reporter-done progress-reporter)
                    (let ((choices (let-alist data .choices)))
@@ -316,18 +319,70 @@ corrections or suggestions for improve the text."
                  :max-tokens 3000
                  :model "gpt-4-vision-preview")))
 
+
+(defun claude-opus-interpret-image (file-path &optional instruction notify buffer)
+  (let ((image-base64 (with-temp-buffer
+                        (insert-file-contents-literally file-path)
+                        (base64-encode-region (point-min) (point-max) t)
+                        (buffer-substring-no-properties (point-min) (point-max)))))
+    (request "https://api.anthropic.com/v1/messages"
+      :type "POST"
+      :headers `(("x-api-key" . ,(anthropic-api-key))
+                 ("anthropic-version" . "2023-06-01")
+                 ("content-type" . "application/json"))
+      :data (json-encode `(("model" . "claude-3-opus-20240229")
+                           ("max_tokens" . 1024)
+                           ("messages" . [(("role" . "user")
+                                           ("content" . [(("type" . "image")
+                                                          ("source" . (("type" . "base64")
+                                                                       ("media_type" . "image/jpeg")
+                                                                       ("data" . ,image-base64))))
+                                                         (("type" . "text")
+                                                          ("text" . ,instruction))]))])))
+      :parser 'json-read
+      :success (cl-function
+                (lambda (&key data &allow-other-keys)
+                  (let-alist (elt (assoc-default 'content data) 0)
+                    (when buffer (set-buffer buffer))
+                    (if notify
+                        (notify .text)
+                      (let ((inhibit-read-only t))
+                        (insert .text)
+                        (gfm-view-mode)
+                        (font-lock-fontify-buffer))))))
+      :error (cl-function
+              (lambda (&key error-thrown &allow-other-keys)
+                (message "Error: %S" error-thrown))))))
+
 ;;;###autoload
 (defun llms-explain-image-with-context ()
   (interactive)
   (let ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
-        (llm-buffer (get-buffer-create " *LLM Interpretation*")))
+        (llm-buffer (get-buffer-create " *LLM Interpretation*"))
+        (prompt
+         "For a non-native English reader, collect words that might be new or
+difficult to understand in the context of the articles in the screenshot
+and create a glossary in markdown with concise explanations. Have enough
+space between words for readability.
+
+Example Output:
+
+## Word
+
+<Explanation>
+
+"))
     (with-current-buffer llm-buffer
+      (read-only-mode -1)
       (visual-line-mode +1)
+      (end-of-buffer)
+
+      (insert (format "%s\n─[%s ]─\n\n"
+                      page-delimiter
+                      (current-time-string)))
       (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file)))
-      (openai-interpret-image temp-file
-                              "Very important: be concise! Tell me more about the word closest to the
-position of the cursor in the image. Please include the whole article
-and its text in trying to explain the word in context.")
+      (message "Sending request to LLM API...")
+      (claude-opus-interpret-image temp-file prompt nil llm-buffer)
       (delete-file temp-file))
     llm-buffer))
 
