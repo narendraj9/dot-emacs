@@ -260,71 +260,85 @@
          (make-progress-reporter "Communicating to OpenAI API..." 0  1)))
     (when (string= prompt "") (user-error "A prompt is required."))
     (gptel-request prompt
-                   :system "I want you act as a proofreader. Please format your replies as
+      :system "I want you act as a proofreader. Please format your replies as
 text in markdown format and for readability on an 80-columns
 display. I will provide you texts and I would like you to review
 them for any spelling, grammar, or punctuation errors. Once you
 have finished reviewing the text, provide me with any necessary
 corrections or suggestions for improve the text."
-                   :callback
-                   (lambda (response info)
-                     (progress-reporter-done progress-reporter)
-                     (if (not response)
-                         (message "gptel-quick failed with message: %s" (plist-get info :status))
-                       (with-current-buffer (get-buffer-create "*gptel-quick*")
-                         (let ((inhibit-read-only t))
-                           (erase-buffer)
-                           (insert response)
-                           (gfm-view-mode))
-                         (special-mode)
-                         (display-buffer (current-buffer)
-                                         `((display-buffer-in-side-window)
-                                           (side . right)
-                                           (window-width . 80)))))))))
+      :callback
+      (lambda (response info)
+        (progress-reporter-done progress-reporter)
+        (if (not response)
+            (message "gptel-quick failed with message: %s" (plist-get info :status))
+          (with-current-buffer (get-buffer-create "*gptel-quick*")
+            (let ((inhibit-read-only t))
+              (erase-buffer)
+              (insert response)
+              (gfm-view-mode))
+            (special-mode)
+            (display-buffer (current-buffer)
+                            `((display-buffer-in-side-window)
+                              (side . right)
+                              (window-width . 80)))))))))
 
+;;; Useful for having a conversation about an image with a model.
+(defvar llms--interpret-image-history nil)
 
 ;;;###autoload
 (defun openai-interpret-image (file-path &optional instruction notify)
   (interactive "fFile: ")
-  (let ((instruction (or instruction (read-string "Instruction: ")))
+  (let8 ((result "")
 
-        (progress-reporter
-         (make-progress-reporter "Sending request to OpenAI..." 0 1))
+         (instruction (or instruction (read-string "Instruction: ")))
 
-        (base64-image-data
-         (format "data:image/jpeg;base64,%s"
-                 (with-temp-buffer
-                   (insert-file-contents-literally (expand-file-name file-path))
-                   (base64-encode-region (point-min) (point-max) t)
-                   (buffer-substring-no-properties (point-min) (point-max)))))
+         (progress-reporter
+          (make-progress-reporter "Sending request to OpenAI..." 0 1))
 
-        (result ""))
-    (openai-chat `[(("role"    . "user")
-                    ("content" . [(("type" . "text")
-                                   ("text" . ,instruction))
-                                  (("type" . "image_url")
-                                   ("image_url" . (("url" . ,base64-image-data))))]))]
-                 (lambda (data)
-                   (progress-reporter-done progress-reporter)
-                   (let ((choices (let-alist data .choices)))
-                     (dolist (item (mapcar (lambda (choice)
-                                             (let-alist choice
-                                               (let-alist .message
-                                                 (concat " " .content))))
-                                           choices))
-                       (setq result (format "%s %s\n" result item))))
-                   (if notify
-                       (notify result)
-                     (insert result)))
-                 :max-tokens 3000
-                 :model "gpt-4-vision-preview")))
+         (base64-image-data
+          (format "data:image/jpeg;base64,%s"
+                  (with-temp-buffer
+                    (insert-file-contents-literally (expand-file-name file-path))
+                    (base64-encode-region (point-min) (point-max) t)
+                    (buffer-substring-no-properties (point-min) (point-max)))))
+
+         (image-message `(("role"    . "user")
+                          ("content" . [(("type" . "text")
+                                         ("text" . ,instruction))
+                                        (("type" . "image_url")
+                                         ("image_url" . (("url" . ,base64-image-data))))]))))
+        (push image-message llms--interpret-image-history)
+        (openai-chat [image-message]
+                     (lambda (data)
+                       (progress-reporter-done progress-reporter)
+                       (let ((choices (let-alist data .choices)))
+                         (dolist (item (mapcar (lambda (choice)
+                                                 (let-alist choice
+                                                   (let-alist .message
+                                                     (concat " " .content))))
+                                               choices))
+                           (setq result (format "%s %s\n" result item))))
+                       (if notify
+                           (notify result)
+                         (insert result)))
+                     :max-tokens 3000
+                     :model "gpt-4-vision-preview")))
 
 
+;;;###autoload
 (defun claude-opus-interpret-image (file-path &optional instruction notify buffer)
-  (let ((image-base64 (with-temp-buffer
-                        (insert-file-contents-literally file-path)
-                        (base64-encode-region (point-min) (point-max) t)
-                        (buffer-substring-no-properties (point-min) (point-max)))))
+  (let* ((image-base64 (with-temp-buffer
+                         (insert-file-contents-literally file-path)
+                         (base64-encode-region (point-min) (point-max) t)
+                         (buffer-substring-no-properties (point-min) (point-max))))
+         (image-message `(("role" . "user")
+                          ("content" . [(("type" . "image")
+                                         ("source" . (("type" . "base64")
+                                                      ("media_type" . "image/jpeg")
+                                                      ("data" . ,image-base64))))
+                                        (("type" . "text")
+                                         ("text" . ,instruction))]))))
+    (push image-message llms--interpret-image-history)
     (request "https://api.anthropic.com/v1/messages"
       :type "POST"
       :headers `(("x-api-key" . ,(anthropic-api-key))
@@ -332,13 +346,7 @@ corrections or suggestions for improve the text."
                  ("content-type" . "application/json"))
       :data (json-encode `(("model" . "claude-3-opus-20240229")
                            ("max_tokens" . 1024)
-                           ("messages" . [(("role" . "user")
-                                           ("content" . [(("type" . "image")
-                                                          ("source" . (("type" . "base64")
-                                                                       ("media_type" . "image/jpeg")
-                                                                       ("data" . ,image-base64))))
-                                                         (("type" . "text")
-                                                          ("text" . ,instruction))]))])))
+                           ("messages" . [,image-message])))
       :parser 'json-read
       :success (cl-function
                 (lambda (&key data &allow-other-keys)
@@ -348,6 +356,9 @@ corrections or suggestions for improve the text."
                         (notify .text)
                       (let ((inhibit-read-only t))
                         (insert .text)
+                        ;; (push `(("role" . "assistant")
+                        ;;         ("content" . ,.text))
+                        ;;       llms--interpret-image-history)
                         (gfm-view-mode)
                         (font-lock-fontify-buffer))))))
       :error (cl-function
@@ -363,7 +374,9 @@ corrections or suggestions for improve the text."
          "For a non-native English reader, collect words that might be new or
 difficult to understand in the context of the articles in the screenshot
 and create a glossary in markdown with concise explanations. Have enough
-space between words for readability.
+space between words for readability. Pay particular attention of terms
+related to Finance and Economics. Use examples whenever possible to make
+explanations more concrete.
 
 Example Output:
 
@@ -376,15 +389,43 @@ Example Output:
       (read-only-mode -1)
       (visual-line-mode +1)
       (end-of-buffer)
-
-      (insert (format "%s\n─[%s ]─\n\n"
-                      page-delimiter
-                      (current-time-string)))
+      (insert (format "%s\n─[%s ]─\n\n" (substring page-delimiter 1) (current-time-string)))
       (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file)))
       (message "Sending request to LLM API...")
       (claude-opus-interpret-image temp-file prompt nil llm-buffer)
       (delete-file temp-file))
     llm-buffer))
+
+;;; Advice to HACK gptel to include an image in the beginning.
+;;; -----------------------------------------------------------
+(defun gptel--include-last-image-in-conversation (result)
+  (let ((gptel-formatted-history
+         (mapcar (-lambda ((&alist "role" role "content" content))
+                   (-let (([(&alist "source" source)] content))
+                     `( :role ,role
+                        :content [( :type  "image"
+                                    :source  ( :type  "base64"
+                                               :media_type  "image/jpeg"
+                                               :data  ,(assoc-default "data" source)))])))
+                 ;; Only include the latest image.
+                 (take 1 llms--interpret-image-history))))
+    (seq-concatenate 'list
+                     gptel-formatted-history
+                     ;; Yet another hack.
+                     `(( :role "assistant"
+                         :content "I am taking a minute to articulate my thoughts."))
+                     result)))
+
+(defun llms-enable-image-in-gptel-conversation ()
+  (interactive)
+  (advice-add 'gptel--parse-buffer :filter-return #'gptel--include-last-image-in-conversation))
+
+(defun llms-disable-image-in-gptel-conversation ()
+  (interactive)
+  (advice-remove 'gptel--parse-buffer #'gptel--include-last-image-in-conversation))
+
+;;; End of HACK
+
 
 (provide 'llms)
 ;;; llms.el ends here
