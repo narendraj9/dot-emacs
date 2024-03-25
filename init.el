@@ -1300,6 +1300,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Buffers, Windows and Frame
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package frame
+  :init
+  (undelete-frame-mode +1))
+
 (use-package pixel-scroll
   :bind ( :map ctl-m-map
           ("j" . --scroll-up-other-window)
@@ -2437,7 +2441,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (buffer-fns . (chatgpt-shell*))
       (width . 1.0)
       (height . 0.40)
-      (alpha . 0.9)
+      (alpha . 1.0)
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
                            (visibility . t)
@@ -2448,7 +2452,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (left . 1.0)
       (width . 0.30)
       (height . 1.0)
-      (alpha . 0.9)
+      (alpha . 1.0)
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
                            (visibility . t)
