@@ -1612,8 +1612,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( :map ctl-m-map
           (("i"   . company-complete)
-           ("C-c" . company-complete)
-           ("u"   . company-complete-unicode)))
+           ("C-c" . company-complete)) )
   :hook (after-init . global-company-mode)
   :diminish company-mode
   :config
@@ -2685,6 +2684,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("x ." . org-timer)
          ("e"   . org-agenda)
          ("l"   . lower-frame)
+         ("L"   . raise-frame)
+
 
          :map ctl-quote-map
          ("C-n" . open-org-file)

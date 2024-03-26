@@ -286,9 +286,9 @@ corrections or suggestions for improve the text."
 (defvar llms--interpret-image-history nil)
 
 ;;;###autoload
-(defun openai-interpret-image (file-path &optional instruction notify)
+(defun openai-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
-  (let8 ((result "")
+  (let* ((result "")
 
          (instruction (or instruction (read-string "Instruction: ")))
 
@@ -303,28 +303,30 @@ corrections or suggestions for improve the text."
                     (buffer-substring-no-properties (point-min) (point-max)))))
 
          (image-message `(("role"    . "user")
-                          ("content" . [(("type" . "text")
-                                         ("text" . ,instruction))
-                                        (("type" . "image_url")
-                                         ("image_url" . (("url" . ,base64-image-data))))]))))
-        (push image-message llms--interpret-image-history)
-        (openai-chat [image-message]
-                     (lambda (data)
-                       (progress-reporter-done progress-reporter)
-                       (let ((choices (let-alist data .choices)))
-                         (dolist (item (mapcar (lambda (choice)
-                                                 (let-alist choice
-                                                   (let-alist .message
-                                                     (concat " " .content))))
-                                               choices))
-                           (setq result (format "%s %s\n" result item))))
-                       (if notify
-                           (notify result)
-                         (let ((inhibit-read-only t))
-                           (insert result)
-                           (font-lock-fontify-buffer))))
-                     :max-tokens 3000
-                     :model "gpt-4-vision-preview")))
+                          ("content" . [(("type" . "image_url")
+                                         ("image_url" . (("url" . ,base64-image-data)
+                                                         ("detail" . "low"))))
+                                        (("type" . "text")
+                                         ("text" . ,instruction))]))))
+    (push image-message llms--interpret-image-history)
+    (openai-chat `[,image-message]
+                 (lambda (data)
+                   (progress-reporter-done progress-reporter)
+                   (let ((choices (let-alist data .choices)))
+                     (dolist (item (mapcar (lambda (choice)
+                                             (let-alist choice
+                                               (let-alist .message
+                                                 (concat " " .content))))
+                                           choices))
+                       (setq result (format "%s %s\n" result item))))
+                   (when buffer (set-buffer buffer))
+                   (if notify
+                       (notify result)
+                     (let ((inhibit-read-only t))
+                       (insert result)
+                       (font-lock-fontify-buffer))))
+                 :max-tokens 3000
+                 :model "gpt-4-vision-preview")))
 
 
 ;;;###autoload
@@ -397,8 +399,8 @@ Concise Explanation about the above Word
       (visual-line-mode +1)
       (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file)))
       (message "Sending request to LLM API...")
-      (claude-opus-interpret-image temp-file prompt nil llm-buffer)
-      (delete-file temp-file)
+      (openai-interpret-image temp-file prompt nil llm-buffer)
+      (run-with-timer 300 nil (lambda () (delete-file temp-file)))
       (define-key (current-local-map) (kbd "q") #'lower-frame)
       (add-hook 'kill-buffer-hook
                 (lambda ()
@@ -416,12 +418,19 @@ Concise Explanation about the above Word
 (defun gptel--include-last-image-in-conversation (result)
   (let ((gptel-formatted-history
          (mapcar (-lambda ((&alist "role" role "content" content))
-                   (-let (([(&alist "source" source)] content))
-                     `( :role ,role
-                        :content [( :type  "image"
-                                    :source  ( :type  "base64"
-                                               :media_type  "image/jpeg"
-                                               :data  ,(assoc-default "data" source)))])))
+                   (-let (([(&alist "source" source "image_url" image-url)] content))
+                     (cond
+                      ((string= (gptel-backend-name gptel-backend) "Anthropic")
+                       `( :role ,role
+                          :content [( :type  "image"
+                                      :source  ( :type  "base64"
+                                                 :media_type  "image/jpeg"
+                                                 :data  ,(assoc-default "data" source)))]))
+                      ((string= (gptel-backend-name gptel-backend) "ChatGPT")
+                       `( :role ,role
+                          :content [( :type  "image_url"
+                                      :image_url  ( :url  ,(assoc-default "url" image-url)
+                                                    :details "low" ))])))))
                  ;; Only include the latest image.
                  (take 1 llms--interpret-image-history))))
     (seq-concatenate 'list
