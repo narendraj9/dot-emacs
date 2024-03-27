@@ -35,6 +35,12 @@
       (plist-get :secret)
       (funcall)))
 
+(defun llms-auth-source-api-key (host)
+  (-> (auth-source-search :host host)
+      (car)
+      (plist-get :secret)
+      (funcall)))
+
 (defun llms--display-choices-as-overlay (choices)
   (let* ((prompt-region (llms-prompt-region))
          (choice-count (length choices))
@@ -105,11 +111,22 @@
     (setq gptel-api-key openai-secret-key))
 
   (require 'gptel-transient)
+
   :config
   (require 'gptel-anthropic)
 
   (setq gptel-backend
         (gptel-make-anthropic "Anthropic" :key #'anthropic-api-key))
+
+  ;; Register Groq as a backend with gptel.
+  (gptel-make-openai "Groq"
+    :host "api.groq.com"
+    :endpoint "/openai/v1/chat/completions"
+    :stream t
+    :key (llms-auth-source-api-key "api.groq.com")
+    :models '("mixtral-8x7b-32768"
+              "gemma-7b-it"
+              "llama2-70b-4096"))
 
   (add-hook 'gptel-post-response-hook
             (lambda (_start end)
@@ -285,6 +302,15 @@ corrections or suggestions for improve the text."
 ;;; Useful for having a conversation about an image with a model.
 (defvar llms--interpret-image-history nil)
 
+
+(defun llms-process-result (result buffer notify)
+  (when buffer (set-buffer buffer))
+  (if notify (notify result)
+    (let ((inhibit-read-only t))
+      (insert result)
+      (font-lock-fontify-buffer))))
+
+
 ;;;###autoload
 (defun openai-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
@@ -319,12 +345,7 @@ corrections or suggestions for improve the text."
                                                  (concat " " .content))))
                                            choices))
                        (setq result (format "%s %s\n" result item))))
-                   (when buffer (set-buffer buffer))
-                   (if notify
-                       (notify result)
-                     (let ((inhibit-read-only t))
-                       (insert result)
-                       (font-lock-fontify-buffer))))
+                   (llms-process-result result buffer notify))
                  :max-tokens 3000
                  :model "gpt-4-vision-preview")))
 
@@ -356,18 +377,42 @@ corrections or suggestions for improve the text."
       :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (let-alist (elt (assoc-default 'content data) 0)
-                    (when buffer (set-buffer buffer))
-                    (if notify
-                        (notify .text)
-                      (let ((inhibit-read-only t))
-                        (insert .text)
-                        ;; (push `(("role" . "assistant")
-                        ;;         ("content" . ,.text))
-                        ;;       llms--interpret-image-history)
-                        (font-lock-fontify-buffer))))))
+                    (llms-process-result .text buffer notify))))
       :error (cl-function
               (lambda (&key error-thrown &allow-other-keys)
                 (message "Error: %S" error-thrown))))))
+
+;;;###autoload
+(defun tesseract-openai-interpret-image (file-path &optional instruction notify buffer)
+  (interactive "fFile: ")
+  (let* ((result "")
+
+         (instruction (or instruction (read-string "Instruction: ")))
+
+         (progress-reporter
+          (make-progress-reporter "Sending request to OpenAI..." 0 1))
+
+         (image-text
+          (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
+    (openai-chat `[(("role"    . "system")
+                    ("content" . ,(format "%s. %s"
+                                          instruction
+                                          "For your convenience, I have converted the image to text using
+tesseract. Include a 4 sentence summary at the beginning of the output please.")))
+                   (("role"    . "user")
+                    ("content" . ,image-text))]
+                 (lambda (data)
+                   (progress-reporter-done progress-reporter)
+                   (let ((choices (let-alist data .choices)))
+                     (dolist (item (mapcar (lambda (choice)
+                                             (let-alist choice
+                                               (let-alist .message
+                                                 (concat " " .content))))
+                                           choices))
+                       (setq result (format "%s %s\n" result item))))
+                   (llms-process-result result buffer notify))
+                 :max-tokens 3000
+                 :model "gpt-4-turbo-preview")))
 
 ;;;###autoload
 (defun llms-explain-image-with-context ()
@@ -399,7 +444,7 @@ Concise Explanation about the above Word
       (visual-line-mode +1)
       (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file)))
       (message "Sending request to LLM API...")
-      (openai-interpret-image temp-file prompt nil llm-buffer)
+      (tesseract-openai-interpret-image temp-file prompt nil llm-buffer)
       (run-with-timer 300 nil (lambda () (delete-file temp-file)))
       (define-key (current-local-map) (kbd "q") #'lower-frame)
       (add-hook 'kill-buffer-hook
