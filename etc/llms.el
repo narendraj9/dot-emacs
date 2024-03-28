@@ -417,10 +417,12 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
 ;;;###autoload
 (defun llms-explain-image-with-context ()
   (interactive)
-  (let ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
-        (llm-buffer (get-buffer-create " *LLM Interpretation*"))
-        (prompt
-         "For a non-native English reader, collect words that might be new or
+  (let* ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
+         (_ (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file))))
+
+         (llm-buffer (get-buffer-create " *LLM Interpretation*"))
+         (prompt
+          "For a non-native English reader, collect words that might be new or
 difficult to understand in the context of the articles in the screenshot
 and create a glossary in markdown with concise explanations. Have enough
 space between words for readability. Use examples whenever possible to
@@ -435,25 +437,33 @@ Example Output Format:
 
 Concise Explanation about the above Word
 
-"))
+")
+         (prepare-buffer (lambda () (end-of-buffer)
+                           (let ((inhibit-read-only t))
+                             (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string))))
+                           (gfm-view-mode)
+                           (visual-line-mode +1))))
     (with-current-buffer llm-buffer
-      (end-of-buffer)
-      (let ((inhibit-read-only t))
-        (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string))))
-      (gfm-view-mode)
-      (visual-line-mode +1)
-      (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file)))
+      (funcall prepare-buffer)
       (message "Sending request to LLM API...")
       (tesseract-openai-interpret-image temp-file prompt nil llm-buffer)
-      (run-with-timer 300 nil (lambda () (delete-file temp-file)))
-      (define-key (current-local-map) (kbd "q") #'lower-frame)
+      (let ((keymap (current-local-map)))
+        (define-key keymap (kbd "q") #'lower-frame)
+        (define-key keymap (kbd "G") (lambda ()
+                                       (interactive)
+                                       (funcall prepare-buffer)
+                                       (tesseract-openai-interpret-image temp-file
+                                                                         (read-string "Instruction: ")
+                                                                         nil
+                                                                         llm-buffer))))
       (add-hook 'kill-buffer-hook
                 (lambda ()
                   (when (eq (current-buffer) llm-buffer)
                     (append-to-file (point-min)
                                     (point-max)
                                     (expand-file-name "var/llm-interpretation.log"
-                                                      user-emacs-directory))))
+                                                      user-emacs-directory))
+                    (delete-file temp-file)))
                 nil
                 t))
     llm-buffer))
