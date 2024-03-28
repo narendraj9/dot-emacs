@@ -413,6 +413,39 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
                    (llms-process-result result buffer notify))
                  :max-tokens 3000
                  :model "gpt-4-turbo-preview")))
+;;;###autload
+(defun tesseract-groq-interpret-image (file-path &optional instruction notify buffer)
+  (interactive "fFile: ")
+  (let* ((result "")
+
+         (instruction (or instruction (read-string "Instruction: ")))
+
+         (progress-reporter
+          (make-progress-reporter "Sending request to OpenAI..." 0 1))
+
+         (image-text
+          (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
+    (openai-chat `[(("role"    . "system")
+                    ("content" . ,(format "%s. %s"
+                                          instruction
+                                          "For your convenience, I have converted the image to text using
+tesseract. Include a 4 sentence summary at the beginning of the output please.")))
+                   (("role"    . "user")
+                    ("content" . ,image-text))]
+                 (lambda (data)
+                   (progress-reporter-done progress-reporter)
+                   (let ((choices (let-alist data .choices)))
+                     (dolist (item (mapcar (lambda (choice)
+                                             (let-alist choice
+                                               (let-alist .message
+                                                 (concat " " .content))))
+                                           choices))
+                       (setq result (format "%s %s\n" result item))))
+                   (llms-process-result result buffer notify))
+                 :max-tokens 3000
+                 :base-url "https://api.groq.com/openai/v1"
+                 :key (llms-auth-source-api-key "api.groq.com")
+                 :model "mixtral-8x7b-32768")))
 
 ;;;###autoload
 (defun llms-explain-image-with-context ()
@@ -438,15 +471,21 @@ Example Output Format:
 Concise Explanation about the above Word
 
 ")
-         (prepare-buffer (lambda () (end-of-buffer)
-                           (let ((inhibit-read-only t))
-                             (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string))))
-                           (gfm-view-mode)
+         (prepare-buffer (lambda ()
+                           (let ((inhibit-read-only t)
+                                 (screenshot-image
+                                  (create-image temp-file 'imagemagick nil :width (frame-pixel-width) ))                                 )
+                             (end-of-buffer)
+                             (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string)))
+                             (insert-image screenshot-image
+                                           (format "![Captured Image](%s)" temp-file))
+                             (insert "\n\n"))
                            (visual-line-mode +1))))
     (with-current-buffer llm-buffer
+      (gfm-view-mode)
       (funcall prepare-buffer)
       (message "Sending request to LLM API...")
-      (tesseract-openai-interpret-image temp-file prompt nil llm-buffer)
+      (tesseract-groq-interpret-image temp-file prompt nil llm-buffer)
       (let ((keymap (current-local-map)))
         (define-key keymap (kbd "q") #'lower-frame)
         (define-key keymap (kbd "G") (lambda ()
