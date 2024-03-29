@@ -1277,5 +1277,6 @@ search keyword."
   (dolist (overlay (get 'watch :overlays))
     (delete-overlay overlay)))
 
+
 (provide 'defs)
 ;;; defs.el ends here

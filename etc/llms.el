@@ -302,14 +302,15 @@ corrections or suggestions for improve the text."
 ;;; Useful for having a conversation about an image with a model.
 (defvar llms--interpret-image-history nil)
 
+(defvar llms-interpret-image-function #'tesseract-groq-interpret-image)
 
 (defun llms-process-result (result buffer notify)
   (when buffer (set-buffer buffer))
   (if notify (notify result)
-    (let ((inhibit-read-only t))
+    (let ((inhibit-read-only t)
+          (start (point)))
       (insert result)
-      (font-lock-fontify-buffer))))
-
+      (font-lock-ensure start (point)))))
 
 ;;;###autoload
 (defun openai-interpret-image (file-path &optional instruction notify buffer)
@@ -364,6 +365,7 @@ corrections or suggestions for improve the text."
                                         (("type" . "text")
                                          ("text" . ,instruction))]))))
     (push image-message llms--interpret-image-history)
+    (message "Sending request to Anthropic API...")
     (request "https://api.anthropic.com/v1/messages"
       :type "POST"
       :headers `(("x-api-key" . ,(anthropic-api-key))
@@ -421,7 +423,7 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
          (instruction (or instruction (read-string "Instruction: ")))
 
          (progress-reporter
-          (make-progress-reporter "Sending request to OpenAI..." 0 1))
+          (make-progress-reporter "Sending request to Groq Cloud API..." 0 1))
 
          (image-text
           (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
@@ -474,7 +476,7 @@ Concise Explanation about the above Word
          (prepare-buffer (lambda ()
                            (let ((inhibit-read-only t)
                                  (screenshot-image
-                                  (create-image temp-file 'imagemagick nil :width (frame-pixel-width) ))                                 )
+                                  (create-image temp-file 'imagemagick nil :width (frame-pixel-width))))
                              (end-of-buffer)
                              (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string)))
                              (insert-image screenshot-image
@@ -482,19 +484,20 @@ Concise Explanation about the above Word
                              (insert "\n\n"))
                            (visual-line-mode +1))))
     (with-current-buffer llm-buffer
-      (gfm-view-mode)
+      (unless (eq major-mode 'gfm-view-mode)
+        (gfm-view-mode))
       (funcall prepare-buffer)
-      (message "Sending request to LLM API...")
-      (tesseract-groq-interpret-image temp-file prompt nil llm-buffer)
+      (funcall llms-interpret-image-function temp-file prompt nil llm-buffer)
       (let ((keymap (current-local-map)))
         (define-key keymap (kbd "q") #'lower-frame)
         (define-key keymap (kbd "G") (lambda ()
                                        (interactive)
                                        (funcall prepare-buffer)
-                                       (tesseract-openai-interpret-image temp-file
-                                                                         (read-string "Instruction: ")
-                                                                         nil
-                                                                         llm-buffer))))
+                                       (funcall llms-interpret-image-function
+                                                temp-file
+                                                (read-string "Instruction: ")
+                                                nil
+                                                llm-buffer))))
       (add-hook 'kill-buffer-hook
                 (lambda ()
                   (when (eq (current-buffer) llm-buffer)
