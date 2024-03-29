@@ -28,6 +28,14 @@
 (require 'json)
 (require 'auth-source)
 
+(defun image-file->base64-data (file-path)
+  (with-temp-buffer
+    (insert-file-contents-literally (expand-file-name file-path))
+    (base64-encode-region (point-min) (point-max) t)
+    (buffer-substring-no-properties (point-min) (point-max))))
+
+(defun image-file->base64-data-uri (file-path)
+  (format "data:image/jpeg;base64,%s" (image-file->base64-data file-path)))
 
 (defun anthropic-api-key ()
   (-> (auth-source-search :host "api.anthropic.com")
@@ -135,17 +143,6 @@
               (visual-line-mode +1))))
 
 
-(use-package c3po
-  :disabled t
-  :git "https://github.com/d1egoaz/c3po.el"
-  :defer t
-  :init
-  (when (boundp 'openai-secret-key)
-    (setq c3po-api-key openai-secret-key)))
-
-
-(use-package chatgpt :disabled t :git "https://github.com/emacs-openai/chatgpt")
-(use-package codegpt :disabled t :git "https://github.com/emacs-openai/codegpt")
 (use-package openai
   :git "https://github.com/emacs-openai/openai"
   :init
@@ -316,19 +313,9 @@ corrections or suggestions for improve the text."
 (defun openai-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
   (let* ((result "")
-
          (instruction (or instruction (read-string "Instruction: ")))
-
-         (progress-reporter
-          (make-progress-reporter "Sending request to OpenAI..." 0 1))
-
-         (base64-image-data
-          (format "data:image/jpeg;base64,%s"
-                  (with-temp-buffer
-                    (insert-file-contents-literally (expand-file-name file-path))
-                    (base64-encode-region (point-min) (point-max) t)
-                    (buffer-substring-no-properties (point-min) (point-max)))))
-
+         (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
+         (base64-image-data (image-file->base64-data-uri file-path))
          (image-message `(("role"    . "user")
                           ("content" . [(("type" . "image_url")
                                          ("image_url" . (("url" . ,base64-image-data)
@@ -353,10 +340,7 @@ corrections or suggestions for improve the text."
 
 ;;;###autoload
 (defun claude-opus-interpret-image (file-path &optional instruction notify buffer)
-  (let* ((image-base64 (with-temp-buffer
-                         (insert-file-contents-literally file-path)
-                         (base64-encode-region (point-min) (point-max) t)
-                         (buffer-substring-no-properties (point-min) (point-max))))
+  (let* ((image-base64 (image-file->base64-data file-path))
          (image-message `(("role" . "user")
                           ("content" . [(("type" . "image")
                                          ("source" . (("type" . "base64")
@@ -422,11 +406,12 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
 
          (instruction (or instruction (read-string "Instruction: ")))
 
-         (progress-reporter
-          (make-progress-reporter "Sending request to Groq Cloud API..." 0 1))
-
          (image-text
-          (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
+          (progn (message "Using tesseract to convert image to text.")
+                 (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
+
+         (progress-reporter
+          (make-progress-reporter "Sending request to Groq Cloud API..." 0 1)))
     (openai-chat `[(("role"    . "system")
                     ("content" . ,(format "%s. %s"
                                           instruction
@@ -473,6 +458,7 @@ Example Output Format:
 Concise Explanation about the above Word
 
 ")
+         (screenshot-image-data-uri ())
          (prepare-buffer (lambda ()
                            (let ((inhibit-read-only t)
                                  (screenshot-image
@@ -480,7 +466,7 @@ Concise Explanation about the above Word
                              (end-of-buffer)
                              (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string)))
                              (insert-image screenshot-image
-                                           (format "![Captured Image](%s)" temp-file))
+                                           (format "![Captured Image](%s)" (image-file->base64-data-uri temp-file)))
                              (insert "\n\n"))
                            (visual-line-mode +1))))
     (with-current-buffer llm-buffer
@@ -546,6 +532,18 @@ Concise Explanation about the above Word
   (advice-remove 'gptel--parse-buffer #'gptel--include-last-image-in-conversation))
 
 ;;; End of HACK
+
+(defun llms-view-inline-image ()
+  "Replaces base64 data url at point with a rendered image. "
+  (interactive)
+  (beginning-of-line)
+  (let ((temp-file (make-temp-file "llm-image-" nil ".jpg"))
+        (data (-> (search-forward "data:image/jpeg;base64," (line-end-position))
+                  (buffer-substring-no-properties (1- (search-forward ")" (line-end-position)))))))
+    (with-temp-file temp-file
+      (insert data)
+      (base64-decode-region (point-min) (point-max)))
+    (insert-image (create-image temp-file 'imagemagick nil :width (frame-pixel-width)))))
 
 
 (provide 'llms)
