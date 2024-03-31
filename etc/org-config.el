@@ -560,7 +560,7 @@ Otherwise, limit to only `org-mode' files."
 
   (setq org-datetree-add-timestamp nil)
   (setq org-capture-templates
-        `(("i" "TODO" entry (file+headline "capture.org" "Tasks")
+        `(("i" "TODO" entry (file "capture.org")
            ,(concat
              "* TODO %?                                           %^G\n"
              org-config--common-metadata))
