@@ -3936,7 +3936,8 @@ buffer."
   :ensure t
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :hook ( (pdf-view-mode . pdf-tools-enable-minor-modes)
-          (pdf-view-mode . pdf-view-themed-minor-mode) )
+          ;; (pdf-view-mode . pdf-view-themed-minor-mode)
+          )
   :bind (:map pdf-view-mode-map
               ("j" . image-next-line)
               ("k" . image-previous-line)
@@ -4275,6 +4276,7 @@ buffer."
   :defer 10
   :bind ( :map ctl-quote-map
           (("t TAB" . openai-complete-text)
+           ("t a"   . gptel-ask-quickly)
            ("t c"   . gptel)
            ("t m"   . gptel-menu)
            ("t l"   . hugging-face-complete)

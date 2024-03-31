@@ -385,6 +385,7 @@ Otherwise, limit to only `org-mode' files."
                               (pulse-momentary-highlight-one-line (point-at-bol)))))
 
               (bind-keys :map org-agenda-mode-map
+                         ("R"       . org-review-captures)
                          ("T"       . org-agenda-toggle-toggle-tags-column)
                          ("a"       . org-agenda-redo-with-days-to-deadline)
                          ("g"       . org-agenda-redo)

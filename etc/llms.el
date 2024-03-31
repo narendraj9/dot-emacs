@@ -119,6 +119,7 @@
     (setq gptel-api-key openai-secret-key))
 
   (require 'gptel-transient)
+  (require 'gptel-curl)
 
   :config
   (require 'gptel-anthropic)
@@ -127,14 +128,15 @@
         (gptel-make-anthropic "Anthropic" :key #'anthropic-api-key))
 
   ;; Register Groq as a backend with gptel.
-  (gptel-make-openai "Groq"
-    :host "api.groq.com"
-    :endpoint "/openai/v1/chat/completions"
-    :stream t
-    :key (llms-auth-source-api-key "api.groq.com")
-    :models '("mixtral-8x7b-32768"
-              "gemma-7b-it"
-              "llama2-70b-4096"))
+  (defvar llms-gptel-groq-backend
+    (gptel-make-openai "Groq"
+      :host "api.groq.com"
+      :endpoint "/openai/v1/chat/completions"
+      :stream t
+      :key (llms-auth-source-api-key "api.groq.com")
+      :models '("mixtral-8x7b-32768"
+                "gemma-7b-it"
+                "llama2-70b-4096")))
 
   (add-hook 'gptel-post-response-hook
             (lambda (_start end)
@@ -157,6 +159,7 @@
   (require 'openai-image))
 
 (use-package chatgpt-shell
+  :demand t
   :ensure t
   :custom
   (chatgpt-shell-openai-key openai-secret-key)
@@ -262,39 +265,56 @@
 
 (defvar gptel-quick-proofreader--history nil)
 
+
+;;;###autoload
+(defun gptel-ask-quickly (system-prompt)
+  (interactive "sInstruction: ")
+  (let* ((prompt
+          (encode-coding-string (if (region-active-p)
+                                    (buffer-substring-no-properties (region-beginning) (region-end))
+                                  (read-string "Use markdown for the response and be very very concise. \nContext: "
+                                               nil
+                                               gptel-quick-proofreader--history))
+                                'utf-8))
+         (progress-reporter
+          (make-progress-reporter "Communicating to OpenAI API..." 0  1))
+
+         (gptel-backend llms-gptel-groq-backend)
+         (gptel-model "mixtral-8x7b-32768")
+         (gptel-use-curl t)
+         (gptel-response-callback
+          (lambda (response info)
+            (progress-reporter-done progress-reporter)
+            (if (not response)
+                (message "gptel-quick failed with message: %s" (plist-get info :status))
+              (with-current-buffer (get-buffer-create "*gptel-quick*")
+                (let ((inhibit-read-only t))
+                  (erase-buffer)
+                  (insert response)
+                  (gfm-view-mode)
+                  (visual-line-mode)
+                  (font-lock-fontify-buffer)
+                  (display-buffer (current-buffer)
+                                  `((display-buffer-in-side-window)
+                                    (side . right)
+                                    (window-width . 60)))))))))
+
+    (when (string= prompt "") (user-error "A prompt is required."))
+    (gptel-request prompt
+      :system system-prompt
+      :callback gptel-response-callback)))
+
+
 ;;;###autoload
 (defun gptel-quick-proofreader ()
   (interactive)
-  (let ((prompt (if (region-active-p)
-                    (buffer-substring-no-properties (region-beginning) (region-end))
-                  (read-string "Text: "
-                               nil
-                               gptel-quick-proofreader--history)))
-        (progress-reporter
-         (make-progress-reporter "Communicating to OpenAI API..." 0  1)))
-    (when (string= prompt "") (user-error "A prompt is required."))
-    (gptel-request prompt
-      :system "I want you act as a proofreader. Please format your replies as
+  (gptel-ask-quickly "I want you act as a proofreader. Please format your replies as
 text in markdown format and for readability on an 80-columns
 display. I will provide you texts and I would like you to review
 them for any spelling, grammar, or punctuation errors. Once you
 have finished reviewing the text, provide me with any necessary
-corrections or suggestions for improve the text."
-      :callback
-      (lambda (response info)
-        (progress-reporter-done progress-reporter)
-        (if (not response)
-            (message "gptel-quick failed with message: %s" (plist-get info :status))
-          (with-current-buffer (get-buffer-create "*gptel-quick*")
-            (let ((inhibit-read-only t))
-              (erase-buffer)
-              (insert response)
-              (gfm-view-mode))
-            (special-mode)
-            (display-buffer (current-buffer)
-                            `((display-buffer-in-side-window)
-                              (side . right)
-                              (window-width . 80)))))))))
+corrections or suggestions for improve the text."))
+
 
 ;;; Useful for having a conversation about an image with a model.
 (defvar llms--interpret-image-history nil)
