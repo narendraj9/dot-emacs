@@ -111,7 +111,10 @@
 (use-package gptel
   :git "https://github.com/karthink/gptel"
   :demand t
-  :bind ( :map gptel-mode-map ("C-j" . gptel-send) )
+  :bind ( :map gptel-mode-map
+          ("C-j" . gptel-send)
+          ("RET" . gptel-send) )
+
   :custom ((gptel-use-curl nil)
            (gptel-model "claude-3-opus-20240229"))
   :init
@@ -124,9 +127,6 @@
   :config
   (require 'gptel-anthropic)
 
-  (setq gptel-backend
-        (gptel-make-anthropic "Anthropic" :key #'anthropic-api-key))
-
   ;; Register Groq as a backend with gptel.
   (defvar llms-gptel-groq-backend
     (gptel-make-openai "Groq"
@@ -138,6 +138,20 @@
                 "gemma-7b-it"
                 "llama2-70b-4096")))
 
+  ;; A gptel backend for perplexity API
+  (defvar llms-gptel-preplexity-backend
+    (gptel-make-openai "Perplexity"
+      :host "api.perplexity.ai"
+      :protocol "https"
+      :endpoint "/chat/completions"
+      :stream t
+      :key (llms-auth-source-api-key "api.perplexity.ai")
+      :models '("sonar-small-chat"
+                "sonar-medium-chat"
+                "sonar-small-online"
+                "sonar-medium-online")))
+
+  (setq gptel-backend llms-gptel-groq-backend)
   (add-hook 'gptel-post-response-hook
             (lambda (_start end)
               (when end (goto-char end))
@@ -164,7 +178,7 @@
   :custom
   (chatgpt-shell-openai-key openai-secret-key)
   (chatgpt-shell-system-prompt 2)
-  (chatgpt-shell-model-version "gpt-4-0125-preview")
+  (chatgpt-shell-model-version "gpt-4-turbo")
 
   :init
   ;; Used by `chatgpt-shell-load-awesome-prompts'
@@ -216,7 +230,7 @@
                                   (let-alist .message
                                     (concat " " .content))))
                               choices))))
-                 :model "gpt-4"
+                 :model "gpt-4-turbo"
                  :max-tokens 30
                  :temperature openai-chat-temperature
                  :n 3
@@ -355,7 +369,7 @@ corrections or suggestions for improve the text."))
                        (setq result (format "%s %s\n" result item))))
                    (llms-process-result result buffer notify))
                  :max-tokens 3000
-                 :model "gpt-4-vision-preview")))
+                 :model "gpt-4-turbo")))
 
 
 ;;;###autoload
@@ -418,7 +432,7 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
                        (setq result (format "%s %s\n" result item))))
                    (llms-process-result result buffer notify))
                  :max-tokens 3000
-                 :model "gpt-4-turbo-preview")))
+                 :model "gpt-4-turbo")))
 ;;;###autload
 (defun tesseract-groq-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
