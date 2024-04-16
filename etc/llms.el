@@ -38,16 +38,16 @@
   (format "data:image/jpeg;base64,%s" (image-file->base64-data file-path)))
 
 (defun anthropic-api-key ()
-  (-> (auth-source-search :host "api.anthropic.com")
-      (car)
-      (plist-get :secret)
-      (funcall)))
+  (-some-> (auth-source-search :host "api.anthropic.com")
+    (car)
+    (plist-get :secret)
+    (funcall)))
 
 (defun llms-auth-source-api-key (host)
-  (-> (auth-source-search :host host)
-      (car)
-      (plist-get :secret)
-      (funcall)))
+  (-some-> (auth-source-search :host host)
+    (car)
+    (plist-get :secret)
+    (funcall)))
 
 (defun llms--display-choices-as-overlay (choices)
   (let* ((prompt-region (llms-prompt-region))
@@ -115,8 +115,8 @@
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
 
-  :custom ((gptel-use-curl nil)
-           (gptel-model "claude-3-opus-20240229"))
+  :custom ( gptel-use-curl nil
+            gptel-model "claude-3-opus-20240229" )
   :init
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
@@ -140,16 +140,17 @@
 
   ;; A gptel backend for perplexity API
   (defvar llms-gptel-preplexity-backend
-    (gptel-make-openai "Perplexity"
-      :host "api.perplexity.ai"
-      :protocol "https"
-      :endpoint "/chat/completions"
-      :stream t
-      :key (llms-auth-source-api-key "api.perplexity.ai")
-      :models '("sonar-small-chat"
-                "sonar-medium-chat"
-                "sonar-small-online"
-                "sonar-medium-online")))
+    (when-let ((api-key (llms-auth-source-api-key "api.perplexity.ai")))
+      (gptel-make-openai "Perplexity"
+        :host "api.perplexity.ai"
+        :protocol "https"
+        :endpoint "/chat/completions"
+        :stream t
+        :key api-key
+        :models '("sonar-small-chat"
+                  "sonar-medium-chat"
+                  "sonar-small-online"
+                  "sonar-medium-online"))))
 
   (setq gptel-backend llms-gptel-groq-backend)
   (add-hook 'gptel-post-response-hook
@@ -202,8 +203,13 @@
   :git "https://github.com/copilot-emacs/copilot.el.git"
   :demand t
   :bind ( :map copilot-completion-map ("SPC" . copilot-accept-completion) )
+
   :init
-  (use-package editorconfig :ensure t))
+  (use-package editorconfig :ensure t)
+
+  :custom
+  ( copilot-indent-offset-warning-disable t
+    copilot-max-char -1 ))
 
 
 ;;;###autoload
