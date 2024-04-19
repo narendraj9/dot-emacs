@@ -869,5 +869,8 @@ Otherwise, limit to only `org-mode' files."
                                                  emacs-assets-directory)))
 
 
+(use-package org-protocol :demand t)
+
+
 (provide 'org-config)
 ;;; org-config.el ends here

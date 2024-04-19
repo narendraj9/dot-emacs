@@ -115,8 +115,8 @@
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
 
-  :custom ( gptel-use-curl nil
-            gptel-model "claude-3-opus-20240229" )
+  :custom ((gptel-use-curl nil)
+           (gptel-model "gpt-4-turbo"))
   :init
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
@@ -136,7 +136,8 @@
       :key (llms-auth-source-api-key "api.groq.com")
       :models '("mixtral-8x7b-32768"
                 "gemma-7b-it"
-                "llama2-70b-4096")))
+                "llama2-70b-4096"
+                "llama3-70b-8192")))
 
   ;; A gptel backend for perplexity API
   (defvar llms-gptel-preplexity-backend
@@ -157,6 +158,8 @@
             (lambda (_start end)
               (when end (goto-char end))
               (end-of-line)
+              (search-forward "###")
+              (forward-char)
               (visual-line-mode +1))))
 
 
@@ -472,7 +475,7 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
                  :max-tokens 3000
                  :base-url "https://api.groq.com/openai/v1"
                  :key (llms-auth-source-api-key "api.groq.com")
-                 :model "mixtral-8x7b-32768")))
+                 :model "llama3-70b-8192")))
 
 ;;;###autoload
 (defun llms-explain-image-with-context ()
