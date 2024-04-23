@@ -211,9 +211,8 @@
   :init
   (use-package editorconfig :ensure t)
 
-  :custom
-  ( copilot-indent-offset-warning-disable t
-    copilot-max-char -1 ))
+  :custom ( (copilot-indent-offset-warning-disable t)
+            (copilot-max-char -1) ))
 
 
 ;;;###autoload
