@@ -394,7 +394,7 @@ Otherwise, limit to only `org-mode' files."
                          ("C-S-o"   . custom-agenda-view)
                          ("x"       . org-agenda-quit)
                          ("C-c C-r" . org-agenda-refile)
-                         ("C-c C-c" . org-review-captures)
+                         ("V" . org-review-captures)
                          ("C-c C-n" . take-notes)
                          ("C-c C-f" . org-agenda-find-file)
                          ("C-c C-s" . org-schedule-and-todo)
@@ -714,7 +714,7 @@ Otherwise, limit to only `org-mode' files."
   (setq org-habit-graph-column 80
         ;; Use `customize-variable' depending on the screen size and
         ;; resolution.
-        org-habit-preceding-days 42
+        org-habit-preceding-days 21
         org-habit-following-days 14
         org-habit-show-done-always-green t))
 

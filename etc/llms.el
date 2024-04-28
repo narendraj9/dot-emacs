@@ -215,6 +215,12 @@
             (copilot-max-char -1) ))
 
 
+(use-package cody
+  :git "https://github.com/sourcegraph/emacs-cody.git"
+  :init
+  (use-package uuidgen :ensure t))
+
+
 ;;;###autoload
 (defun openai-complete-text (arg)
   (interactive "P")
