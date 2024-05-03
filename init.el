@@ -1967,7 +1967,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       'c++-mode 'c++-ts-mode
       'ruby-mode 'ruby-ts-mode
       'typescript-mode 'typescript-ts-mode
-      'elixir-ts-mode)
+      'elixir-ts-mode
+      'terraform-mode)
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
@@ -2952,8 +2953,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :preface
   (defun consult-grep-dwim ()
-    (require 'vc)
     (interactive)
+    (require 'vc)
     (let ((directory (project-root (project-current)))
           (initial (when (region-active-p)
                      (buffer-substring (region-beginning) (region-end)))))
@@ -3716,8 +3717,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package terraform-mode
   :ensure t
   :defer t
-  :mode "\\.tf\\(vars\\)?\\'")
-(use-package ansible        :ensure t :defer t)
+  :mode "\\.tf\\(vars\\)?\\'"
+  :custom (terraform-format-on-save  t))
+
+(use-package ansible :ensure t :defer t)
 
 
 ;;; Version Control
