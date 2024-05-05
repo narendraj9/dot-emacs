@@ -463,7 +463,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (propertize "%b%p%% " 'face 'mode-line-battery-face))
   (display-battery-mode +1)
 
-  (run-with-timer 60 60 #'battery-protection-notifications)
+  ;; (run-with-timer 60 60 #'battery-protection-notifications)
 
   :preface
   (defun battery-protection-pause ()

@@ -562,7 +562,7 @@ Otherwise, limit to only `org-mode' files."
   (setq org-capture-templates
         `(("i" "TODO" entry (file "capture.org")
            ,(concat
-             "* TODO %?                                           %^G\n"
+             "* TODO %?                                           \n"
              org-config--common-metadata))
           ("n" "NOTE" entry (file+olp+datetree ,org-default-notes-file)
            ,(concat "* %? \n"
