@@ -1,0 +1,2 @@
+alias send-to-tab bluetooth-sendto --device ${(format "%s" tablet-mac-address)} $*
+alias nu nu -c $@*
