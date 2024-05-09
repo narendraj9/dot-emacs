@@ -348,7 +348,7 @@ corrections or suggestions for improve the text."))
 ;;; Useful for having a conversation about an image with a model.
 (defvar llms--interpret-image-history nil)
 
-(defvar llms-interpret-image-function #'tesseract-groq-interpret-image)
+(defvar llms-interpret-image-function #'openai-interpret-image)
 
 (defun llms-process-result (result buffer notify)
   (when buffer (set-buffer buffer))
@@ -593,6 +593,16 @@ Concise Explanation about the above Word
       (insert data)
       (base64-decode-region (point-min) (point-max)))
     (insert-image (create-image temp-file 'imagemagick nil :width (frame-pixel-width)))))
+
+;;;###autoload
+(defun llms-switch-image-interpret-function ()
+  (interactive)
+  (setq llms-interpret-image-function
+        (intern (completing-read "Interpret images with: "
+                                 `(openai-interpret-image
+                                   tesseract-openai-interpret-image
+                                   tesseract-groq-interpret-image
+                                   claude-opus-interpret-image)))))
 
 
 (provide 'llms)

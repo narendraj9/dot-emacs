@@ -2292,7 +2292,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         highlight-indent-guides-auto-even-face-perc 3
         highlight-indent-guides-auto-character-face-perc 3))
 
-(use-package indent-bars
+(use-package indent-bars-ts
   :git "https://github.com/jdtsmith/indent-bars"
   :custom
   (indent-bars-treesit-support t)
@@ -2334,6 +2334,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (vterm-send-key "n" nil nil t)))
 
 (use-package shell
+  :custom ( explicit-shell-file-name "nu" )
   :init
   (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
 
@@ -2408,15 +2409,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package eat
   :ensure t
-  :bind ( "s-<return>" . eat )
+  :bind ( "s-<return>" . --eat-toggle )
 
   :diminish eat-eshell-mode
   :custom ( eat-kill-buffer-on-exit t
             eshell-visual-commands (list) )
-
   :init
   (eat-eshell-mode +1)
-  (eat-eshell-visual-command-mode +1))
+  (eat-eshell-visual-command-mode +1)
+
+  :preface
+  (defun --eat-toggle ()
+    (interactive)
+    (if (eq major-mode 'eat-mode)
+        (set-window-configuration (get this-command :window-config))
+      (put this-command :window-config (current-window-configuration))
+      (eat))))
 
 
 (use-package yequake
@@ -4288,7 +4296,8 @@ buffer."
            ("t m"   . gptel-menu)
            ("t l"   . hugging-face-complete)
            ("t p"   . gptel-quick-proofreader)
-           ("t t"   . copilot-mode)) )
+           ("t t"   . copilot-mode)
+           ("t j"   . llms-switch-image-interpret-function)) )
   :load-path "etc/"
   :config
   (add-to-list 'display-buffer-alist
