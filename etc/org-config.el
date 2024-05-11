@@ -554,9 +554,14 @@ Otherwise, limit to only `org-mode' files."
 
   :config
   (defconst org-config--common-metadata
-    (concat ":METADATA:\n"
-            " CREATED: %U         \n"
-            ":END:"))
+    (string-join (list ":METADATA:"
+                       " CREATED: %U"
+                       " %(unless (s-blank? \"%:link\") (concat \"URL: \" \"%:link\"))"
+                       " %(unless (s-blank? \"%:description\") (concat \"DESCRIPTION: \" \"%:description\"))"
+                       " %(unless (s-blank? \"%:annotation\") (concat \"ANNOTATION: \" \"%:annotation\"))"
+                       ":END:"
+                       "%(unless (s-blank? \"%i\") (format \":SELECTED_TEXT:\n %s\n:END:\" \"%i\"))")
+                 "\n"))
 
   (setq org-datetree-add-timestamp nil)
   (setq org-capture-templates
