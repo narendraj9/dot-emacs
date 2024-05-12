@@ -2378,12 +2378,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq eshell-modules-list
         '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
            eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
-           eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra ))
+           eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra
+           eshell-elecslash
+           ;; Disabled because it's hard to get used to it.
+           ;;          See: (info "(eshell) Smart scrolling")
+           ;; eshell-smart
+           ))
 
   (setq eshell-prompt-regexp "([^#$]*) [#$] "
         eshell-prompt-function
         (lambda ()
-          (concat "(" (file-name-nondirectory (eshell/pwd)) ")"
+          (concat "(" (abbreviate-file-name (eshell/pwd)) ")"
                   (if (= (user-uid) 0) " # " " $ ")))
 
         eshell-aliases-file
@@ -2398,6 +2403,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               ;; screen.
               (pixel-scroll-mode -1)
               (pixel-scroll-precision-mode -1)))
+
+  :config
+  (add-to-list 'eshell-expand-input-functions
+               #'eshell-expand-history-references)
 
   ;; (eval-after-load 'em-cmpl
   ;;   '(define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common))
@@ -4025,6 +4034,9 @@ buffer."
   :config
   (unless (server-running-p)
     (server-start))
+
+  ;; Always change focus to a newly created frame.
+  (add-hook 'server-switch-hook #'raise-frame)
 
   (pcase system-type
     (`windows-nt

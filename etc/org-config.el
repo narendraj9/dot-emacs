@@ -554,14 +554,13 @@ Otherwise, limit to only `org-mode' files."
 
   :config
   (defconst org-config--common-metadata
-    (string-join (list ":METADATA:"
-                       " CREATED: %U"
-                       " %(unless (s-blank? \"%:link\") (concat \"URL: \" \"%:link\"))"
-                       " %(unless (s-blank? \"%:description\") (concat \"DESCRIPTION: \" \"%:description\"))"
-                       " %(unless (s-blank? \"%:annotation\") (concat \"ANNOTATION: \" \"%:annotation\"))"
-                       ":END:"
-                       "%(unless (s-blank? \"%i\") (format \":SELECTED_TEXT:\n %s\n:END:\" \"%i\"))")
-                 "\n"))
+    (concat ":METADATA:\n"
+            " CREATED: %U\n"
+            "%(unless (s-blank? \"%:link\") (concat \" URL: \" \"%:link\" \"\n\"))"
+            "%(unless (s-blank? \"%:description\") (concat \" DESCRIPTION: \" \"%:description\" \"\n\"))"
+            "%(unless (s-blank? \"%:annotation\") (concat \" ANNOTATION: \" \"%:annotation\" \"\n\"))"
+            ":END:\n"
+            "%(unless (s-blank? \"%i\") (format \"#+BEGIN_QUOTE\n %s\n#+END_QUOTE\n\" (string-fill \"%i\" 100)))"))
 
   (setq org-datetree-add-timestamp nil)
   (setq org-capture-templates
