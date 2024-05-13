@@ -37,18 +37,6 @@
 (defun image-file->base64-data-uri (file-path)
   (format "data:image/jpeg;base64,%s" (image-file->base64-data file-path)))
 
-(defun anthropic-api-key ()
-  (-some-> (auth-source-search :host "api.anthropic.com")
-    (car)
-    (plist-get :secret)
-    (funcall)))
-
-(defun llms-auth-source-api-key (host)
-  (-some-> (auth-source-search :host host)
-    (car)
-    (plist-get :secret)
-    (funcall)))
-
 (defun llms--display-choices-as-overlay (choices)
   (let* ((prompt-region (llms-prompt-region))
          (choice-count (length choices))
@@ -75,7 +63,7 @@
             (overlay-put completion-overlay
                          'after-string
                          (format "%s [%s/%s] "
-                                 (propertize (nth current-index choices)
+                                 (propertize (string-fill (nth current-index choices) 80)
                                              'face 'shadow
                                              'cursor t)
                                  (propertize (number-to-string (1+ current-index))
@@ -96,10 +84,7 @@
   (if (region-active-p)
       (cons (region-beginning) (region-end))
     (save-excursion
-      (cons (progn (start-of-paragraph-text)
-                   (point))
-            (progn (end-of-paragraph-text)
-                   (point))))))
+      (cons (window-start) (point)))))
 
 
 (defun llms-prompt-text ()
@@ -133,7 +118,7 @@
       :host "api.groq.com"
       :endpoint "/openai/v1/chat/completions"
       :stream t
-      :key (llms-auth-source-api-key "api.groq.com")
+      :key (auth-source-pick-first-password :host "api.groq.com")
       :models '("mixtral-8x7b-32768"
                 "gemma-7b-it"
                 "llama2-70b-4096"
@@ -141,7 +126,7 @@
 
   ;; A gptel backend for perplexity API
   (defvar llms-gptel-preplexity-backend
-    (when-let ((api-key (llms-auth-source-api-key "api.perplexity.ai")))
+    (when-let ((api-key (auth-source-pick-first-password :host "api.perplexity.ai")))
       (gptel-make-openai "Perplexity"
         :host "api.perplexity.ai"
         :protocol "https"
@@ -225,17 +210,12 @@
 
 
 ;;;###autoload
-(defun openai-complete-text (arg)
+(defun llms-complete (arg)
   (interactive "P")
   (let ((prompt-text (llms-prompt-text))
-        (instruction (if arg
-                         (read-string "Instruction: ")
-                       (concat "You are a helpful assistant."
-                               "Try to complete the following sentence, only"
-                               "if you are sure you can confidently guess what should follow."
-                               "Make sure that the combined sentence is"
-                               "coherent and logically correct."))))
-
+        (instruction (if arg (read-string "Instruction: ")
+                       (concat "Complete the sentence and reply with just the sentence and nothing
+else. Your output will be used in a program so make sure that you start your response with the promt text."))))
     (openai-chat `[(("role"    . "system")
                     ("content" . ,instruction))
                    (("role"    . "user")
@@ -248,33 +228,11 @@
                                   (let-alist .message
                                     (concat " " .content))))
                               choices))))
-                 :model "gpt-4-turbo"
-                 :max-tokens 30
+                 :base-url "https://api.groq.com/openai/v1"
+                 :key (auth-source-pick-first-password :host "api.groq.com")
+                 :model "llama3-70b-8192"
                  :temperature openai-chat-temperature
-                 :n 3
                  :user (unless (string= openai-user "user") openai-user))))
-
-
-;;;###autoload
-(defun hugging-face-complete ()
-  (interactive)
-  (let ((auth-token (auth-source-pick-first-password :host "huggingface.co"))
-        (prompt (llms-prompt-text)))
-    (request "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-v0.1"
-      :type "POST"
-      :headers `(("Content-Type" . "application/json")
-                 ("Authorization". ,(concat "Bearer " auth-token)))
-      :parser 'json-read
-      :data (json-encode `(("inputs" . ,prompt)
-                           ("parameters" . (("num_return_sequences" . 3)))))
-      :success (cl-function
-                (lambda (&key data &allow-other-keys)
-                  (llms--display-choices-as-overlay
-                   (mapcar (lambda (choice)
-                             (string-remove-prefix prompt
-                                                   (assoc-default 'generated_text
-                                                                  choice)))
-                           data)))))))
 
 
 ;;;###autoload
@@ -405,7 +363,7 @@ corrections or suggestions for improve the text."))
     (message "Sending request to Anthropic API...")
     (request "https://api.anthropic.com/v1/messages"
       :type "POST"
-      :headers `(("x-api-key" . ,(anthropic-api-key))
+      :headers `(("x-api-key" . ,(auth-source-pick-first-password :host "api.anthropic.com"))
                  ("anthropic-version" . "2023-06-01")
                  ("content-type" . "application/json"))
       ;; Use Anthropic's fastest model for usual image interpretation
@@ -484,7 +442,7 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
                    (llms-process-result result buffer notify))
                  :max-tokens 3000
                  :base-url "https://api.groq.com/openai/v1"
-                 :key (llms-auth-source-api-key "api.groq.com")
+                 :key (auth-source-pick-first-password :host "api.groq.com")
                  :model "llama3-70b-8192")))
 
 
@@ -610,6 +568,31 @@ Concise Explanation about the above Word.")
                                    tesseract-openai-interpret-image
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
+
+
+(defvar llms-complete-timer nil)
+(define-minor-mode llms-complete-minor-mode
+  "Minor mode for completing text with LLMs."
+  :lighter "LLMS"
+  :keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c TAB") #'llms-complete)
+    map)
+
+  (let ((llms-complete-timer-fn
+         (lambda ()
+           (when (and llms-complete-minor-mode
+                      (member last-command
+                              (list 'self-insert-command
+                                    'org-self-insert-command)))
+             (llms-complete nil)))))
+    (if llms-complete-minor-mode
+        (progn (setq llms-complete-timer
+                     (run-with-idle-timer 1 t llms-complete-timer-fn))
+               (message "LLMS minor mode enabled."))
+      (cancel-timer llms-complete-timer)
+      (message "LLMS minor mode disabled."))))
+
 
 
 (provide 'llms)

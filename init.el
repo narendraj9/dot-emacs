@@ -4306,7 +4306,7 @@ buffer."
            ("t a"   . gptel-ask-quickly)
            ("t c"   . gptel)
            ("t m"   . gptel-menu)
-           ("t l"   . hugging-face-complete)
+           ("t l"   . llms-complete)
            ("t p"   . gptel-quick-proofreader)
            ("t t"   . copilot-mode)
            ("t j"   . llms-switch-image-interpret-function)) )
