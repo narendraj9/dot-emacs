@@ -560,7 +560,7 @@ Otherwise, limit to only `org-mode' files."
             "%(unless (s-blank? \"%:description\") (concat \" DESCRIPTION: \" \"%:description\" \"\n\"))"
             "%(unless (s-blank? \"%:annotation\") (concat \" ANNOTATION: \" \"%:annotation\" \"\n\"))"
             ":END:\n"
-            "%(unless (s-blank? \"%i\") (format \"#+BEGIN_QUOTE\n %s\n#+END_QUOTE\n\" (string-fill \"%i\" 100)))"))
+            "%(unless (s-blank? \"%i\") (format \"\n#+BEGIN_QUOTE\n %s\n#+END_QUOTE\n\" (string-fill \"%i\" 100)))"))
 
   (setq org-datetree-add-timestamp nil)
   (setq org-capture-templates

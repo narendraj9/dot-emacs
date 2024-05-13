@@ -384,7 +384,8 @@ corrections or suggestions for improve the text."))
                        (setq result (format "%s %s\n" result item))))
                    (llms-process-result result buffer notify))
                  :max-tokens 3000
-                 :model "gpt-4-turbo")))
+                 ;; gpt-4o is cheaper than gpt-4-turbo.
+                 :model "gpt-4o")))
 
 
 ;;;###autoload
@@ -487,7 +488,7 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
 (defun llms-explain-image-with-context ()
   (interactive)
   (let* ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
-         (_ (shell-command (format "scrot -p -q 30 -o %s" (shell-quote-argument temp-file))))
+         (_ (shell-command (format "gnome-screenshot -p -f %s" (shell-quote-argument temp-file))))
 
          (llm-buffer (get-buffer-create " *LLM Interpretation*"))
          (prompt
@@ -504,9 +505,7 @@ Example Output Format:
 
 ## Word
 
-Concise Explanation about the above Word
-
-")
+Concise Explanation about the above Word.")
          (screenshot-image-data-uri ())
          (prepare-buffer (lambda ()
                            (let ((inhibit-read-only t)
