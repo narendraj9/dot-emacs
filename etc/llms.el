@@ -188,6 +188,9 @@
   ;; Used by `chatgpt-shell-load-awesome-prompts'
   (use-package pcsv :ensure t)
 
+  :config
+  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t)
+
   :bind ( :map ctl-quote-map
           ("t C" . chatgpt-shell)
           ("t u" . chatgpt-shell-generate-unit-test)
@@ -484,11 +487,16 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
                  :key (llms-auth-source-api-key "api.groq.com")
                  :model "llama3-70b-8192")))
 
+
+(defvar llms-screenshot-command "gnome-screenshot")
+
 ;;;###autoload
 (defun llms-explain-image-with-context ()
   (interactive)
   (let* ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
-         (_ (shell-command (format "gnome-screenshot -p -f %s" (shell-quote-argument temp-file))))
+         (_ (shell-command (format "%s -p -f %s"
+                                   llms-screenshot-command
+                                   (shell-quote-argument temp-file))))
 
          (llm-buffer (get-buffer-create " *LLM Interpretation*"))
          (prompt
