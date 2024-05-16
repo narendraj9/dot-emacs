@@ -198,6 +198,7 @@
 
 (use-package cody
   :git "https://github.com/sourcegraph/emacs-cody.git"
+  :disabled t
   :init
   (use-package uuidgen :ensure t))
 
