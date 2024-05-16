@@ -100,8 +100,7 @@
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
 
-  :custom ((gptel-use-curl nil)
-           (gptel-model "gpt-4-turbo"))
+  :custom ((gptel-use-curl nil))
   :init
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
@@ -138,14 +137,8 @@
                   "sonar-small-online"
                   "sonar-medium-online"))))
 
-  (setq gptel-backend llms-gptel-groq-backend)
-  (add-hook 'gptel-post-response-hook
-            (lambda (_start end)
-              (when end (goto-char end))
-              (end-of-line)
-              (search-forward "###")
-              (forward-char)
-              (visual-line-mode +1))))
+  (setq gptel-backend llms-gptel-groq-backend
+        gptel-model "llama3-70b-8192"))
 
 
 (use-package openai
@@ -167,7 +160,7 @@
   :custom
   (chatgpt-shell-openai-key openai-secret-key)
   (chatgpt-shell-system-prompt 2)
-  (chatgpt-shell-model-version "gpt-4-turbo")
+  (chatgpt-shell-model-version "gpt-4o")
 
   :init
   ;; Used by `chatgpt-shell-load-awesome-prompts'
@@ -270,7 +263,7 @@ else. Your output will be used in a program so make sure that you start your res
           (make-progress-reporter "Communicating to OpenAI API..." 0  1))
 
          (gptel-backend llms-gptel-groq-backend)
-         (gptel-model "mixtral-8x7b-32768")
+         (gptel-model "llama3-70b-8192")
          (gptel-use-curl t)
          (gptel-response-callback
           (lambda (response info)
@@ -345,7 +338,7 @@ corrections or suggestions for improve the text."))
                        (setq result (format "%s %s\n" result item))))
                    (llms-process-result result buffer notify))
                  :max-tokens 3000
-                 ;; gpt-4o is cheaper than gpt-4-turbo.
+                 ;; gpt-4o is cheaper than gpt-4o.
                  :model "gpt-4o")))
 
 
@@ -409,7 +402,7 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
                        (setq result (format "%s %s\n" result item))))
                    (llms-process-result result buffer notify))
                  :max-tokens 3000
-                 :model "gpt-4-turbo")))
+                 :model "gpt-4o")))
 ;;;###autload
 (defun tesseract-groq-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
