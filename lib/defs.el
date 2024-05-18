@@ -29,6 +29,7 @@
 (require 'seq)
 (require 's)
 (require 'cl-lib)
+(require 'treesit)
 
 (defvar emacs-assets-directory
   (expand-file-name "~/miscellany/assets/")

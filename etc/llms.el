@@ -182,6 +182,9 @@
           ("t s" . chatgpt-shell-send-and-review-region)
           ("t R" . chatgpt-shell-restore-session-from-transcript) ))
 
+(use-package dall-e-shell
+  :ensure t
+  :custom (dall-e-shell-openai-key openai-secret-key))
 
 (use-package copilot
   :git "https://github.com/copilot-emacs/copilot.el.git"
@@ -220,7 +223,8 @@ else. Your output will be used in a program so make sure that you start your res
                       (mapcar (lambda (choice)
                                 (let-alist choice
                                   (let-alist .message
-                                    (concat " " .content))))
+                                    (string-remove-prefix prompt-text
+                                                          .content))))
                               choices))))
                  :base-url "https://api.groq.com/openai/v1"
                  :key (auth-source-pick-first-password :host "api.groq.com")
@@ -567,7 +571,6 @@ Concise Explanation about the above Word.")
 (defvar llms-complete-timer nil)
 (define-minor-mode llms-complete-minor-mode
   "Minor mode for completing text with LLMs."
-  :lighter "LLMS"
   :keymap
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c TAB") #'llms-complete)

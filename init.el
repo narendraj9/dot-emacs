@@ -1997,6 +1997,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package treesit
   :defer t
   :when (treesit-available-p)
+  :bind ( :map ctl-period-map
+          ("C-M-u" . --treesit-backward-up) )
   :doc
   "[2023-02-08 Wed 22:48] Tree-sitter support is now built into Emacs.
    The directory where shared libraries for language grammars are
@@ -2014,6 +2016,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               (js-mode     . js-ts-mode)
                               (elixir-mode . elixir-ts-mode)))
     (add-to-list 'major-mode-remap-alist mode-remap-entry))
+
+  (define-repeat-map ("C-M-u" . --treesit-backward-up))
 
   :config
   (dolist (grammar '((c "https://github.com/tree-sitter/tree-sitter-c")
@@ -2040,7 +2044,35 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (unless quiet
           (message "Tree-sitter grammar for %s already installed." language))
       (message "Installing tree-sitter grammar for %s" language)
-      (treesit-install-language-grammar language))))
+      (treesit-install-language-grammar language)))
+
+  (defvar --treesit-highlight-overlay nil)
+
+  ;; The following pattern where I add a function to a `{pre-post}-command-hook'
+  ;; for a execution exactly once is very common. I should probably abstract
+  ;; into something reusable.
+  (defun --treesit-remove-overlay-hook ()
+    (delete-overlay --treesit-highlight-overlay)
+    (remove-hook 'pre-command-hook #'--treesit-remove-overlay-hook))
+
+  (defun --treesit-backward-up ()
+    "Inspired by `paredit-backward-up'."
+    (interactive)
+    (letrec ((original-point (point))
+             (current-node (treesit-node-on (point) (point))))
+      (setq --treesit-highlight-overlay
+            (make-overlay (point) (point)))
+      (overlay-put --treesit-highlight-overlay 'face 'highlight)
+      (while (and current-node (= (point) original-point))
+        (setq current-node (treesit-node-parent current-node))
+        (when current-node
+          (goto-char (treesit-node-start current-node))
+          (move-overlay --treesit-highlight-overlay
+                        (treesit-node-start current-node)
+                        (treesit-node-end current-node))))
+      ;; Before executing the next command remove the overlay. Adding to
+      ;; `post-command-hook' => execution right after this function returns.
+      (add-hook 'pre-command-hook #'--treesit-remove-overlay-hook))))
 
 (use-package combobulate
   :git "https://github.com/mickeynp/combobulate.git"
