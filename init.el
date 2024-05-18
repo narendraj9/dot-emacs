@@ -2066,10 +2066,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (while (and current-node (= (point) original-point))
         (setq current-node (treesit-node-parent current-node))
         (when current-node
-          (goto-char (treesit-node-start current-node))
-          (move-overlay --treesit-highlight-overlay
-                        (treesit-node-start current-node)
-                        (treesit-node-end current-node))))
+          (let ((start (treesit-node-start current-node))
+                (end (treesit-node-end current-node)))
+            (goto-char start)
+            (push-mark end)
+            (move-overlay --treesit-highlight-overlay start end))))
       ;; Before executing the next command remove the overlay. Adding to
       ;; `post-command-hook' => execution right after this function returns.
       (add-hook 'pre-command-hook #'--treesit-remove-overlay-hook))))
