@@ -26,9 +26,11 @@
 
 ;;; Avoid garbage collection during Emacs startup and garbage collect right
 ;;; after loading Emacs configuration.
-(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-threshold most-positive-fixnum
+      garbage-collection-messages t)
 (add-hook 'after-init-hook
           (lambda ()
+            (setq garbage-collection-messages nil)
             (garbage-collect)
             (setq gc-cons-threshold (* 256 1024 1024))))
 
