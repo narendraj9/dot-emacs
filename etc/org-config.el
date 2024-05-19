@@ -382,23 +382,7 @@ Otherwise, limit to only `org-mode' files."
                 (advice-add org-move-fn
                             :after
                             (lambda ()
-                              (pulse-momentary-highlight-one-line (point-at-bol)))))
-
-              (bind-keys :map org-agenda-mode-map
-                         ("T"       . org-agenda-toggle-toggle-tags-column)
-                         ("a"       . org-agenda-redo-with-days-to-deadline)
-                         ("g"       . org-agenda-redo)
-                         ("r"       . org-agenda-redo-all)
-                         ("M-."     . org-agenda-goto-today*)
-                         ("C-o"     . org-agenda-list)
-                         ("C-S-o"   . custom-agenda-view)
-                         ("x"       . org-agenda-quit)
-                         ("C-c C-r" . org-agenda-refile)
-                         ("V" . org-review-captures)
-                         ("C-c C-n" . take-notes)
-                         ("C-c C-f" . org-agenda-find-file)
-                         ("C-c C-s" . org-schedule-and-todo)
-                         ("C-c C-d" . org-deadline-and-todo))))
+                              (pulse-momentary-highlight-one-line (point-at-bol)))))))
 
   (add-hook 'org-agenda-finalize-hook #'org-agenda-delete-empty-blocks)
   (add-hook 'org-agenda-after-show-hook #'after-org-agenda-selection-move-to-heading)

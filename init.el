@@ -2676,9 +2676,25 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq timeclock-file
         (expand-file-name "timelog" emacs-assets-directory)))
 
-(use-package org :defer t)
+(use-package org-agenda
+  :defer t
+  :bind ( :map org-agenda-mode-map
+          ("T"       . org-agenda-toggle-toggle-tags-column)
+          ("a"       . org-agenda-redo-with-days-to-deadline)
+          ("g"       . org-agenda-redo)
+          ("r"       . org-agenda-redo-all)
+          ("M-."     . org-agenda-goto-today*)
+          ("C-o"     . org-agenda-list)
+          ("C-S-o"   . custom-agenda-view)
+          ("x"       . org-agenda-quit)
+          ("C-c C-r" . org-agenda-refile)
+          ("V" . org-review-captures)
+          ("C-c C-n" . take-notes)
+          ("C-c C-f" . org-agenda-find-file)
+          ("C-c C-s" . org-schedule-and-todo)
+          ("C-c C-d" . org-deadline-and-todo) ))
+
 (use-package org-config
-  :after org
   :load-path "etc/"
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
@@ -3639,6 +3655,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; GO MODE
 ;; ──────────────────────────────────────────────────────────────────
 (use-package go-mode
+  :defer t
   :ensure t
   :config
   (use-package go-guru :ensure t)
