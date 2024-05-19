@@ -64,6 +64,8 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
+(setq use-package-compute-statistics t)
+
 (use-package use-package-ensure-system-package)
 (use-package diminish :ensure t :demand t)
 (use-package bind-key :ensure t)
@@ -196,8 +198,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setd no-littering-etc-directory "etc/"
         no-littering-var-directory "var/"))
 
-(use-package "startup"
-  :init
+(progn
+  ;; I just want to group these somehow and I don't want to use a fake
+  ;; use-package package name because it messes up with `use-package-report'.
+
   (setq inhibit-splash-screen t)
 
   ;; ----------------------------------------
@@ -665,6 +669,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                  (window-width . 0.5))))
 
 (use-package eww
+  :defer t
   :custom ((eww-auto-rename-buffer 'title)
            (eww-browse-url-new-window-is-tab nil))
   :config
@@ -933,9 +938,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                    (format "%s: %s" (car command-freq) (cdr command-freq)))
                                  (sort items (lambda (a b) (> (cdr a) (cdr b))))
                                  "\n"))))
+
   ;; ----------------------------------------------------------------------------
 
   (setq suggest-key-bindings t)
+
+  (setq-default indent-tabs-mode nil)
 
   (setq async-shell-command-buffer 'new-buffer
         set-mark-command-repeat-pop t
@@ -2174,10 +2182,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :ensure t)
 
-(use-package "indent"
-  :init
-  (setq-default indent-tabs-mode nil
-                tab-always-indent 'complete))
+(progn
+  ;; indent.el doesn't have a `(provide 'ident)' at the end.
+  (load "indent")
+  (setq-default tab-always-indent 'complete))
 
 (use-package xref
   :doc "Find definitions like the coolest kid."
@@ -2340,9 +2348,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                   (delete-window))))))))
 
 (use-package eshell
-  :bind ( :map ctl-quote-map
-          ("C-p" . eshell-toggle) )
-
+  :bind ( :map ctl-quote-map ("C-p" . eshell-toggle) )
   :preface
   (defun eshell-toggle (arg)
     (interactive "P")
@@ -2360,7 +2366,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (when text-in-region
           (insert text-in-region)))))
 
-  :init
+  :config
+  (require 'em-hist)
   (setq eshell-modules-list
         '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
            eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
@@ -2390,7 +2397,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (pixel-scroll-mode -1)
               (pixel-scroll-precision-mode -1)))
 
-  :config
   (add-to-list 'eshell-expand-input-functions
                #'eshell-expand-history-references)
 
@@ -2409,9 +2415,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :diminish eat-eshell-mode
   :custom ( eat-kill-buffer-on-exit t
             eshell-visual-commands (list) )
-  :init
-  (eat-eshell-mode +1)
-  (eat-eshell-visual-command-mode +1)
 
   :preface
   (defun --eat-toggle ()
@@ -2673,7 +2676,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq timeclock-file
         (expand-file-name "timelog" emacs-assets-directory)))
 
-(use-package org :demand t)
+(use-package org :defer t)
 (use-package org-config
   :after org
   :load-path "etc/"
@@ -3336,11 +3339,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :ensure t
   :hook (racket-mode . geiser-mode)
-  :init
+  :config
   (use-package geiser-racket :ensure t)
   (use-package geiser-mit    :ensure t)
-
-  :config
   (advice-add 'run-geiser
               :after
               (lambda (&rest _args)
@@ -3373,8 +3374,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t)
 
 
-(use-package julia-mode :ensure t)
-(use-package julia-snail :ensure t)
+(use-package julia-mode  :defer t :ensure t)
+(use-package julia-snail :defer t :ensure t)
 
 ;;; [WO]MAN-MODE
 ;;  ─────────────────────────────────────────────────────────────────
@@ -3452,7 +3453,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          (js2-mode  . skewer-mode)))
 
 (use-package js2-mode        :defer t :ensure t)
-(use-package typescript-mode :ensure t)
+(use-package typescript-mode :defer t :ensure t)
 (use-package coffee-mode     :defer t :ensure t)
 (use-package elm-mode        :defer t :ensure t)
 
@@ -4271,13 +4272,6 @@ buffer."
   (define-key proced-mode-map
               [remap proced-toggle-marks] #'proced-toggle-tree))
 
-(use-package forecast
-  :load-path "packages/lisp"
-  :bind (:map ctl-quote-map
-              ("c w" . forecast))
-  :config
-  (add-hook 'forecast-mode-hook (lambda () (text-scale-decrease 1))))
-
 (use-package gif-screencast
   :defer t
   :doc "A better alternative to my `start-recording-window' command."
@@ -4286,7 +4280,7 @@ buffer."
 (use-package keycast :disabled t :ensure t :defer t)
 
 (use-package llms
-  :defer 10
+  :defer t
   :bind ( :map ctl-quote-map
           (("t TAB" . openai-complete-text)
            ("t a"   . gptel-ask-quickly)
