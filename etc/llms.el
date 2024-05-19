@@ -145,6 +145,7 @@
 (use-package openai
   :vc ( :url "https://github.com/emacs-openai/openai"
         :rev :newest )
+  :defer t
   :init
   (use-package tblui :ensure t)
   ;; The same variable sets up the user role.
@@ -157,7 +158,6 @@
   (require 'openai-image))
 
 (use-package chatgpt-shell
-  :demand t
   :ensure t
   :custom
   (chatgpt-shell-openai-key openai-secret-key)
@@ -169,35 +169,20 @@
   (use-package pcsv :ensure t)
 
   :config
-  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t)
-
-  :bind ( :map ctl-quote-map
-          ("t C" . chatgpt-shell)
-          ("t u" . chatgpt-shell-generate-unit-test)
-          ("t e" . chatgpt-shell-explain-code)
-          ("t i" . chatgpt-shell-interrupt)
-          ("t p" . chatgpt-shell-proofread-region)
-          ("t S" . chatgpt-shell-send-region)
-          ("t d" . chatgpt-shell-describe-code)
-          ("t r" . chatgpt-shell-refactor-code)
-          ("t g" . chatgpt-shell-write-git-commit)
-          ("t s" . chatgpt-shell-send-and-review-region)
-          ("t R" . chatgpt-shell-restore-session-from-transcript) ))
+  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t))
 
 (use-package dall-e-shell
   :ensure t
+  :defer t
   :custom (dall-e-shell-openai-key openai-secret-key))
 
 (use-package copilot
+  :defer t
   :vc ( :url "https://github.com/copilot-emacs/copilot.el.git"
         :rev :newest)
-  :demand t
-  :bind ( :map copilot-completion-map
-          ("C-c C-c" . copilot-accept-completion) )
-
+  :bind ( :map copilot-completion-map ("C-c C-c" . copilot-accept-completion) )
   :init
   (use-package editorconfig :ensure t)
-
   :custom ( (copilot-indent-offset-warning-disable t)
             (copilot-max-char -1) ))
 

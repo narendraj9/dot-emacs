@@ -4302,17 +4302,33 @@ buffer."
 (use-package keycast :disabled t :ensure t :defer t)
 
 (use-package llms
-  :defer t
-  :bind ( :map ctl-quote-map
-          (("t TAB" . openai-complete-text)
-           ("t a"   . gptel-ask-quickly)
-           ("t c"   . gptel)
-           ("t m"   . gptel-menu)
-           ("t l"   . llms-complete)
-           ("t p"   . gptel-quick-proofreader)
-           ("t t"   . copilot-mode)
-           ("t j"   . llms-switch-image-interpret-function)) )
   :load-path "etc/"
+  :init
+  ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
+  ;; following features are loaded.
+  (dolist (feature (list 'copilot 'chatgpt-shell 'gptel 'openai))
+    (eval-after-load feature '(require 'llms)))
+
+  :bind ( :map ctl-quote-map
+          ("t C"   . chatgpt-shell)
+          ("t S"   . chatgpt-shell-send-region)
+          ("t TAB" . openai-complete-text)
+          ("t a"   . gptel-ask-quickly)
+          ("t c"   . gptel)
+          ("t d"   . chatgpt-shell-describe-code)
+          ("t e"   . chatgpt-shell-explain-code)
+          ("t g"   . chatgpt-shell-write-git-commit)
+          ("t i"   . chatgpt-shell-interrupt)
+          ("t j"   . llms-switch-image-interpret-function)
+          ("t l"   . llms-complete)
+          ("t m"   . gptel-menu)
+          ("t p"   . chatgpt-shell-proofread-region)
+          ("t p"   . gptel-quick-proofreader)
+          ("t r"   . chatgpt-shell-refactor-code)
+          ("t s"   . chatgpt-shell-send-and-review-region)
+          ("t t"   . copilot-mode)
+          ("t u"   . chatgpt-shell-generate-unit-test))
+
   :config
   (add-to-list 'display-buffer-alist
                '("\\*chatgpt\\*" display-buffer-in-direction
