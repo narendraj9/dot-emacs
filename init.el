@@ -525,6 +525,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (add-hook 'restclient-response-received-hook (lambda () (message "Done!"))))
 
+(use-package verb
+  :ensure t
+  :after org
+  :config
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (define-key org-mode-map
+                          (kbd "C-c v")
+                          verb-command-map))))
+
 (use-package prodigy
   :defer t
   :bind ( :map ctl-quote-map ("s p" . prodigy) )

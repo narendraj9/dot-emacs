@@ -859,6 +859,5 @@ Otherwise, limit to only `org-mode' files."
 
 (use-package org-protocol :demand t)
 
-
 (provide 'org-config)
 ;;; org-config.el ends here
