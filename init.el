@@ -24,20 +24,13 @@
 
 ;;; Code:
 
-;;; The Epoch
-
-;;; This shouldn't be required in the (hopefully near) future.
-(setq byte-compile-warnings '(cl-functions))
-
-(defconst emacs-start-time (current-time))
-
-;;; Avoid garbage collection during Emacs startup. Garbage collection when
-;;; Emacs loses focus.
+;;; Avoid garbage collection during Emacs startup and garbage collect right
+;;; after loading Emacs configuration.
 (setq gc-cons-threshold most-positive-fixnum)
 (add-hook 'after-init-hook
           (lambda ()
             (garbage-collect)
-            (setq gc-cons-threshold (* 128 1024 1024))))
+            (setq gc-cons-threshold (* 256 1024 1024))))
 
 ;; Try to make `.emacs.d` relocatable
 (setq user-emacs-directory
