@@ -12,4 +12,9 @@
       ;; upgraded.
       package-quickstart nil
       package-quickstart-file (expand-file-name "var/package-quickstart.el"
-                                                user-emacs-directory))
+                                                user-emacs-directory)
+
+      ;; Enable verbose logging to debug issues
+      use-package-verbose nil)
+
+

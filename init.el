@@ -70,7 +70,6 @@
 
 (eval-and-compile
   (add-to-list 'use-package-keywords :doc t)
-  (add-to-list 'use-package-keywords :git nil)
 
   (defun use-package-handler/:doc (name-symbol _keyword _docstring rest state)
     "An identity handler for :doc.
@@ -86,56 +85,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (let ((body (use-package-process-keywords name-symbol rest state)))
       body)))
 
-(defun use-package-normalize/:git (name keyword args)
-  ;; No error handling yet.
-  (car args))
-
-(defun use-package-handler/:git (name-symbol _keyword git-url rest state)
-  (let* ((body (use-package-process-keywords name-symbol rest state))
-         (package-directory (file-name-base git-url))
-         (package-path (expand-file-name (format "packages/git/%s" package-directory)
-                                         user-emacs-directory)))
-    (use-package-concat
-     `((eval-and-compile (add-to-list 'load-path ,package-path))
-       (when (or (not (file-exists-p ,package-path))
-                 (directory-empty-p ,package-path))
-         (message "Cloning %s" ,git-url)
-         (shell-command ,(format "git clone %s %s"
-                                 (shell-quote-argument git-url)
-                                 (shell-quote-argument package-path)))))
-     body)))
-
-
-(defun use-package-update-git-repos ()
-  (interactive)
-  (let ((update-report "")
-        (processes (list)))
-    (dolist (file-path (directory-files (expand-file-name "packages/git" user-emacs-directory)
-                                        t
-                                        "^[^\.]"))
-      (when (file-directory-p file-path)
-        (let ((default-directory file-path)
-              (update-buffer (get-buffer-create " *use-package git pull*")))
-          (with-current-buffer update-buffer
-            (insert (format ">>> Starting git pull for: %s\n\n" file-path)))
-          (push (make-process :name "git-pull"
-                              :buffer update-buffer
-                              :command (list "git" "pull")
-                              :sentinel
-                              (lambda (p _status)
-                                (setq update-report (format "%s Update [%s]: %s\n"
-                                                            update-report
-                                                            (directory-file-name file-path)
-                                                            (if (zerop (process-exit-status p))
-                                                                (propertize "✓" 'face 'success)
-                                                              (propertize "❌" 'face 'error))))))
-                processes))))
-    (while (seq-filter (lambda (p) (eq 'run (process-status p)))
-                       processes)
-      (message "Waiting for %s to finish..." this-command)
-      (sit-for 1))
-    (message "%s finished." this-command)
-    (message-box "%s" update-report)))
 
 ;;; Emacs Lisp Compilation
 
@@ -1990,7 +1939,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 
 (use-package dape
-  :git "https://github.com/svaante/dape.git"
+  :vc ( :url "https://github.com/svaante/dape.git"
+        :rev :neweset)
   :commands dape
   :defer t)
 
@@ -2076,11 +2026,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (add-hook 'pre-command-hook #'--treesit-remove-overlay-hook))))
 
 (use-package combobulate
-  :git "https://github.com/mickeynp/combobulate.git"
+  :vc ( :url "https://github.com/mickeynp/combobulate.git"
+        :rev :newest )
   :disabled t)
 
 (use-package ts-movement
-  :git "https://github.com/haritkapadia/ts-movement.git"
+  :vc ( :url "https://github.com/haritkapadia/ts-movement.git"
+        :rev :newest )
   :disabled t)
 
 
@@ -2326,7 +2278,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         highlight-indent-guides-auto-character-face-perc 3))
 
 (use-package indent-bars-ts
-  :git "https://github.com/jdtsmith/indent-bars"
+  :vc ( :url "https://github.com/jdtsmith/indent-bars"
+        :rev :newest )
   :custom
   (indent-bars-treesit-support t)
   (indent-bars-no-descend-string t)
@@ -2775,7 +2728,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package org-timeblock
   :disabled t
   :after org
-  :git "https://github.com/ichernyshovvv/org-timeblock"
+  :vc ( :url "https://github.com/ichernyshovvv/org-timeblock"
+        :rev :newest )
   :init
   (use-package org-ql :ensure t :defer t))
 
@@ -4330,7 +4284,6 @@ buffer."
   :load-path "packages/lisp")
 
 (use-package keycast :disabled t :ensure t :defer t)
-(use-package exercism :disabled t :ensure t :defer t)
 
 (use-package llms
   :defer 10

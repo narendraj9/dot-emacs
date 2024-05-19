@@ -94,7 +94,8 @@
 
 
 (use-package gptel
-  :git "https://github.com/karthink/gptel"
+  :vc ( :url "https://github.com/karthink/gptel"
+        :rev :newest )
   :demand t
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
@@ -142,7 +143,8 @@
 
 
 (use-package openai
-  :git "https://github.com/emacs-openai/openai"
+  :vc ( :url "https://github.com/emacs-openai/openai"
+        :rev :newest )
   :init
   (use-package tblui :ensure t)
   ;; The same variable sets up the user role.
@@ -187,7 +189,8 @@
   :custom (dall-e-shell-openai-key openai-secret-key))
 
 (use-package copilot
-  :git "https://github.com/copilot-emacs/copilot.el.git"
+  :vc ( :url "https://github.com/copilot-emacs/copilot.el.git"
+        :rev :newest)
   :demand t
   :bind ( :map copilot-completion-map
           ("C-c C-c" . copilot-accept-completion) )
@@ -200,7 +203,8 @@
 
 
 (use-package cody
-  :git "https://github.com/sourcegraph/emacs-cody.git"
+  :vc ( :url "https://github.com/sourcegraph/emacs-cody.git"
+        :rev :newest )
   :disabled t
   :init
   (use-package uuidgen :ensure t))
