@@ -71,14 +71,13 @@
                                  (propertize (number-to-string choice-count)
                                              'face 'highlight))))))
 
-    (define-key completion-keymap (kbd "TAB") show-next-choice)
-    (define-key completion-keymap (kbd "RET") select-current-choice)
+    (define-key completion-keymap (kbd "C-n") show-next-choice)
+    (define-key completion-keymap (kbd "TAB") select-current-choice)
     (define-key completion-keymap (kbd "!") replace-with-choice)
     (set-transient-map completion-keymap t (lambda ()
                                              (delete-overlay completion-overlay)))
     (unless (zerop choice-count)
       (funcall show-next-choice))))
-
 
 (defun llms-prompt-region ()
   (if (region-active-p)
@@ -86,12 +85,57 @@
     (save-excursion
       (cons (window-start) (point)))))
 
-
 (defun llms-prompt-text ()
   (let ((prompt-region (llms-prompt-region)))
     (buffer-substring-no-properties (car prompt-region)
                                     (cdr prompt-region))))
+;;;###autoload
+(defun llms-complete (arg)
+  (interactive "P")
+  (let ((prompt-text (llms-prompt-text))
+        (instruction (if arg (read-string "Instruction: ")
+                       (concat "Complete the sentence and reply with just the sentence and nothing
+else. Your output will be used in a program so make sure that you start your response with the promt text."))))
+    (openai-chat `[(("role"    . "system")
+                    ("content" . ,instruction))
+                   (("role"    . "user")
+                    ("content" . ,prompt-text))]
+                 (lambda (data)
+                   (let ((choices (let-alist data .choices)))
+                     (llms--display-choices-as-overlay
+                      (mapcar (lambda (choice)
+                                (let-alist choice
+                                  (let-alist .message
+                                    (string-remove-prefix prompt-text
+                                                          .content))))
+                              choices))))
+                 :base-url "https://api.groq.com/openai/v1"
+                 :key (auth-source-pick-first-password :host "api.groq.com")
+                 :model "llama3-70b-8192"
+                 :temperature openai-chat-temperature
+                 :user (unless (string= openai-user "user") openai-user))))
 
+(defvar llms-complete-timer nil)
+(define-minor-mode llms-complete-minor-mode
+  "Minor mode for completing text with LLMs."
+  :keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c TAB") #'llms-complete)
+    map)
+
+  (let ((llms-complete-timer-fn
+         (lambda ()
+           (when (and llms-complete-minor-mode
+                      (member last-command
+                              (list 'self-insert-command
+                                    'org-self-insert-command)))
+             (llms-complete nil)))))
+    (if llms-complete-minor-mode
+        (progn (setq llms-complete-timer
+                     (run-with-idle-timer 1 t llms-complete-timer-fn))
+               (message "LLMS minor mode enabled."))
+      (cancel-timer llms-complete-timer)
+      (message "LLMS minor mode disabled."))))
 
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
@@ -141,7 +185,6 @@
   (setq gptel-backend llms-gptel-groq-backend
         gptel-model "llama3-70b-8192"))
 
-
 (use-package openai
   :vc ( :url "https://github.com/emacs-openai/openai"
         :rev :newest )
@@ -186,41 +229,12 @@
   :custom ( (copilot-indent-offset-warning-disable t)
             (copilot-max-char -1) ))
 
-
 (use-package cody
   :vc ( :url "https://github.com/sourcegraph/emacs-cody.git"
         :rev :newest )
   :disabled t
   :init
   (use-package uuidgen :ensure t))
-
-
-;;;###autoload
-(defun llms-complete (arg)
-  (interactive "P")
-  (let ((prompt-text (llms-prompt-text))
-        (instruction (if arg (read-string "Instruction: ")
-                       (concat "Complete the sentence and reply with just the sentence and nothing
-else. Your output will be used in a program so make sure that you start your response with the promt text."))))
-    (openai-chat `[(("role"    . "system")
-                    ("content" . ,instruction))
-                   (("role"    . "user")
-                    ("content" . ,prompt-text))]
-                 (lambda (data)
-                   (let ((choices (let-alist data .choices)))
-                     (llms--display-choices-as-overlay
-                      (mapcar (lambda (choice)
-                                (let-alist choice
-                                  (let-alist .message
-                                    (string-remove-prefix prompt-text
-                                                          .content))))
-                              choices))))
-                 :base-url "https://api.groq.com/openai/v1"
-                 :key (auth-source-pick-first-password :host "api.groq.com")
-                 :model "llama3-70b-8192"
-                 :temperature openai-chat-temperature
-                 :user (unless (string= openai-user "user") openai-user))))
-
 
 ;;;###autoload
 (defun openai-insert-image (prompt)
@@ -239,63 +253,8 @@ else. Your output will be used in a program so make sure that you start your res
                     :n 1
                     :response-format "url"))))
 
-
-(defvar gptel-quick-proofreader--history nil)
-
-
-;;;###autoload
-(defun gptel-ask-quickly (system-prompt)
-  (interactive "sInstruction: ")
-  (let* ((prompt
-          (encode-coding-string (if (region-active-p)
-                                    (buffer-substring-no-properties (region-beginning) (region-end))
-                                  (read-string "Use markdown for the response and be very very concise. \nContext: "
-                                               nil
-                                               gptel-quick-proofreader--history))
-                                'utf-8))
-         (progress-reporter
-          (make-progress-reporter "Communicating to OpenAI API..." 0  1))
-
-         (gptel-backend llms-gptel-groq-backend)
-         (gptel-model "llama3-70b-8192")
-         (gptel-use-curl t)
-         (gptel-response-callback
-          (lambda (response info)
-            (progress-reporter-done progress-reporter)
-            (if (not response)
-                (message "gptel-quick failed with message: %s" (plist-get info :status))
-              (with-current-buffer (get-buffer-create "*gptel-quick*")
-                (let ((inhibit-read-only t))
-                  (erase-buffer)
-                  (insert response)
-                  (gfm-view-mode)
-                  (visual-line-mode)
-                  (font-lock-fontify-buffer)
-                  (display-buffer (current-buffer)
-                                  `((display-buffer-in-side-window)
-                                    (side . right)
-                                    (window-width . 60)))))))))
-
-    (when (string= prompt "") (user-error "A prompt is required."))
-    (gptel-request prompt
-      :system system-prompt
-      :callback gptel-response-callback)))
-
-
-;;;###autoload
-(defun gptel-quick-proofreader ()
-  (interactive)
-  (gptel-ask-quickly "I want you act as a proofreader. Please format your replies as
-text in markdown format and for readability on an 80-columns
-display. I will provide you texts and I would like you to review
-them for any spelling, grammar, or punctuation errors. Once you
-have finished reviewing the text, provide me with any necessary
-corrections or suggestions for improve the text."))
-
-
 ;;; Useful for having a conversation about an image with a model.
 (defvar llms--interpret-image-history nil)
-
 (defvar llms-interpret-image-function #'openai-interpret-image)
 
 (defun llms-process-result (result buffer notify)
@@ -432,7 +391,6 @@ tesseract. Include a 4 sentence summary at the beginning of the output please.")
                  :key (auth-source-pick-first-password :host "api.groq.com")
                  :model "llama3-70b-8192")))
 
-
 (defvar llms-screenshot-command "gnome-screenshot")
 
 ;;;###autoload
@@ -497,55 +455,6 @@ Concise Explanation about the above Word.")
                 t))
     llm-buffer))
 
-;;; Advice to HACK gptel to include an image in the beginning.
-;;; -----------------------------------------------------------
-(defun gptel--include-last-image-in-conversation (result)
-  (let ((gptel-formatted-history
-         (mapcar (-lambda ((&alist "role" role "content" content))
-                   (-let (([(&alist "source" source "image_url" image-url)] content))
-                     (cond
-                      ((string= (gptel-backend-name gptel-backend) "Anthropic")
-                       `( :role ,role
-                          :content [( :type  "image"
-                                      :source  ( :type  "base64"
-                                                 :media_type  "image/jpeg"
-                                                 :data  ,(assoc-default "data" source)))]))
-                      ((string= (gptel-backend-name gptel-backend) "ChatGPT")
-                       `( :role ,role
-                          :content [( :type  "image_url"
-                                      :image_url  ( :url  ,(assoc-default "url" image-url)
-                                                    :details "low" ))])))))
-                 ;; Only include the latest image.
-                 (take 1 llms--interpret-image-history))))
-    (seq-concatenate 'list
-                     gptel-formatted-history
-                     ;; Yet another hack.
-                     `(( :role "assistant"
-                         :content "I am taking a minute to articulate my thoughts."))
-                     result)))
-
-(defun llms-enable-image-in-gptel-conversation ()
-  (interactive)
-  (advice-add 'gptel--parse-buffer :filter-return #'gptel--include-last-image-in-conversation))
-
-(defun llms-disable-image-in-gptel-conversation ()
-  (interactive)
-  (advice-remove 'gptel--parse-buffer #'gptel--include-last-image-in-conversation))
-
-;;; End of HACK
-
-(defun llms-view-inline-image ()
-  "Replaces base64 data url at point with a rendered image. "
-  (interactive)
-  (beginning-of-line)
-  (let ((temp-file (make-temp-file "llm-image-" nil ".jpg"))
-        (data (-> (search-forward "data:image/jpeg;base64," (line-end-position))
-                  (buffer-substring-no-properties (1- (search-forward ")" (line-end-position)))))))
-    (with-temp-file temp-file
-      (insert data)
-      (base64-decode-region (point-min) (point-max)))
-    (insert-image (create-image temp-file 'imagemagick nil :width (frame-pixel-width)))))
-
 ;;;###autoload
 (defun llms-switch-image-interpret-function ()
   (interactive)
@@ -555,30 +464,6 @@ Concise Explanation about the above Word.")
                                    tesseract-openai-interpret-image
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
-
-
-(defvar llms-complete-timer nil)
-(define-minor-mode llms-complete-minor-mode
-  "Minor mode for completing text with LLMs."
-  :keymap
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c TAB") #'llms-complete)
-    map)
-
-  (let ((llms-complete-timer-fn
-         (lambda ()
-           (when (and llms-complete-minor-mode
-                      (member last-command
-                              (list 'self-insert-command
-                                    'org-self-insert-command)))
-             (llms-complete nil)))))
-    (if llms-complete-minor-mode
-        (progn (setq llms-complete-timer
-                     (run-with-idle-timer 1 t llms-complete-timer-fn))
-               (message "LLMS minor mode enabled."))
-      (cancel-timer llms-complete-timer)
-      (message "LLMS minor mode disabled."))))
-
 
 
 (provide 'llms)

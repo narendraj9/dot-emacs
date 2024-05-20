@@ -16,5 +16,3 @@
 
       ;; Enable verbose logging to debug issues
       use-package-verbose nil)
-
-

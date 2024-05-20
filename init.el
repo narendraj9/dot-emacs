@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(setq byte-compile-warnings '(not cl-functions))
+
 ;;; Avoid garbage collection during Emacs startup and garbage collect right
 ;;; after loading Emacs configuration.
 (setq gc-cons-threshold most-positive-fixnum
@@ -597,39 +599,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    calendar-month-header
    '(propertize (format "%s %d/%d" (calendar-month-name month) month year)
                 'font-lock-face 'calendar-month-header)))
-
-(use-package calfw
-  :ensure t
-  :after org
-  :config
-  (setq cfw:render-line-breaker #'cfw:render-line-breaker-wordwrap)
-  (setq cfw:fchar-junction ?╬
-        cfw:fchar-vertical-line ?║
-        cfw:fchar-horizontal-line ?═
-        cfw:fchar-left-junction ?╠
-        cfw:fchar-right-junction ?╣
-        cfw:fchar-top-junction ?╦
-        cfw:fchar-top-left-corner ?╔
-        cfw:fchar-top-right-corner ?╗))
-
-(use-package calfw-org
-  :ensure t
-  :bind ( :map org-agenda-mode-map
-          ("C-c d" . cfw:open-agenda-on-calendar) )
-  :after org
-  :preface
-  (defun cfw:open-agenda-on-calendar ()
-    ;; Depends on internal details and might stop working some day.
-    (interactive)
-    (select-frame (make-frame '((name . "Agenda"))))
-    (set-face-attribute 'default (selected-frame) :height 80)
-    (cfw:open-org-calendar)
-    (run-with-timer 1 nil (lambda () (cfw:refresh-calendar-buffer nil)))
-    (with-current-buffer (get-buffer "*cfw-calendar*")
-      (define-key (current-local-map) (kbd "q")
-                  (lambda () (interactive)
-                    (kill-buffer)
-                    (delete-frame))))))
 
 (use-package holidays
   :defer t
@@ -1258,10 +1227,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package saveplace
   :init
-  (save-place-mode +1)
-  :config
   (setq save-place-file
-        (locate-user-emacs-file "var/saved-places")))
+        (locate-user-emacs-file "var/saved-places"))
+  (save-place-mode +1))
 
 ;;; Buffers, Windows and Frame
 ;; ――――――――――――――――――――――――――――――――――――――――
@@ -1834,6 +1802,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("+" . set-selective-display)
          ("s" . chart-numbers-on-line)
          ("z" . calc-store-numbers-on-line))
+
+  :init
+  (use-package async :ensure t)
+
   :config
   (setq hledger-jfile
         (expand-file-name "~/miscellany/personal/finance/accounting.journal"))
@@ -2435,34 +2407,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand t
   :custom
   (yequake-frames
-   '(("org-capture"
-      (buffer-fns . (yequake-org-capture))
-      (width . 0.75)
-      (height . 0.5)
-      (alpha . 1.0)
-      (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (sticky . t))))
-     ("shell"
-      (buffer-fns . (eat))
-      (width . 0.75)
-      (height . 0.1)
-      (alpha . 1.0)
-      (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (sticky . t))))
-
-     ("ChatGPT"
-      (buffer-fns . (chatgpt-shell*))
-      (width . 1.0)
-      (height . 0.40)
-      (alpha . 1.0)
-      (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (visibility . t)
-                           (sticky . t))))
-
-     ("LLM"
+   '(("LLM"
       (buffer-fns . (llms-explain-image-with-context))
       (left . 1.0)
       (width . 0.30)
@@ -2471,13 +2416,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
                            (visibility . t)
-                           (sticky . t))))))
-
-  :preface
-  (defun chatgpt-shell* ()
-    (chatgpt-shell)
-    (delete-other-windows)
-    nil))
+                           (sticky . t)))))))
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
@@ -2809,6 +2748,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; ----------------------------------------------------------------------------
 
 (use-package burly
+  :disabled t
   :ensure t)
 
 (use-package desktop
@@ -2834,8 +2774,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   "Hyperbole provides similar functionality through
   hui-select.el but I have found `expand-region' to be more
   intuitive."
-  :bind (:map ctl-period-map
-              ("@" . er/expand-region)))
+  :bind (:map ctl-period-map ("@" . er/expand-region)))
 
 (use-package plantuml-mode
   :ensure t

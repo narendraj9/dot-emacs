@@ -655,6 +655,7 @@ Otherwise, limit to only `org-mode' files."
 
 (use-package ob
   :after org
+  :defer t
   :init
   (setq org-babel-python-command "ipython"
         org-confirm-babel-evaluate nil)
