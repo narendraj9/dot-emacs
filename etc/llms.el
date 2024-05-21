@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+(require 'pcase)
 (require 'request)
 (require 'json)
 (require 'auth-source)
@@ -155,6 +156,11 @@ else. Your output will be used in a program so make sure that you start your res
 
   :config
   (require 'gptel-anthropic)
+
+  (defvar llms-openai-groq-backed
+    (gptel-make-openai "OpenAI"
+      :key gptel-api-key
+      :models '("gpt-4o" "gpt-4-turbo")))
 
   ;; Register Groq as a backend with gptel.
   (defvar llms-gptel-groq-backend
@@ -464,6 +470,51 @@ Concise Explanation about the above Word.")
                                    tesseract-openai-interpret-image
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
+
+(defun llms-chat--name->gptel-backend (name)
+  (cond
+   ((string= name "groq")
+    (cons llms-gptel-groq-backend "llama3-70b-8192"))
+
+   ((string= name "openai")
+    (cons gptel--openai "gpt-4o"))
+
+   ((string= name "pplx")
+    (cons llms-gptel-preplexity-backend "sonar-medium-online"))))
+
+;;;autoload
+(defun llms-chat ()
+  "Talk to LLMs as if you are chatting to them,
+
+@openai: current world population is.. (one sentence)
+@openai:
+
+As of 2023, the estimated world population is approximately 8 billion.
+"
+  (interactive)
+  (save-excursion
+    (let* ((original-point (point))
+           (llm-name-regex "@\\([a-z]+\\)\\S+")
+           (llm-name (progn (re-search-backward llm-name-regex (window-start) t)
+                            (buffer-substring (match-beginning 1) (match-end 1))))
+           (gptel-params (llms-chat--name->gptel-backend llm-name))
+           (gptel-backend (car gptel-params))
+           (gptel-model (cdr gptel-params))
+           (prompt (buffer-substring (pos-bol) original-point)))
+      (goto-char original-point)
+      (unless (looking-back "^\\S+")
+        (insert "\n"))
+      (insert (format "@%s: " llm-name))
+      (gptel-request prompt
+        :position (point)
+        :stream t
+        :system "Follow these rules no matter what:
+1. Be factually correct. If you are not sure about something,
+don't say anything at all.
+2. Try to respond with text that is made to fit in 80 columns.
+3. Be concise.
+4. Answer in less than 8 sentences but make sure to provide a
+complete answer. Use mathematical equations if that helps."))))
 
 
 (provide 'llms)

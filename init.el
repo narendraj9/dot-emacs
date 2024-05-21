@@ -4249,6 +4249,7 @@ buffer."
     (eval-after-load feature '(require 'llms)))
 
   :bind ( :map ctl-quote-map
+          ("t RET" . llms-chat)
           ("t C"   . chatgpt-shell)
           ("t S"   . chatgpt-shell-send-region)
           ("t TAB" . openai-complete-text)
@@ -4280,6 +4281,7 @@ buffer."
                  (window . main)
                  (direction . right)
                  (window-width . 0.5))))
+
 
 (provide 'init)
 ;;; init.el ends here
