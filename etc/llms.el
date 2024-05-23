@@ -486,6 +486,21 @@ Concise Explanation about the above Word.")
     (user-error (format "Unknown LLM: %s" name)))))
 
 
+(defun make-progress-indicator (starting-point)
+  (let ((indicate-progress-p t)
+        (indicator-overlay (make-overlay starting-point (+ 3 starting-point))))
+    (make-thread (lambda ()
+                   (while indicate-progress-p
+                     (overlay-put indicator-overlay 'after-string ".") (sleep-for 0.1)
+                     (overlay-put indicator-overlay 'after-string "..") (sleep-for 0.1)
+                     (overlay-put indicator-overlay 'after-string "...") (sleep-for 0.1))))
+    (lambda ()
+      (setq indicate-progress-p nil)
+      (delete-overlay indicator-overlay))))
+
+(defun stop-progress-indicator (progress-indicator)
+  (funcall progress-indicator))
+
 ;;;autoload
 (defun llms-chat ()
   "Talk to LLMs as if you are chatting to them,
@@ -514,23 +529,25 @@ As of 2023, the estimated world population is approximately 8 billion.
       (unless (looking-back "^\\S+")
         (insert "\n"))
       (insert (format "@%s: " llm-name))
-      (gptel-request prompt
-        :position (point)
-        :callback
-        (lambda (response info)
-          (let ((position (marker-position (plist-get info :position)))
-                (buffer  (buffer-name (plist-get info :buffer))))
-            (with-current-buffer buffer
-              (goto-char position)
-              (insert response)
-              (goto-char original-point))))
-        :system "Follow these rules no matter what:
+      (let ((progress-indicator (make-progress-indicator (point))))
+        (gptel-request prompt
+          :position (point)
+          :callback
+          (lambda (response info)
+            (stop-progress-indicator progress-indicator)
+            (let ((position (marker-position (plist-get info :position)))
+                  (buffer  (buffer-name (plist-get info :buffer))))
+              (with-current-buffer buffer
+                (goto-char position)
+                (insert response)
+                (goto-char original-point))))
+          :system "Follow these rules no matter what:
 1. Be factually correct. If you are not sure about something,
 don't say anything at all.
 2. Try to respond with text that is made to fit in 80 columns.
 3. Be concise.
 4. Answer in less than 8 sentences but make sure to provide a
-complete answer. Use mathematical equations if that helps."))))
+complete answer. Use mathematical equations if that helps.")))))
 
 
 (provide 'llms)
