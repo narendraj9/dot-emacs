@@ -236,7 +236,27 @@ Otherwise, limit to only `org-mode' files."
 
   ;; Opening PDF files inside Emacs by default
   (setq org-file-apps
-        (assoc-delete-all "\\.pdf\\'" org-file-apps)))
+        (assoc-delete-all "\\.pdf\\'" org-file-apps))
+
+
+  (setq org-babel-load-languages
+        `((plantuml   . t)
+          (emacs-lisp . t)
+          (sqlite     . t)
+          (sql        . t)
+          (lisp       . t)
+          (python     . t)
+          (R          . t)
+          (ruby       . t)
+          (gnuplot    . t)
+          (clojure    . t)
+          (C          . t)
+          (shell      . t)
+          (awk        . t)
+          (elixir     . t)
+          (go         . t)
+          (haskell    . t)
+          (ditaa      . t))))
 
 
 (use-package org-agenda
@@ -674,27 +694,7 @@ Otherwise, limit to only `org-mode' files."
 
   (add-hook 'org-babel-after-execute-hook
             #'org-display-inline-images
-            'append)
-  :config
-  (org-babel-do-load-languages 'org-babel-load-languages
-                               `((plantuml   . t)
-                                 (emacs-lisp . t)
-                                 (sqlite     . t)
-                                 (sql        . t)
-                                 (lisp       . t)
-                                 (python     . t)
-                                 ;; (ipython    . ,(executable-find "jupyter"))
-                                 (R          . t)
-                                 (ruby       . t)
-                                 (gnuplot    . t)
-                                 (clojure    . t)
-                                 (C          . t)
-                                 (shell      . t)
-                                 (awk        . t)
-                                 (elixir     . t)
-                                 (go         . t)
-                                 (haskell    . t)
-                                 (ditaa      . t))))
+            'append))
 
 
 (use-package org-habit

@@ -480,7 +480,11 @@ Concise Explanation about the above Word.")
     (cons gptel--openai "gpt-4o"))
 
    ((string= name "pplx")
-    (cons llms-gptel-preplexity-backend "sonar-medium-online"))))
+    (cons llms-gptel-preplexity-backend "sonar-medium-online"))
+
+   (t
+    (user-error (format "Unknown LLM: %s" name)))))
+
 
 ;;;autoload
 (defun llms-chat ()
@@ -494,20 +498,32 @@ As of 2023, the estimated world population is approximately 8 billion.
   (interactive)
   (save-excursion
     (let* ((original-point (point))
-           (llm-name-regex "@\\([a-z]+\\)\\S+")
+           (llm-name-regex "@\\([a-z]+\\)\\(\\S+\\|$\\)")
            (llm-name (progn (re-search-backward llm-name-regex (window-start) t)
                             (buffer-substring (match-beginning 1) (match-end 1))))
            (gptel-params (llms-chat--name->gptel-backend llm-name))
            (gptel-backend (car gptel-params))
            (gptel-model (cdr gptel-params))
-           (prompt (buffer-substring (pos-bol) original-point)))
+           (prompt-start-position (if (region-active-p) (region-beginning)
+                                    (save-excursion (backward-paragraph) (point))))
+           (prompt-end-position (if (region-active-p) (region-end)
+                                  original-point))
+           (prompt (buffer-substring-no-properties prompt-start-position prompt-end-position)))
+      (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
       (goto-char original-point)
       (unless (looking-back "^\\S+")
         (insert "\n"))
       (insert (format "@%s: " llm-name))
       (gptel-request prompt
         :position (point)
-        :stream t
+        :callback
+        (lambda (response info)
+          (let ((position (marker-position (plist-get info :position)))
+                (buffer  (buffer-name (plist-get info :buffer))))
+            (with-current-buffer buffer
+              (goto-char position)
+              (insert response)
+              (goto-char original-point))))
         :system "Follow these rules no matter what:
 1. Be factually correct. If you are not sure about something,
 don't say anything at all.
