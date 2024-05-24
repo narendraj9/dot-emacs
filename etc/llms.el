@@ -25,9 +25,11 @@
 ;;; Code:
 
 (require 'pcase)
-(require 'request)
 (require 'json)
 (require 'auth-source)
+
+(use-package request :ensure t :demand t)
+(use-package spinner :ensure t :demand t)
 
 (defun image-file->base64-data (file-path)
   (with-temp-buffer
@@ -158,7 +160,6 @@ else. Your output will be used in a program so make sure that you start your res
   :config
   (require 'gptel-anthropic)
 
-  ;; Register Groq as a backend with gptel.
   (defvar llms-gptel-groq-backend
     (gptel-make-openai "Groq"
       :host "api.groq.com"
@@ -170,12 +171,10 @@ else. Your output will be used in a program so make sure that you start your res
                 "llama2-70b-4096"
                 "llama3-70b-8192")))
 
-  ;; A gptel backend for perplexity API
   (defvar llms-gptel-preplexity-backend
     (when-let ((api-key (auth-source-pick-first-password :host "api.perplexity.ai")))
       (gptel-make-openai "Perplexity"
         :host "api.perplexity.ai"
-        :protocol "https"
         :endpoint "/chat/completions"
         :stream t
         :key api-key
@@ -184,16 +183,18 @@ else. Your output will be used in a program so make sure that you start your res
                   "sonar-small-online"
                   "sonar-medium-online"))))
 
-  ;; A gemini backend for gptel
   (defvar llms-gptel-gemini-backend
     (when-let ((api-key (auth-source-pick-first-password :host "generativelanguage.googleapis.com")))
       (gptel-make-gemini "Gemini"
-        :host "generativelanguage.googleapis.com"
-        :protocol "https"
         :stream t
-        :key api-key
-        :models '("gemini-pro" "gemini-1.5-pro-latest")
-        :endpoint "/v1beta/models")))
+        :key api-key)))
+
+  (defvar llms-gptel-kagi-backend
+    (when-let ((api-key (auth-source-pick-first-password :host "kagi.com")))
+      (gptel-make-kagi "Kagi"
+        :stream t
+        :key api-key)))
+
 
   (setq gptel-backend llms-gptel-groq-backend
         gptel-model "llama3-70b-8192"))
@@ -492,18 +493,25 @@ Concise Explanation about the above Word.")
    ((string= name "gemini")
     (cons llms-gptel-gemini-backend "gemini-pro"))
 
+   ((string= name "kagi")
+    (cons llms-gptel-kagi-backend "summarize:cecil"))
+
    (t
     (user-error (format "Unknown LLM: %s" name)))))
 
 
 (defun make-progress-indicator (starting-point)
   (let ((indicate-progress-p t)
+        (spinner (spinner-create 'box-in-circle))
         (indicator-overlay (make-overlay starting-point (+ 3 starting-point))))
-    (make-thread (lambda ()
-                   (while indicate-progress-p
-                     (overlay-put indicator-overlay 'after-string ".") (sleep-for 0.1)
-                     (overlay-put indicator-overlay 'after-string "..") (sleep-for 0.1)
-                     (overlay-put indicator-overlay 'after-string "...") (sleep-for 0.1))))
+    (spinner-start spinner)
+    ;; If you end up with orphaned threads, send them error/quit signals using
+    ;; the UI provided by `list-threads'.
+    (make-thread
+     (lambda ()
+       (while indicate-progress-p
+         (overlay-put indicator-overlay 'after-string (spinner-print spinner))
+         (sleep-for 0.2))))
     (lambda ()
       (setq indicate-progress-p nil)
       (delete-overlay indicator-overlay))))
@@ -561,12 +569,14 @@ As of 2023, the estimated world population is approximately 8 billion.
           :callback
           (lambda (response info)
             (stop-progress-indicator progress-indicator)
-            (let ((position (marker-position (plist-get info :position)))
-                  (buffer  (buffer-name (plist-get info :buffer))))
-              (with-current-buffer buffer
-                (goto-char position)
-                (insert response)
-                (goto-char original-point)))))))))
+            (if (not response)
+                (error "Error talking to LLM %s: %s" llm-name info)
+              (let ((position (marker-position (plist-get info :position)))
+                    (buffer  (buffer-name (plist-get info :buffer))))
+                (with-current-buffer buffer
+                  (goto-char position)
+                  (insert response)
+                  (goto-char original-point))))))))))
 
 
 (provide 'llms)
