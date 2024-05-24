@@ -4203,7 +4203,7 @@ buffer."
 
 (use-package nsm
   :init
-  (setq network-security-level 'paranoid
+  (setq network-security-level 'high
         nsm-save-host-names t))
 
 ;;; -----------------------------------------------------------------
