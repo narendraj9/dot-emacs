@@ -185,9 +185,7 @@ else. Your output will be used in a program so make sure that you start your res
 
   (defvar llms-gptel-gemini-backend
     (when-let ((api-key (auth-source-pick-first-password :host "generativelanguage.googleapis.com")))
-      (gptel-make-gemini "Gemini"
-        :stream t
-        :key api-key)))
+      (gptel-make-gemini "Gemini" :key api-key)))
 
   (defvar llms-gptel-kagi-backend
     (when-let ((api-key (auth-source-pick-first-password :host "kagi.com")))
