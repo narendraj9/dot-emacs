@@ -153,14 +153,10 @@ else. Your output will be used in a program so make sure that you start your res
 
   (require 'gptel-transient)
   (require 'gptel-curl)
+  (require 'gptel-gemini)
 
   :config
   (require 'gptel-anthropic)
-
-  (defvar llms-openai-groq-backed
-    (gptel-make-openai "OpenAI"
-      :key gptel-api-key
-      :models '("gpt-4o" "gpt-4-turbo")))
 
   ;; Register Groq as a backend with gptel.
   (defvar llms-gptel-groq-backend
@@ -187,6 +183,17 @@ else. Your output will be used in a program so make sure that you start your res
                   "sonar-medium-chat"
                   "sonar-small-online"
                   "sonar-medium-online"))))
+
+  ;; A gemini backend for gptel
+  (defvar llms-gptel-gemini-backend
+    (when-let ((api-key (auth-source-pick-first-password :host "generativelanguage.googleapis.com")))
+      (gptel-make-gemini "Gemini"
+        :host "generativelanguage.googleapis.com"
+        :protocol "https"
+        :stream t
+        :key api-key
+        :models '("gemini-pro" "gemini-1.5-pro-latest")
+        :endpoint "/v1beta/models")))
 
   (setq gptel-backend llms-gptel-groq-backend
         gptel-model "llama3-70b-8192"))
@@ -482,6 +489,9 @@ Concise Explanation about the above Word.")
    ((string= name "pplx")
     (cons llms-gptel-preplexity-backend "sonar-medium-online"))
 
+   ((string= name "gemini")
+    (cons llms-gptel-gemini-backend "gemini-pro"))
+
    (t
     (user-error (format "Unknown LLM: %s" name)))))
 
@@ -500,6 +510,15 @@ Concise Explanation about the above Word.")
 
 (defun stop-progress-indicator (progress-indicator)
   (funcall progress-indicator))
+
+(defvar llms-chat--system-prompt
+  "Follow these rules no matter what:
+1. Be factually correct. If you are not sure about something, don't say
+anything at all.
+2. Try to respond with text that is made to fit in 80 columns.
+3. Be concise.
+4. Answer in less than 8 sentences but make sure to provide a complete
+answer. Use mathematical equations if that helps.")
 
 ;;;autoload
 (defun llms-chat ()
@@ -524,6 +543,12 @@ As of 2023, the estimated world population is approximately 8 billion.
            (prompt-end-position (if (region-active-p) (region-end)
                                   original-point))
            (prompt (buffer-substring-no-properties prompt-start-position prompt-end-position)))
+
+      (unless (and gptel-backend gptel-model)
+        (error "No backend found for LLM: %s" llm-name))
+      (when (s-blank-str? prompt)
+        (user-error "No prompt found."))
+
       (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
       (goto-char original-point)
       (unless (looking-back "^\\S+")
@@ -531,6 +556,7 @@ As of 2023, the estimated world population is approximately 8 billion.
       (insert (format "@%s: " llm-name))
       (let ((progress-indicator (make-progress-indicator (point))))
         (gptel-request prompt
+          :system llms-chat--system-prompt
           :position (point)
           :callback
           (lambda (response info)
@@ -540,14 +566,7 @@ As of 2023, the estimated world population is approximately 8 billion.
               (with-current-buffer buffer
                 (goto-char position)
                 (insert response)
-                (goto-char original-point))))
-          :system "Follow these rules no matter what:
-1. Be factually correct. If you are not sure about something,
-don't say anything at all.
-2. Try to respond with text that is made to fit in 80 columns.
-3. Be concise.
-4. Answer in less than 8 sentences but make sure to provide a
-complete answer. Use mathematical equations if that helps.")))))
+                (goto-char original-point)))))))))
 
 
 (provide 'llms)
