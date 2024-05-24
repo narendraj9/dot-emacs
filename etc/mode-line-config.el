@@ -117,27 +117,30 @@
 (add-to-list 'mode-line-misc-info '(:eval (tab-bar-modeline)) t)
 
 (setq-default mode-line-format
-              '(:eval (simple-mode-line-render
-                       ;; -- Left
-                       '("%e"
-                         mode-line-front-space
-                         mode-line-mule-info
-                         mode-line-client
-                         mode-line-modified
-                         mode-line-auto-compile
-                         mode-line-remote
-                         mode-line-frame-identification
-                         mode-line-buffer-identification
-                         "   " mode-line-position "  "
-                         (:eval (when (and vc-mode
-                                           (not mode-line-config-hide-vc))
-                                  vc-mode)))
+              '(""
+                ;; ^^ makes it easier for `eldoc-message-function' to do its job
+                ;; cleanly when it tries to prepend `eldoc-mode-line-string'.
+                (:eval (simple-mode-line-render
+                        ;; -- Left
+                        '("%e"
+                          mode-line-front-space
+                          mode-line-mule-info
+                          mode-line-client
+                          mode-line-modified
+                          mode-line-auto-compile
+                          mode-line-remote
+                          mode-line-frame-identification
+                          mode-line-buffer-identification
+                          "   " mode-line-position "  "
+                          (:eval (when (and vc-mode
+                                            (not mode-line-config-hide-vc))
+                                   vc-mode)))
 
-                       ;; -- Middle
-                       mode-line-modes
+                        ;; -- Middle
+                        'mode-line-modes
 
-                       ;; -- Right
-                       mode-line-misc-info)))
+                        ;; -- Right
+                        mode-line-misc-info))))
 
 (provide 'mode-line-config)
 ;;; mode-line-config.el ends here
