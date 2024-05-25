@@ -2004,7 +2004,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           (let ((start (treesit-node-start current-node))
                 (end (treesit-node-end current-node)))
             (goto-char start)
-            (push-mark end)
+            ;; Push mark only for the first time so that we can get back to
+            ;; where we started the tree traversal from.
+            (unless (eq this-command last-command)
+              (push-mark end))
             (move-overlay --treesit-highlight-overlay start end))))
       ;; Before executing the next command remove the overlay. Adding to
       ;; `post-command-hook' => execution right after this function returns.
