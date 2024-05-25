@@ -27,6 +27,7 @@
 (require 'pcase)
 (require 'json)
 (require 'auth-source)
+(require 'org-id)
 
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
@@ -477,6 +478,10 @@ Concise Explanation about the above Word.")
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
 
+;;; ──────────────────────────────────────────────────────────────────
+;; Functions to have a conversation with LLMs using a chat/mention interface.
+;;
+
 (defun llms-chat--name->gptel-backend (name)
   (cond
    ((string= name "groq")
@@ -498,10 +503,10 @@ Concise Explanation about the above Word.")
     (user-error (format "Unknown LLM: %s" name)))))
 
 
-(defun make-progress-indicator (starting-point)
+(defun llms-chat-make-progress-indicator (starting-point)
   (let ((indicate-progress-p t)
         (spinner (spinner-create 'box-in-circle))
-        (indicator-overlay (make-overlay starting-point (+ 3 starting-point))))
+        (indicator-overlay (make-overlay starting-point starting-point)))
     (spinner-start spinner)
     ;; If you end up with orphaned threads, send them error/quit signals using
     ;; the UI provided by `list-threads'.
@@ -514,8 +519,54 @@ Concise Explanation about the above Word.")
       (setq indicate-progress-p nil)
       (delete-overlay indicator-overlay))))
 
-(defun stop-progress-indicator (progress-indicator)
+(defun llms-chat-stop-progress-indicator (progress-indicator)
   (funcall progress-indicator))
+
+
+(defun llms-chat--remove-old-reply (prompt-id)
+  ;; Try removing existing response.
+  (when-let* ((reply-start
+               (text-property-any (point) (point-max) :llm-role :assistant))
+              (reply-end
+               (and (string= prompt-id (get-text-property reply-start :llm-prompt-id))
+                    (or (text-property-not-all reply-start (point-max)
+                                               :llm-prompt-id prompt-id)
+                        ;; All of the buffer is filled with reply from an LLM
+                        ;; till the end of buffer.
+                        (point-max)))))
+    (delete-region reply-start reply-end)))
+
+
+(defun llms-chat--insert-reply (prompt-id position response-text)
+  (goto-char position)
+  (insert response-text)
+  (add-text-properties position (point) (list :llm-prompt-id prompt-id
+                                              :llm-role :assistant)))
+
+(defun llms-chat--prompt-bounds ()
+  (let ((start (if (region-active-p)
+                   (region-beginning)
+                 (save-excursion (backward-paragraph)
+                                 (point))))
+        (end (if (region-active-p)
+                 (region-end)
+               (line-end-position))))
+    (cons start end)))
+
+(defun llms-chat--prompt-id (prompt-bounds)
+  (let ((prompt-start-position (car prompt-bounds))
+        (org-id-method 'ts))
+    (or (get-text-property prompt-start-position :llm-prompt-id)
+        (org-id-new "llm"))))
+
+(defun llms-chat--llm-name ()
+  (let* ((llm-name-regex "@\\([a-z]+\\)\\(\\S+\\|$\\)")
+         (llm-name (save-excursion
+                     (and (re-search-backward llm-name-regex (window-start) t)
+                          (buffer-substring (match-beginning 1) (match-end 1))))))
+    (unless llm-name
+      (user-error "No LLM name found in the prompt."))
+    llm-name))
 
 (defvar llms-chat--system-prompt
   "Follow these rules no matter what:
@@ -538,42 +589,52 @@ As of 2023, the estimated world population is approximately 8 billion.
   (interactive)
   (save-excursion
     (let* ((original-point (point))
-           (llm-name-regex "@\\([a-z]+\\)\\(\\S+\\|$\\)")
-           (llm-name (progn (re-search-backward llm-name-regex (window-start) t)
-                            (buffer-substring (match-beginning 1) (match-end 1))))
+           (llm-name (llms-chat--llm-name))
+
            (gptel-params (llms-chat--name->gptel-backend llm-name))
            (gptel-backend (car gptel-params))
            (gptel-model (cdr gptel-params))
-           (prompt-start-position (if (region-active-p) (region-beginning)
-                                    (save-excursion (backward-paragraph) (point))))
-           (prompt-end-position (if (region-active-p) (region-end)
-                                  original-point))
-           (prompt (buffer-substring-no-properties prompt-start-position prompt-end-position)))
+
+           ;; A struct (position, id, etc.) probably makes more sense here.
+           (prompt-bounds (llms-chat--prompt-bounds))
+           (prompt-start-position (car prompt-bounds))
+           (prompt-end-position (cdr prompt-bounds))
+           (prompt (buffer-substring-no-properties prompt-start-position prompt-end-position))
+           (prompt-id (llms-chat--prompt-id prompt-bounds)))
 
       (unless (and gptel-backend gptel-model)
         (error "No backend found for LLM: %s" llm-name))
       (when (s-blank-str? prompt)
         (user-error "No prompt found."))
-
       (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
+      (add-text-properties prompt-start-position
+                           prompt-end-position
+                           (list :llm-prompt-id prompt-id
+                                 :llm-role :user))
+
+      (llms-chat--remove-old-reply prompt-id)
+
       (goto-char original-point)
-      (unless (looking-back "^\\S+")
-        (insert "\n"))
-      (insert (format "@%s: " llm-name))
-      (let ((progress-indicator (make-progress-indicator (point))))
+      (insert (propertize (format "%s@%s: "
+                                  (if (looking-back "^\\S+") "" "\n")
+                                  llm-name)
+                          :llm-prompt-id prompt-id
+                          :llm-role :assistant))
+
+
+      (let ((progress-indicator (llms-chat-make-progress-indicator (point))))
         (gptel-request prompt
           :system llms-chat--system-prompt
           :position (point)
           :callback
           (lambda (response info)
-            (stop-progress-indicator progress-indicator)
+            (llms-chat-stop-progress-indicator progress-indicator)
             (if (not response)
                 (error "Error talking to LLM %s: %s" llm-name info)
               (let ((position (marker-position (plist-get info :position)))
                     (buffer  (buffer-name (plist-get info :buffer))))
                 (with-current-buffer buffer
-                  (goto-char position)
-                  (insert response)
+                  (llms-chat--insert-reply prompt-id position response)
                   (goto-char original-point))))))))))
 
 
