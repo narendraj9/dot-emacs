@@ -536,18 +536,22 @@ Concise Explanation about the above Word.")
                         (point-max)))))
     (delete-region reply-start reply-end)))
 
-(defun llms-chat--insert-reply (prompt-id position response-text)
-  (goto-char position)
-  (let* ((color-% 18)
+(defun llms-chat--insert-reply (prompt-id response info)
+  (let* ((position (marker-position (plist-get info :position)))
+         (buffer  (buffer-name (plist-get info :buffer)))
+         (color-% 18)
          (background-color (color-lighten-name (background-color-at-point) color-%))
          (foreground-color (color-darken-name (foreground-color-at-point) color-%))
-         (face (list :background background-color :foreground foreground-color)))
-    (insert response-text)
-    (add-text-properties position (point)
-                         (list :llm-prompt-id prompt-id
-                               :llm-role :assistant
-                               'face face
-                               'font-lock-face face))))
+         (face (list :background background-color :foreground foreground-color))
+         (text-properties (list :llm-prompt-id prompt-id
+                                :llm-role :assistant
+                                'face face
+                                'font-lock-face face)))
+    (with-current-buffer buffer
+      (save-excursion
+        (goto-char position)
+        (insert response)
+        (add-text-properties position (point) text-properties)))))
 
 (defun llms-chat--prompt-bounds ()
   (let ((start (if (region-active-p)
@@ -565,10 +569,13 @@ Concise Explanation about the above Word.")
     (or (get-text-property prompt-start-position :llm-prompt-id)
         (org-id-new "llm"))))
 
-(defun llms-chat--llm-name ()
-  (let* ((llm-name-regex "@\\([a-z]+\\)\\(\\S+\\|$\\)")
+(defun llms-chat--llm-name (prompt-bounds)
+  (let* ((prompt-start-position (car prompt-bounds))
+         (prompt-end-position (cdr prompt-bounds))
+         (llm-name-regex "@\\([a-z]+\\)\\(\\S+\\|$\\)")
          (llm-name (save-excursion
-                     (and (re-search-backward llm-name-regex (window-start) t)
+                     (goto-char prompt-end-position)
+                     (and (re-search-backward llm-name-regex prompt-start-position t)
                           (buffer-substring (match-beginning 1) (match-end 1))))))
     (unless llm-name
       (user-error "No LLM name found in the prompt."))
@@ -594,19 +601,18 @@ As of 2023, the estimated world population is approximately 8 billion.
 "
   (interactive)
   (save-excursion
-    (let* ((original-point (point))
-           (llm-name (llms-chat--llm-name))
-
-           (gptel-params (llms-chat--name->gptel-backend llm-name))
-           (gptel-backend (car gptel-params))
-           (gptel-model (cdr gptel-params))
-
+    (let* (
            ;; A struct (position, id, etc.) probably makes more sense here.
            (prompt-bounds (llms-chat--prompt-bounds))
            (prompt-start-position (car prompt-bounds))
            (prompt-end-position (cdr prompt-bounds))
            (prompt (buffer-substring-no-properties prompt-start-position prompt-end-position))
-           (prompt-id (llms-chat--prompt-id prompt-bounds)))
+           (prompt-id (llms-chat--prompt-id prompt-bounds))
+           ;; --
+           (llm-name (llms-chat--llm-name prompt-bounds))
+           (gptel-params (llms-chat--name->gptel-backend llm-name))
+           (gptel-backend (car gptel-params))
+           (gptel-model (cdr gptel-params)))
 
       (unless (and gptel-backend gptel-model)
         (error "No backend found for LLM: %s" llm-name))
@@ -622,13 +628,12 @@ As of 2023, the estimated world population is approximately 8 billion.
 
       (llms-chat--remove-old-reply prompt-id)
 
-      (goto-char original-point)
+      (goto-char prompt-end-position)
       (insert (propertize (format "%s@%s: "
                                   (if (looking-back "^\\S+") "" "\n")
                                   llm-name)
                           :llm-prompt-id prompt-id
                           :llm-role :assistant))
-
 
       (let ((progress-indicator (llms-chat-make-progress-indicator (point))))
         (gptel-request prompt
@@ -639,11 +644,7 @@ As of 2023, the estimated world population is approximately 8 billion.
             (llms-chat-stop-progress-indicator progress-indicator)
             (if (not response)
                 (error "Error talking to LLM %s: %s" llm-name info)
-              (let ((position (marker-position (plist-get info :position)))
-                    (buffer  (buffer-name (plist-get info :buffer))))
-                (with-current-buffer buffer
-                  (llms-chat--insert-reply prompt-id position response)
-                  (goto-char original-point))))))))))
+              (llms-chat--insert-reply prompt-id response info))))))))
 
 
 (provide 'llms)
