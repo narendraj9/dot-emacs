@@ -536,12 +536,18 @@ Concise Explanation about the above Word.")
                         (point-max)))))
     (delete-region reply-start reply-end)))
 
-
 (defun llms-chat--insert-reply (prompt-id position response-text)
   (goto-char position)
-  (insert response-text)
-  (add-text-properties position (point) (list :llm-prompt-id prompt-id
-                                              :llm-role :assistant)))
+  (let* ((color-% 18)
+         (background-color (color-lighten-name (background-color-at-point) color-%))
+         (foreground-color (color-darken-name (foreground-color-at-point) color-%))
+         (face (list :background background-color :foreground foreground-color)))
+    (insert response-text)
+    (add-text-properties position (point)
+                         (list :llm-prompt-id prompt-id
+                               :llm-role :assistant
+                               'face face
+                               'font-lock-face face))))
 
 (defun llms-chat--prompt-bounds ()
   (let ((start (if (region-active-p)
@@ -610,7 +616,9 @@ As of 2023, the estimated world population is approximately 8 billion.
       (add-text-properties prompt-start-position
                            prompt-end-position
                            (list :llm-prompt-id prompt-id
-                                 :llm-role :user))
+                                 :llm-role :user
+                                 'face 'bold
+                                 'font-lock-face 'bold))
 
       (llms-chat--remove-old-reply prompt-id)
 
