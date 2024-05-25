@@ -504,17 +504,22 @@ Concise Explanation about the above Word.")
 
 
 (defun llms-chat-make-progress-indicator (starting-point)
-  (let ((indicate-progress-p t)
-        (spinner (spinner-create 'box-in-circle))
-        (indicator-overlay (make-overlay starting-point starting-point)))
+  (let* ((indicate-progress-p t)
+         (spinner (spinner-create 'box-in-circle))
+         (indicator-overlay (make-overlay starting-point starting-point)))
     (spinner-start spinner)
     ;; If you end up with orphaned threads, send them error/quit signals using
     ;; the UI provided by `list-threads'.
     (make-thread
      (lambda ()
-       (while indicate-progress-p
-         (overlay-put indicator-overlay 'after-string (spinner-print spinner))
-         (sleep-for 0.2))))
+       (let ((max-iterations 50)
+             (current-iteration 0))
+         (while (and indicate-progress-p
+                     (< current-iteration max-iterations))
+           (overlay-put indicator-overlay 'after-string (spinner-print spinner))
+           (redisplay t)
+           (sleep-for 0.1)
+           (setq current-iteration (1+ current-iteration))))))
     (lambda ()
       (setq indicate-progress-p nil)
       (delete-overlay indicator-overlay))))
