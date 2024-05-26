@@ -525,6 +525,8 @@ Concise Explanation about the above Word.")
     ;; ---------------------------------------------------
     llm-prompt-id ,prompt-id
     llm-role assistant
+    front-sticky nil
+    rear-nonsticky t
     ,@extra-props))
 
 (defun llms-chat--remove-old-reply (prompt-id)
@@ -566,12 +568,15 @@ Concise Explanation about the above Word.")
         (goto-char position)
         (insert response)
         (add-text-properties position (point) text-properties)
+        (insert "\n")
         (llms-chat--fill-text position (point))))))
 
 (defun llms-chat--prompt-id (prompt-bounds)
-  (let ((prompt-start-position (car prompt-bounds))
-        (org-id-method 'ts))
-    (or (get-text-property prompt-start-position 'llm-prompt-id)
+  (let* ((prompt-start-position (car prompt-bounds))
+         (text-author (get-text-property prompt-start-position 'llm-role))
+         (org-id-method 'ts))
+    (or (and (eq text-author 'user)
+             (get-text-property prompt-start-position 'llm-prompt-id))
         (org-id-new "llm"))))
 
 (defun llms-chat--llm-name (prompt-bounds)
