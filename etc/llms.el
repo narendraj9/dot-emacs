@@ -96,28 +96,20 @@
 ;;;###autoload
 (defun llms-complete (arg)
   (interactive "P")
-  (let ((prompt-text (llms-prompt-text))
-        (instruction (if arg (read-string "Instruction: ")
-                       (concat "Complete the sentence and reply with just the sentence and nothing
-else. Your output will be used in a program so make sure that you start your response with the promt text."))))
-    (openai-chat `[(("role"    . "system")
-                    ("content" . ,instruction))
-                   (("role"    . "user")
-                    ("content" . ,prompt-text))]
-                 (lambda (data)
-                   (let ((choices (let-alist data .choices)))
-                     (llms--display-choices-as-overlay
-                      (mapcar (lambda (choice)
-                                (let-alist choice
-                                  (let-alist .message
-                                    (string-remove-prefix prompt-text
-                                                          .content))))
-                              choices))))
-                 :base-url "https://api.groq.com/openai/v1"
-                 :key (auth-source-pick-first-password :host "api.groq.com")
-                 :model "llama3-70b-8192"
-                 :temperature openai-chat-temperature
-                 :user (unless (string= openai-user "user") openai-user))))
+  (let ((gptel-backend llms-gptel-groq-backend)
+        (prompt-text (llms-prompt-text))
+        (gptel-mode "llama3-70b-8192")
+        (system-prompt
+         (if arg (read-string "Instruction: ")
+           (concat "Complete the sentence and reply with just the sentence and nothing else."
+                   "Your output will be used in a program."
+                   "So, make sure that you start your response with the prompt text."))))
+    (gptel-request prompt-text
+      :system system-prompt
+      :callback
+      ;; `gptel' cannot handle more than 1 choice in the response yet.
+      (lambda (response info)
+        (llms--display-choices-as-overlay (list response))))))
 
 (defvar llms-complete-timer nil)
 (define-minor-mode llms-complete-minor-mode
@@ -161,6 +153,9 @@ else. Your output will be used in a program so make sure that you start your res
   :config
   (require 'gptel-anthropic)
 
+  (defvar llms-gptel-openai-backend
+    (gptel-make-openai "OpenAI" :key openai-secret-key))
+
   (defvar llms-gptel-groq-backend
     (gptel-make-openai "Groq"
       :host "api.groq.com"
@@ -197,21 +192,6 @@ else. Your output will be used in a program so make sure that you start your res
 
   (setq gptel-backend llms-gptel-groq-backend
         gptel-model "llama3-70b-8192"))
-
-(use-package openai
-  :vc ( :url "https://github.com/emacs-openai/openai"
-        :rev :newest )
-  :defer t
-  :init
-  (use-package tblui :ensure t)
-  ;; The same variable sets up the user role.
-  ;; (setq openai-user (user-full-name))
-  (when (boundp 'openai-secret-key)
-    (setq openai-key openai-secret-key))
-
-  (require 'openai-edit)
-  (require 'openai-chat)
-  (require 'openai-image))
 
 (use-package chatgpt-shell
   :ensure t
@@ -281,31 +261,25 @@ else. Your output will be used in a program so make sure that you start your res
 ;;;###autoload
 (defun openai-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
-  (let* ((result "")
+  (let* ((progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
+         (gptel-backend llms-gptel-openai-backend)
+         (gptel-model "gpt-4o")
+
          (instruction (or instruction (read-string "Instruction: ")))
-         (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
          (base64-image-data (image-file->base64-data-uri file-path))
-         (image-message `(("role"    . "user")
-                          ("content" . [(("type" . "image_url")
-                                         ("image_url" . (("url" . ,base64-image-data)
-                                                         ("detail" . "low"))))
-                                        (("type" . "text")
-                                         ("text" . ,instruction))]))))
+         (image-message `( :role  "user"
+                           :content  [( :type  "image_url"
+                                        :image_url ( :url ,base64-image-data
+                                                     :detail  "low" ) )
+                                      ( :type  "text"
+                                        :text  ,instruction )])))
     (push image-message llms--interpret-image-history)
-    (openai-chat `[,image-message]
-                 (lambda (data)
-                   (progress-reporter-done progress-reporter)
-                   (let ((choices (let-alist data .choices)))
-                     (dolist (item (mapcar (lambda (choice)
-                                             (let-alist choice
-                                               (let-alist .message
-                                                 (concat " " .content))))
-                                           choices))
-                       (setq result (format "%s %s\n" result item))))
-                   (llms-process-result result buffer notify))
-                 :max-tokens 3000
-                 ;; gpt-4o is cheaper than gpt-4o.
-                 :model "gpt-4o")))
+    (gptel-request (list image-message)
+      :callback (lambda (response info)
+                  (progress-reporter-done progress-reporter)
+                  (if response
+                      (llms-process-result response buffer notify)
+                    (error "Request to LLM failed: %s" info))))))
 
 
 ;;;###autoload
@@ -341,68 +315,35 @@ else. Your output will be used in a program so make sure that you start your res
 ;;;###autoload
 (defun tesseract-openai-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
-  (let* ((result "")
-
-         (instruction (or instruction (read-string "Instruction: ")))
-
-         (progress-reporter
-          (make-progress-reporter "Sending request to OpenAI..." 0 1))
-
+  (let* ((instruction (or instruction (read-string "Instruction: ")))
+         (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
+         (gptel-backend llms-gptel-openai-backend)
+         (gptel-model "gpt-4o")
          (image-text
           (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
-    (openai-chat `[(("role"    . "system")
-                    ("content" . ,(format "%s. %s"
-                                          instruction
-                                          "For your convenience, I have converted the image to text using
-tesseract. Include a 4 sentence summary at the beginning of the output please.")))
-                   (("role"    . "user")
-                    ("content" . ,image-text))]
-                 (lambda (data)
-                   (progress-reporter-done progress-reporter)
-                   (let ((choices (let-alist data .choices)))
-                     (dolist (item (mapcar (lambda (choice)
-                                             (let-alist choice
-                                               (let-alist .message
-                                                 (concat " " .content))))
-                                           choices))
-                       (setq result (format "%s %s\n" result item))))
-                   (llms-process-result result buffer notify))
-                 :max-tokens 3000
-                 :model "gpt-4o")))
+    (gptel-request image-text
+      :system instruction
+      :callback (lambda (response info)
+                  (progress-reporter-done progress-reporter)
+                  (if response
+                      (llms-process-result response buffer notify)
+                    (error "Request to LLM failed: %s" info))))    ))
 ;;;###autload
 (defun tesseract-groq-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
-  (let* ((result "")
-
-         (instruction (or instruction (read-string "Instruction: ")))
-
+  (let* ((instruction (or instruction (read-string "Instruction: ")))
+         (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
+         (gptel-backend llms-gptel-groq-backend)
+         (gptel-model "llama3-70b-8192")
          (image-text
-          (progn (message "Using tesseract to convert image to text.")
-                 (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
-
-         (progress-reporter
-          (make-progress-reporter "Sending request to Groq Cloud API..." 0 1)))
-    (openai-chat `[(("role"    . "system")
-                    ("content" . ,(format "%s. %s"
-                                          instruction
-                                          "For your convenience, I have converted the image to text using
-tesseract. Include a 4 sentence summary at the beginning of the output please.")))
-                   (("role"    . "user")
-                    ("content" . ,image-text))]
-                 (lambda (data)
-                   (progress-reporter-done progress-reporter)
-                   (let ((choices (let-alist data .choices)))
-                     (dolist (item (mapcar (lambda (choice)
-                                             (let-alist choice
-                                               (let-alist .message
-                                                 (concat " " .content))))
-                                           choices))
-                       (setq result (format "%s %s\n" result item))))
-                   (llms-process-result result buffer notify))
-                 :max-tokens 3000
-                 :base-url "https://api.groq.com/openai/v1"
-                 :key (auth-source-pick-first-password :host "api.groq.com")
-                 :model "llama3-70b-8192")))
+          (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
+    (gptel-request image-text
+      :system instruction
+      :callback (lambda (response info)
+                  (progress-reporter-done progress-reporter)
+                  (if response
+                      (llms-process-result response buffer notify)
+                    (error "Request to LLM failed: %s" info))))    ))
 
 (defvar llms-screenshot-command "gnome-screenshot")
 
@@ -492,7 +433,7 @@ Concise Explanation about the above Word.")
          (cons llms-gptel-groq-backend "llama3-70b-8192"))
 
    (cons"openai"
-        (cons gptel--openai "gpt-4o"))
+        (cons llms-gptel-openai-backend "gpt-4o"))
 
    (cons "pplx"
          (cons llms-gptel-preplexity-backend "sonar-medium-online"))
