@@ -590,6 +590,25 @@ Concise Explanation about the above Word.")
   (when-let ((bounds (llms-chat--reply-bounds prompt-id)))
     (delete-region (car bounds) (cdr bounds))))
 
+(defun llms-chat--fill-text (start end)
+  "Fill text present between positions start and end, inclusive."
+  ;; To be implemented.
+  ;; ──────────────────────────────────────────────────────────────────
+  ;; Fill response text.
+  ;; (let ((end-of-reply (point)))
+  ;;   (with-restriction position end-of-reply
+  ;;     (goto-char position)
+  ;;     (while (< (point) end-of-reply)
+  ;;       ;; Leave code blocks as they are.
+  ;;       ;; TODO: fontify code blocks. Can I just use something provided by
+  ;;       ;; org-mode here?
+  ;;       (if (looking-at "\\S*```[a-z- ]*\\S+")
+  ;;           (forward-paragraph)
+  ;;         (fill-region (point) (forward-paragraph))))
+  ;;     (widen)))
+  ;; ──────────────────────────────────────────────────────────────────
+  :noop)
+
 (defun llms-chat--insert-reply (prompt-id response info)
   (let* ((position (marker-position (plist-get info :position)))
          (buffer  (buffer-name (plist-get info :buffer)))
@@ -604,7 +623,8 @@ Concise Explanation about the above Word.")
       (save-excursion
         (goto-char position)
         (insert response)
-        (add-text-properties position (point) text-properties)))))
+        (add-text-properties position (point) text-properties)
+        (llms-chat--fill-text position (point))))))
 
 (defun llms-chat--prompt-id (prompt-bounds)
   (let ((prompt-start-position (car prompt-bounds))
@@ -628,10 +648,10 @@ Concise Explanation about the above Word.")
   "Follow these rules no matter what:
 1. Be factually correct. If you are not sure about something, don't say
 anything at all.
-2. Try to respond with text that is made to fit in 80 columns.
-3. Be concise.
-4. Answer in less than 8 sentences but make sure to provide a complete
-answer. Use mathematical equations if that helps.")
+2. Be concise.
+3. Answer in as few sentences as possible but make sure to provide a complete
+answer. Use mathematical equations if that helps.
+4. Use markdown code blocks for code snippets.")
 
 ;;;autoload
 (defun llms-chat (arg)
