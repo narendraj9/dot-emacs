@@ -627,9 +627,7 @@ As of 2023, the estimated world population is approximately 8 billion.
       (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
       (add-text-properties prompt-start-position
                            prompt-end-position
-                           (llms-chat--prompt-properties prompt-id
-                                                         'face 'bold
-                                                         'font-lock-face 'bold))
+                           (llms-chat--prompt-properties prompt-id))
 
       (llms-chat--remove-old-reply prompt-id)
 
