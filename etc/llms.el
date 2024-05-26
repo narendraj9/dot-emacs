@@ -533,11 +533,11 @@ Concise Explanation about the above Word.")
 (defun llms-chat-stop-progress-indicator (progress-indicator)
   (funcall progress-indicator))
 
-(defun llms-chat--prompt-bounds ()
-  (let ((start (if (region-active-p)
-                   (region-beginning)
-                 (save-excursion (backward-paragraph)
-                                 (point))))
+(defun llms-chat--prompt-bounds (&optional start-at-bobp)
+  (let ((start (cond
+                ((region-active-p) (region-beginning))
+                (start-at-bobp (point-min))
+                (t (save-excursion (backward-paragraph) (point)))))
         (end (if (region-active-p)
                  (region-end)
                (line-end-position))))
@@ -634,19 +634,21 @@ anything at all.
 answer. Use mathematical equations if that helps.")
 
 ;;;autoload
-(defun llms-chat ()
+(defun llms-chat (arg)
   "Talk to LLMs as if you are chatting to them,
+
+With a prefix ARG, send the whole buffer to the LLM upto current point.
 
 @openai: current world population is.. (one sentence)
 @openai:
 
 As of 2023, the estimated world population is approximately 8 billion.
 "
-  (interactive)
+  (interactive "P")
   (save-excursion
     (let* (
            ;; A struct (position, id, etc.) probably makes more sense here.
-           (prompt-bounds (llms-chat--prompt-bounds))
+           (prompt-bounds (llms-chat--prompt-bounds arg))
            (prompt-start-position (car prompt-bounds))
            (prompt-end-position (cdr prompt-bounds))
            (prompt (llms-chat--prompt-text prompt-start-position prompt-end-position))
