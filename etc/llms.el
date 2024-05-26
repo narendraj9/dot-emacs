@@ -531,11 +531,11 @@ Concise Explanation about the above Word.")
 (defun llms-chat--remove-old-reply (prompt-id)
   ;; Try removing existing response.
   (when-let* ((reply-start
-               (text-property-any (point) (point-max) :llm-role :assistant))
+               (text-property-any (point) (point-max) 'llm-role 'assistant))
               (reply-end
-               (and (string= prompt-id (get-text-property reply-start :llm-prompt-id))
+               (and (string= prompt-id (get-text-property reply-start 'llm-prompt-id))
                     (or (text-property-not-all reply-start (point-max)
-                                               :llm-prompt-id prompt-id)
+                                               'llm-prompt-id prompt-id)
                         ;; All of the buffer is filled with reply from an LLM
                         ;; till the end of buffer.
                         (point-max)))))
@@ -548,8 +548,9 @@ Concise Explanation about the above Word.")
          (background-color (color-lighten-name (background-color-at-point) color-%))
          (foreground-color (color-darken-name (foreground-color-at-point) color-%))
          (face (list :background background-color :foreground foreground-color))
-         (text-properties (list :llm-prompt-id prompt-id
-                                :llm-role :assistant
+         (text-properties (list 'llm-prompt-id prompt-id
+                                'llm-role 'assistant
+                                'gptel 'response
                                 'face face
                                 'font-lock-face face)))
     (with-current-buffer buffer
@@ -571,7 +572,7 @@ Concise Explanation about the above Word.")
 (defun llms-chat--prompt-id (prompt-bounds)
   (let ((prompt-start-position (car prompt-bounds))
         (org-id-method 'ts))
-    (or (get-text-property prompt-start-position :llm-prompt-id)
+    (or (get-text-property prompt-start-position 'llm-prompt-id)
         (org-id-new "llm"))))
 
 (defun llms-chat--llm-name (prompt-bounds)
@@ -626,10 +627,10 @@ As of 2023, the estimated world population is approximately 8 billion.
       (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
       (add-text-properties prompt-start-position
                            prompt-end-position
-                           (list :llm-prompt-id prompt-id
-                                 :llm-role :user
-                                 'face 'bold
-                                 'font-lock-face 'bold))
+                           `( llm-prompt-id ,prompt-id
+                              llm-role user
+                              face bold
+                              font-lock-face bold))
 
       (llms-chat--remove-old-reply prompt-id)
 
@@ -637,8 +638,13 @@ As of 2023, the estimated world population is approximately 8 billion.
       (insert (propertize (format "%s@%s: "
                                   (if (looking-back "^\\S+") "" "\n")
                                   llm-name)
-                          :llm-prompt-id prompt-id
-                          :llm-role :assistant))
+                          'llm-prompt-id prompt-id
+                          'llm-role 'assistant
+                          ;; Implementation detail and might change without
+                          ;; notice. This text property is used by
+                          ;; `gptel--parse-buffer' to build the list of messages
+                          ;; (from user and assisstant) to send to the LLM.
+                          'gptel 'response))
 
       (let ((progress-indicator (llms-chat-make-progress-indicator (point))))
         (gptel-request prompt
