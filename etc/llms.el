@@ -482,26 +482,30 @@ Concise Explanation about the above Word.")
 ;; Functions to have a conversation with LLMs using a chat/mention interface.
 ;;
 
+(defvar llms-chat--known-llms
+  ;; An association list each association of which is of the form:
+  ;;
+  ;; (<llm-name> . (<llm-backend> . <llm-model>)).
+  ;;
+  (list
+   (cons "groq"
+         (cons llms-gptel-groq-backend "llama3-70b-8192"))
+
+   (cons"openai"
+        (cons gptel--openai "gpt-4o"))
+
+   (cons "pplx"
+         (cons llms-gptel-preplexity-backend "sonar-medium-online"))
+
+   (cons "gemini"
+         (cons llms-gptel-gemini-backend "gemini-pro"))
+
+   (cons "kagi"
+         (cons llms-gptel-kagi-backend "summarize:cecil"))))
+
 (defun llms-chat--name->gptel-backend (name)
-  (cond
-   ((string= name "groq")
-    (cons llms-gptel-groq-backend "llama3-70b-8192"))
-
-   ((string= name "openai")
-    (cons gptel--openai "gpt-4o"))
-
-   ((string= name "pplx")
-    (cons llms-gptel-preplexity-backend "sonar-medium-online"))
-
-   ((string= name "gemini")
-    (cons llms-gptel-gemini-backend "gemini-pro"))
-
-   ((string= name "kagi")
-    (cons llms-gptel-kagi-backend "summarize:cecil"))
-
-   (t
-    (user-error (format "Unknown LLM: %s" name)))))
-
+  (or (assoc-default name llms-chat--known-llms)
+      (user-error (format "Unknown LLM: %s" name))))
 
 (defun llms-chat-make-progress-indicator (starting-point)
   (let* ((indicate-progress-p t)
@@ -527,38 +531,6 @@ Concise Explanation about the above Word.")
 (defun llms-chat-stop-progress-indicator (progress-indicator)
   (funcall progress-indicator))
 
-
-(defun llms-chat--remove-old-reply (prompt-id)
-  ;; Try removing existing response.
-  (when-let* ((reply-start
-               (text-property-any (point) (point-max) 'llm-role 'assistant))
-              (reply-end
-               (and (string= prompt-id (get-text-property reply-start 'llm-prompt-id))
-                    (or (text-property-not-all reply-start (point-max)
-                                               'llm-prompt-id prompt-id)
-                        ;; All of the buffer is filled with reply from an LLM
-                        ;; till the end of buffer.
-                        (point-max)))))
-    (delete-region reply-start reply-end)))
-
-(defun llms-chat--insert-reply (prompt-id response info)
-  (let* ((position (marker-position (plist-get info :position)))
-         (buffer  (buffer-name (plist-get info :buffer)))
-         (color-% 18)
-         (background-color (color-lighten-name (background-color-at-point) color-%))
-         (foreground-color (color-darken-name (foreground-color-at-point) color-%))
-         (face (list :background background-color :foreground foreground-color))
-         (text-properties (list 'llm-prompt-id prompt-id
-                                'llm-role 'assistant
-                                'gptel 'response
-                                'face face
-                                'font-lock-face face)))
-    (with-current-buffer buffer
-      (save-excursion
-        (goto-char position)
-        (insert response)
-        (add-text-properties position (point) text-properties)))))
-
 (defun llms-chat--prompt-bounds ()
   (let ((start (if (region-active-p)
                    (region-beginning)
@@ -568,6 +540,69 @@ Concise Explanation about the above Word.")
                  (region-end)
                (line-end-position))))
     (cons start end)))
+
+(let ((llm-name-regexp (mapconcat (lambda (llm)
+                                    (format "\\(@%s:?\\)"(car llm)))
+                                  llms-chat--known-llms
+                                  "\\|")))
+  (defun llms-chat--prompt-text (beg end)
+    (replace-regexp-in-string  llm-name-regexp
+                               ""
+                               ;; Include text properties so that
+                               ;; `gptel--parse-buffer' can separate text into
+                               ;; user and assistant messages.
+                               (buffer-substring beg end))))
+
+(defun llms-chat--reply-bounds (prompt-id)
+  "Return the bounds of the next reply starting at current point."
+  (when-let* ((reply-start
+               (text-property-any (point) (point-max) 'llm-role 'assistant))
+              (reply-end
+               (and (string= prompt-id (get-text-property reply-start 'llm-prompt-id))
+                    (or (text-property-not-all reply-start (point-max)
+                                               'llm-prompt-id prompt-id)
+                        ;; All of the buffer is filled with reply from an LLM
+                        ;; till the end of buffer.
+                        (point-max)))))
+    (cons reply-start reply-end)))
+
+(defun llms-chat--prompt-properties (prompt-id &rest extra-props)
+  `( llm-prompt-id ,prompt-id
+     llm-role user
+     ,@extra-props ))
+
+(defun llms-chat--reply-properties (prompt-id &rest extra-props)
+  `(
+    ;; Implementation detail and might change without
+    ;; notice. This text property is used by
+    ;; `gptel--parse-buffer' to build the list of messages
+    ;; (from user and assisstant) to send to the LLM.
+    gptel response
+    ;; ---------------------------------------------------
+    llm-prompt-id ,prompt-id
+    llm-role assistant
+    ,@extra-props))
+
+(defun llms-chat--remove-old-reply (prompt-id)
+  ;; Try removing existing response.
+  (when-let ((bounds (llms-chat--reply-bounds prompt-id)))
+    (delete-region (car bounds) (cdr bounds))))
+
+(defun llms-chat--insert-reply (prompt-id response info)
+  (let* ((position (marker-position (plist-get info :position)))
+         (buffer  (buffer-name (plist-get info :buffer)))
+         (color-% 18)
+         (background-color (color-lighten-name (background-color-at-point) color-%))
+         (foreground-color (color-darken-name (foreground-color-at-point) color-%))
+         (face (list :background background-color :foreground foreground-color))
+         (text-properties (llms-chat--reply-properties prompt-id
+                                                       'face face
+                                                       'font-lock-face face)))
+    (with-current-buffer buffer
+      (save-excursion
+        (goto-char position)
+        (insert response)
+        (add-text-properties position (point) text-properties)))))
 
 (defun llms-chat--prompt-id (prompt-bounds)
   (let ((prompt-start-position (car prompt-bounds))
@@ -612,7 +647,7 @@ As of 2023, the estimated world population is approximately 8 billion.
            (prompt-bounds (llms-chat--prompt-bounds))
            (prompt-start-position (car prompt-bounds))
            (prompt-end-position (cdr prompt-bounds))
-           (prompt (buffer-substring-no-properties prompt-start-position prompt-end-position))
+           (prompt (llms-chat--prompt-text prompt-start-position prompt-end-position))
            (prompt-id (llms-chat--prompt-id prompt-bounds))
            ;; --
            (llm-name (llms-chat--llm-name prompt-bounds))
@@ -627,24 +662,18 @@ As of 2023, the estimated world population is approximately 8 billion.
       (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
       (add-text-properties prompt-start-position
                            prompt-end-position
-                           `( llm-prompt-id ,prompt-id
-                              llm-role user
-                              face bold
-                              font-lock-face bold))
+                           (llms-chat--prompt-properties prompt-id
+                                                         'face 'bold
+                                                         'font-lock-face 'bold))
 
       (llms-chat--remove-old-reply prompt-id)
 
       (goto-char prompt-end-position)
-      (insert (propertize (format "%s@%s: "
-                                  (if (looking-back "^\\S+") "" "\n")
-                                  llm-name)
-                          'llm-prompt-id prompt-id
-                          'llm-role 'assistant
-                          ;; Implementation detail and might change without
-                          ;; notice. This text property is used by
-                          ;; `gptel--parse-buffer' to build the list of messages
-                          ;; (from user and assisstant) to send to the LLM.
-                          'gptel 'response))
+      (insert (apply #'propertize
+                     (format "%s@%s: "
+                             (if (looking-back "^\\S+") "" "\n")
+                             llm-name)
+                     (llms-chat--reply-properties prompt-id)))
 
       (let ((progress-indicator (llms-chat-make-progress-indicator (point))))
         (gptel-request prompt
