@@ -526,6 +526,8 @@ Concise Explanation about the above Word.")
            (setq current-iteration (1+ current-iteration))))))
     (lambda ()
       (setq indicate-progress-p nil)
+      ;; `spinner' users timers that should be stopped.
+      (spinner-stop spinner)
       (delete-overlay indicator-overlay))))
 
 (defun llms-chat-stop-progress-indicator (progress-indicator)
