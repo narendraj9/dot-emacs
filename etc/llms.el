@@ -498,7 +498,7 @@ Concise Explanation about the above Word.")
          (cons llms-gptel-preplexity-backend "sonar-medium-online"))
 
    (cons "gemini"
-         (cons llms-gptel-gemini-backend "gemini-pro"))
+         (cons llms-gptel-gemini-backend "gemini-1.5-flash"))
 
    (cons "kagi"
          (cons llms-gptel-kagi-backend "summarize:cecil"))))
