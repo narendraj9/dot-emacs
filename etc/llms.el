@@ -251,12 +251,13 @@
 (defvar llms-interpret-image-function #'openai-interpret-image)
 
 (defun llms-process-result (result buffer notify)
-  (when buffer (set-buffer buffer))
-  (if notify (notify result)
-    (let ((inhibit-read-only t)
-          (start (point)))
-      (insert result)
-      (font-lock-ensure start (point)))))
+  (if notify
+      (notify result)
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t)
+            (start (point)))
+        (insert result)
+        (font-lock-ensure start (point))))))
 
 ;;;###autoload
 (defun openai-interpret-image (file-path &optional instruction notify buffer)
