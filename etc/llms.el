@@ -149,12 +149,16 @@
   (require 'gptel-transient)
   (require 'gptel-curl)
   (require 'gptel-gemini)
+  (require 'gptel-anthropic)
+  (require 'gptel-kagi)
 
   :config
-  (require 'gptel-anthropic)
-
   (defvar llms-gptel-openai-backend
     (gptel-make-openai "OpenAI" :key openai-secret-key))
+
+  (defvar llms-gptel-anthropic-backend
+    (gptel-make-anthropic "Anthropic"
+      :key (auth-source-pick-first-password :host "api.anthropic.com")))
 
   (defvar llms-gptel-groq-backend
     (gptel-make-openai "Groq"
@@ -440,12 +444,12 @@ Concise Explanation about the above Word.")
          (cons llms-gptel-preplexity-backend "sonar-medium-online"))
 
    (cons "gemini"
-         (cons llms-gptel-gemini-backend "gemini-1.5-flash"))
+         (cons llms-gptel-gemini-backend "gemini-1.5-pro"))
 
    (cons "kagi"
-         (cons llms-gptel-kagi-backend "summarize:cecil"))))
+         (cons llms-gptel-kagi-backend "fastgpt"))))
 
-(defun llms-chat--name->gptel-backend (name)
+(defun llms-chat--name->gptel-params (name)
   (or (assoc-default name llms-chat--known-llms)
       (user-error (format "Unknown LLM: %s" name))))
 
@@ -522,6 +526,9 @@ Concise Explanation about the above Word.")
     ;; `gptel--parse-buffer' to build the list of messages
     ;; (from user and assisstant) to send to the LLM.
     gptel response
+    ;; Including this in text properties just in case I would like to attribute
+    ;; the response to a specific backend.
+    gptel-backend ,gptel-backend
     ;; ---------------------------------------------------
     llm-prompt-id ,prompt-id
     llm-role assistant
@@ -622,7 +629,7 @@ As of 2023, the estimated world population is approximately 8 billion.
            (prompt-id (llms-chat--prompt-id prompt-bounds))
            ;; --
            (llm-name (llms-chat--llm-name prompt-bounds))
-           (gptel-params (llms-chat--name->gptel-backend llm-name))
+           (gptel-params (llms-chat--name->gptel-params llm-name))
            (gptel-backend (car gptel-params))
            (gptel-model (cdr gptel-params)))
 
@@ -654,6 +661,68 @@ As of 2023, the estimated world population is approximately 8 billion.
             (if (not response)
                 (error "Error talking to LLM %s: %s" llm-name info)
               (llms-chat--insert-reply prompt-id response info))))))))
+
+;;; ---------------------------------------------------------------------
+(defun llms-let-them-all-chat! ()
+  (interactive)
+  (let* ((llm-names (remove "kagi" (mapcar #'car llms-chat--known-llms)))
+         (next-llm (nth (random (length llm-names)) llm-names))
+         (gptel-params (llms-chat--name->gptel-params next-llm))
+         (next-llm-backend (car gptel-params))
+         (next-llm-model (cdr gptel-params))
+         (current-text (buffer-substring (point-min) (point)))
+         (current-buffer (current-buffer))
+         (current-point (point))
+         (temp-buffer-prefix (format " *temp: %s* " next-llm))
+         (temp-buffer (generate-new-buffer temp-buffer-prefix t))
+         ;; Set up gptel params before making a call
+         (gptel-backend next-llm-backend)
+         (gptel-model next-llm-model)
+         (gptel-max-tokens 100)
+         (system-prompt
+          (save-excursion
+            (goto-char (point-min))
+            (search-forward "System Prompt:")
+            (buffer-substring (point)
+                              (progn (forward-paragraph)
+                                     (point)))))
+         (prop))
+    (message "%s..." next-llm)
+
+    (with-current-buffer temp-buffer
+      (insert current-text)
+      ;; Fix up text before sending it to the next llm.
+      (goto-char (point-min))
+      ;; Consider everything other than what `next-llm' replied with as user
+      ;; text by removing the `gptel' text property.
+      (while (setq prop (text-property-search-forward 'llm-name
+                                                      next-llm
+                                                      nil))
+        (remove-text-properties (prop-match-beginning prop)
+                                (prop-match-end prop)
+                                '(gptel response))
+        (put-text-property (prop-match-beginning prop)
+                           (prop-match-end prop)
+                           'face '(:background "green")))
+      (gptel-request nil
+        :system system-prompt
+        :callback
+        (lambda (response info)
+          (if response
+              (with-current-buffer current-buffer
+                (goto-char current-point)
+                (insert
+                 (propertize (format "\n%s: %s\n\n"
+                                     (propertize (capitalize next-llm)
+                                                 'face 'highlight
+                                                 'font-lock-face 'highlight)
+                                     response)
+                             'gptel 'response
+                             'llm-name next-llm)))
+            (message "Request to %s failed with: %s"
+                     next-llm info))))
+      ;; Clean up
+      (kill-buffer temp-buffer))))
 
 
 (provide 'llms)
