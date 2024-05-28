@@ -137,12 +137,11 @@
   :vc ( :url "https://github.com/karthink/gptel"
         :rev :newest )
   :demand t
+  :custom ((gptel-use-curl nil))
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
-
-  :custom ((gptel-use-curl nil))
-  :init
+  :config
   (when (boundp 'openai-secret-key)
     (setq gptel-api-key openai-secret-key))
 
@@ -152,7 +151,22 @@
   (require 'gptel-anthropic)
   (require 'gptel-kagi)
 
-  :config
+  (add-hook 'gptel-post-response-functions
+            #'gptel-end-of-response)
+
+  (defvar llms-gptel-openrouter-backend
+    (gptel-make-openai "OpenRouter"
+      :host "openrouter.ai"
+      :endpoint "/api/v1/chat/completions"
+      :stream t
+      :key (auth-source-pick-first-password :host "openrouter.ai")
+      :models '("anthropic/claude-3-opus"
+                "anthropic/claude-3-sonnet"
+                "anthropic/claude-3-haiku"
+                "meta-llama/codellama-34b-instruct"
+                "codellama/codellama-70b-instruct"
+                "google/palm-2-codechat-bison-32k")))
+
   (defvar llms-gptel-openai-backend
     (gptel-make-openai "OpenAI" :key openai-secret-key))
 
@@ -424,6 +438,63 @@ Concise Explanation about the above Word.")
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
 
+;;; Openrouter
+;; ──────────────────────────────────────────────────────────────────
+
+(defvar llms-chat-openrouter-models nil)
+
+(defun llms-chat-openrouter-completion-function (str pred action)
+  (let ((model-ids (mapcar (lambda (model) (plist-get model :id))
+                           llms-chat-openrouter-models))
+        (annotation-function
+         (lambda (model-id)
+           (let* ((filter-fn (lambda (model)
+                               (string= (plist-get model :id) model-id)))
+                  (model (car (seq-filter filter-fn llms-chat-openrouter-models)))
+                  (annotation (format " %s "
+                                      (plist-get model :description))))
+             (truncate-string-to-width annotation
+                                       (frame-width)
+                                       nil
+                                       nil
+                                       (truncate-string-ellipsis))))))
+    (cond
+     ((eq action 'metadata)
+      `(metadata . ((annotation-function . ,annotation-function))))
+     ((eq action t)
+      (all-completions str model-ids pred))
+     ((eq action 'lambda)
+      (test-completion str model-ids pred))
+     ((eq action 'nil)
+      (try-completion str model-ids pred)))))
+
+(defun llms-chat-pick-openrouter-model ()
+  (interactive)
+  (unless llms-chat-openrouter-models
+    (let* ((json-object-type 'plist)
+           (json-array-type 'list)
+           (json-key-type 'keyword)
+           (models-url "https://openrouter.ai/api/v1/models"))
+      (request models-url
+        :parser #'json-read
+        :success (cl-function (lambda (&key data &allow-other-keys)
+                                (setq llms-chat-openrouter-models
+                                      (plist-get data :data))))
+        :sync t)))
+  (kill-local-variable 'gptel-backend)
+  (kill-local-variable 'gptel-model)
+  (setq llms-gptel-openrouter-backend
+        ;; Redefine OpenRouter backend with an updated model list.
+        (gptel-make-openai "OpenRouter"
+          :host "openrouter.ai"
+          :endpoint "/api/v1/chat/completions"
+          :stream t
+          :key (auth-source-pick-first-password :host "openrouter.ai")
+          :models (mapcar (lambda (m) (plist-get m :id)) llms-chat-openrouter-models)))
+  (setq gptel-backend llms-gptel-openrouter-backend
+        gptel-model
+        (completing-read "Model:" #'llms-chat-openrouter-completion-function)))
+
 ;;; ──────────────────────────────────────────────────────────────────
 ;; Functions to have a conversation with LLMs using a chat/mention interface.
 ;;
@@ -431,23 +502,16 @@ Concise Explanation about the above Word.")
 (defvar llms-chat--known-llms
   ;; An association list each association of which is of the form:
   ;;
-  ;; (<llm-name> . (<llm-backend> . <llm-model>)).
+  ;; (<llm-name> . (<llm-backend> . <llm-model>))
   ;;
-  (list
-   (cons "groq"
-         (cons llms-gptel-groq-backend "llama3-70b-8192"))
-
-   (cons"openai"
-        (cons llms-gptel-openai-backend "gpt-4o"))
-
-   (cons "pplx"
-         (cons llms-gptel-preplexity-backend "sonar-medium-online"))
-
-   (cons "gemini"
-         (cons llms-gptel-gemini-backend "gemini-1.5-pro"))
-
-   (cons "kagi"
-         (cons llms-gptel-kagi-backend "fastgpt"))))
+  `(("groq"   . (,llms-gptel-groq-backend       . "llama3-70b-8192"))
+    ("opus"   . (,llms-gptel-openrouter-backend . "anthropic/claude-3-opus"))
+    ("haiku"  . (,llms-gptel-openrouter-backend . "anthropic/claude-3-haiku"))
+    ("openai" . (,llms-gptel-openai-backend     . "gpt-4o"))
+    ("pplx"   . (,llms-gptel-preplexity-backend . "sonar-medium-online"))
+    ("gemini" . (,llms-gptel-gemini-backend     . "gemini-1.5-pro"))
+    ("flash"  . (,llms-gptel-gemini-backend     . "gemini-1.5-flash"))
+    ("kagi"   . (,llms-gptel-kagi-backend       . "fastgpt"))))
 
 (defun llms-chat--name->gptel-params (name)
   (or (assoc-default name llms-chat--known-llms)
@@ -663,6 +727,7 @@ As of 2023, the estimated world population is approximately 8 billion.
               (llms-chat--insert-reply prompt-id response info))))))))
 
 ;;; ---------------------------------------------------------------------
+;;;###autoload
 (defun llms-let-them-all-chat! ()
   (interactive)
   (let* ((llm-names (remove "kagi" (mapcar #'car llms-chat--known-llms)))
@@ -670,7 +735,6 @@ As of 2023, the estimated world population is approximately 8 billion.
          (gptel-params (llms-chat--name->gptel-params next-llm))
          (next-llm-backend (car gptel-params))
          (next-llm-model (cdr gptel-params))
-         (current-text (buffer-substring (point-min) (point)))
          (current-buffer (current-buffer))
          (current-point (point))
          (temp-buffer-prefix (format " *temp: %s* " next-llm))
@@ -680,12 +744,13 @@ As of 2023, the estimated world population is approximately 8 billion.
          (gptel-model next-llm-model)
          (gptel-max-tokens 100)
          (system-prompt
-          (save-excursion
+          (progn
             (goto-char (point-min))
             (search-forward "System Prompt:")
             (buffer-substring (point)
                               (progn (forward-paragraph)
                                      (point)))))
+         (current-text (buffer-substring (point) (point-max)))
          (prop))
     (message "%s..." next-llm)
 
@@ -722,7 +787,8 @@ As of 2023, the estimated world population is approximately 8 billion.
             (message "Request to %s failed with: %s"
                      next-llm info))))
       ;; Clean up
-      (kill-buffer temp-buffer))))
+      (kill-buffer temp-buffer))
+    (goto-char current-point)))
 
 
 (provide 'llms)
