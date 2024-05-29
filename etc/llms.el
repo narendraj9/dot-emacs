@@ -539,6 +539,7 @@ Concise Explanation about the above Word.")
   (let* ((indicate-progress-p t)
          (spinner (spinner-create 'box-in-circle))
          (indicator-overlay (make-overlay starting-point starting-point))
+         (timeout-seconds 60)
          (shutdown-fn (lambda ()
                         (setq indicate-progress-p nil)
                         ;; `spinner' users timers that should be stopped.
@@ -549,11 +550,12 @@ Concise Explanation about the above Word.")
     ;; the UI provided by `list-threads'.
     (make-thread (lambda ()
                    (unwind-protect
-                       (while (and indicate-progress-p)
-                         (overlay-put indicator-overlay
-                                      'after-string (spinner-print spinner))
-                         (redisplay t)
-                         (sleep-for 0.1))
+                       (progn (run-with-timer timeout-seconds nil shutdown-fn)
+                              (while (and indicate-progress-p)
+                                (overlay-put indicator-overlay
+                                             'after-string (spinner-print spinner))
+                                (redisplay t)
+                                (sleep-for 0.1)))
                      (funcall shutdown-fn))))
     ;; Return the function to shutdown the thread so that the caller can use it.
     shutdown-fn))
