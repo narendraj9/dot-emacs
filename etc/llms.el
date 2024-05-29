@@ -33,6 +33,14 @@
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
 
+(defun llms-api-key-from-auth-source (host)
+  ;; See: https://github.com/karthink/gptel/issues/4
+  ;;      https://github.com/tkf/emacs-request/issues/185#issuecomment-654553599
+  ;;      -- Library users are supposed to encode multi-byte strings to utf-8
+  ;;      unibyte string. --
+  (when-let ((api-key (auth-source-pick-first-password :host host)))
+    (encode-coding-string api-key 'utf-8)))
+
 (defun image-file->base64-data (file-path)
   (with-temp-buffer
     (insert-file-contents-literally (expand-file-name file-path))
@@ -156,7 +164,7 @@
             #'gptel-end-of-response)
 
   (defvar llms-gptel-openrouter-backend
-    (when-let ((api-key (auth-source-pick-first-password :host "openrouter.ai")))
+    (when-let ((api-key (llms-api-key-from-auth-source "openrouter.ai")))
       (gptel-make-openai "OpenRouter"
         :host "openrouter.ai"
         :endpoint "/api/v1/chat/completions"
@@ -174,21 +182,21 @@
 
   (defvar llms-gptel-anthropic-backend
     (gptel-make-anthropic "Anthropic"
-      :key (auth-source-pick-first-password :host "api.anthropic.com")))
+      :key (llms-api-key-from-auth-source "api.anthropic.com")))
 
   (defvar llms-gptel-groq-backend
     (gptel-make-openai "Groq"
       :host "api.groq.com"
       :endpoint "/openai/v1/chat/completions"
       :stream t
-      :key (auth-source-pick-first-password :host "api.groq.com")
+      :key (llms-api-key-from-auth-source "api.groq.com")
       :models '("mixtral-8x7b-32768"
                 "gemma-7b-it"
                 "llama2-70b-4096"
                 "llama3-70b-8192")))
 
   (defvar llms-gptel-preplexity-backend
-    (when-let ((api-key (auth-source-pick-first-password :host "api.perplexity.ai")))
+    (when-let ((api-key (llms-api-key-from-auth-source "api.perplexity.ai")))
       (gptel-make-openai "Perplexity"
         :host "api.perplexity.ai"
         :endpoint "/chat/completions"
@@ -200,11 +208,11 @@
                   "sonar-medium-online"))))
 
   (defvar llms-gptel-gemini-backend
-    (when-let ((api-key (auth-source-pick-first-password :host "generativelanguage.googleapis.com")))
+    (when-let ((api-key (llms-api-key-from-auth-source "generativelanguage.googleapis.com")))
       (gptel-make-gemini "Gemini" :key api-key)))
 
   (defvar llms-gptel-kagi-backend
-    (when-let ((api-key (auth-source-pick-first-password :host "kagi.com")))
+    (when-let ((api-key (llms-api-key-from-auth-source "kagi.com")))
       (gptel-make-kagi "Kagi"
         :stream t
         :key api-key)))
@@ -318,7 +326,7 @@
     (message "Sending request to Anthropic API...")
     (request "https://api.anthropic.com/v1/messages"
       :type "POST"
-      :headers `(("x-api-key" . ,(auth-source-pick-first-password :host "api.anthropic.com"))
+      :headers `(("x-api-key" . ,(llms-api-key-from-auth-source "api.anthropic.com"))
                  ("anthropic-version" . "2023-06-01")
                  ("content-type" . "application/json"))
       ;; Use Anthropic's fastest model for usual image interpretation
@@ -443,7 +451,7 @@ Concise Explanation about the above Word.")
 
 (defvar llms-chat-openrouter-models nil)
 (defun llms-chat-openrouter-models ()
-  (when-let ((api-key (auth-source-pick-first-password :host "openrouter.ai")))
+  (when-let ((api-key (llms-api-key-from-auth-source "openrouter.ai")))
     (unless llms-chat-openrouter-models
       (let* ((json-object-type 'plist)
              (json-array-type 'list)
