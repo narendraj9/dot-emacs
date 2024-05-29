@@ -28,6 +28,7 @@
 (require 'json)
 (require 'auth-source)
 (require 'org-id)
+(require 'seq)
 
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
@@ -155,17 +156,18 @@
             #'gptel-end-of-response)
 
   (defvar llms-gptel-openrouter-backend
-    (gptel-make-openai "OpenRouter"
-      :host "openrouter.ai"
-      :endpoint "/api/v1/chat/completions"
-      :stream t
-      :key (auth-source-pick-first-password :host "openrouter.ai")
-      :models '("anthropic/claude-3-opus"
-                "anthropic/claude-3-sonnet"
-                "anthropic/claude-3-haiku"
-                "meta-llama/codellama-34b-instruct"
-                "codellama/codellama-70b-instruct"
-                "google/palm-2-codechat-bison-32k")))
+    (when-let ((api-key (auth-source-pick-first-password :host "openrouter.ai")))
+      (gptel-make-openai "OpenRouter"
+        :host "openrouter.ai"
+        :endpoint "/api/v1/chat/completions"
+        :stream t
+        :key api-key
+        :models '("anthropic/claude-3-opus"
+                  "anthropic/claude-3-sonnet"
+                  "anthropic/claude-3-haiku"
+                  "meta-llama/codellama-34b-instruct"
+                  "codellama/codellama-70b-instruct"
+                  "google/palm-2-codechat-bison-32k"))))
 
   (defvar llms-gptel-openai-backend
     (gptel-make-openai "OpenAI" :key openai-secret-key))
@@ -439,21 +441,49 @@ Concise Explanation about the above Word.")
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
 
-;;; Openrouter
-;; ──────────────────────────────────────────────────────────────────
-
 (defvar llms-chat-openrouter-models nil)
+(defun llms-chat-openrouter-models ()
+  (when-let ((api-key (auth-source-pick-first-password :host "openrouter.ai")))
+    (unless llms-chat-openrouter-models
+      (let* ((json-object-type 'plist)
+             (json-array-type 'list)
+             (json-key-type 'keyword)
+             (models-url "https://openrouter.ai/api/v1/models"))
+        (request models-url
+          :parser #'json-read
+          :success
+          (cl-function
+           (lambda (&key data &allow-other-keys)
+             (setq llms-chat-openrouter-models
+                   (plist-get data :data))
+             ;; Redefine OpenRouter backend with an updated model list.
+             (gptel-make-openai "OpenRouter"
+               :host "openrouter.ai"
+               :endpoint "/api/v1/chat/completions"
+               :stream t
+               :key api-key
+               :models (mapcar (lambda (m) (plist-get m :id)) llms-chat-openrouter-models))))
+          :sync t)))
+    llms-chat-openrouter-models))
 
-(defun llms-chat-openrouter-completion-function (str pred action)
-  (let ((model-ids (mapcar (lambda (model) (plist-get model :id))
-                           llms-chat-openrouter-models))
+(defun llms-chat-openrouter-model (model-id)
+  (car (seq-filter (lambda (model)
+                     (string= (plist-get model :id) model-id))
+                   (llms-chat-openrouter-models))))
+
+(defun llms-chat-models ()
+  (seq-concatenate 'list
+                   (mapcar #'car llms-chat--known-llms)
+                   (mapcar (lambda (model) (plist-get model :id))
+                           (llms-chat-openrouter-models))))
+
+(defun llms-chat-completion-function (str pred action)
+  (let ((model-ids (llms-chat-models))
         (annotation-function
          (lambda (model-id)
-           (let* ((filter-fn (lambda (model)
-                               (string= (plist-get model :id) model-id)))
-                  (model (car (seq-filter filter-fn llms-chat-openrouter-models)))
-                  (annotation (format " %s "
-                                      (plist-get model :description))))
+           (when-let* ((model (llms-chat-openrouter-model model-id))
+                       (model-description (plist-get model :description))
+                       (annotation (format " %s " model-description)))
              (truncate-string-to-width annotation
                                        (frame-width)
                                        nil
@@ -469,8 +499,7 @@ Concise Explanation about the above Word.")
      ((eq action 'nil)
       (try-completion str model-ids pred)))))
 
-;;;###autoload
-(defun llms-chat-openrouter-completion-at-point-function ()
+(defun llms-chat-completion-at-point-function ()
   (when-let* ((symbol-bounds (bounds-of-thing-at-point 'symbol))
               (beg (car symbol-bounds))
               (end (cdr symbol-bounds))
@@ -480,49 +509,7 @@ Concise Explanation about the above Word.")
             end
             (completion-table-dynamic
              (lambda (_)
-               (mapcar (lambda (model)
-                         (plist-get model :id))
-                       (llms-chat-openrouter-models))))))))
-
-(defun llms-chat-openrouter-models ()
-  (interactive)
-  (unless llms-chat-openrouter-models
-    (let* ((json-object-type 'plist)
-           (json-array-type 'list)
-           (json-key-type 'keyword)
-           (models-url "https://openrouter.ai/api/v1/models"))
-      (request models-url
-        :parser #'json-read
-        :success (cl-function (lambda (&key data &allow-other-keys)
-                                (setq llms-chat-openrouter-models
-                                      (plist-get data :data))))
-        :sync t)))
-  llms-chat-openrouter-models)
-
-(defun llms-chat-openrouter-model (model-name)
-  (car (seq-filter (lambda (model)
-                     (string= (plist-get model :id) model-name))
-                   (llms-chat-openrouter-models))))
-
-;;;###autoload
-(defun llms-chat-pick-openrouter-model ()
-  (interactive)
-  (unless llms-chat-openrouter-models
-    (llms-chat-openrouter-models)
-    (setq llms-gptel-openrouter-backend
-          ;; Redefine OpenRouter backend with an updated model list.
-          (gptel-make-openai "OpenRouter"
-            :host "openrouter.ai"
-            :endpoint "/api/v1/chat/completions"
-            :stream t
-            :key (auth-source-pick-first-password :host "openrouter.ai")
-            :models (mapcar (lambda (m) (plist-get m :id)) llms-chat-openrouter-models))))
-
-  (kill-local-variable 'gptel-backend)
-  (kill-local-variable 'gptel-model)
-  (setq gptel-backend llms-gptel-openrouter-backend
-        gptel-model
-        (completing-read "Model:" #'llms-chat-openrouter-completion-function)))
+               (llms-chat-models)))))))
 
 ;;; ──────────────────────────────────────────────────────────────────
 ;; Functions to have a conversation with LLMs using a chat/mention interface.
@@ -584,9 +571,9 @@ Concise Explanation about the above Word.")
                (line-end-position))))
     (cons start end)))
 
-(let ((llm-name-regexp (mapconcat (lambda (llm)
-                                    (format "\\(@%s:?\\)"(car llm)))
-                                  llms-chat--known-llms
+(let ((llm-name-regexp (mapconcat (lambda (llm-name)
+                                    (format "\\(@%s:?\\)" llm-name))
+                                  (llms-chat-models)
                                   "\\|")))
   (defun llms-chat--prompt-text (beg end)
     (replace-regexp-in-string  llm-name-regexp
@@ -835,14 +822,14 @@ point for the large language models openrouter.ai supports."
             (define-key map (kbd "C-c RET") #'llms-chat)
             map)
   (if llms-chat-minor-mode
-      ;; When `llms-chat-minor-mode'is enabled, this completion function is the
-      ;; first in the list.
-      (add-to-list 'completion-at-point-functions
-                   #'llms-chat-openrouter-completion-at-point-function)
+      (progn (llms-chat-models)
+             ;; When `llms-chat-minor-mode'is enabled, this completion function is the
+             ;; first in the list.
+             (add-to-list 'completion-at-point-functions
+                          #'llms-chat-completion-at-point-function))
     (setq completion-at-point-functions
-          (remove #'llms-chat-openrouter-completion-at-point-function
+          (remove #'llms-chat-completion-at-point-function
                   completion-at-point-functions))
-    (cancel-timer llms-chat-timer)
     (message "LLMS chat minor mode disabled.")))
 
 
