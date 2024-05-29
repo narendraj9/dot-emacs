@@ -468,11 +468,12 @@ Concise Explanation about the above Word.")
      ((eq action 'nil)
       (try-completion str model-ids pred)))))
 
+;;;###autoload
 (defun llms-chat-openrouter-completion-at-point-function ()
-  (let* ((symbol-bounds (bounds-of-thing-at-point 'symbol))
-         (beg (car symbol-bounds))
-         (end (cdr symbol-bounds))
-         (symbol-str (buffer-substring-no-properties beg end)))
+  (when-let* ((symbol-bounds (bounds-of-thing-at-point 'symbol))
+              (beg (car symbol-bounds))
+              (end (cdr symbol-bounds))
+              (symbol-str (buffer-substring-no-properties beg end)))
     (when (string-prefix-p "@" symbol-str)
       (list (1+ beg)
             end
@@ -497,6 +498,7 @@ Concise Explanation about the above Word.")
         :sync t)))
   llms-chat-openrouter-models)
 
+;;;###autoload
 (defun llms-chat-pick-openrouter-model ()
   (interactive)
   (unless llms-chat-openrouter-models
@@ -546,25 +548,25 @@ Concise Explanation about the above Word.")
 (defun llms-chat-make-progress-indicator (starting-point)
   (let* ((indicate-progress-p t)
          (spinner (spinner-create 'box-in-circle))
-         (indicator-overlay (make-overlay starting-point starting-point)))
+         (indicator-overlay (make-overlay starting-point starting-point))
+         (shutdown-fn (lambda ()
+                        (setq indicate-progress-p nil)
+                        ;; `spinner' users timers that should be stopped.
+                        (spinner-stop spinner)
+                        (delete-overlay indicator-overlay))))
     (spinner-start spinner)
     ;; If you end up with orphaned threads, send them error/quit signals using
     ;; the UI provided by `list-threads'.
-    (make-thread
-     (lambda ()
-       (let ((max-iterations 50)
-             (current-iteration 0))
-         (while (and indicate-progress-p
-                     (< current-iteration max-iterations))
-           (overlay-put indicator-overlay 'after-string (spinner-print spinner))
-           (redisplay t)
-           (sleep-for 0.1)
-           (setq current-iteration (1+ current-iteration))))))
-    (lambda ()
-      (setq indicate-progress-p nil)
-      ;; `spinner' users timers that should be stopped.
-      (spinner-stop spinner)
-      (delete-overlay indicator-overlay))))
+    (make-thread (lambda ()
+                   (unwind-protect
+                       (while (and indicate-progress-p)
+                         (overlay-put indicator-overlay
+                                      'after-string (spinner-print spinner))
+                         (redisplay t)
+                         (sleep-for 0.1))
+                     (funcall shutdown-fn))))
+    ;; Return the function to shutdown the thread so that the caller can use it.
+    shutdown-fn))
 
 (defun llms-chat-stop-progress-indicator (progress-indicator)
   (funcall progress-indicator))
@@ -742,15 +744,19 @@ As of 2023, the estimated world population is approximately 8 billion.
                      (llms-chat--reply-properties prompt-id)))
 
       (let ((progress-indicator (llms-chat-make-progress-indicator (point))))
-        (gptel-request prompt
-          :system llms-chat--system-prompt
-          :position (point)
-          :callback
-          (lambda (response info)
-            (llms-chat-stop-progress-indicator progress-indicator)
-            (if (not response)
-                (error "Error talking to LLM %s: %s" llm-name info)
-              (llms-chat--insert-reply prompt-id response info))))))))
+        (condition-case error
+            (gptel-request prompt
+              :system llms-chat--system-prompt
+              :position (point)
+              :callback
+              (lambda (response info)
+                (llms-chat-stop-progress-indicator progress-indicator)
+                (if (not response)
+                    (error "Error talking to LLM %s: %s" llm-name info)
+                  (llms-chat--insert-reply prompt-id response info))))
+          (error
+           (message "Error sending request to LLM: %s" error)
+           (llms-chat-stop-progress-indicator progress-indicator)))))))
 
 ;;; ---------------------------------------------------------------------
 ;;;###autoload
