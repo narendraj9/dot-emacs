@@ -498,6 +498,11 @@ Concise Explanation about the above Word.")
         :sync t)))
   llms-chat-openrouter-models)
 
+(defun llms-chat-openrouter-model (model-name)
+  (car (seq-filter (lambda (model)
+                     (string= (plist-get model :id) name))
+                   (llms-chat-openrouter-models))))
+
 ;;;###autoload
 (defun llms-chat-pick-openrouter-model ()
   (interactive)
@@ -538,11 +543,8 @@ Concise Explanation about the above Word.")
 
 (defun llms-chat--name->gptel-params (name)
   (or (assoc-default name llms-chat--known-llms)
-      (when-let ((openrouter-model-name
-                  (car (seq-filter (lambda (model)
-                                     (string= (plist-get model :id) name))
-                                   (llms-chat-openrouter-models)))))
-        (cons llms-gptel-openrouter-backend openrouter-model-name))
+      (when (llms-chat-openrouter-model name)
+        (cons llms-gptel-openrouter-backend name))
       (user-error (format "Unknown LLM: %s" name))))
 
 (defun llms-chat-make-progress-indicator (starting-point)
@@ -699,7 +701,7 @@ anything at all.
 answer. Use mathematical equations if that helps.
 4. Use markdown code blocks for code snippets.")
 
-;;;autoload
+;;;###autoload
 (defun llms-chat (arg)
   "Talk to LLMs as if you are chatting to them,
 
@@ -821,6 +823,25 @@ As of 2023, the estimated world population is approximately 8 billion.
       ;; Clean up
       (kill-buffer temp-buffer))
     (goto-char current-point)))
+
+;;; ---------------------------------------------------------------------
+
+;;;###autoload
+(define-minor-mode llms-chat-minor-mode
+  "Minor mode for chatting with LLMs. Exists mainly to set up completion at
+point for the large language models openrouter.ai supports."
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "C-c RET") #'llms-chat)
+            map)
+  (if llms-chat-minor-mode
+      (add-to-list 'completion-at-point-functions
+                   #'llms-chat-openrouter-completion-at-point-function
+                   t)
+    (setq completion-at-point-functions
+          (remove #'llms-chat-openrouter-completion-at-point-function
+                  completion-at-point-functions))
+    (cancel-timer llms-chat-timer)
+    (message "LLMS chat minor mode disabled.")))
 
 
 (provide 'llms)
