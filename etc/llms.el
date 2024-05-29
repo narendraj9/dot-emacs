@@ -500,7 +500,7 @@ Concise Explanation about the above Word.")
 
 (defun llms-chat-openrouter-model (model-name)
   (car (seq-filter (lambda (model)
-                     (string= (plist-get model :id) name))
+                     (string= (plist-get model :id) model-name))
                    (llms-chat-openrouter-models))))
 
 ;;;###autoload
@@ -834,9 +834,10 @@ point for the large language models openrouter.ai supports."
             (define-key map (kbd "C-c RET") #'llms-chat)
             map)
   (if llms-chat-minor-mode
+      ;; When `llms-chat-minor-mode'is enabled, this completion function is the
+      ;; first in the list.
       (add-to-list 'completion-at-point-functions
-                   #'llms-chat-openrouter-completion-at-point-function
-                   t)
+                   #'llms-chat-openrouter-completion-at-point-function)
     (setq completion-at-point-functions
           (remove #'llms-chat-openrouter-completion-at-point-function
                   completion-at-point-functions))
