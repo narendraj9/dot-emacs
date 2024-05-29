@@ -468,7 +468,21 @@ Concise Explanation about the above Word.")
      ((eq action 'nil)
       (try-completion str model-ids pred)))))
 
-(defun llms-chat-pick-openrouter-model ()
+(defun llms-chat-openrouter-completion-at-point-function ()
+  (let* ((symbol-bounds (bounds-of-thing-at-point 'symbol))
+         (beg (car symbol-bounds))
+         (end (cdr symbol-bounds))
+         (symbol-str (buffer-substring-no-properties beg end)))
+    (when (string-prefix-p "@" symbol-str)
+      (list (1+ beg)
+            end
+            (completion-table-dynamic
+             (lambda (_)
+               (mapcar (lambda (model)
+                         (plist-get model :id))
+                       (llms-chat-openrouter-models))))))))
+
+(defun llms-chat-openrouter-models ()
   (interactive)
   (unless llms-chat-openrouter-models
     (let* ((json-object-type 'plist)
@@ -481,16 +495,23 @@ Concise Explanation about the above Word.")
                                 (setq llms-chat-openrouter-models
                                       (plist-get data :data))))
         :sync t)))
+  llms-chat-openrouter-models)
+
+(defun llms-chat-pick-openrouter-model ()
+  (interactive)
+  (unless llms-chat-openrouter-models
+    (llms-chat-openrouter-models)
+    (setq llms-gptel-openrouter-backend
+          ;; Redefine OpenRouter backend with an updated model list.
+          (gptel-make-openai "OpenRouter"
+            :host "openrouter.ai"
+            :endpoint "/api/v1/chat/completions"
+            :stream t
+            :key (auth-source-pick-first-password :host "openrouter.ai")
+            :models (mapcar (lambda (m) (plist-get m :id)) llms-chat-openrouter-models))))
+
   (kill-local-variable 'gptel-backend)
   (kill-local-variable 'gptel-model)
-  (setq llms-gptel-openrouter-backend
-        ;; Redefine OpenRouter backend with an updated model list.
-        (gptel-make-openai "OpenRouter"
-          :host "openrouter.ai"
-          :endpoint "/api/v1/chat/completions"
-          :stream t
-          :key (auth-source-pick-first-password :host "openrouter.ai")
-          :models (mapcar (lambda (m) (plist-get m :id)) llms-chat-openrouter-models)))
   (setq gptel-backend llms-gptel-openrouter-backend
         gptel-model
         (completing-read "Model:" #'llms-chat-openrouter-completion-function)))
@@ -515,6 +536,11 @@ Concise Explanation about the above Word.")
 
 (defun llms-chat--name->gptel-params (name)
   (or (assoc-default name llms-chat--known-llms)
+      (when-let ((openrouter-model-name
+                  (car (seq-filter (lambda (model)
+                                     (string= (plist-get model :id) name))
+                                   (llms-chat-openrouter-models)))))
+        (cons llms-gptel-openrouter-backend openrouter-model-name))
       (user-error (format "Unknown LLM: %s" name))))
 
 (defun llms-chat-make-progress-indicator (starting-point)
@@ -653,7 +679,7 @@ Concise Explanation about the above Word.")
 (defun llms-chat--llm-name (prompt-bounds)
   (let* ((prompt-start-position (car prompt-bounds))
          (prompt-end-position (cdr prompt-bounds))
-         (llm-name-regex "@\\([a-z]+\\)\\(\\S+\\|$\\)")
+         (llm-name-regex "@\\([-/a-z0-9]+\\)\\(\\S+\\|$\\)")
          (llm-name (save-excursion
                      (goto-char prompt-end-position)
                      (and (re-search-backward llm-name-regex prompt-start-position t)
