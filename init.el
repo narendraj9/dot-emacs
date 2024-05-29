@@ -4263,7 +4263,7 @@ buffer."
           ("t g"   . chatgpt-shell-write-git-commit)
           ("t i"   . chatgpt-shell-interrupt)
           ("t j"   . llms-switch-image-interpret-function)
-          ("t l"   . llms-complete)
+          ("t l"   . llms-chat-minor-mode)
           ("t m"   . gptel-menu)
           ("t p"   . chatgpt-shell-proofread-region)
           ("t p"   . gptel-quick-proofreader)

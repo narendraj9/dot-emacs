@@ -214,6 +214,7 @@
 (use-package chatgpt-shell
   :ensure t
   :custom
+  (shell-maker-prompt-before-killing-buffer nil)
   (chatgpt-shell-openai-key openai-secret-key)
   (chatgpt-shell-system-prompt 2)
   (chatgpt-shell-model-version "gpt-4o")
