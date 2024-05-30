@@ -508,9 +508,10 @@ Concise Explanation about the above Word.")
       (try-completion str model-ids pred)))))
 
 (defun llms-chat-completion-at-point-function ()
-  (when-let* ((symbol-bounds (bounds-of-thing-at-point 'symbol))
-              (beg (car symbol-bounds))
-              (end (cdr symbol-bounds))
+  (when-let* ((beg (save-excursion
+                     (re-search-backward "@[^\\S]+" (line-beginning-position) t)
+                     (point)))
+              (end (point))
               (symbol-str (buffer-substring-no-properties beg end)))
     (when (string-prefix-p "@" symbol-str)
       (list (1+ beg)
@@ -762,7 +763,7 @@ As of 2023, the estimated world population is approximately 8 billion.
 ;;;###autoload
 (defun llms-let-them-all-chat! ()
   (interactive)
-  (let* ((llm-names (remove "kagi" (mapcar #'car llms-chat--known-llms)))
+  (let* ((llm-names (remove "kagi" (llms-chat-models)))
          (next-llm (nth (random (length llm-names)) llm-names))
          (gptel-params (llms-chat--name->gptel-params next-llm))
          (next-llm-backend (car gptel-params))

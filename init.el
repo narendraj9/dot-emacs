@@ -666,7 +666,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (setq browse-url-browser-function 'browse-url-chrome))))
 
 
-(use-package atomic-chrome :ensure t :disabled t)
+(use-package atomic-chrome :ensure t)
 
 (use-package paren
   :config
