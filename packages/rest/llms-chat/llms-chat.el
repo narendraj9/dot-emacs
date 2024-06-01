@@ -229,14 +229,23 @@
       (user-error (format "Unknown LLM: %s" name))))
 
 (defun llms-chat--prompt-bounds (&optional start-at-bobp)
-  (let ((start (cond
-                ((region-active-p) (region-beginning))
-                (start-at-bobp (point-min))
-                (t (save-excursion (backward-paragraph) (point)))))
-        (end (if (region-active-p)
-                 (region-end)
-               (line-end-position))))
-    (cons start end)))
+  (cond
+   ((region-active-p)
+    (cons (region-beginning) (region-end)))
+
+   (start-at-bobp
+    (cons (point-min) (line-end-position)))
+
+   ;; Inside an existing prompt, then send the potentially updated prompt
+   ((eq 'user (get-text-property (point) 'llm-role))
+    (save-excursion
+      (text-property-search-backward 'llm-role 'user t)
+      (when-let ((prop (text-property-search-forward 'llm-role 'user t)))
+        (cons (prop-match-beginning prop)
+              (prop-match-end prop)))))
+
+   (t (cons (save-excursion (backward-paragraph) (point))
+            (line-end-position)))))
 
 (let ((llm-name-regexp (mapconcat (lambda (llm-name)
                                     (format "\\(@%s:?\\)" llm-name))
@@ -354,7 +363,7 @@ anything at all.
 2. Be concise.
 3. Answer in as few sentences as possible but make sure to provide a complete
 answer. Use mathematical equations if that helps.
-4. Use markdown code blocks for code snippets.")
+4. Use Emacs org-mode source code blocks for code snippets.")
 
 ;;;###autoload
 (defun llms-chat (arg)
