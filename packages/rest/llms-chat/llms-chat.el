@@ -222,22 +222,21 @@
     ("flash"  . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-flash"))
     ("kagi"   . (,llms-chat-gptel-kagi-backend       . "summarize:muriel"))))
 
+
 (defvar llms-chat-context-providers
   `(("#webpage" . llms-chat-context-provider-webpage)))
 
-
-(defun llms-chat-context-provider-webpage ()
-  (let* ((url-at-point (thing-at-point 'url))
-         (url-contents-buffer (url-retrieve-synchronously url-at-point))
+(defun llms-chat-context-provider-webpage (url)
+  (let* ((url-contents-buffer (url-retrieve-synchronously url))
          (url-contents (with-current-buffer url-contents-buffer
                          (shr-render-region (point-min) (point-max))
                          (encode-coding-string
                           (buffer-substring-no-properties (point-min) (point-max))
                           'utf-8))))
-    (format "Content of webpage at %s: \n%s\n----\n"
-            url-at-point
-            url-contents)))
-
+    (json-encode-string
+     (format "Content of webpage at %s: \n%s\n----\n"
+             url
+             url-contents))))
 
 (defun llms-chat-apply-context-providers (prompt)
   "Expand prompt to include context provided by
@@ -249,12 +248,16 @@
         (goto-char (point-min))
         ;; TODO: Allow multiple instances of the same context provider in the
         ;; prompt.
-        (search-forward (car context-provider))
-        (forward-word)
-        (let ((context-string (funcall (cdr context-provider))))
-          (setq new-prompt
-                (string-join (list new-prompt (json-encode-string context-string))
-                             "\n")))))
+        (while (re-search-forward (concat (regexp-quote (car context-provider))
+                                          ;; TODO: arg to context provider
+                                          ;; cannot have spaces.
+                                          "\\S+\\([^ ]+\\)")
+                                  (point-max)
+                                  t)
+          (let ((context-string (funcall (cdr context-provider)
+                                         (match-string 1))))
+            (setq new-prompt
+                  (string-join (list new-prompt context-string) "\n"))))))
     new-prompt))
 
 (defun llms-chat--name->gptel-params (name)
