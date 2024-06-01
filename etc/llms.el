@@ -167,7 +167,7 @@
 ;;;###autoload
 (defun llms-complete (arg)
   (interactive "P")
-  (let ((gptel-backend llms-gptel-groq-backend)
+  (let ((gptel-backend llms-chat-gptel-groq-backend)
         (prompt-text (llms-prompt-text))
         (gptel-mode "llama3-70b-8192")
         (system-prompt
@@ -238,7 +238,7 @@
 (defun openai-interpret-image (file-path &optional instruction notify buffer)
   (interactive "fFile: ")
   (let* ((progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
-         (gptel-backend llms-gptel-openai-backend)
+         (gptel-backend llms-chat-gptel-openai-backend)
          (gptel-model "gpt-4o")
 
          (instruction (or instruction (read-string "Instruction: ")))
@@ -295,7 +295,7 @@
   (interactive "fFile: ")
   (let* ((instruction (or instruction (read-string "Instruction: ")))
          (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
-         (gptel-backend llms-gptel-openai-backend)
+         (gptel-backend llms-chat-gptel-openai-backend)
          (gptel-model "gpt-4o")
          (image-text
           (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
@@ -311,7 +311,7 @@
   (interactive "fFile: ")
   (let* ((instruction (or instruction (read-string "Instruction: ")))
          (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
-         (gptel-backend llms-gptel-groq-backend)
+         (gptel-backend llms-chat-gptel-groq-backend)
          (gptel-model "llama3-70b-8192")
          (image-text
           (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
