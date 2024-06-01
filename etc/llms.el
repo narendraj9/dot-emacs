@@ -324,18 +324,8 @@
                     (error "Request to LLM failed: %s" info))))    ))
 
 (defvar llms-screenshot-command "gnome-screenshot")
-
-;;;###autoload
-(defun llms-explain-image-with-context ()
-  (interactive)
-  (let* ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
-         (_ (shell-command (format "%s -p -f %s"
-                                   llms-screenshot-command
-                                   (shell-quote-argument temp-file))))
-
-         (llm-buffer (get-buffer-create " *LLM Interpretation*"))
-         (prompt
-          "For a non-native English reader, collect words that might be new or
+(defvar llms-explain-image--default-prompt
+  "For a non-native English reader, collect words that might be new or
 difficult to understand in the context of the articles in the screenshot
 and create a glossary in markdown with concise explanations. Have enough
 space between words for readability. Use examples whenever possible to
@@ -349,42 +339,61 @@ Example Output Format:
 ## Word
 
 Concise Explanation about the above Word.")
+
+;;;###autoload
+(defun llms-explain-image-with-context ()
+  (interactive)
+  (let* ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
+         (_ (shell-command (format "%s -p -f %s"
+                                   llms-screenshot-command
+                                   (shell-quote-argument temp-file))))
+
+         (llm-buffer (get-buffer-create " *LLM Interpretation*"))
          (screenshot-image-data-uri ())
-         (prepare-buffer (lambda ()
-                           (let ((inhibit-read-only t)
-                                 (screenshot-image
-                                  (create-image temp-file 'imagemagick nil :width (frame-pixel-width))))
-                             (end-of-buffer)
-                             (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string)))
-                             (insert-image screenshot-image
-                                           (format "![Captured Image](%s)" (image-file->base64-data-uri temp-file)))
-                             (insert "\n\n"))
-                           (visual-line-mode +1))))
+         (prepare-buffer
+          (lambda ()
+            (let ((inhibit-read-only t)
+                  (screenshot-image
+                   (create-image temp-file 'imagemagick nil :width (frame-pixel-width))))
+              (end-of-buffer)
+              (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string)))
+              (insert-image screenshot-image
+                            (format "![Captured Image](%s)" (image-file->base64-data-uri temp-file)))
+              (insert "\n\n"))
+            (visual-line-mode +1)))
+         (reinterpret-image
+          (lambda ()
+            (interactive)
+            (funcall prepare-buffer)
+            (funcall llms-interpret-image-function
+                     temp-file
+                     (read-string "Instruction: ")
+                     nil
+                     llm-buffer)))
+         (archive-llm-interaction
+          (lambda ()
+            (when (eq (current-buffer) llm-buffer)
+              (append-to-file (point-min)
+                              (point-max)
+                              (expand-file-name "var/llm-interpretation.log"
+                                                user-emacs-directory))
+              (delete-file temp-file)))))
     (with-current-buffer llm-buffer
       (unless (eq major-mode 'gfm-view-mode)
         (gfm-view-mode))
-      (funcall prepare-buffer)
-      (funcall llms-interpret-image-function temp-file prompt nil llm-buffer)
+      (let ((display-buffer-alist '((".*" display-buffer-full-frame))))
+        (funcall prepare-buffer)
+        (display-buffer llm-buffer))
+      (funcall llms-interpret-image-function
+               temp-file
+               (read-string "Prompt: " nil nil llms-explain-image--default-prompt)
+               nil llm-buffer)
+
       (let ((keymap (current-local-map)))
         (define-key keymap (kbd "q") #'lower-frame)
-        (define-key keymap (kbd "G") (lambda ()
-                                       (interactive)
-                                       (funcall prepare-buffer)
-                                       (funcall llms-interpret-image-function
-                                                temp-file
-                                                (read-string "Instruction: ")
-                                                nil
-                                                llm-buffer))))
-      (add-hook 'kill-buffer-hook
-                (lambda ()
-                  (when (eq (current-buffer) llm-buffer)
-                    (append-to-file (point-min)
-                                    (point-max)
-                                    (expand-file-name "var/llm-interpretation.log"
-                                                      user-emacs-directory))
-                    (delete-file temp-file)))
-                nil
-                t))
+        (define-key keymap (kbd "G") #'reinterpret-image))
+      (add-hook 'kill-buffer-hook #'archive-llm-interaction nil t))
+
     llm-buffer))
 
 ;;;###autoload

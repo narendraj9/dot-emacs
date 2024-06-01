@@ -2419,7 +2419,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
                            (visibility . t)
-                           (sticky . t)))))))
+                           (sticky . t))))))
+  :init
+  (autoload 'llms-explain-image-with-context
+    "llms"))
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────
