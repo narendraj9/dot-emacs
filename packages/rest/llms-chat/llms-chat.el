@@ -220,7 +220,42 @@
     ("pplx"   . (,llms-chat-gptel-preplexity-backend . "sonar-medium-online"))
     ("gemini" . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-pro"))
     ("flash"  . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-flash"))
-    ("kagi"   . (,llms-chat-gptel-kagi-backend       . "fastgpt"))))
+    ("kagi"   . (,llms-chat-gptel-kagi-backend       . "summarize:muriel"))))
+
+(defvar llms-chat-context-providers
+  `(("#webpage" . llms-chat-context-provider-webpage)))
+
+
+(defun llms-chat-context-provider-webpage ()
+  (let* ((url-at-point (thing-at-point 'url))
+         (url-contents-buffer (url-retrieve-synchronously url-at-point))
+         (url-contents (with-current-buffer url-contents-buffer
+                         (shr-render-region (point-min) (point-max))
+                         (encode-coding-string
+                          (buffer-substring-no-properties (point-min) (point-max))
+                          'utf-8))))
+    (format "Content of webpage at %s: \n%s\n----\n"
+            url-at-point
+            url-contents)))
+
+
+(defun llms-chat-apply-context-providers (prompt)
+  "Expand prompt to include context provided by
+`llms-chat-context-providers' used in the prompt."
+  (let ((new-prompt prompt))
+    (with-temp-buffer
+      (insert prompt)
+      (dolist (context-provider llms-chat-context-providers)
+        (goto-char (point-min))
+        ;; TODO: Allow multiple instances of the same context provider in the
+        ;; prompt.
+        (search-forward (car context-provider))
+        (forward-word)
+        (let ((context-string (funcall (cdr context-provider))))
+          (setq new-prompt
+                (string-join (list new-prompt (json-encode-string context-string))
+                             "\n")))))
+    new-prompt))
 
 (defun llms-chat--name->gptel-params (name)
   (or (assoc-default name llms-chat-gptel-backends)
@@ -252,12 +287,16 @@
                                   (llms-chat-models)
                                   "\\|")))
   (defun llms-chat--prompt-text (beg end)
-    (replace-regexp-in-string  llm-name-regexp
-                               ""
-                               ;; Include text properties so that
-                               ;; `gptel--parse-buffer' can separate text into
-                               ;; user and assistant messages.
-                               (buffer-substring beg end))))
+    (let* ((initial-prompt
+            ;; Include text properties so that `gptel--parse-buffer' can separate
+            ;; text into user and assistant messages.
+            (buffer-substring beg end))
+           ;; Remove all LLM @handles.
+           (prompt-with-no-mentions
+            (replace-regexp-in-string llm-name-regexp "" initial-prompt)))
+      ;; Expand context providers to append information to the overall prompt
+      ;; sent to the LLM
+      (llms-chat-apply-context-providers prompt-with-no-mentions))))
 
 (defun llms-chat--reply-bounds (prompt-id)
   "Return the bounds of the next reply starting at current point."
@@ -395,6 +434,7 @@ As of 2023, the estimated world population is approximately 8 billion.
         (error "No backend found for LLM: %s" llm-name))
       (when (s-blank-str? prompt)
         (user-error "No prompt found."))
+
       (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
       (add-text-properties prompt-start-position
                            prompt-end-position
