@@ -42,6 +42,76 @@
 (defun image-file->base64-data-uri (file-path)
   (format "data:image/jpeg;base64,%s" (image-file->base64-data file-path)))
 
+(use-package chatgpt-shell
+  :ensure t
+  :custom
+  (shell-maker-prompt-before-killing-buffer nil)
+  (chatgpt-shell-openai-key openai-secret-key)
+  (chatgpt-shell-system-prompt 2)
+  (chatgpt-shell-model-version "gpt-4o")
+
+  :init
+  ;; Used by `chatgpt-shell-load-awesome-prompts'
+  (use-package pcsv :ensure t)
+
+  :config
+  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t))
+
+(use-package dall-e-shell
+  :ensure t
+  :defer t
+  :custom (dall-e-shell-openai-key openai-secret-key))
+
+(use-package copilot
+  :defer t
+  :vc ( :url "https://github.com/copilot-emacs/copilot.el.git"
+        :rev :newest)
+  :bind ( :map copilot-completion-map ("C-c C-c" . copilot-accept-completion) )
+  :init
+  (use-package editorconfig :ensure t)
+  :custom ( (copilot-indent-offset-warning-disable t)
+            (copilot-max-char -1) ))
+
+(use-package cody
+  :vc ( :url "https://github.com/sourcegraph/emacs-cody.git"
+        :rev :newest )
+  :disabled t
+  :init
+  (use-package uuidgen :ensure t))
+
+(use-package llms-chat
+  :load-path "packages/rest/llms-chat"
+  :demand t)
+
+(use-package gptel
+  :vc ( :url "https://github.com/karthink/gptel"
+        :rev :newest )
+  :demand t
+  :custom ((gptel-use-curl nil)
+           (gtpel-expert-commands t))
+  :bind ( :map gptel-mode-map
+          ("C-j" . gptel-send)
+          ("RET" . gptel-send) )
+  :config
+  (when (boundp 'openai-secret-key)
+    (setq gptel-api-key openai-secret-key))
+
+  (require 'gptel-transient)
+  (require 'gptel-curl)
+  (require 'gptel-gemini)
+  (require 'gptel-anthropic)
+  (require 'gptel-kagi)
+
+  (add-hook 'gptel-post-response-functions
+            #'gptel-end-of-response)
+
+  (setq gptel-backend llms-chat-gptel-groq-backend
+        gptel-model "llama3-70b-8192"))
+
+
+;;; Expermients
+;; ──────────────────────────────────────────────────────────────────
+
 (defun llms--display-choices-as-overlay (choices)
   (let* ((prompt-region (llms-prompt-region))
          (choice-count (length choices))
@@ -133,73 +203,6 @@
                (message "LLMS minor mode enabled."))
       (cancel-timer llms-complete-timer)
       (message "LLMS minor mode disabled."))))
-
-
-(use-package chatgpt-shell
-  :ensure t
-  :custom
-  (shell-maker-prompt-before-killing-buffer nil)
-  (chatgpt-shell-openai-key openai-secret-key)
-  (chatgpt-shell-system-prompt 2)
-  (chatgpt-shell-model-version "gpt-4o")
-
-  :init
-  ;; Used by `chatgpt-shell-load-awesome-prompts'
-  (use-package pcsv :ensure t)
-
-  :config
-  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t))
-
-(use-package dall-e-shell
-  :ensure t
-  :defer t
-  :custom (dall-e-shell-openai-key openai-secret-key))
-
-(use-package copilot
-  :defer t
-  :vc ( :url "https://github.com/copilot-emacs/copilot.el.git"
-        :rev :newest)
-  :bind ( :map copilot-completion-map ("C-c C-c" . copilot-accept-completion) )
-  :init
-  (use-package editorconfig :ensure t)
-  :custom ( (copilot-indent-offset-warning-disable t)
-            (copilot-max-char -1) ))
-
-(use-package cody
-  :vc ( :url "https://github.com/sourcegraph/emacs-cody.git"
-        :rev :newest )
-  :disabled t
-  :init
-  (use-package uuidgen :ensure t))
-
-(use-package llms-chat
-  :load-path "packages/rest/llms-chat"
-  :demand t)
-
-(use-package gptel
-  :vc ( :url "https://github.com/karthink/gptel"
-        :rev :newest )
-  :demand t
-  :custom ((gptel-use-curl nil))
-  :bind ( :map gptel-mode-map
-          ("C-j" . gptel-send)
-          ("RET" . gptel-send) )
-  :config
-  (when (boundp 'openai-secret-key)
-    (setq gptel-api-key openai-secret-key))
-
-  (require 'gptel-transient)
-  (require 'gptel-curl)
-  (require 'gptel-gemini)
-  (require 'gptel-anthropic)
-  (require 'gptel-kagi)
-
-  (add-hook 'gptel-post-response-functions
-            #'gptel-end-of-response)
-
-  (setq gptel-backend llms-chat-gptel-groq-backend
-        gptel-model "llama3-70b-8192"))
-
 
 ;;;###autoload
 (defun openai-insert-image (prompt)
@@ -393,5 +396,6 @@ Concise Explanation about the above Word.")
                                    tesseract-openai-interpret-image
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
+
 (provide 'llms)
 ;;; llms.el ends here
