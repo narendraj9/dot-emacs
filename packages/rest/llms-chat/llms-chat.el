@@ -32,6 +32,7 @@
 (require 'org-id)
 (require 'seq)
 (require 'spinner)
+(require 'url-http)
 
 (require 'gptel)
 (require 'gptel-transient)
@@ -163,6 +164,13 @@
                      (string= (plist-get model :id) model-id))
                    (llms-chat-openrouter-models))))
 
+(defun llms-chat-openrouter-model-search (model-name)
+  "Try finding a model with the same name as MODEL-NAME on openrouter.ai"
+  (or (llms-chat-openrouter-model model-name)
+      (car (seq-filter (lambda (model)
+                         (string-suffix-p model-name (plist-get model :id)))
+                       (llms-chat-openrouter-models)))))
+
 (defun llms-chat-models ()
   (seq-concatenate 'list
                    (mapcar #'car llms-chat-gptel-backends)
@@ -224,15 +232,39 @@
 
 
 (defvar llms-chat-context-providers
-  `(("#webpage" . llms-chat-context-provider-webpage)))
+  ;; Hardcoding context provider usage to start with the `#' char,
+  ;; e.g. #webpage https://example.com Current implementation doesn't allow
+  ;; spaces to be present in the argument to the context name.
+  `(("webpage"   . llms-chat-context-provider-webpage)
+    ("plainpage" . llms-chat-context-provider-plainpage)))
+
+(defun llms-chat-context-provider-plainpage (url)
+  (let* ((url-contents
+          (if (executable-find "pandoc")
+              (shell-command-to-string (format "pandoc --from html --to plain %s"
+                                               (shell-quote-argument url)))
+            (with-current-buffer (url-retrieve-synchronously url)
+              (goto-char url-http-end-of-headers)
+              (shr-render-region (point-min) (point-max))
+              (encode-coding-string
+               (buffer-substring-no-properties (point-min) (point-max))
+               'utf-8)))))
+    (json-encode-string
+     (format "Content of webpage at %s: \n%s\n----\n"
+             url
+             url-contents))))
 
 (defun llms-chat-context-provider-webpage (url)
-  (let* ((url-contents-buffer (url-retrieve-synchronously url))
-         (url-contents (with-current-buffer url-contents-buffer
-                         (shr-render-region (point-min) (point-max))
-                         (encode-coding-string
-                          (buffer-substring-no-properties (point-min) (point-max))
-                          'utf-8))))
+  (let* ((url-contents
+          (if (executable-find "pandoc")
+              (shell-command-to-string (format "pandoc --from html --to markdown %s"
+                                               (shell-quote-argument url)))
+            (with-current-buffer (url-retrieve-synchronously url)
+              (goto-char url-http-end-of-headers)
+              (shr-render-region (point-min) (point-max))
+              (encode-coding-string
+               (buffer-substring-no-properties (point-min) (point-max))
+               'utf-8)))))
     (json-encode-string
      (format "Content of webpage at %s: \n%s\n----\n"
              url
@@ -246,9 +278,8 @@
       (insert prompt)
       (dolist (context-provider llms-chat-context-providers)
         (goto-char (point-min))
-        ;; TODO: Allow multiple instances of the same context provider in the
-        ;; prompt.
-        (while (re-search-forward (concat (regexp-quote (car context-provider))
+        (while (re-search-forward (concat "#"
+                                          (regexp-quote (car context-provider))
                                           ;; TODO: arg to context provider
                                           ;; cannot have spaces.
                                           "\\S+\\([^ ]+\\)")
@@ -407,6 +438,9 @@ anything at all.
 answer. Use mathematical equations if that helps.
 4. Use Emacs org-mode source code blocks for code snippets.")
 
+
+(defvar llms-chat--last-used-model nil)
+
 ;;;###autoload
 (defun llms-chat (arg)
   "Talk to LLMs as if you are chatting to them,
@@ -437,6 +471,7 @@ As of 2023, the estimated world population is approximately 8 billion.
         (error "No backend found for LLM: %s" llm-name))
       (when (s-blank-str? prompt)
         (user-error "No prompt found."))
+      (setq llms-chat--last-used-model gptel-model)
 
       (pulse-momentary-highlight-region prompt-start-position prompt-end-position)
       (add-text-properties prompt-start-position
@@ -495,7 +530,7 @@ As of 2023, the estimated world population is approximately 8 billion.
          (current-text (buffer-substring (point) (point-max)))
          (prop))
     (message "%s..." next-llm)
-
+    (setq llms-chat--last-used-model gptel-model)
     (with-current-buffer temp-buffer
       (insert current-text)
       ;; Fix up text before sending it to the next llm.
@@ -534,10 +569,15 @@ As of 2023, the estimated world population is approximately 8 billion.
 
 ;;; ---------------------------------------------------------------------
 
+(defvar llms-chat--mode-line-string nil)
+(put 'llms-chat--mode-line-string 'risky-local-variable t)
+
 ;;;###autoload
 (define-minor-mode llms-chat-minor-mode
   "Minor mode for chatting with LLMs. Exists mainly to set up completion at
 point for the large language models openrouter.ai supports."
+  :lighter (llms-chat--mode-line-string
+            (" " llms-chat--mode-line-string " "))
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map (kbd "C-c RET") #'llms-chat)
             map)
@@ -551,6 +591,7 @@ point for the large language models openrouter.ai supports."
           (remove #'llms-chat-completion-at-point-function
                   completion-at-point-functions))
     (message "LLMS chat minor mode disabled.")))
+
 
 
 (provide 'llms-chat)

@@ -3609,6 +3609,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :config
   (use-package go-guru :ensure t)
+  (use-package go-dlv  :ensure t)
+
   (unless (getenv "GOPATH")
     (setenv "GOPATH" (shell-command-to-string "echo -n $GOPATH")))
 
