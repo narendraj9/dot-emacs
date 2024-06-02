@@ -201,7 +201,7 @@
 
 (defun llms-chat-completion-at-point-function ()
   (when-let* ((beg (save-excursion
-                     (re-search-backward "@[^\\S]+" (line-beginning-position) t)
+                     (re-search-backward "@[^\\S]*" (line-beginning-position) t)
                      (point)))
               (end (point))
               (symbol-str (buffer-substring-no-properties beg end)))
