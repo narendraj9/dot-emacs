@@ -453,6 +453,8 @@ With a prefix ARG, send the whole buffer to the LLM upto current point.
 As of 2023, the estimated world population is approximately 8 billion.
 "
   (interactive "P")
+  (unless llms-chat-minor-mode
+    (llms-chat-minor-mode +1))
   (save-excursion
     (let* (
            ;; A struct (position, id, etc.) probably makes more sense here.
