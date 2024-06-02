@@ -81,7 +81,9 @@
 
 (use-package llms-chat
   :load-path "packages/rest/llms-chat"
-  :demand t)
+  :demand t
+  :config
+  (require 'llms-usage))
 
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
