@@ -238,6 +238,15 @@
   `(("webpage"   . llms-chat-context-provider-webpage)
     ("plainpage" . llms-chat-context-provider-plainpage)))
 
+
+(defvar llms-chat--local-text-keymap
+  (let ((keymap (make-sparse-keymap)))
+    (define-key keymap (kbd "C-c C-c") #'llms-chat)
+    (define-key keymap (kbd "C-c C-k") #'llms-chat-cleanup)
+    keymap)
+  "Keymap active when point is within text inserted because of `llms-chat'
+interactions.")
+
 (defun llms-chat-context-provider-plainpage (url)
   (let* ((url-contents
           (if (executable-find "pandoc")
@@ -348,6 +357,7 @@
 (defun llms-chat--prompt-properties (prompt-id &rest extra-props)
   `( llm-prompt-id ,prompt-id
      llm-role user
+     keymap ,llms-chat--local-text-keymap
      ,@extra-props ))
 
 (defun llms-chat--reply-properties (prompt-id &rest extra-props)
@@ -361,8 +371,11 @@
     ;; the response to a specific backend.
     gptel-backend ,gptel-backend
     ;; ---------------------------------------------------
+
     llm-prompt-id ,prompt-id
     llm-role assistant
+
+    keymap ,llms-chat--local-text-keymap
     front-sticky nil
     rear-nonsticky t
     ,@extra-props))
@@ -569,6 +582,17 @@ As of 2023, the estimated world population is approximately 8 billion.
       (kill-buffer temp-buffer))
     (goto-char current-point)))
 
+
+(defun llms-chat-cleanup ()
+  "Clean up all messages associated with the current prompt under point."
+  (interactive)
+  (let ((prompt-id (get-text-property (point) 'llm-prompt-id)))
+    (save-excursion
+      (delete-region (progn (text-property-search-backward 'llm-prompt-id prompt-id t)
+                            (point))
+                     (progn (text-property-search-forward 'llm-prompt-id prompt-id)
+                            (point))))))
+
 ;;; ---------------------------------------------------------------------
 
 (defvar llms-chat--mode-line-string nil)
@@ -580,9 +604,9 @@ As of 2023, the estimated world population is approximately 8 billion.
 point for the large language models openrouter.ai supports."
   :lighter (llms-chat--mode-line-string
             (" " llms-chat--mode-line-string " "))
-  :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "C-c RET") #'llms-chat)
-            map)
+  :keymap (let ((keymap (make-sparse-keymap)))
+            (define-key keymap (kbd "C-c RET") #'llms-chat)
+            keymap)
   (if llms-chat-minor-mode
       (progn (llms-chat-models)
              ;; When `llms-chat-minor-mode'is enabled, this completion function is the
