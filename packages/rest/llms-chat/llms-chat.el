@@ -263,7 +263,7 @@
 tokens. The only real drawback is the fact that urls are completely
 removed and replaced by text."
   (let* ((url-contents
-          (or (llms-chat--pandoc-url->text url)
+          (or (llms-chat--pandoc-url->plaintext url)
               (llms-chat--url-retrieve-plaintext url))))
     (format "Content of webpage at %s: \n%s\n----\n"
             url
@@ -601,12 +601,12 @@ As of 2023, the estimated world population is approximately 8 billion.
 (defun llms-chat-cleanup ()
   "Clean up all messages associated with the current prompt under point."
   (interactive)
-  (let ((prompt-id (get-text-property (point) 'llm-prompt-id)))
+  (let ((prompt-id (get-text-property (point) 'llm-prompt-id))
+        (prop))
     (save-excursion
-      (delete-region (progn (text-property-search-backward 'llm-prompt-id prompt-id t)
-                            (point))
-                     (progn (text-property-search-forward 'llm-prompt-id prompt-id)
-                            (point))))))
+      (text-property-search-backward 'llm-prompt-id prompt-id t)
+      (while (setq prop (text-property-search-forward 'llm-prompt-id prompt-id t))
+        (delete-region (prop-match-beginning prop) (prop-match-end prop))))))
 
 ;;; ---------------------------------------------------------------------
 
