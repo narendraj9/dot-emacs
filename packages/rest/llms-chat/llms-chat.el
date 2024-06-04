@@ -41,6 +41,24 @@
 (require 'gptel-anthropic)
 (require 'gptel-kagi)
 
+(defun llms-chat--pandoc-url->markdown (url)
+  (when (executable-find "pandoc")
+    (shell-command-to-string (format "pandoc --from html --to markdown %s"
+                                     (shell-quote-argument url)))))
+
+(defun llms-chat--pandoc-url->plaintext (url)
+  (when (executable-find "pandoc")
+    (shell-command-to-string (format "pandoc --from html --to plain %s"
+                                     (shell-quote-argument url)))))
+
+(defun llms-chat--url-retrieve-plaintext (url)
+  (with-current-buffer (url-retrieve-synchronously url)
+    (goto-char url-http-end-of-headers)
+    (shr-render-region (point-min) (point-max))
+    (encode-coding-string
+     (buffer-substring-no-properties (point-min) (point-max))
+     'utf-8)))
+
 (defun llms-chat-make-progress-indicator (starting-point)
   (let* ((indicate-progress-p t)
          (spinner (spinner-create 'box-in-circle))
@@ -236,48 +254,36 @@
   ;; e.g. #webpage https://example.com Current implementation doesn't allow
   ;; spaces to be present in the argument to the context name.
   `(("webpage"   . llms-chat-context-provider-webpage)
-    ("plainpage" . llms-chat-context-provider-plainpage)))
+    ("plainpage" . llms-chat-context-provider-plainpage)
+    ("file"      . llms-chat-context-provider-file)))
 
-
-(defvar llms-chat--local-text-keymap
-  (let ((keymap (make-sparse-keymap)))
-    (define-key keymap (kbd "C-c C-c") #'llms-chat)
-    (define-key keymap (kbd "C-c C-k") #'llms-chat-cleanup)
-    keymap)
-  "Keymap active when point is within text inserted because of `llms-chat'
-interactions.")
 
 (defun llms-chat-context-provider-plainpage (url)
+  "Similar to `llms-chat-context-provider-webpage' but costs fewer
+tokens. The only real drawback is the fact that urls are completely
+removed and replaced by text."
   (let* ((url-contents
-          (if (executable-find "pandoc")
-              (shell-command-to-string (format "pandoc --from html --to plain %s"
-                                               (shell-quote-argument url)))
-            (with-current-buffer (url-retrieve-synchronously url)
-              (goto-char url-http-end-of-headers)
-              (shr-render-region (point-min) (point-max))
-              (encode-coding-string
-               (buffer-substring-no-properties (point-min) (point-max))
-               'utf-8)))))
-    (json-encode-string
-     (format "Content of webpage at %s: \n%s\n----\n"
-             url
-             url-contents))))
+          (or (llms-chat--pandoc-url->text url)
+              (llms-chat--url-retrieve-plaintext url))))
+    (format "Content of webpage at %s: \n%s\n----\n"
+            url
+            url-contents)))
 
 (defun llms-chat-context-provider-webpage (url)
   (let* ((url-contents
-          (if (executable-find "pandoc")
-              (shell-command-to-string (format "pandoc --from html --to markdown %s"
-                                               (shell-quote-argument url)))
-            (with-current-buffer (url-retrieve-synchronously url)
-              (goto-char url-http-end-of-headers)
-              (shr-render-region (point-min) (point-max))
-              (encode-coding-string
-               (buffer-substring-no-properties (point-min) (point-max))
-               'utf-8)))))
-    (json-encode-string
-     (format "Content of webpage at %s: \n%s\n----\n"
-             url
-             url-contents))))
+          (or (llms-chat--pandoc-url->markdown url)
+              (llms-chat--url-retrieve-plaintext url))))
+    (format "Content of webpage at %s: \n%s\n----\n"
+            url
+            url-contents)))
+
+(defun llms-chat-context-provider-file (file-path)
+  (let ((file-contents (with-temp-buffer
+                         (insert-file-contents file-path)
+                         (buffer-substring-no-properties (point-min) (point-max)))))
+    (format "Contents of file at path %s:\n%s\n---\n"
+            file-path
+            file-contents)))
 
 (defun llms-chat-apply-context-providers (prompt)
   "Expand prompt to include context provided by
@@ -294,8 +300,9 @@ interactions.")
                                           "\\S+\\([^ ]+\\)")
                                   (point-max)
                                   t)
-          (let ((context-string (funcall (cdr context-provider)
-                                         (match-string 1))))
+          (let ((context-string (json-encode-string
+                                 (funcall (cdr context-provider)
+                                          (match-string 1)))))
             (setq new-prompt
                   (string-join (list new-prompt context-string) "\n"))))))
     new-prompt))
@@ -353,6 +360,14 @@ interactions.")
                         ;; till the end of buffer.
                         (point-max)))))
     (cons reply-start reply-end)))
+
+(defvar llms-chat--local-text-keymap
+  (let ((keymap (make-sparse-keymap)))
+    (define-key keymap (kbd "C-c C-c") #'llms-chat)
+    (define-key keymap (kbd "C-c C-k") #'llms-chat-cleanup)
+    keymap)
+  "Keymap active when point is within text inserted because of `llms-chat'
+interactions.")
 
 (defun llms-chat--prompt-properties (prompt-id &rest extra-props)
   `( llm-prompt-id ,prompt-id
