@@ -39,7 +39,7 @@ We use this information to estimate costs."
     (`"sonar-medium-online" "perplexity/llama-3-sonar-large-32k-online")
     (`"gemini-1.5-pro" "google/gemini-pro-1.5")
     (`"gemini-1.5-flash" "google/gemini-flash-1.5")
-    (t llms-chat--last-used-model)))
+    (_ llms-chat--last-used-model)))
 
 (defun llms-chat-openrouter-estimte-cost (model-name prompt-tokens completion-tokens)
   (when-let* ((model-name (llms-chat--openrouter-model-name model-name))
