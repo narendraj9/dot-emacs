@@ -41,6 +41,14 @@
 (require 'gptel-anthropic)
 (require 'gptel-kagi)
 
+(defgroup llms-chat nil
+  "Chat with LLMs from anywhere in Emacs.")
+
+(defcustom llms-chat-include-model-usage-info nil
+  "Include model usage information in the response inserted by `llms-chat'."
+  :type 'boolean
+  :group 'llms-chat)
+
 (defun llms-chat--pandoc-url->markdown (url)
   (when (executable-find "pandoc")
     (shell-command-to-string (format "pandoc --from html --to markdown %s"
@@ -419,8 +427,22 @@ interactions.")
   ;; ──────────────────────────────────────────────────────────────────
   :noop)
 
+(defun llms-chat--model-usage-text (prompt-id model-usage)
+  (when-let* ((tokens (plist-get model-usage :tokens))
+              (cost (plist-get model-usage :cost)))
+    (apply #'propertize
+           "\n"
+           'display
+           (format "\n─────────────────── [ Tokens: %.2fk, Cost: ¢%0.4f ] "
+                   (/ tokens 1000.0)
+                   (* cost 100))
+           'face  '(:inherit font-lock-comment-face :height 0.6)
+           'font-lock-face '(:inherit font-lock-comment-face :height 0.6)
+           (llms-chat--reply-properties prompt-id))))
+
 (defun llms-chat--insert-reply (prompt-id response info)
-  (let* ((position (marker-position (plist-get info :position)))
+  (let* ((model-usage-info (plist-get info :model-usage-info))
+         (position (marker-position (plist-get info :position)))
          (buffer  (buffer-name (plist-get info :buffer)))
          (color-% 18)
          (background-color (color-lighten-name (background-color-at-point) color-%))
@@ -434,7 +456,7 @@ interactions.")
         (goto-char position)
         (insert response)
         (add-text-properties position (point) text-properties)
-        (insert "\n")
+        (insert model-usage-info)
         (llms-chat--fill-text position (point))))))
 
 (defun llms-chat--prompt-id (prompt-bounds)
@@ -491,11 +513,14 @@ As of 2023, the estimated world population is approximately 8 billion.
            (prompt-end-position (cdr prompt-bounds))
            (prompt (llms-chat--prompt-text prompt-start-position prompt-end-position))
            (prompt-id (llms-chat--prompt-id prompt-bounds))
-           ;; --
            (llm-name (llms-chat--llm-name prompt-bounds))
            (gptel-params (llms-chat--name->gptel-params llm-name))
-           (gptel-backend (car gptel-params))
-           (gptel-model (cdr gptel-params)))
+
+           ;; Keeping these around as lexical variables for use in the callback.
+           (llm-backend (car gptel-params))
+           (llm-model (cdr gptel-params))
+           (gptel-backend llm-backend)
+           (gptel-model llm-model))
 
       (unless (and gptel-backend gptel-model)
         (error "No backend found for LLM: %s" llm-name))
@@ -517,7 +542,8 @@ As of 2023, the estimated world population is approximately 8 billion.
                              llm-name)
                      (llms-chat--reply-properties prompt-id)))
 
-      (let ((progress-indicator (llms-chat-make-progress-indicator (point))))
+      (let ((progress-indicator (llms-chat-make-progress-indicator (point)))
+            (model-name gptel-model))
         (condition-case error
             (gptel-request prompt
               :system llms-chat--system-prompt
@@ -527,7 +553,22 @@ As of 2023, the estimated world population is approximately 8 billion.
                 (llms-chat-stop-progress-indicator progress-indicator)
                 (if (not response)
                     (error "Error talking to LLM %s: %s" llm-name info)
-                  (llms-chat--insert-reply prompt-id response info))))
+                  (let* ((model-usage
+                          (and llms-chat-include-model-usage-info
+                               (llms-chat-model-usage llm-backend model-name response)))
+                         (model-usage-text
+                          (llms-chat--model-usage-text prompt-id model-usage))
+                         (mode-line-string
+                          (llms-chat-model-usage->mode-line-string model-usage)))
+                    (when llms-chat-include-model-usage-info
+                      (setq llms-chat--mode-line-string mode-line-string))
+                    (llms-chat--insert-reply prompt-id
+                                             response
+                                             `( :model-usage-info ,model-usage-text
+                                                ,@info ))
+                    ;; A final newline that is not considered part of the LLM
+                    ;; response, i.e. has no custom text properties.
+                    (insert "\n")))))
           (error
            (message "Error sending request to LLM: %s" error)
            (llms-chat-stop-progress-indicator progress-indicator)))))))

@@ -27,19 +27,15 @@
 (require 'gptel-openai)
 (require 'savehist)
 
-(add-to-list 'savehist-additional-variables
-             'llms-chat--accumulated-costs)
-(defvar llms-chat--accumulated-costs 0)
-
 (defun llms-chat--openrouter-model-name (model-name)
   "Given a general model-name, returnt the closest openrouter model name (if possible).
 We use this information to estimate costs."
-  (pcase llms-chat--last-used-model
+  (pcase model-name
     (`"llama3-70b-8192" "meta-llama/llama-3-70b")
     (`"sonar-medium-online" "perplexity/llama-3-sonar-large-32k-online")
     (`"gemini-1.5-pro" "google/gemini-pro-1.5")
     (`"gemini-1.5-flash" "google/gemini-flash-1.5")
-    (_ llms-chat--last-used-model)))
+    (_ model-name)))
 
 (defun llms-chat-openrouter-estimte-cost (model-name prompt-tokens completion-tokens)
   (when-let* ((model-name (llms-chat--openrouter-model-name model-name))
@@ -50,49 +46,65 @@ We use this information to estimate costs."
     (+ (* prompt-tokens (string-to-number prompt-pricing))
        (* completion-tokens (string-to-number completion-pricing)))))
 
-(cl-defgeneric llms-chat--model-usage (backend response)
+(cl-defgeneric llms-chat--tokens-consumed (backend model-name response)
   (:documentation "Extract usage metadata from model response for a gptel backend."))
 
-(cl-defmethod llms-chat--model-usage ((backend gptel-openai) response)
+(cl-defmethod llms-chat--tokens-consumed ((backend gptel-openai) model-name response)
   (let* ((usage-info (plist-get response :usage))
          (total-tokens (plist-get usage-info :total_tokens))
          (prompt-tokens (plist-get usage-info :prompt_tokens))
-         (completion-tokens (plist-get usage-info :completion_tokens))
-         (cost (llms-chat-openrouter-estimte-cost llms-chat--last-used-model
-                                                  prompt-tokens
-                                                  completion-tokens)))
-    (list :tokens total-tokens :cost cost)))
+         (completion-tokens (plist-get usage-info :completion_tokens)))
+    (list :prompt-tokens total-tokens
+          :completion-tokens completion-tokens)))
 
-(cl-defmethod llms-chat--model-usage ((backend gptel-gemini) response)
+(cl-defmethod llms-chat--tokens-consumed ((backend gptel-gemini) model-name response)
   (let* ((usage-info (plist-get response :usageMetadata))
          (total-tokens (plist-get usage-info :totalTokenCount))
          (prompt-tokens (plist-get usage-info :promptTokenCount))
-         (completion-tokens (plist-get usage-info :candidatesTokenCount))
-         (cost (llms-chat-openrouter-estimte-cost llms-chat--last-used-model
-                                                  prompt-tokens
-                                                  completion-tokens)))
-    (list :tokens total-tokens :cost cost)))
+         (completion-tokens (plist-get usage-info :candidatesTokenCount)))
+    (list :prompt-tokens total-tokens
+          :completion-tokens completion-tokens)))
 
-(cl-defmethod gptel--parse-response :before (backend response _info)
-  (let ((model-usage (llms-chat--model-usage backend response))
-        (mode-line-string))
+(cl-defmethod gptel--parse-response :around (backend response info)
+  (let* ((response-text (cl-call-next-method backend response info)))
 
-    (when-let ((tokens (plist-get model-usage :tokens)))
+    ;; Hack: I need to do this to make sure I can pass this information from
+    ;; where it is available, i.e. here in this function, to the callback that
+    ;; `gtpel-request' is going to call with the response string. I am attaching
+    ;; the raw response from the LLM API as a text property of the string that
+    ;; `gptel-request' extracts and passes onto the user supplied callback. I am
+    ;; not replacing the definition of `gptel--parse-response' because I want to
+    ;; make sure that the existing `gptel' features continue to work.
+    (put-text-property 0 (length response-text) 'response response response-text)
+
+    ;; Make sure to return the actual response text.
+    response-text))
+
+(defun llms-chat-model-usage (backend model-name response)
+  ;; See: gptel--parse-response :around (backend response info) ^ above.
+  (let* ((response (get-text-property 0 'response response))
+         (token-usage (llms-chat--tokens-consumed backend model-name response))
+         (prompt-tokens (plist-get token-usage :prompt-tokens))
+         (completion-tokens (plist-get token-usage :completion-tokens)))
+    `( :cost ,(llms-chat-openrouter-estimte-cost model-name
+                                                 prompt-tokens
+                                                 completion-tokens)
+       :tokens ,(+ prompt-tokens completion-tokens)
+       ,@token-usage)))
+
+(defun llms-chat-model-usage->mode-line-string (model-usage)
+  (let ((mode-line-string))
+    (when-let ((prompt-tokens (plist-get model-usage :prompt-tokens))
+               (completion-tokens (plist-get model-usage :completion-tokens))
+               (tokens (+ prompt-tokens completion-tokens)))
       (setq mode-line-string
             (number-to-string (/ tokens 1000.0))))
 
     (when-let ((cost (plist-get model-usage :cost)))
-      (setq llms-chat--accumulated-costs
-            (+ llms-chat--accumulated-costs cost))
       (setq mode-line-string
-            (propertize (format "%sk @ ¢%.4f/$%.4f"
-                                mode-line-string
-                                (* cost 100)
-                                llms-chat--accumulated-costs)
+            (propertize (format "%sk @ ¢%.4f" mode-line-string (* cost 100))
                         'face 'mode-line-highlight)))
-    (setq llms-chat--mode-line-string mode-line-string)
-    (run-with-timer 4 nil (lambda ()
-                            (setq llms-chat--mode-line-string nil)))))
+    mode-line-string))
 
 
 (provide 'llms-usage)

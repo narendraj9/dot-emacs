@@ -82,6 +82,7 @@
 (use-package llms-chat
   :load-path "packages/rest/llms-chat"
   :demand t
+  :custom (llms-chat-include-model-usage-info t)
   :config
   (require 'llms-usage))
 
