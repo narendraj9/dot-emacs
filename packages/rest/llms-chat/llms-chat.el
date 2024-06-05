@@ -373,6 +373,7 @@ removed and replaced by text."
   (let ((keymap (make-sparse-keymap)))
     (define-key keymap (kbd "C-c C-c") #'llms-chat)
     (define-key keymap (kbd "C-c C-k") #'llms-chat-cleanup)
+    (define-key keymap (kbd "C-c C-n") #'llms-chat-add-reply)
     keymap)
   "Keymap active when point is within text inserted because of `llms-chat'
 interactions.")
@@ -433,7 +434,7 @@ interactions.")
     (apply #'propertize
            "\n"
            'display
-           (format "\n─────────────────── [ Tokens: %.2fk, Cost: ¢%0.4f ] "
+           (format "\n─────────────────── [ Tokens: %.2fk, Cost: ¢%0.4f ] \n"
                    (/ tokens 1000.0)
                    (* cost 100))
            'face  '(:inherit font-lock-comment-face :height 0.6)
@@ -489,7 +490,8 @@ answer. Use mathematical equations if that helps.
 4. Use Emacs org-mode source code blocks for code snippets.")
 
 
-(defvar llms-chat--last-used-model nil)
+(defvar llms-chat--send-whole-buffer nil)
+(make-variable-buffer-local 'llms-chat--send-whole-buffer)
 
 ;;;###autoload
 (defun llms-chat (arg)
@@ -505,10 +507,14 @@ As of 2023, the estimated world population is approximately 8 billion.
   (interactive "P")
   (unless llms-chat-minor-mode
     (llms-chat-minor-mode +1))
+  (when arg
+    ;; Once you send the whole buffer, keep sending it in future interactions by
+    ;; default.
+    (setq llms-chat--send-whole-buffer t))
   (save-excursion
     (let* (
            ;; A struct (position, id, etc.) probably makes more sense here.
-           (prompt-bounds (llms-chat--prompt-bounds arg))
+           (prompt-bounds (llms-chat--prompt-bounds llms-chat--send-whole-buffer))
            (prompt-start-position (car prompt-bounds))
            (prompt-end-position (cdr prompt-bounds))
            (prompt (llms-chat--prompt-text prompt-start-position prompt-end-position))
@@ -648,6 +654,20 @@ As of 2023, the estimated world population is approximately 8 billion.
       (text-property-search-backward 'llm-prompt-id prompt-id t)
       (while (setq prop (text-property-search-forward 'llm-prompt-id prompt-id t))
         (delete-region (prop-match-beginning prop) (prop-match-end prop))))))
+
+(defun llms-chat-add-reply ()
+  (interactive)
+  (when-let* ((prompt-id (get-text-property (point) 'llm-prompt-id))
+              (prompt-bounds (llms-chat--prompt-bounds))
+              (llm-name (llms-chat--llm-name prompt-bounds))
+              (next-position (or (text-property-not-all (point)
+                                                        (point-max)
+                                                        'llm-prompt-id
+                                                        prompt-id)
+                                 (point-max))))
+    (goto-char next-position)
+    (insert (format "\n@%s " llm-name))))
+
 
 ;;; ---------------------------------------------------------------------
 
