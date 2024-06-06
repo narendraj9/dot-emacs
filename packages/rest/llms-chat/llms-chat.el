@@ -49,6 +49,18 @@
   :type 'boolean
   :group 'llms-chat)
 
+(defface llms-chat-usage-text-face
+  '((t :inherit shadow :height 0.6))
+  "Face for text displaying usage information after LLM replies in buffers.")
+
+(defface llms-chat-reply-face
+  '((t :inherit default))
+  "Face for replies from an LLM.")
+
+(defface llms-chat-prompt-face
+  '((t :inherit default))
+  "Face for prompt sent to an LLM.")
+
 (defun llms-chat--pandoc-url->markdown (url)
   (when (executable-find "pandoc")
     (shell-command-to-string (format "pandoc --from html --to markdown %s"
@@ -382,6 +394,8 @@ interactions.")
   `( llm-prompt-id ,prompt-id
      llm-role user
      keymap ,llms-chat--local-text-keymap
+     face llms-chat-prompt-face
+     font-lock-face llms-chat-prompt-face
      ,@extra-props ))
 
 (defun llms-chat--reply-properties (prompt-id &rest extra-props)
@@ -437,21 +451,17 @@ interactions.")
            (format "\n─────────────────── [ Tokens: %.2fk, Cost: ¢%0.4f ] \n"
                    (/ tokens 1000.0)
                    (* cost 100))
-           'face  '(:inherit font-lock-comment-face :height 0.6)
-           'font-lock-face '(:inherit font-lock-comment-face :height 0.6)
+           'face  'llms-chat-usage-text-face
+           'font-lock-face 'llms-chat-usage-text-face
            (llms-chat--reply-properties prompt-id))))
 
 (defun llms-chat--insert-reply (prompt-id response info)
   (let* ((model-usage-info (plist-get info :model-usage-info))
          (position (marker-position (plist-get info :position)))
          (buffer  (buffer-name (plist-get info :buffer)))
-         (color-% 18)
-         (background-color (color-lighten-name (background-color-at-point) color-%))
-         (foreground-color (color-darken-name (foreground-color-at-point) color-%))
-         (face (list :background background-color :foreground foreground-color))
          (text-properties (llms-chat--reply-properties prompt-id
-                                                       'face face
-                                                       'font-lock-face face)))
+                                                       'face 'llms-chat-reply-face
+                                                       'font-lock-face 'llms-chat-reply-face)))
     (with-current-buffer buffer
       (save-excursion
         (goto-char position)
@@ -567,7 +577,9 @@ As of 2023, the estimated world population is approximately 8 billion.
                          (mode-line-string
                           (llms-chat-model-usage->mode-line-string model-usage)))
                     (when llms-chat-include-model-usage-info
-                      (setq llms-chat--mode-line-string mode-line-string))
+                      (setq llms-chat--mode-line-string mode-line-string)
+                      (run-with-timer 5 nil (lambda ()
+                                              (setq llms-chat--mode-line-string nil))))
                     (llms-chat--insert-reply prompt-id
                                              response
                                              `( :model-usage-info ,model-usage-text
@@ -619,10 +631,7 @@ As of 2023, the estimated world population is approximately 8 billion.
                                                       nil))
         (remove-text-properties (prop-match-beginning prop)
                                 (prop-match-end prop)
-                                '(gptel response))
-        (put-text-property (prop-match-beginning prop)
-                           (prop-match-end prop)
-                           'face '(:background "green")))
+                                '(gptel response)))
       (gptel-request nil
         :system system-prompt
         :callback

@@ -2717,7 +2717,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    ((t (:inherit underline :extend t :foreground "DarkOliveGreen2"))))
 
   :init
-  (setq xeft-directory org-directory
+  (setq xeft-directory (expand-file-name "notes/" org-directory)
         xeft-default-extension "org"
         xeft-recursive t
         xeft-database (expand-file-name "xeft.db" emacs-assets-directory)
@@ -4253,25 +4253,21 @@ buffer."
   :init
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
-  (dolist (feature (list 'copilot 'chatgpt-shell 'gptel 'openai))
+  (dolist (feature (list 'copilot 'chatgpt-shell 'gptel))
     (eval-after-load feature '(require 'llms)))
 
   :bind ( :map ctl-quote-map
           ("t RET" . llms-chat)
           ("t C"   . chatgpt-shell)
           ("t S"   . chatgpt-shell-send-region)
-          ("t TAB" . openai-complete-text)
-          ("t a"   . gptel-ask-quickly)
           ("t c"   . gptel)
           ("t d"   . chatgpt-shell-describe-code)
           ("t e"   . chatgpt-shell-explain-code)
-          ("t g"   . chatgpt-shell-write-git-commit)
           ("t i"   . chatgpt-shell-interrupt)
           ("t j"   . llms-switch-image-interpret-function)
           ("t l"   . llms-chat-minor-mode)
           ("t m"   . gptel-menu)
           ("t p"   . chatgpt-shell-proofread-region)
-          ("t p"   . gptel-quick-proofreader)
           ("t r"   . chatgpt-shell-refactor-code)
           ("t s"   . chatgpt-shell-send-and-review-region)
           ("t t"   . copilot-mode)
