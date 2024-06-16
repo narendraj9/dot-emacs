@@ -394,8 +394,8 @@ interactions.")
   `( llm-prompt-id ,prompt-id
      llm-role user
      keymap ,llms-chat--local-text-keymap
-     face llms-chat-prompt-face
-     font-lock-face llms-chat-prompt-face
+     ;; face llms-chat-prompt-face
+     ;; font-lock-face llms-chat-prompt-face
      ,@extra-props ))
 
 (defun llms-chat--reply-properties (prompt-id &rest extra-props)

@@ -925,6 +925,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         size-indication-mode t)
 
   (diminish 'visual-line-mode)
+  (global-visual-line-mode +1)
 
   ;; This BROKE multiple cursors! Multiple-cursor uses
   ;; `exchange-point-and-mark' and creates overlays for active region around
