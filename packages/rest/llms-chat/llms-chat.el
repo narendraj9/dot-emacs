@@ -503,6 +503,10 @@ answer. Use mathematical equations if that helps.
 (defvar llms-chat--send-whole-buffer nil)
 (make-variable-buffer-local 'llms-chat--send-whole-buffer)
 
+(defcustom llms-chat-post-response-hook (list)
+  "Hook to run after response from an LLM is inserted into the buffer."
+  :group 'llms-chat)
+
 ;;;###autoload
 (defun llms-chat (arg)
   "Talk to LLMs as if you are chatting to them,
@@ -586,7 +590,9 @@ As of 2023, the estimated world population is approximately 8 billion.
                                                 ,@info ))
                     ;; A final newline that is not considered part of the LLM
                     ;; response, i.e. has no custom text properties.
-                    (insert "\n")))))
+                    (insert "\n")
+                    (with-current-buffer (plist-get info :buffer)
+                      (run-hooks 'llms-chat-post-response-hook))))))
           (error
            (message "Error sending request to LLM: %s" error)
            (llms-chat-stop-progress-indicator progress-indicator)))))))

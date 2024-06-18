@@ -44,6 +44,7 @@
 
 (use-package chatgpt-shell
   :ensure t
+  :autoload (chatgpt-shell--put-source-block-overlays)
   :custom
   (shell-maker-prompt-before-killing-buffer nil)
   (chatgpt-shell-openai-key openai-secret-key)
@@ -84,7 +85,9 @@
   :demand t
   :custom (llms-chat-include-model-usage-info t)
   :config
-  (require 'llms-usage))
+  (require 'llms-usage)
+  (add-hook 'llms-chat-post-response-hook
+            #'chatgpt-shell--put-source-block-overlays))
 
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
@@ -172,7 +175,7 @@
   (interactive "P")
   (let ((gptel-backend llms-chat-gptel-groq-backend)
         (prompt-text (llms-prompt-text))
-        (gptel-mode "llama3-70b-8192")
+        (gptel-model "llama3-70b-8192")
         (system-prompt
          (if arg (read-string "Instruction: ")
            (concat "Complete the sentence and reply with just the sentence and nothing else."
@@ -408,6 +411,43 @@ Concise Explanation about the above Word.")
                                    tesseract-openai-interpret-image
                                    tesseract-groq-interpret-image
                                    claude-opus-interpret-image)))))
+
+;;; *Experiment* : An AI Companion (e.g. speedbar-mode but with custom
+;;; *instructions).
+
+(defun llms-spin-up-companion-timer nil)
+(defun llms-spin-up-companion (instruction)
+  (interactive "sInstruction: ")
+  (let* ((attached-buffer (current-buffer))
+         (buffer (get-buffer-create " *LLM Companion* "))
+         (stop (lambda ()
+                 (cancel-timer llms-spin-up-companion-timer)
+                 (kill-buffer buffer)))
+         (refresh-buffer
+          (lambda ()
+            (when (eq (current-buffer) attached-buffer)
+              (let ((gptel-backend llms-chat-gptel-groq-backend)
+                    (gptel-model "llama3-70b-8192")
+                    (text (save-excursion
+                            (backward-paragraph)
+                            (buffer-substring (point)
+                                              (progn (forward-paragraph)
+                                                     (point))))))
+                (with-current-buffer buffer
+                  (erase-buffer)
+                  (setq header-line-format
+                        (format "Last Updated: %s\n" (current-time-string)))
+                  (insert "\n")
+                  (insert text)
+                  (gptel-request nil :system instruction :in-place t)))))))
+    (add-to-list 'display-buffer-alist
+                 `(,(buffer-name buffer) display-buffer-in-direction
+                   (window . main)
+                   (direction . right)
+                   (window-width . 0.4)))
+    (display-buffer buffer)
+    (setq llms-spin-up-companion-timer
+          (run-with-idle-timer 1 t refresh-buffer))))
 
 (provide 'llms)
 ;;; llms.el ends here
