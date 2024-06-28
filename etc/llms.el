@@ -439,7 +439,8 @@ Concise Explanation about the above Word.")
                         (format "Last Updated: %s\n" (current-time-string)))
                   (insert "\n")
                   (insert text)
-                  (gptel-request nil :system instruction :in-place t)))))))
+                  (gptel-request nil :system instruction :in-place t)
+                  (chatgpt-shell--put-source-block-overlays)))))))
     (add-to-list 'display-buffer-alist
                  `(,(buffer-name buffer) display-buffer-in-direction
                    (window . main)

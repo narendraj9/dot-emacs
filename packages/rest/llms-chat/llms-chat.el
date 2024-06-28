@@ -383,9 +383,9 @@ removed and replaced by text."
 
 (defvar llms-chat--local-text-keymap
   (let ((keymap (make-sparse-keymap)))
-    (define-key keymap (kbd "C-c C-c") #'llms-chat)
-    (define-key keymap (kbd "C-c C-k") #'llms-chat-cleanup)
-    (define-key keymap (kbd "C-c C-n") #'llms-chat-add-reply)
+    (define-key keymap (kbd "C-' t C-c") #'llms-chat)
+    (define-key keymap (kbd "C-' t C-k") #'llms-chat-cleanup)
+    (define-key keymap (kbd "C-' t C-n") #'llms-chat-add-reply)
     keymap)
   "Keymap active when point is within text inserted because of `llms-chat'
 interactions.")
@@ -481,7 +481,7 @@ interactions.")
 (defun llms-chat--llm-name (prompt-bounds)
   (let* ((prompt-start-position (car prompt-bounds))
          (prompt-end-position (cdr prompt-bounds))
-         (llm-name-regex "@\\([-/a-z0-9]+\\)\\(\\S+\\|$\\)")
+         (llm-name-regex "@\\([-/a-z0-9\\.]+\\)\\(\\S+\\|$\\)")
          (llm-name (save-excursion
                      (goto-char prompt-end-position)
                      (and (re-search-backward llm-name-regex prompt-start-position t)
