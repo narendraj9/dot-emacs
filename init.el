@@ -1884,6 +1884,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c C-j" . eglot-reconnect)
           ("C-c r g" . eglot-code-actions)
           ("C-c r r" . eglot-rename)
+          ("C-c r f" . eglot-format)
 
           :map ctl-m-map
           ("g" . eglot-code-actions) )

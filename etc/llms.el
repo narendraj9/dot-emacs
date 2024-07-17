@@ -416,6 +416,11 @@ Concise Explanation about the above Word.")
 ;;; *instructions).
 
 (defun llms-spin-up-companion-timer nil)
+(defun llms-spin-up-companion-stop ()
+  (interactive)
+  (cancel-timer llms-spin-up-companion-timer)
+  (kill-buffer (get-buffer " *LLM Companion* ")))
+
 (defun llms-spin-up-companion (instruction)
   (interactive "sInstruction: ")
   (let* ((attached-buffer (current-buffer))
@@ -432,14 +437,28 @@ Concise Explanation about the above Word.")
                             (backward-paragraph)
                             (buffer-substring (point)
                                               (progn (forward-paragraph)
-                                                     (point))))))
+                                                     (point)))))
+                    (inhibit-read-only t))
                 (with-current-buffer buffer
+                  (setq diff-mode-read-only nil)
                   (erase-buffer)
                   (setq header-line-format
                         (format "Last Updated: %s\n" (current-time-string)))
-                  (insert "\n")
                   (insert text)
-                  (gptel-request nil :system instruction :in-place t)
+                  (gptel-request nil
+                    :system instruction
+                    :in-place t
+                    :callback
+                    (lambda (response info)
+                      (let ((inhibit-read-only t)
+                            (diff-use-labels nil))
+                        (with-temp-buffer
+                          (if (not response)
+                              (error "Error talking to LLM %s: %s" llm-name info)
+                            (insert response)
+                            (diff-no-select buffer (current-buffer) "--color always --display inline --exit-code --strip-cr on" t buffer)
+                            (with-current-buffer buffer
+                              (ansi-color-apply-on-region (point-min) (point-max))))))))
                   (chatgpt-shell--put-source-block-overlays)))))))
     (add-to-list 'display-buffer-alist
                  `(,(buffer-name buffer) display-buffer-in-direction
