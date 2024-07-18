@@ -421,8 +421,11 @@ Concise Explanation about the above Word.")
   (cancel-timer llms-spin-up-companion-timer)
   (kill-buffer (get-buffer " *LLM Companion* ")))
 
+;;;###autoload
 (defun llms-spin-up-companion (instruction)
   (interactive "sInstruction: ")
+  (when (timerp llms-spin-up-companion-timer)
+    (cancel-timer llms-spin-up-companion-timer))
   (let* ((attached-buffer (current-buffer))
          (buffer (get-buffer-create " *LLM Companion* "))
          (stop (lambda ()
@@ -451,12 +454,20 @@ Concise Explanation about the above Word.")
                     :callback
                     (lambda (response info)
                       (let ((inhibit-read-only t)
-                            (diff-use-labels nil))
+                            (diff-use-labels nil)
+                            (diff-command "delta"))
                         (with-temp-buffer
                           (if (not response)
                               (error "Error talking to LLM %s: %s" llm-name info)
                             (insert response)
-                            (diff-no-select buffer (current-buffer) "--color always --display inline --exit-code --strip-cr on" t buffer)
+                            (diff-no-select buffer (current-buffer)
+                                            ""
+                                            ;; If using `difftastic', the
+                                            ;; following flags make sense:
+                                            ;; (format "--color always --display side-by-side --width %s --exit-code --strip-cr on"
+                                            ;;         (shell-quote-argument (number-to-string (window-text-width))))
+                                            t
+                                            buffer)
                             (with-current-buffer buffer
                               (ansi-color-apply-on-region (point-min) (point-max))))))))
                   (chatgpt-shell--put-source-block-overlays)))))))

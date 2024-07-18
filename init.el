@@ -666,7 +666,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (setq browse-url-browser-function 'browse-url-chrome))))
 
 
-(use-package atomic-chrome :ensure t)
+(use-package atomic-chrome
+  :ensure t
+  :init
+  (defvar atomic-chrome--saved-window-configuration nil)
+  (add-hook 'atomic-chrome-edit-mode-hook
+            (lambda ()
+              (setq atomic-chrome--saved-window-configuration (current-window-configuration))
+              (delete-other-windows)))
+  (add-hook 'atomic-chrome-edit-done-hook
+            (lambda ()
+              (when (window-configuration-p atomic-chrome--saved-window-configuration)
+                (set-window-configuration atomic-chrome--saved-window-configuration)))))
 
 (use-package paren
   :config
@@ -4260,6 +4271,8 @@ buffer."
 
   :bind ( :map ctl-quote-map
           ("t RET" . llms-chat)
+          ("t w"   . llms-spin-up-companion)
+          ("t W"   . llms-spin-up-companion-stop)
           ("t C"   . chatgpt-shell)
           ("t S"   . chatgpt-shell-send-region)
           ("t c"   . gptel)
