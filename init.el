@@ -4207,11 +4207,6 @@ buffer."
       (calc)
       (calc-recall 'var-q0))))
 
-(use-package casual
-  :ensure t
-  :bind ( :map calc-mode-map
-          ("C-o" . casual-main-menu)))
-
 (use-package mule-cmds
   :bind (("C-x \\" . set-input-method)
          ("C-\\"   . toggle-input-method))
