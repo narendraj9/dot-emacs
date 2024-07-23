@@ -2164,11 +2164,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (which-function-mode +1))
 
 (use-package gud
-  :config
-  (setq gdb-show-main t
-        ;; Change this to `t' or use command `gdb-many-windows' to
-        ;; have a fancier IDE like UI.
-        gdb-many-windows nil))
+  :custom
+  (gdb-show-main t)
+  ;; Change this to `t' or use command `gdb-many-windows' to
+  ;; have a fancier IDE like UI.
+  (gdb-many-windows nil)
+  (gud-gdb-command-name "rr replay -i=mi"))
 
 (use-package realgud
   :doc "`gud' with bells and whistles."
