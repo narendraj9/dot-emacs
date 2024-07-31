@@ -142,7 +142,8 @@
     :endpoint "/openai/v1/chat/completions"
     :stream t
     :key (llms-chat--api-key-from-auth-source "api.groq.com")
-    :models '("mixtral-8x7b-32768"
+    :models '("llama-3.1-70b-versatile"
+              "mixtral-8x7b-32768"
               "gemma-7b-it"
               "llama2-70b-4096"
               "llama3-70b-8192")))
@@ -467,7 +468,8 @@ interactions.")
         (goto-char position)
         (insert response)
         (add-text-properties position (point) text-properties)
-        (insert model-usage-info)
+        (when model-usage-info
+          (insert model-usage-info))
         (llms-chat--fill-text position (point))))))
 
 (defun llms-chat--prompt-id (prompt-bounds)

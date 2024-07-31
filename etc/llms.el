@@ -112,7 +112,7 @@
             #'gptel-end-of-response)
 
   (setq gptel-backend llms-chat-gptel-groq-backend
-        gptel-model "llama3-70b-8192"))
+        gptel-model "llama-3.1-70b-versatile"))
 
 
 ;;; Expermients
@@ -175,7 +175,7 @@
   (interactive "P")
   (let ((gptel-backend llms-chat-gptel-groq-backend)
         (prompt-text (llms-prompt-text))
-        (gptel-model "llama3-70b-8192")
+        (gptel-model "llama-3.1-70b-versatile")
         (system-prompt
          (if arg (read-string "Instruction: ")
            (concat "Complete the sentence and reply with just the sentence and nothing else."
@@ -318,7 +318,7 @@
   (let* ((instruction (or instruction (read-string "Instruction: ")))
          (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
          (gptel-backend llms-chat-gptel-groq-backend)
-         (gptel-model "llama3-70b-8192")
+         (gptel-model "llama-3.1-70b-versatile")
          (image-text
           (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
     (gptel-request image-text
@@ -415,7 +415,7 @@ Concise Explanation about the above Word.")
 ;;; *Experiment* : An AI Companion (e.g. speedbar-mode but with custom
 ;;; *instructions).
 
-(defun llms-spin-up-companion-timer nil)
+(defvar llms-spin-up-companion-timer nil)
 (defun llms-spin-up-companion-stop ()
   (interactive)
   (cancel-timer llms-spin-up-companion-timer)
@@ -435,7 +435,7 @@ Concise Explanation about the above Word.")
           (lambda ()
             (when (eq (current-buffer) attached-buffer)
               (let ((gptel-backend llms-chat-gptel-groq-backend)
-                    (gptel-model "llama3-70b-8192")
+                    (gptel-model "llama-3.1-70b-versatile")
                     (text (save-excursion
                             (backward-paragraph)
                             (buffer-substring (point)
