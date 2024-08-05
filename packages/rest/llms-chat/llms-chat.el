@@ -260,7 +260,7 @@
   ;;
   ;; (<llm-name> . (<llm-backend> . <llm-model>))
   ;;
-  `(("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-70b-8192"))
+  `(("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-groq-70b-8192-tool-use-preview"))
     ("opus"   . (,llms-chat-gptel-openrouter-backend . "anthropic/claude-3-opus"))
     ("haiku"  . (,llms-chat-gptel-openrouter-backend . "anthropic/claude-3-haiku"))
     ("openai" . (,llms-chat-gptel-openai-backend     . "gpt-4o"))
