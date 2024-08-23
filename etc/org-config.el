@@ -571,7 +571,8 @@ Otherwise, limit to only `org-mode' files."
         `(("i" "TODO" entry (file "capture.org")
            ,(concat
              "* TODO %? \n"
-             org-config--common-metadata))
+             org-config--common-metadata)
+           :prepend t)
           ("n" "NOTE" entry (file+olp+datetree ,org-default-notes-file)
            ,(concat "* %? \n"
                     org-config--common-metadata

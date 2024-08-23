@@ -64,7 +64,7 @@
 (setq use-package-compute-statistics t)
 
 (use-package use-package-ensure-system-package)
-(use-package diminish :ensure t :demand t)
+(use-package delight :ensure t :demand t)
 (use-package bind-key :ensure t)
 
 (eval-and-compile
@@ -689,7 +689,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package uniquify
   :doc "Unique buffer names"
-  :diminish t
+  :delight t
   :init
   (setq uniquify-buffer-name-style 'post-forward
         uniquify-separator " • "))
@@ -772,7 +772,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package hideshow
   :defer t
-  :diminish hs-minor-mode
+  :delight hs-minor-mode
   :bind ( :map hs-minor-mode-map
           ([backtab] . hs-toggle-hiding)
           ("C-c @ a"  . my-toggle-hideshow-all)
@@ -813,7 +813,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   "Wrap region with custom chars."
   :ensure t
   :hook (after-init . wrap-region-mode)
-  :diminish
+  :delight
   :config
   (wrap-region-add-wrappers
    '(("=" "=" nil (org-mode))
@@ -822,7 +822,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (wrap-region-remove-wrapper "<" 'org-mode))
 
 (use-package selected
-  :diminish selected-minor-mode
+  :delight selected-minor-mode
   :ensure t
   :config
   (selected-global-mode +1))
@@ -862,7 +862,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package simple
   :doc "The great simple.el"
   :demand t
-  :diminish auto-fill-function
+  :delight auto-fill-function
   :bind (("M-q"   . fill-or-unfill)
          ("M-["   . backward-delete-dwim)
 
@@ -1130,7 +1130,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package volatile-highlights
   :ensure t
-  :diminish volatile-highlights-mode
+  :delight volatile-highlights-mode
   :hook (after-init . volatile-highlights-mode))
 
 (use-package info
@@ -1145,7 +1145,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "Get quick emacs key binding suggestions"
   :ensure t
   :demand 2
-  :diminish which-key-mode
+  :delight which-key-mode
   :config
   (setq which-key-max-description-length nil
         which-key-preserve-window-configuration t)
@@ -1509,7 +1509,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                  (window-width . 0.5))))
 
 (use-package flyspell
-  :diminish flyspell-mode
+  :delight flyspell-mode
   :bind (:map ctl-period-map
               ("!" . flyspell-buffer))
   :preface
@@ -1560,7 +1560,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           (("i"   . company-complete)
            ("C-c" . company-complete)) )
   :hook (after-init . global-company-mode)
-  :diminish company-mode
+  :delight company-mode
   :config
   (define-key company-mode-map [remap indent-for-tab-command]
               #'company-indent-or-complete-common)
@@ -1686,7 +1686,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           try-expand-line)))
 
 (use-package abbrev
-  :diminish abbrev-mode
+  :delight abbrev-mode
   :init
   (setq-default abbrev-mode t
                 save-abbrevs t
@@ -1708,7 +1708,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package yasnippet
   :defer 2
   :ensure t
-  :diminish yas-minor-mode
+  :delight yas-minor-mode
   :bind (("C-c & C-h" . yas-describe-tables)
          :map yas-keymap
          ("<tab>" . my-yas-next-field-or-maybe-expand))
@@ -2092,7 +2092,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   )
 
 (use-package eldoc
-  :diminish eldoc-mode
+  :delight eldoc-mode
   :bind ( :map ctl-m-map
           ("d" . toggle-eldoc-doc-buffer)
           ("D" . freeze-eldoc-buffer) )
@@ -2189,7 +2189,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package subword
   ;; :hook (prog-mode . subword-mode)
-  :diminish subword-mode
+  :delight subword-mode
   :init
   (global-subword-mode +1))
 
@@ -2234,7 +2234,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                  :margin 2))))
 
 (use-package flymake
-  :diminish flymake-mode
+  :delight flymake-mode
   :bind ( :map flymake-mode-map
           ("M-g n" . flymake-goto-next-error)
           ("M-g p" . flymake-goto-prev-error) )
@@ -2268,7 +2268,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package highlight-indent-guides
   :ensure t
-  :diminish highlight-indent-guides-mode
+  :delight highlight-indent-guides-mode
   :bind ( :map ctl-period-map
           ("C-l" . highlight-indent-guides-mode))
   :config
@@ -2295,7 +2295,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package aggressive-indent
   :ensure t
   :defer t
-  :diminish aggressive-indent-mode
+  :delight aggressive-indent-mode
   :hook ((emacs-lisp-mode clojure-mode racket-mode scheme-mode cc-mode rust-mode) . aggressive-indent-mode))
 
 (use-package comint
@@ -2406,7 +2406,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( "s-<return>" . --eat-toggle )
 
-  :diminish eat-eshell-mode
+  :delight eat-eshell-mode
   :custom ( eat-kill-buffer-on-exit t
             eshell-visual-commands (list) )
 
@@ -2744,7 +2744,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
   :defer 5
-  :diminish pomodoro-mode
+  :delight pomodoro-mode
   :commands (pomodoro-mode pomodoro-append-to-org-agenda pomodoro-jump-to-org-heading)
   :bind ( :map ctl-m-map
           ("x <return>" . pomodoro-jump-to-org-heading)
@@ -3021,7 +3021,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "Gradle integration in Emacs."
   :ensure t
   :hook (java-mode . gradle-mode)
-  :diminish gradle-mode
+  :delight gradle-mode
   :config
   (setq gradle-use-gradlew t
         gradle-gradlew-executable "./gradlew"))
@@ -3093,7 +3093,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :doc "Automatically guess offset and tabs-indent for opened file."
   :ensure t
   :disabled t
-  :diminish dtrt-indent-mode
+  :delight dtrt-indent-mode
   :hook (java-mode . dtrt-indent-mode))
 
 (use-package pos-tip
@@ -3120,7 +3120,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package cargo
   :ensure t
   :after rust-mode
-  :diminish cargo-minor-mode
+  :delight cargo-minor-mode
   :config
   (define-key cargo-mode-map (kbd "C-. C-k") #'cargo-process-check))
 
@@ -3166,7 +3166,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package paredit
   :ensure t
-  :diminish paredit-mode
+  :delight paredit-mode
   :hook ((( emacs-lisp-mode inferior-emacs-lisp-mode
             lisp-mode clojure-mode clojurescript-mode
             cider-repl-mode racket-mode scheme-mode
@@ -3232,7 +3232,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package clj-refactor
   :pin melpa
   :ensure t
-  :diminish clj-refactor-mode
+  :delight clj-refactor-mode
   :after clojure-mode
   :hook (clojure-mode . clj-refactor-mode)
   :custom ((cljr-insert-newline-after-require . nil)
@@ -3240,19 +3240,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (:map clj-refactor-map
               ("C-; c <SPC>" . clojure-top-level-spacing))
   :config
-  (cljr-add-keybindings-with-prefix "C-;")
-  (add-hook 'clojure-mode-hook
-            (lambda ()
-              (add-hook #'before-save-hook
-                        (lambda ()
-                          (when (eq major-mode 'clojure-mode)
-                            (make-thread (lambda ()
-                                           (cljr--clean-ns nil :no-pruning)))))))))
+  (cljr-add-keybindings-with-prefix "C-;"))
+
+(use-package cljstyle-format
+  :hook (clojure-mode . cljstyle-format-on-save-mode)
+  :delight cljstyle-format-on-save-mode
+  :ensure t
+  :init
+  (cljstyle-format-on-save-mode))
 
 (use-package cider
   :doc
   :ensure t
-  :diminish cider-mode
+  :delight cider-mode
   :hook (clojure-mode . cider-mode)
   :bind ( :map cider-mode-map
           ("M-." . cider-find-var-dwim) )
@@ -3375,7 +3375,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; WHITESPACE-MODE
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package whitespace
-  :diminish whitespace-mode
+  :delight whitespace-mode
   :hook ((message-mode . whitespace-mode))
   :bind (("C-x C-y" . whitespace-mode)
          ("C-x y"   . whitespace-toggle-options))
@@ -3565,7 +3565,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package ruby-end
   :ensure t
-  :diminish ruby-end-mode
+  :delight ruby-end-mode
   :hook ((ruby-ts-mode . ruby-end-mode)
          (ruby-mode . ruby-end-mode)))
 
@@ -3725,7 +3725,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         diff-font-lock-syntax nil))
 
 (use-package autorevert
-  :diminish auto-revert-mode
+  :delight auto-revert-mode
   :config
   (global-auto-revert-mode +1))
 
