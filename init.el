@@ -1099,6 +1099,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :ensure t
   :demand t
+  :custom (TeX-master 'dwim)
   :init
   (use-package company-math
     :ensure t
@@ -1693,7 +1694,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 abbrev-file-name (expand-file-name "lib/abbrevs/abbrev-defs"
                                                    user-emacs-directory))
   (if (file-exists-p abbrev-file-name)
-      (quietly-read-abbrev-file))
+      (quietly-read-abbrev-file)
+    (make-empty-file abbrev-file-name))
 
 
   :config

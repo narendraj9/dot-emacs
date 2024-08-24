@@ -415,25 +415,27 @@ Concise Explanation about the above Word.")
 ;;; *Experiment* : An AI Companion (e.g. speedbar-mode but with custom
 ;;; *instructions).
 
-(defvar llms-spin-up-companion-timer nil)
+(defvar llms-spin-up-companion--saved-window-config)
+
 (defun llms-spin-up-companion-stop ()
   (interactive)
-  (cancel-timer llms-spin-up-companion-timer)
-  (kill-buffer (get-buffer " *LLM Companion* ")))
+  (kill-buffer (get-buffer " *LLM Companion* "))
+  (when (window-configuration-p llms-spin-up-companion--saved-window-config)
+    (set-window-configuration llms-spin-up-companion--saved-window-config)))
 
 ;;;###autoload
 (defun llms-spin-up-companion (instruction)
   (interactive "sInstruction: ")
-  (when (timerp llms-spin-up-companion-timer)
-    (cancel-timer llms-spin-up-companion-timer))
   (let* ((attached-buffer (current-buffer))
-         (buffer (get-buffer-create " *LLM Companion* "))
+         (window-configuration (current-window-configuration))
          (stop (lambda ()
-                 (cancel-timer llms-spin-up-companion-timer)
-                 (kill-buffer buffer)))
+                 (kill-buffer buffer)
+                 (set-window-configuration window-configuration)))
+         (buffer (get-buffer-create " *LLM Companion* "))
          (refresh-buffer
           (lambda ()
-            (when (eq (current-buffer) attached-buffer)
+            (interactive)
+            (when (and (eq (current-buffer) attached-buffer))
               (let ((gptel-backend llms-chat-gptel-groq-backend)
                     (gptel-model "llama-3.1-70b-versatile")
                     (text (save-excursion
@@ -476,9 +478,12 @@ Concise Explanation about the above Word.")
                    (window . main)
                    (direction . right)
                    (window-width . 0.4)))
+    (setq llms-spin-up-companion--saved-window-config window-configuration)
     (display-buffer buffer)
-    (setq llms-spin-up-companion-timer
-          (run-with-idle-timer 1 t refresh-buffer))))
+    (funcall refresh-buffer)
+    (define-key (current-local-map)
+                (kbd "C-c r")
+                refresh-buffer)))
 
 (provide 'llms)
 ;;; llms.el ends here
