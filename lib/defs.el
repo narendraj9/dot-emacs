@@ -713,7 +713,7 @@ print information about what repeat is doing."
         (list 'interactive)
         (list 'repeat-command (list 'quote command) (list 'quote message-fn))))
 
-(defvar quick-switch-themes (let ((themes-list (list 'jazz 'modus-operandi)))
+(defvar quick-switch-themes (let ((themes-list (list 'jazz 'modus-operandi 'ef-dark)))
                               (nconc themes-list themes-list))
   "A circular list of themes to keep switching between.
 Make sure that the currently enabled theme is at the head of this
