@@ -481,9 +481,10 @@ Concise Explanation about the above Word.")
     (setq llms-spin-up-companion--saved-window-config window-configuration)
     (display-buffer buffer)
     (funcall refresh-buffer)
-    (define-key (current-local-map)
-                (kbd "C-c r")
-                refresh-buffer)))
+    (with-current-buffer attached-buffer
+      (define-key (current-local-map)
+                  (kbd "C-c r")
+                  refresh-buffer))))
 
 (provide 'llms)
 ;;; llms.el ends here
