@@ -29,6 +29,7 @@
 (require 'auth-source)
 (require 'org-id)
 (require 'seq)
+(require 'diff)
 
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
