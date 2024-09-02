@@ -91,7 +91,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package comp
   :if (fboundp 'native-compile)
-  :custom (comp-async-report-warnings-errors nil))
+  :custom (native-comp-async-report-warnings-errors nil))
 
 
 ;; LIBRARIES

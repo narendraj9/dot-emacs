@@ -76,7 +76,6 @@
 (use-package cody
   :vc ( :url "https://github.com/sourcegraph/emacs-cody.git"
         :rev :newest )
-  :disabled t
   :init
   (use-package uuidgen :ensure t))
 
