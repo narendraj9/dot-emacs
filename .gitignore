@@ -1,7 +1,7 @@
 *
 !.gitignore
 !init.el
-!abbrev_defs
+!abbrev-defs
 !custom.el
 
 !README.md
