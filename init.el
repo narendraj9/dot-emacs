@@ -2030,8 +2030,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package combobulate
   :vc ( :url "https://github.com/mickeynp/combobulate.git"
-        :rev :newest )
-  :disabled t)
+        :rev :newest ))
 
 (use-package ts-movement
   :vc ( :url "https://github.com/haritkapadia/ts-movement.git"
@@ -2324,7 +2323,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (vterm-send-key "n" nil nil t)))
 
 (use-package shell
-  :custom ( explicit-shell-file-name "nu" )
+  :custom ( explicit-shell-file-name "zsh" )
   :init
   (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
 
