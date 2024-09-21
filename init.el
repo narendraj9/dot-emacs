@@ -762,7 +762,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (add-hook 'outline-minor-mode-hook
             (lambda ()
-              (diminish 'outline-minor-mode)))
+              (delight 'outline-minor-mode)))
   ;; This minor mode uses selective display to hide text so it displays three
   ;; dots (ellipsis) like `selective-display'
   ;; https://www.emacswiki.org/emacs/OutlineMode
@@ -935,7 +935,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         column-number-mode t
         size-indication-mode t)
 
-  (diminish 'visual-line-mode)
+  (delight 'visual-line-mode)
   (global-visual-line-mode +1)
 
   ;; This BROKE multiple cursors! Multiple-cursor uses
@@ -1784,10 +1784,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setd yankpad-file "etc/yankpad.org"))
 
-;;;
-
-(use-package langtool
-  :ensure t)
 
 ;;; Personal Finance
 ;; ――――――――――――――――――――――――――――――――――――
@@ -1816,9 +1812,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("+" . set-selective-display)
          ("s" . chart-numbers-on-line)
          ("z" . calc-store-numbers-on-line))
-
-  :init
-  (use-package async :ensure t)
 
   :config
   (setq hledger-jfile

@@ -50,14 +50,15 @@
   (shell-maker-prompt-before-killing-buffer nil)
   (chatgpt-shell-openai-key openai-secret-key)
   (chatgpt-shell-system-prompt 2)
-  (chatgpt-shell-model-version "gpt-4o")
+  (chatgpt-shell-model-version "o1-preview")
 
   :init
   ;; Used by `chatgpt-shell-load-awesome-prompts'
   (use-package pcsv :ensure t)
 
   :config
-  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t))
+  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t)
+  (add-to-list 'chatgpt-shell-model-versions "o1-preview" t))
 
 (use-package dall-e-shell
   :ensure t
@@ -436,13 +437,14 @@ Concise Explanation about the above Word.")
           (lambda ()
             (interactive)
             (when (and (eq (current-buffer) attached-buffer))
-              (let ((gptel-backend llms-chat-gptel-groq-backend)
-                    (gptel-model "llama-3.1-70b-versatile")
-                    (text (save-excursion
-                            (backward-paragraph)
-                            (buffer-substring (point)
-                                              (progn (forward-paragraph)
-                                                     (point)))))
+              (let ((gptel-backend llms-chat-gptel-openai-backend)
+                    (gptel-model "gpt-4o")
+                    (text (if (region-active-p)
+                              (buffer-substring (region-beginning) (region-end))
+                            (save-excursion (backward-paragraph)
+                                            (buffer-substring (point)
+                                                              (progn (forward-paragraph)
+                                                                     (point))))))
                     (inhibit-read-only t))
                 (with-current-buffer buffer
                   (setq diff-mode-read-only nil)
