@@ -760,9 +760,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer t
   :custom ((outline-blank-line t))
   :init
-  (add-hook 'outline-minor-mode-hook
-            (lambda ()
-              (delight 'outline-minor-mode)))
+  (delight 'outline-minor-mode "" "outline")
   ;; This minor mode uses selective display to hide text so it displays three
   ;; dots (ellipsis) like `selective-display'
   ;; https://www.emacswiki.org/emacs/OutlineMode
@@ -809,8 +807,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                '(left-fringe right-arrow highlight))))))
 
 (use-package wrap-region
-  :doc
-  "Wrap region with custom chars."
+  :doc "Wrap region with custom chars."
   :ensure t
   :hook (after-init . wrap-region-mode)
   :delight
@@ -935,7 +932,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         column-number-mode t
         size-indication-mode t)
 
-  (delight 'visual-line-mode)
+  (delight 'visual-line-mode nil "simple")
   (global-visual-line-mode +1)
 
   ;; This BROKE multiple cursors! Multiple-cursor uses
@@ -1656,10 +1653,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     "Switch current directory to ~/."
     (interactive)
     (dired-jump nil (expand-file-name "~/"))))
-
-(use-package dired-collapse
-  :ensure t
-  :hook (dired-mode . dired-collapse-mode))
 
 (use-package discover
   :ensure t
