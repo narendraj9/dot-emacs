@@ -1806,6 +1806,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("s" . chart-numbers-on-line)
          ("z" . calc-store-numbers-on-line))
 
+  :init
+  (use-package async :ensure t :defer t)
+
   :config
   (setq hledger-jfile
         (expand-file-name "~/miscellany/personal/finance/accounting.journal"))
