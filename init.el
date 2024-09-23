@@ -3237,7 +3237,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :delight cljstyle-format-on-save-mode
   :ensure t
   :init
-  (cljstyle-format-on-save-mode))
+  ;; (cljstyle-format-on-save-mode)
+  )
 
 (use-package cider
   :doc
