@@ -3222,6 +3222,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package clj-refactor
   :pin melpa
   :ensure t
+  :disabled t
   :delight clj-refactor-mode
   :after clojure-mode
   :hook (clojure-mode . clj-refactor-mode)
@@ -3233,12 +3234,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (cljr-add-keybindings-with-prefix "C-;"))
 
 (use-package cljstyle-format
-  :hook (clojure-mode . cljstyle-format-on-save-mode)
-  :delight cljstyle-format-on-save-mode
+  :disabled t
   :ensure t
-  :init
-  ;; (cljstyle-format-on-save-mode)
-  )
+  :hook (clojure-mode . cljstyle-format-on-save-mode)
+  :delight cljstyle-format-on-save-mode)
 
 (use-package cider
   :doc
