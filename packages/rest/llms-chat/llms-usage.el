@@ -47,7 +47,8 @@ We use this information to estimate costs."
        (* completion-tokens (string-to-number completion-pricing)))))
 
 (cl-defgeneric llms-chat--tokens-consumed (backend model-name response)
-  (:documentation "Extract usage metadata from model response for a gptel backend."))
+  (:documentation "Extract usage metadata from model response for a gptel backend.")
+  nil)
 
 (cl-defmethod llms-chat--tokens-consumed ((backend gptel-openai) model-name response)
   (let* ((usage-info (plist-get response :usage))

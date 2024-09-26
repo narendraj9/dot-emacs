@@ -115,6 +115,10 @@
   (when-let ((api-key (auth-source-pick-first-password :host host)))
     (encode-coding-string api-key 'utf-8)))
 
+(defvar llms-chat-gptel-ollama-backend
+  (gptel-make-ollama "Ollama"
+    :models '("ollama3.2")))
+
 (defvar llms-chat-gptel-openrouter-backend
   (when-let ((api-key (llms-chat--api-key-from-auth-source "openrouter.ai")))
     (gptel-make-openai "OpenRouter"
@@ -260,7 +264,8 @@
   ;;
   ;; (<llm-name> . (<llm-backend> . <llm-model>))
   ;;
-  `(("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-groq-70b-8192-tool-use-preview"))
+  `(("ollama" . (,llms-chat-gptel-ollama-backend     . "llama3.2"))
+    ("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-groq-70b-8192-tool-use-preview"))
     ("opus"   . (,llms-chat-gptel-openrouter-backend . "anthropic/claude-3-opus"))
     ("haiku"  . (,llms-chat-gptel-openrouter-backend . "anthropic/claude-3-haiku"))
     ("openai" . (,llms-chat-gptel-openai-backend     . "gpt-4o"))
