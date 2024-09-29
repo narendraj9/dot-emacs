@@ -236,27 +236,7 @@ Otherwise, limit to only `org-mode' files."
 
   ;; Opening PDF files inside Emacs by default
   (setq org-file-apps
-        (assoc-delete-all "\\.pdf\\'" org-file-apps))
-
-
-  (setq org-babel-load-languages
-        `((plantuml   . t)
-          (emacs-lisp . t)
-          (sqlite     . t)
-          (sql        . t)
-          (lisp       . t)
-          (python     . t)
-          (R          . t)
-          (ruby       . t)
-          (gnuplot    . t)
-          (clojure    . t)
-          (C          . t)
-          (shell      . t)
-          (awk        . t)
-          (elixir     . t)
-          (go         . t)
-          (haskell    . t)
-          (ditaa      . t))))
+        (assoc-delete-all "\\.pdf\\'" org-file-apps)))
 
 
 (use-package org-agenda
@@ -678,7 +658,26 @@ Otherwise, limit to only `org-mode' files."
   :after org
   :defer t
   :init
-  (setq org-babel-python-command "ipython"
+  (setq org-babel-load-languages
+        `((plantuml   . t)
+          (emacs-lisp . t)
+          (sqlite     . t)
+          (sql        . t)
+          (lisp       . t)
+          (python     . t)
+          (R          . t)
+          (ruby       . t)
+          (gnuplot    . t)
+          (clojure    . t)
+          (C          . t)
+          (shell      . t)
+          (awk        . t)
+          (elixir     . t)
+          (go         . t)
+          (haskell    . t)
+          (ditaa      . t)))
+
+  (setq org-babel-python-command "python"
         org-confirm-babel-evaluate nil)
 
   ;; Make tab indent according to source blocks major mode
@@ -693,9 +692,12 @@ Otherwise, limit to only `org-mode' files."
   ;; the windows in the current frame isn't useful for me.
   (setq org-src-window-setup 'current-window)
 
-  (add-hook 'org-babel-after-execute-hook
-            #'org-display-inline-images
-            'append))
+  (add-hook 'org-babel-after-execute-hook #'org-display-inline-images 'append)
+
+  :config
+  :config
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               org-babel-load-languages))
 
 
 (use-package org-habit

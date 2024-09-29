@@ -2,6 +2,6 @@
 # name: src
 # key: src
 # --
-#+begin_src $1 :results verbatim drawer
+#+begin_src $1 :results output drawer
 $0
 #+end_src
