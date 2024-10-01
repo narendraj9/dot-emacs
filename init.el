@@ -2034,12 +2034,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun display-line-columns-dwim (arg)
     (interactive "p")
-    (display-line-numbers-mode (if display-line-numbers-mode -1 +1))
-    (when (= 4 arg)
-      (display-fill-column-indicator-mode (if display-fill-column-indicator-mode -1 +1)))
-    (when (= 16 arg)
-      (display-fill-column-indicator-mode -1)
-      (display-line-numbers-mode -1))))
+    (pcase arg
+      (4 (display-fill-column-indicator-mode +1))
+      (16 (progn
+            (display-fill-column-indicator-mode -1)
+            (display-line-numbers-mode -1)))
+      (_ (display-line-numbers-mode +1)))))
 
 (use-package type-break
   :disabled t
@@ -2281,6 +2281,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                       dictionary dictionary_comprehension
                                       parenthesized_expression subscript)))
   :hook ((python-base-mode yaml-mode) . indent-bars-mode))
+
+(use-package track-changes
+  :config
+  (setq track-changes-record-errors nil))
 
 (use-package aggressive-indent
   :ensure t
