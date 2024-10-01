@@ -266,8 +266,7 @@
   ;;
   `(("ollama" . (,llms-chat-gptel-ollama-backend     . "llama3.2"))
     ("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-groq-70b-8192-tool-use-preview"))
-    ("opus"   . (,llms-chat-gptel-openrouter-backend . "anthropic/claude-3-opus"))
-    ("haiku"  . (,llms-chat-gptel-openrouter-backend . "anthropic/claude-3-haiku"))
+    ("sonnet" . (,llms-chat-gptel-openrouter-backend . "@anthropic/claude-3.5-sonnet:beta"))
     ("openai" . (,llms-chat-gptel-openai-backend     . "gpt-4o"))
     ("pplx"   . (,llms-chat-gptel-preplexity-backend . "sonar-medium-online"))
     ("gemini" . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-pro"))
