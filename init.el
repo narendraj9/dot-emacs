@@ -408,6 +408,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (world-clock))))
 
 (use-package battery
+  :disabled t
   :demand t
   :config
   (setq battery-mode-line-format
@@ -2040,6 +2041,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (16 (progn
             (display-fill-column-indicator-mode -1)
             (display-line-numbers-mode -1)))
+
+
       (_ (display-line-numbers-mode +1)))))
 
 (use-package type-break
