@@ -107,6 +107,16 @@ Otherwise, limit to only `org-mode' files."
   (setq org-agenda-remove-tags (not org-agenda-remove-tags))
   (org-agenda-redo))
 
+(defun org-goto-heading-from-attach-dir ()
+  (interactive)
+  (let* ((parts (seq-filter (lambda (part)
+                              (not (string-equal part "")))
+                            (file-name-split default-directory)))
+         (id-parts (drop (- (length parts) 2) parts)))
+    (org-id-goto (format "%s%s"
+                         (car id-parts)
+                         (cadr id-parts)))))
+
 
 (use-package org
   :demand t
