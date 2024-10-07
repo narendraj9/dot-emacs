@@ -1962,6 +1962,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :config
   (dolist (grammar '((c "https://github.com/tree-sitter/tree-sitter-c")
+                     (bash "https://github.com/tree-sitter/tree-sitter-bash")
                      (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
                      (css "https://github.com/tree-sitter/tree-sitter-css")
                      (go "https://github.com/tree-sitter/tree-sitter-go")
