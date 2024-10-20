@@ -33,10 +33,9 @@
 
 (require 'url)
 (require 'cl-lib)
-(require 'help-mode)
 
 (defgroup tldr nil
-  "tldr client for Emacs"
+  "An Emacs client for the TLDR community man pages."
   :prefix "tldr-"
   :link '(url-link "http://github.com/kuanyui/tldr.el")
   :group 'help)
@@ -47,21 +46,28 @@
   :group 'tldr
   :type 'string)
 
+(defcustom tldr-enable-annotations t
+  "Add description of each command in the *Completions* buffer."
+  :group 'tldr
+  :type 'boolean)
+
 (defcustom tldr-use-word-at-point
   nil
-  "Use the word at point as the initial search term when selecting a command."
+  "Use the word at point as the initial search term when
+selecting a command."
   :group 'tldr
   :type 'boolean)
 
 (defcustom tldr-saved-zip-path
   (concat temporary-file-directory "tldr-source.zip")
-  "The temporary location for downloading zip."
+  "The temporary location for downloading the zipped TLDR
+source."
   :group 'tldr
   :type 'string)
 
 (defcustom tldr-source-zip-url
-  "https://github.com/tldr-pages/tldr/archive/master.zip"
-  "Zip URL on GitHub."
+  "https://github.com/tldr-pages/tldr/archive/refs/heads/main.zip"
+  "The location of the zipped TLDR source on GitHub."
   :group 'tldr
   :type 'string)
 
@@ -72,12 +78,18 @@
          '("common" "osx"))
         (t
          '("common")))
-  "List of enabled tldr categories."
+  "A list of the enabled TLDR categories."
   :group 'tldr
   :type '(repeat string))  ; [HELP] I don't know how to make checkbox for a string list
 
+(defcustom tldr-locales
+  nil
+  "Priority list of locales to display tldr pages in."
+  :group 'tldr
+  :type '(repeat string))
+
 (define-derived-mode tldr-mode help-mode "tldr"
-  "Lookup tldr in Emacs"
+  "Lookup TLDR man pages from within in Emacs."
   (set (make-local-variable 'buffer-read-only) t))
 
 
@@ -133,24 +145,32 @@
   ""
   :group 'tldr)
 
+(defvar tldr-length-of-longest-command-name nil
+  "Length of the longest command name.")
 
 ;;;###autoload
 (defun tldr-update-docs ()
-  "Get or update tldr docs from source."
+  "Get or update the TLDR docs from source."
   (interactive)
   (if (tldr--check-unzip)
       (progn
-        (when (file-exists-p tldr-directory-path)
-          (delete-directory tldr-directory-path 'recursive 'no-trash))
-        (url-copy-file tldr-source-zip-url tldr-saved-zip-path 'overwrite)
-        (shell-command (format "unzip -d %s %s" (file-truename user-emacs-directory) tldr-saved-zip-path))
+        (if (file-exists-p tldr-directory-path)
+            (delete-directory tldr-directory-path 'recursive 'no-trash))
+        (if (file-exists-p tldr-saved-zip-path)
+            (delete-file tldr-saved-zip-path 'no-trash))
+        (url-copy-file tldr-source-zip-url tldr-saved-zip-path)
+        (shell-command-to-string (format "unzip -d %s %s" (file-truename user-emacs-directory) tldr-saved-zip-path))
         (delete-file tldr-saved-zip-path)
-        (rename-file (concat (file-truename user-emacs-directory) "tldr-master") tldr-directory-path)
-        (message "Now tldr docs is updated!"))))
+        (if (member system-type '(windows-nt ms-dos))
+            (shell-command-to-string (format "move \"%s\" \"%s\""
+                                             (concat (file-truename user-emacs-directory) "tldr-main")
+                                             (directory-file-name tldr-directory-path)))
+          (shell-command-to-string (format "mv '%s' '%s'" (concat (file-truename user-emacs-directory) "tldr-main") tldr-directory-path)))
+        (message "The TLDR docs are up to date!"))))
 
 
 (defun tldr-get-commands-list ()
-  "For `completing-read'."
+  "For `completing-read'"
   (mapcar (lambda (file.md) (substring file.md 0 -3))
           (cl-remove-if (lambda (y) (member y '("." "..")))
                         (cl-mapcan (lambda (x)
@@ -161,18 +181,45 @@
                                        tldr-directory-path)))
                                    tldr-enabled-categories))))
 
+(defun tldr-get-locales ()
+  "Return a priority list of locales as specified by
+`tldr-locales' and the LANG and LANGUAGE environment variables."
+  (cond
+   (tldr-locales tldr-locales)
+   ((getenv "LANG") (list (getenv "LANG")))
+   ((getenv "LANGUAGE") (split-string (getenv "LANGUAGE") ":"))))
+
+(defun tldr-page-exists-p (command system &optional locale)
+  "Return the file path of the tldr page specified by COMMAND,
+SYSTEM and LOCALE. Return nil if such a page is not found. If
+optional argument LOCALE is unspecified, return the file path of
+the default English language page."
+  (cl-some (lambda (locale-extension)
+             (let ((filename
+                    (expand-file-name
+                     (convert-standard-filename
+                      (format "pages%s/%s/%s.md"
+                              locale-extension system command))
+                     tldr-directory-path)))
+               (and (file-exists-p filename)
+                    filename)))
+           (if locale
+               (let ((language (when (string-match "^\\([^_]*\\)" locale)
+                                 (match-string 1 locale)))
+                     (territory (when (string-match "^[^_]*_\\([^.]*\\)" locale)
+                                  (match-string 1 locale))))
+                 (list (format ".%s_%s" language territory)
+                       (format ".%s" language)))
+             (list ""))))
+
 (defun tldr-get-file-path-from-command-name (command)
-  "Get file path for COMMAND."
-  (cl-find-if #'file-exists-p
-              (mapcar (lambda (system)
-                        (expand-file-name
-                         (convert-standard-filename
-                          (format "pages/%s/%s.md" system command))
-                         tldr-directory-path))
-                      tldr-enabled-categories)))
+  (cl-some (lambda (system)
+             (or (cl-some (apply-partially #'tldr-page-exists-p command system)
+                          (tldr-get-locales))
+                 (tldr-page-exists-p command system)))
+           tldr-enabled-categories))
 
 (defun tldr-render-markdown (command)
-  "Render contents of file for COMMAND."
   (let* ((file-path (tldr-get-file-path-from-command-name command))
          (lines (split-string
                  (with-temp-buffer
@@ -193,10 +240,8 @@
                         (setq line (propertize (substring line 1 -1) 'face 'tldr-code-block))
                         ;; Add command face
                         (setq line (replace-regexp-in-string
-                                    (concat "^" command)
-                                    (propertize command
-                                                'face 'tldr-command-itself
-                                                'button t)
+                                    (concat "^" (regexp-quote command))
+                                    (propertize command 'face 'tldr-command-itself)
                                     line 'fixedcase))
                         ;; Strip {{}} and add command argument face
                         (while (string-match "{{\\(.+?\\)}}" line)
@@ -207,36 +252,53 @@
                lines "\n")))
 
 (defun tldr--check-unzip ()
-  "Check if binary zip is installed."
   (if (executable-find "unzip")
       t
-    (and (message "unzip not found. Please install and run `tldr-update-docs' again.")
-         nil)))
+    (progn (message "unzip not found. Please install and run `tldr-update-docs' again.") nil)))
+
+(defun tldr-completion-annotation(command)
+  "Add description for command COMMAND in the *Completions* buffer."
+  (when-let ((file-path (and tldr-enable-annotations (tldr-get-file-path-from-command-name command))))
+    (with-temp-buffer
+      (insert-file-contents file-path)
+      (and (search-forward "> " (point-max) t 1)
+           (concat (make-string (- tldr-length-of-longest-command-name (length command)) ? )
+                   " -- "
+                   (buffer-substring-no-properties (point) (line-end-position)))))))
 
 ;;;###autoload
 (defun tldr (&optional cmd)
-  "Lookup tldr docs for CMD."
+  "Lookup TLDR docs."
   (interactive)
   (if (not (file-exists-p tldr-directory-path))
-      (when (tldr--check-unzip)
-        (message "Downloading docs. This might take a while...")
-        (sit-for 3)
-        (tldr-update-docs)
-        (tldr))
-    (let ((command (or cmd
-                       (completing-read "tldr: " (tldr-get-commands-list) nil t
-                                        (when tldr-use-word-at-point
-                                          (current-word))))))
+      (if (tldr--check-unzip)
+          (progn
+            (message "This is the first time you have run TLDR.
+Please wait while the latest TLDR docs are downloaded...")
+            (sit-for 3)
+            (tldr-update-docs)
+            (tldr)))
+    (setq tldr-length-of-longest-command-name (apply #'max (mapcar #'length (tldr-get-commands-list))))
+    (let* ((completion-extra-properties '(:annotation-function tldr-completion-annotation))
+           (command (or cmd
+                        (completing-read "TLDR: " (tldr-get-commands-list) nil t
+                                         (when tldr-use-word-at-point (current-word))))))
       (if (string= "" command)
           (message "No input, canceled.")
         (progn
           (with-temp-buffer-window "*tldr*" nil nil)
           (if (not (equal (buffer-name) "*tldr*"))
               (switch-to-buffer-other-window "*tldr*"))
-          (unless (equal major-mode 'tldr-mode)
-            (tldr-mode))
-          (let ((help-xref-following t)) ; See `help-buffer' & `help-setup-xref'
+          (if (not (equal major-mode 'tldr-mode))
+              (tldr-mode))
+          (let ((help-xref-following t))  ;See `help-buffer' & `help-setup-xref'
             (help-setup-xref (list #'tldr command) t))
+          ;; fuck you docstring (╯°□°）╯︵ ┻━┻
+          ;; `help-setup-xref'
+          ;; (help-setup-xref ITEM INTERACTIVE-P)
+          ;; ITEM is a (FUNCTION . ARGS) pair appropriate for recreating the help .....
+          ;; NOT A PAIR AT ALL! This shit waste me one hour.
+
           (let (buffer-read-only)
             (insert (tldr-render-markdown command))
             (insert "\n")
@@ -253,6 +315,57 @@
             (goto-char (point-min))))))))
 
 (declare-function Man-default-man-entry "man")
+(declare-function helm "helm")
+(declare-function helm-build-sync-source "helm-source")
+
+;;;###autoload
+(defun helm-tldr ()
+  "Helm interface for `tldr'."
+  (interactive)
+  (unless (require 'helm nil t)
+    (user-error "Helm not available"))
+  (require 'man)
+  (let* ((default-cmd (Man-default-man-entry))
+         (cmd (completing-read
+               (format "tldr%s"
+                       (if (string= default-cmd "")
+                           ": "
+                         (format " (default %s): " default-cmd)))
+               (tldr-get-commands-list)
+               nil t nil nil default-cmd))
+         (markdown (tldr-render-markdown cmd)))
+    (helm :sources (helm-build-sync-source "tldr"
+                                           :header-name
+                                           (lambda (_)
+                                             (with-temp-buffer
+                                               (insert markdown)
+                                               (replace-regexp-in-string
+                                                "\n\n *" ": "
+                                                (buffer-substring-no-properties
+                                                 (point-min)
+                                                 (progn
+                                                   (goto-char (point-min))
+                                                   (forward-line 2)
+                                                   (line-end-position))))))
+                                           :candidates
+                                           (lambda ()
+                                             (with-temp-buffer
+                                               (insert markdown)
+                                               (goto-char (point-min))
+                                               (let ((res) text code)
+                                                 (while (re-search-forward "^- " nil 'no-error)
+                                                   (setq text (buffer-substring (point) (line-end-position)))
+                                                   (forward-line 2)
+                                                   (back-to-indentation)
+                                                   (setq code (buffer-substring (point) (line-end-position)))
+                                                   (push (concat text "\n" code) res))
+                                                 (nreverse res))))
+                                           :multiline t
+                                           :coerce (lambda (candidate) (substring candidate (1+ (string-match "\n" candidate))))
+                                           :action
+                                           '(("Insert command" . insert)
+                                             ("Copy command to kill-ring" . kill-new)))
+          :buffer "*helm tldr*")))
 
 (provide 'tldr)
 ;;; tldr.el ends here

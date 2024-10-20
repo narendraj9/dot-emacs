@@ -674,6 +674,7 @@ Otherwise, limit to only `org-mode' files."
           (sqlite     . t)
           (sql        . t)
           (lisp       . t)
+          (latex      . t)
           (python     . t)
           (R          . t)
           (ruby       . t)

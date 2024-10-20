@@ -162,7 +162,7 @@
 
 (defun app/font-setup ()
   ;; Setup my favorite fonts [if available]
-  (dolist (font (list "Symbola" "Fira Code"))
+  (dolist (font (list "Symbola" "Noto Sans" "Fira Code"))
     (if (app/font-availablep font)
         (set-fontset-font "fontset-default" nil
                           (font-spec :name font :size 15)
@@ -188,9 +188,9 @@
                         :height 1.6
                         :weight 'normal))
 
-   ((app/font-availablep "Noto Sans Regular")
+   ((app/font-availablep "Noto Sans")
     (set-face-attribute 'variable-pitch nil
-                        :family "Noto Sans Regular"
+                        :family "Noto Sans"
                         :height 1.6
                         :weight 'normal))))
 
