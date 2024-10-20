@@ -1026,6 +1026,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors."
   :ensure t
+  :custom (mc/always-run-for-all t)
   :init
   (setd mc/list-file "var/mc-lists.el")
   (add-hook 'multiple-cursors-mode-hook
