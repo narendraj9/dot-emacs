@@ -178,6 +178,12 @@
   (cond
    ;; Fonts on a dark background require a lighter weight compared to the weight
    ;; required on brighter backgrounds.
+   ((app/font-availablep "Noto Serif Medium")
+    (set-face-attribute 'variable-pitch nil
+                        :family "Noto Serif Medium"
+                        :height 1.2
+                        :weight 'medium))
+
    ((app/font-availablep "Symbola")
     ;; It would have been great if I could set the background to white
     ;; while reading anything other than code. Emacs doesn't support
@@ -185,12 +191,6 @@
     ;; with hooks.
     (set-face-attribute 'variable-pitch nil
                         :family "Symbola"
-                        :height 1.6
-                        :weight 'normal))
-
-   ((app/font-availablep "Noto Sans")
-    (set-face-attribute 'variable-pitch nil
-                        :family "Noto Sans"
                         :height 1.6
                         :weight 'normal))))
 
