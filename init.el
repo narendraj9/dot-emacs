@@ -953,6 +953,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-hook 'activate-mark-hook (lambda () (setq cursor-type (cons 'bar 4))))
   (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t))))
 
+(use-package visual-wrap
+  :init
+  (global-visual-wrap-prefix-mode +1))
+
 (use-package apropos :config (setq apropos-do-all t))
 (use-package shortdoc :bind ( :map help-map ("g" . shortdoc-display-group) ))
 
@@ -1143,14 +1147,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                 (variable-pitch-mode +1)))))
 
 (use-package which-key
-  :doc "Get quick emacs key binding suggestions"
-  :ensure t
-  :demand 2
   :delight which-key-mode
-  :config
+  :init
   (setq which-key-max-description-length nil
         which-key-preserve-window-configuration t)
-
   (which-key-mode +1))
 
 (use-package project
