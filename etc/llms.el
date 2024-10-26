@@ -416,7 +416,7 @@ Concise Explanation about the above Word.")
 ;;; *Experiment* : An AI Companion (e.g. speedbar-mode but with custom
 ;;; *instructions).
 
-(defvar llms-spin-up-companion--saved-window-config)
+(defvar llms-spin-up-companion--saved-window-config nil)
 
 (defun llms-spin-up-companion-stop ()
   (interactive)
