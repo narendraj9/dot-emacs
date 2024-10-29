@@ -395,7 +395,7 @@ Optional argument ARG controls whether we jump directly to the first heading
  or select one from the options."
   (interactive "P")
   (save-excursion
-    (if-let ((p (text-property-search-forward 'pomodoro-title-text)))
+    (if-let* ((p (text-property-search-forward 'pomodoro-title-text)))
         (let* ((matching-headings
                 (pomodoro--org-agenda-matching-headings (prop-match-value p)))
                (default-heading (car matching-headings))
