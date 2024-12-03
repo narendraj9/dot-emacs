@@ -114,33 +114,44 @@
                             (10 ,(propertize " (%l,%C)"))
                             (6 ,(propertize " L%l")))))))
 
+
+
 (add-to-list 'mode-line-misc-info '(:eval (tab-bar-modeline)) t)
 
-(setq-default mode-line-format
-              '(""
-                ;; ^^ makes it easier for `eldoc-message-function' to do its job
-                ;; cleanly when it tries to prepend `eldoc-mode-line-string'.
-                (:eval (simple-mode-line-render
-                        ;; -- Left
-                        '("%e"
-                          mode-line-front-space
-                          mode-line-mule-info
-                          mode-line-client
-                          mode-line-modified
-                          mode-line-auto-compile
-                          mode-line-remote
-                          mode-line-frame-identification
-                          mode-line-buffer-identification
-                          "   " mode-line-position "  "
-                          (:eval (when (and vc-mode
-                                            (not mode-line-config-hide-vc))
-                                   vc-mode)))
+(setq mode-line-right-align-edge 'right-margin)
 
-                        ;; -- Middle
-                        'mode-line-modes
+(let ((not-misc-info-p (lambda (symbol) (not (eq symbol 'mode-line-misc-info)))))
+  (setq-default mode-line-format
+                (seq-concatenate 'list
+                                 (seq-take-while not-misc-info-p mode-line-format)
+                                 (list 'mode-line-format-right-align)
+                                 (seq-drop-while not-misc-info-p mode-line-format))))
 
-                        ;; -- Right
-                        mode-line-misc-info))))
+;; (setq-default mode-line-format
+;;               '(""
+;;                 ;; ^^ makes it easier for `eldoc-message-function' to do its job
+;;                 ;; cleanly when it tries to prepend `eldoc-mode-line-string'.
+;;                 (:eval (simple-mode-line-render
+;;                         ;; -- Left
+;;                         '("%e"
+;;                           mode-line-front-space
+;;                           mode-line-mule-info
+;;                           mode-line-client
+;;                           mode-line-modified
+;;                           mode-line-auto-compile
+;;                           mode-line-remote
+;;                           mode-line-frame-identification
+;;                           mode-line-buffer-identification
+;;                           "   " mode-line-position "  "
+;;                           (:eval (when (and vc-mode
+;;                                             (not mode-line-config-hide-vc))
+;;                                    vc-mode)))
+
+;;                         ;; -- Middle
+;;                         'mode-line-modes
+
+;;                         ;; -- Right
+;;                         mode-line-misc-info))))
 
 (provide 'mode-line-config)
 ;;; mode-line-config.el ends here
