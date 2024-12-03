@@ -120,38 +120,12 @@
 
 (setq mode-line-right-align-edge 'right-margin)
 
-(let ((not-misc-info-p (lambda (symbol) (not (eq symbol 'mode-line-misc-info)))))
+(let ((not-first-right-item-p (lambda (symbol) (not (eq symbol 'mode-line-misc-info)))))
   (setq-default mode-line-format
                 (seq-concatenate 'list
-                                 (seq-take-while not-misc-info-p mode-line-format)
+                                 (seq-take-while not-first-right-item-p mode-line-format)
                                  (list 'mode-line-format-right-align)
-                                 (seq-drop-while not-misc-info-p mode-line-format))))
-
-;; (setq-default mode-line-format
-;;               '(""
-;;                 ;; ^^ makes it easier for `eldoc-message-function' to do its job
-;;                 ;; cleanly when it tries to prepend `eldoc-mode-line-string'.
-;;                 (:eval (simple-mode-line-render
-;;                         ;; -- Left
-;;                         '("%e"
-;;                           mode-line-front-space
-;;                           mode-line-mule-info
-;;                           mode-line-client
-;;                           mode-line-modified
-;;                           mode-line-auto-compile
-;;                           mode-line-remote
-;;                           mode-line-frame-identification
-;;                           mode-line-buffer-identification
-;;                           "   " mode-line-position "  "
-;;                           (:eval (when (and vc-mode
-;;                                             (not mode-line-config-hide-vc))
-;;                                    vc-mode)))
-
-;;                         ;; -- Middle
-;;                         'mode-line-modes
-
-;;                         ;; -- Right
-;;                         mode-line-misc-info))))
+                                 (seq-drop-while not-first-right-item-p mode-line-format))))
 
 (provide 'mode-line-config)
 ;;; mode-line-config.el ends here

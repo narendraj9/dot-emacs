@@ -385,20 +385,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   :bind ( :map ctl-quote-map ("c t" . world-clock*) )
   :init
-  (display-time-mode +1)
-
-  :config
   (setq world-clock-timer-enable nil
         world-clock-time-format "\n──────────────\n\t%A %d %B %R %Z\n")
 
   (setq display-time-string-forms
         '((propertize
-           (format " %s/%s/%s %s %s:%s "
-                   (substring year -2) (string-trim month) (string-trim day) dayname 24-hours minutes)
+           (format " %s.%s.%s %s %s:%s "
+                   (string-trim day) (string-trim month) (substring year -2) dayname 24-hours minutes)
            'face 'bold))
         display-time-default-load-average 1     ; 5 minute load avg
         display-time-load-average-threshold 0.8 ; >80%
         display-time-mail-string "")
+
+  (display-time-mode +1)
 
   :preface
   (defun world-clock* (&optional arg)
@@ -935,7 +934,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         size-indication-mode t)
 
   (delight 'visual-line-mode nil "simple")
-  (global-visual-line-mode +1)
 
   ;; This BROKE multiple cursors! Multiple-cursor uses
   ;; `exchange-point-and-mark' and creates overlays for active region around
