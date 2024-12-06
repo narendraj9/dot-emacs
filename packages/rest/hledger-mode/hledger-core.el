@@ -187,7 +187,7 @@
    ((hledger-acc-line-has-rupeep)
     (progn
       (hledger-delete-rupee-sign)
-      (when-let ((hledger-currency-string (completing-read "Currency: " hledger-currencies)))
+      (when-let* ((hledger-currency-string (completing-read "Currency: " hledger-currencies)))
         (hledger-insert-rupee))))
    ((hledger-expecting-rupeep) (hledger-insert-rupee))
    (t (indent-line-to tab-width))))

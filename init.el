@@ -2082,7 +2082,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; Switch to compilation buffer after starting compilation
   ;; (add-hook 'compilation-start-hook
   ;;           (lambda (process)
-  ;;             (when-let ((w (get-buffer-window (process-buffer process))))
+  ;;             (when-let* ((w (get-buffer-window (process-buffer process))))
   ;;               (select-window w))))
   )
 
@@ -2104,7 +2104,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (if-let ((w (some-window (lambda (w) (eq (window-buffer w)
                                              eldoc--doc-buffer)))))
         (progn (delete-window w)
-               (when-let ((last-window-configuration (get this-command :window-configuration)))
+               (when-let* ((last-window-configuration (get this-command :window-configuration)))
                  (set-window-configuration last-window-configuration)))
       (put this-command :window-configuration (current-window-configuration))
       (delete-other-windows)
@@ -2131,8 +2131,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun eldoc-documentation-using-link-at-point (cb)
     (let (url)
-      (when-let ((url-at-point (or (and (fboundp 'markdown-link-url)
-                                        (markdown-link-url)))))
+      (when-let* ((url-at-point (or (and (fboundp 'markdown-link-url)
+                                         (markdown-link-url)))))
         (setq url url-at-point))
       (when url
         (request url
@@ -2220,9 +2220,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun display-help-at-pt-dwim (&optional prefix)
     (interactive "P")
-    (when-let ((help (or (help-at-pt-kbd-string)
-                         (progn (scan-buf-next-region (if prefix -1 +1))
-                                (help-at-pt-kbd-string)))))
+    (when-let* ((help (or (help-at-pt-kbd-string)
+                          (progn (scan-buf-next-region (if prefix -1 +1))
+                                 (help-at-pt-kbd-string)))))
       (popup-tip help
                  :point (point)
                  :around t
@@ -3222,7 +3222,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :preface
   (defun project-find-clojure-root (dir)
-    (when-let ((r (clojure-project-root-path (or dir default-directory))))
+    (when-let* ((r (clojure-project-root-path (or dir default-directory))))
       (cons 'clojure-project r)))
 
   (cl-defmethod project-root ((project (head clojure-project)))
@@ -3629,7 +3629,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (require 'project)
   (defun project-find-go-module (dir)
-    (when-let ((root (locate-dominating-file dir "go.mod")))
+    (when-let* ((root (locate-dominating-file dir "go.mod")))
       (cons 'go-module root)))
 
   (cl-defmethod project-root ((project (head go-module)))
@@ -4029,7 +4029,7 @@ buffer."
      (midnight-mode +1)
      ;; Start Redshift if it's not already running on the system.
      (unless (seq-find (lambda (pid)
-                         (when-let ((args (assoc-default 'args (process-attributes pid))))
+                         (when-let* ((args (assoc-default 'args (process-attributes pid))))
                            (string-match "^redshift .*" args)))
                        (list-system-processes))
        ;; Redshift doesn't work on Wayland.

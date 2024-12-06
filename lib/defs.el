@@ -708,7 +708,7 @@ print information about what repeat is doing."
 (defmacro with-repeat-command (command &optional message-fn)
   (list 'defun (intern (format "with-repeat-command--%s" command)) ()
         ;; It's possible that `command' is not loaded yet as a function.
-        (when-let ((fn (symbol-function command)))
+        (when-let* ((fn (symbol-function command)))
           (documentation fn))
         (list 'interactive)
         (list 'repeat-command (list 'quote command) (list 'quote message-fn))))
@@ -728,8 +728,8 @@ One for writing code and the other for reading articles."
   (with-delayed-message (1 "Looks like the current theme is no in `quick-switch-themes'. C-g!")
     (while (not (memq (car quick-switch-themes) custom-enabled-themes ))
       (setq quick-switch-themes (cdr quick-switch-themes))))
-  (if-let ((next-theme (cadr quick-switch-themes)))
-      (progn (when-let ((current-theme (car quick-switch-themes)))
+  (if-let* ((next-theme (cadr quick-switch-themes)))
+      (progn (when-let* ((current-theme (car quick-switch-themes)))
                (disable-theme (car quick-switch-themes)))
              (load-theme next-theme t)
              (message "Loaded theme: %s" next-theme))
@@ -1066,7 +1066,7 @@ respective files."
       (vterm-send-meta-backspace)
       (throw 'done t))
 
-    (when-let ((bounds (and arg (bounds-of-thing-at-point 'symbol))))
+    (when-let* ((bounds (and arg (bounds-of-thing-at-point 'symbol))))
       (delete-region (car bounds) (cdr bounds))
       (throw 'done t))
 
@@ -1110,36 +1110,36 @@ search keyword."
 
 (defvar current-weather nil "Information about current weather")
 (defun current-weather ()
-  (when-let ((_ mode-line-current-weather)
-             (api-key (-> (auth-source-search :host "openweathermap.org")
-                          car
-                          (plist-get :appid))))
+  (when-let* ((_ mode-line-current-weather)
+              (api-key (-> (auth-source-search :host "openweathermap.org")
+                           car
+                           (plist-get :appid))))
     (request "https://api.openweathermap.org/data/2.5/weather"
-             :params `((lat   . ,calendar-latitude)
-                       (lon   . ,calendar-longitude)
-                       (appid . ,api-key)
-                       (units . "metric"))
+      :params `((lat   . ,calendar-latitude)
+                (lon   . ,calendar-longitude)
+                (appid . ,api-key)
+                (units . "metric"))
 
-             :parser #'json-read
+      :parser #'json-read
 
-             :error
-             (lambda (&rest _args)
-               (message "Failed to fetch weather info from openweathermap.org"))
+      :error
+      (lambda (&rest _args)
+        (message "Failed to fetch weather info from openweathermap.org"))
 
-             :success
-             (lambda (&rest args)
-               (let ((data (plist-get args :data)))
-                 (setq current-weather
-                       (propertize (format "%s°C"
-                                           (->> data
-                                                (alist-get 'main)
-                                                (alist-get 'temp)))
-                                   'help-echo
-                                   (format "Updated at: %s\n%s"
-                                           (format-time-string "%FT%T%z"(current-time))
-                                           (pp-to-string data))
-                                   'timestamp
-                                   (current-time))))))))
+      :success
+      (lambda (&rest args)
+        (let ((data (plist-get args :data)))
+          (setq current-weather
+                (propertize (format "%s°C"
+                                    (->> data
+                                         (alist-get 'main)
+                                         (alist-get 'temp)))
+                            'help-echo
+                            (format "Updated at: %s\n%s"
+                                    (format-time-string "%FT%T%z"(current-time))
+                                    (pp-to-string data))
+                            'timestamp
+                            (current-time))))))))
 
 
 (defun start-emacspeak ()
@@ -1223,7 +1223,7 @@ search keyword."
 (defun toggle-frame-meeting-notes (prefix)
   (interactive "P")
   (let ((frame (selected-frame)))
-    (if-let ((params (get this-command :original-parameters)))
+    (if-let* ((params (get this-command :original-parameters)))
         (progn (modify-frame-parameters frame params)
                (put this-command :original-parameters nil))
       (let ((original-params (frame-parameters))

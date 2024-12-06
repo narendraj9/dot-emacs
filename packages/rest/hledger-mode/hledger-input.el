@@ -86,7 +86,7 @@ This setups up the minor mode and narrowing in the input buffer."
                              (make-string 20 ?―))))
     (display-message-or-buffer report-str temp-buffer-name)
     (run-with-timer 10 nil (lambda ()
-                             (when-let ((buf (get-buffer temp-buffer-name)))
+                             (when-let* ((buf (get-buffer temp-buffer-name)))
                                (kill-buffer buf))))
     nil))
 

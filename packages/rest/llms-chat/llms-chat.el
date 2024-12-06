@@ -112,7 +112,7 @@
   ;;      https://github.com/tkf/emacs-request/issues/185#issuecomment-654553599
   ;;      -- Library users are supposed to encode multi-byte strings to utf-8
   ;;      unibyte string. --
-  (when-let ((api-key (auth-source-pick-first-password :host host)))
+  (when-let* ((api-key (auth-source-pick-first-password :host host)))
     (encode-coding-string api-key 'utf-8)))
 
 (defvar llms-chat-gptel-ollama-backend
@@ -120,7 +120,7 @@
     :models '("ollama3.2")))
 
 (defvar llms-chat-gptel-openrouter-backend
-  (when-let ((api-key (llms-chat--api-key-from-auth-source "openrouter.ai")))
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "openrouter.ai")))
     (gptel-make-openai "OpenRouter"
       :host "openrouter.ai"
       :endpoint "/api/v1/chat/completions"
@@ -153,7 +153,7 @@
               "llama3-70b-8192")))
 
 (defvar llms-chat-gptel-preplexity-backend
-  (when-let ((api-key (llms-chat--api-key-from-auth-source "api.perplexity.ai")))
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.perplexity.ai")))
     (gptel-make-openai "Perplexity"
       :host "api.perplexity.ai"
       :endpoint "/chat/completions"
@@ -165,11 +165,11 @@
                 "sonar-medium-online"))))
 
 (defvar llms-chat-gptel-gemini-backend
-  (when-let ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
     (gptel-make-gemini "Gemini" :key api-key)))
 
 (defvar llms-chat-gptel-kagi-backend
-  (when-let ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
     (gptel-make-kagi "Kagi"
       :stream t
       :key api-key)))
@@ -179,7 +179,7 @@
 
 (defvar llms-chat-openrouter-models nil)
 (defun llms-chat-openrouter-models ()
-  (when-let ((api-key (llms-chat--api-key-from-auth-source "openrouter.ai")))
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "openrouter.ai")))
     (unless llms-chat-openrouter-models
       (let* ((json-object-type 'plist)
              (json-array-type 'list)
@@ -350,7 +350,7 @@ removed and replaced by text."
    ((eq 'user (get-text-property (point) 'llm-role))
     (save-excursion
       (text-property-search-backward 'llm-role 'user t)
-      (when-let ((prop (text-property-search-forward 'llm-role 'user t)))
+      (when-let* ((prop (text-property-search-forward 'llm-role 'user t)))
         (cons (prop-match-beginning prop)
               (prop-match-end prop)))))
 
@@ -425,7 +425,7 @@ interactions.")
 
 (defun llms-chat--remove-old-reply (prompt-id)
   ;; Try removing existing response.
-  (when-let ((bounds (llms-chat--reply-bounds prompt-id)))
+  (when-let* ((bounds (llms-chat--reply-bounds prompt-id)))
     (delete-region (car bounds) (cdr bounds))))
 
 (defun llms-chat--fill-text (start end)

@@ -243,13 +243,13 @@ URLs."
 ;;; -- Show current Summary entry in Echo Area
 (defun gnus-summary-echo-current-headers (&rest _callback)
   "Return current from/subject/date string or nil if nothing."
-  (when-let ((headers (gnus-summary-article-header))
-             (mail-date (gnus-user-date (mail-header-date headers)))
-             ;; Hide eldoc for currently selected article.
-             ;; (_show-info-p (and gnus-current-article
-             ;;                    (not (= (gnus-summary-article-number)
-             ;;                            gnus-current-article))))
-             )
+  (when-let* ((headers (gnus-summary-article-header))
+              (mail-date (gnus-user-date (mail-header-date headers)))
+              ;; Hide eldoc for currently selected article.
+              ;; (_show-info-p (and gnus-current-article
+              ;;                    (not (= (gnus-summary-article-number)
+              ;;                            gnus-current-article))))
+              )
     (format "%s %s \n %s"
             (propertize mail-date 'face 'gnus-header-from)
             (propertize (mail-header-from headers) 'face 'gnus-header-name)

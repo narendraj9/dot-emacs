@@ -95,13 +95,13 @@ We use this information to estimate costs."
 
 (defun llms-chat-model-usage->mode-line-string (model-usage)
   (let ((mode-line-string))
-    (when-let ((prompt-tokens (plist-get model-usage :prompt-tokens))
-               (completion-tokens (plist-get model-usage :completion-tokens))
-               (tokens (+ prompt-tokens completion-tokens)))
+    (when-let* ((prompt-tokens (plist-get model-usage :prompt-tokens))
+                (completion-tokens (plist-get model-usage :completion-tokens))
+                (tokens (+ prompt-tokens completion-tokens)))
       (setq mode-line-string
             (number-to-string (/ tokens 1000.0))))
 
-    (when-let ((cost (plist-get model-usage :cost)))
+    (when-let* ((cost (plist-get model-usage :cost)))
       (setq mode-line-string
             (propertize (format "%sk @ ¢%.4f" mode-line-string (* cost 100))
                         'face 'mode-line-highlight)))

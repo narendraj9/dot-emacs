@@ -588,9 +588,9 @@ Optional argument END end date string for journal entries to consider."
          (elisp-string (concat "(" (replace-regexp-in-string "," "" output) ")"))
          (result (car (read-from-string elisp-string))))
     (mapcar (lambda (item)
-              (if-let (m-begin (and (stringp item)
-                                    (string-match hledger-amount-value-regex
-                                                  item)))
+              (if-let* ((m-begin (and (stringp item)
+                                      (string-match hledger-amount-value-regex
+                                                    item))))
                   (abs (string-to-number (substring item
                                                     m-begin
                                                     (match-end 0))))
