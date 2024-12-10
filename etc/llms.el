@@ -113,7 +113,7 @@
             #'gptel-end-of-response)
 
   (setq gptel-backend llms-chat-gptel-groq-backend
-        gptel-model "llama-3.1-70b-versatile"))
+        gptel-model "llama-3.3-70b-versatile"))
 
 
 ;;; Expermients

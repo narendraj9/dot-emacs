@@ -146,7 +146,7 @@
     :endpoint "/openai/v1/chat/completions"
     :stream t
     :key (llms-chat--api-key-from-auth-source "api.groq.com")
-    :models '("llama-3.1-70b-versatile"
+    :models '("llama-3.3-70b-versatile"
               "mixtral-8x7b-32768"
               "gemma-7b-it"
               "llama2-70b-4096"
