@@ -264,7 +264,7 @@
   ;;
   ;; (<llm-name> . (<llm-backend> . <llm-model>))
   ;;
-  `(("ollama" . (,llms-chat-gptel-ollama-backend     . "llama3.2"))
+  `(("ollama" . (,llms-chat-gptel-ollama-backend     . "qwen2.5"))
     ("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-groq-70b-8192-tool-use-preview"))
     ("sonnet" . (,llms-chat-gptel-openrouter-backend . "@anthropic/claude-3.5-sonnet:beta"))
     ("openai" . (,llms-chat-gptel-openai-backend     . "gpt-4o"))

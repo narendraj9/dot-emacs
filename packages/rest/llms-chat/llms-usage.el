@@ -87,11 +87,12 @@ We use this information to estimate costs."
          (token-usage (llms-chat--tokens-consumed backend model-name response))
          (prompt-tokens (plist-get token-usage :prompt-tokens))
          (completion-tokens (plist-get token-usage :completion-tokens)))
-    `( :cost ,(llms-chat-openrouter-estimte-cost model-name
-                                                 prompt-tokens
-                                                 completion-tokens)
-       :tokens ,(+ prompt-tokens completion-tokens)
-       ,@token-usage)))
+    (when (and prompt-tokens completion-tokens)
+      `( :cost ,(llms-chat-openrouter-estimte-cost model-name
+                                                   prompt-tokens
+                                                   completion-tokens)
+         :tokens ,(+ prompt-tokens completion-tokens)
+         ,@token-usage))))
 
 (defun llms-chat-model-usage->mode-line-string (model-usage)
   (let ((mode-line-string))
