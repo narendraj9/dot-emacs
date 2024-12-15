@@ -924,7 +924,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   ;; ----------------------------------------------------------------------------
 
-  (setq suggest-key-bindings t)
+  (setq suggest-key-bindings t
+        extended-command-suggest-shorter nil)
 
   (setq-default indent-tabs-mode nil)
 
