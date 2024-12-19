@@ -3809,9 +3809,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package tramp
   :defer t
   :init
-  (setq tramp-default-method "ssh"
-        tramp-persistency-file-name (expand-file-name "var/tramp"
-                                                      user-emacs-directory))
+  (setq tramp-default-method "ssh")
+
   :config
   ;; Make backups for tramp files in their original locations
   (add-to-list 'backup-directory-alist

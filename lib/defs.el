@@ -1178,6 +1178,11 @@ search keyword."
                        (lambda () with-selected-date-time)))
               ,@body))))
 
+(defvar swap-ctrl-right-win-status nil)
+(add-to-list 'mode-line-misc-info
+             '(:eval swap-ctrl-right-win-status)
+             t)
+
 (defun swap-ctrl-right-win ()
   (interactive)
   (let* ((xkb-options-str (shell-command-to-string "gsettings get org.gnome.desktop.input-sources xkb-options"))
@@ -1189,7 +1194,11 @@ search keyword."
                             (vconcat xkb-options ["ctrl:swap_rwin_rctl"]))))
     (shell-command (format "gsettings set org.gnome.desktop.input-sources xkb-options %s"
                            (shell-quote-argument (string-replace "\"" "'" (json-encode-array new-xkb-optoins)))))
-    (message "%s swap Right window with Right control." (if enabled? "Disabled" "Enabled"))))
+    (message "%s swap Right window with Right control."
+             (if enabled? "[Laptop]: Disabled" "[External]: Enabled"))
+    (setq swap-ctrl-right-win-status
+          (propertize (if enabled? "[L]" "[E]") 'face 'mode-line-dimmed))
+    (run-with-timer 60 nil (lambda () (setq swap-ctrl-right-win-status nil)))))
 
 
 (defun pretty-format-temporarily ()
