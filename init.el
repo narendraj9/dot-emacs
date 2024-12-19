@@ -1656,11 +1656,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (dired-jump nil (expand-file-name "~/"))))
 
-(use-package discover
+(use-package casual-suite
   :ensure t
-  :disabled t
-  :hook (dired-mode . dired-turn-on-discover))
-
+  :defer t
+  :bind ("C-h z" . pick--casual-suite)
+  :preface
+  (defun pick--casual-suite ()
+    (interactive)
+    (let* ((menus '(("Calendar" . casual-calendar-tmenu)
+                    ("Calc" . casual-calc-tmenu)))
+           (selected-menu (completing-read "Menu:" menus)))
+      (call-interactively (assoc-default selected-menu menus)))))
 
 ;;; SNIPPETS and ABBREVS
 ;; ――――――――――――――――――――――――――――――――――――――――
