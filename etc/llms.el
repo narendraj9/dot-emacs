@@ -462,7 +462,7 @@ Concise Explanation about the above Word.")
                             (diff-command "delta"))
                         (with-temp-buffer
                           (if (not response)
-                              (error "Error talking to LLM %s: %s" llm-name info)
+                              (error "Error talking to LLM API" info)
                             (insert response)
                             (diff-no-select buffer (current-buffer)
                                             ""

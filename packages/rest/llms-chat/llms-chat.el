@@ -134,7 +134,9 @@
                 "google/palm-2-codechat-bison-32k"))))
 
 (defvar llms-chat-gptel-openai-backend
-  (gptel-make-openai "OpenAI" :key openai-secret-key))
+  (gptel-make-openai "OpenAI"
+    :key openai-secret-key
+    :models '("gpt-4o")))
 
 (defvar llms-chat-gptel-anthropic-backend
   (gptel-make-anthropic "Anthropic"
@@ -166,7 +168,9 @@
 
 (defvar llms-chat-gptel-gemini-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
-    (gptel-make-gemini "Gemini" :key api-key)))
+    (gptel-make-gemini "Gemini"
+      :key api-key
+      :models '("gemini-1.5-pro"))))
 
 (defvar llms-chat-gptel-kagi-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
