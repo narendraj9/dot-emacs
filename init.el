@@ -1914,7 +1914,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       'ruby-mode 'ruby-ts-mode
       'typescript-mode 'typescript-ts-mode
       'elixir-ts-mode
-      'terraform-mode)
+      'terraform-mode
+      'lua-ts-mode)
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
@@ -1961,13 +1962,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               (ruby-mode   . ruby-ts-mode)
                               (java-mode   . java-ts-mode)
                               (js-mode     . js-ts-mode)
+                              (lua-mode    . lua-ts-mode)
                               (elixir-mode . elixir-ts-mode)))
     (add-to-list 'major-mode-remap-alist mode-remap-entry))
 
   (define-repeat-map ("C-M-u" . --treesit-backward-up))
 
   :config
-  (dolist (grammar '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+  (dolist (grammar '((lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+                     (bash "https://github.com/tree-sitter/tree-sitter-bash")
                      (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
                      (css "https://github.com/tree-sitter/tree-sitter-css")
                      (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main")
