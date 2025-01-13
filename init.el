@@ -2331,7 +2331,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (vterm-send-key "n" nil nil t)))
 
 (use-package shell
-  :custom ( explicit-shell-file-name "zsh" )
+  :custom ( explicit-shell-file-name "bash" )
   :init
   (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
 
@@ -2433,7 +2433,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand t
   :custom
   (yequake-frames
-   '(("LLM"
+   '(("LLMShell"
+      (buffer-fns . (chatgpt-shell))
+      (left . 1.0)
+      (width . 1.0)
+      (height . 0.3)
+      (alpha . 1.0)
+      (frame-parameters . ((undecorated . t)
+                           (skip-taskbar . t)
+                           (visibility . t)
+                           (sticky . t))))
+     ("LLM"
       (buffer-fns . (llms-explain-image-with-context))
       (left . 1.0)
       (width . 0.30)
@@ -2445,7 +2455,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                            (sticky . t))))))
   :init
   (autoload 'llms-explain-image-with-context
-    "llms"))
+    "llms")
+
+  :preface
+  (defun yequake-screenshot-and-toggle-llm ()
+    (let* ((image-file (make-temp-file "image-with-context-" nil ".jpg"))
+           (llms-explain-image--input-image image-file))
+      (shell-command (format "%s -p -f %s"
+                             llms-screenshot-command
+                             (shell-quote-argument image-file)))
+      (yequake-toggle "LLM"))))
 
 ;;; DevOps
 ;; ──────────────────────────────────────────────────────────────────

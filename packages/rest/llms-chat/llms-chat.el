@@ -148,11 +148,11 @@
     :endpoint "/openai/v1/chat/completions"
     :stream t
     :key (llms-chat--api-key-from-auth-source "api.groq.com")
-    :models '("llama-3.3-70b-versatile"
-              "mixtral-8x7b-32768"
-              "gemma-7b-it"
-              "llama2-70b-4096"
-              "llama3-70b-8192")))
+    :models '(llama-3.3-70b-versatile
+              mixtral-8x7b-32768
+              gemma-7b-it
+              llama2-70b-4096
+              llama3-70b-8192)))
 
 (defvar llms-chat-gptel-preplexity-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.perplexity.ai")))
@@ -161,16 +161,14 @@
       :endpoint "/chat/completions"
       :stream t
       :key api-key
-      :models '("sonar-small-chat"
-                "sonar-medium-chat"
-                "sonar-small-online"
-                "sonar-medium-online"))))
+      :models '(sonar
+                sonar-pro))))
 
 (defvar llms-chat-gptel-gemini-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
     (gptel-make-gemini "Gemini"
       :key api-key
-      :models '("gemini-1.5-pro"))))
+      :models '(gemini-1.5-pro))))
 
 (defvar llms-chat-gptel-kagi-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
@@ -179,7 +177,7 @@
       :key api-key)))
 
 (setq gptel-backend llms-chat-gptel-groq-backend
-      gptel-model "llama3-70b-8192")
+      gptel-model  'llama3-70b-8192)
 
 (defvar llms-chat-openrouter-models nil)
 (defun llms-chat-openrouter-models ()
@@ -272,7 +270,7 @@
     ("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-groq-70b-8192-tool-use-preview"))
     ("sonnet" . (,llms-chat-gptel-openrouter-backend . "@anthropic/claude-3.5-sonnet:beta"))
     ("openai" . (,llms-chat-gptel-openai-backend     . "gpt-4o"))
-    ("pplx"   . (,llms-chat-gptel-preplexity-backend . "sonar-medium-online"))
+    ("pplx"   . (,llms-chat-gptel-preplexity-backend . "sonar"))
     ("gemini" . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-pro"))
     ("flash"  . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-flash"))
     ("kagi"   . (,llms-chat-gptel-kagi-backend       . "summarize:muriel"))))

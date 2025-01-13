@@ -113,7 +113,7 @@
             #'gptel-end-of-response)
 
   (setq gptel-backend llms-chat-gptel-groq-backend
-        gptel-model "llama-3.3-70b-versatile"))
+        gptel-model 'llama-3.3-70b-versatile))
 
 
 ;;; Expermients
@@ -176,7 +176,7 @@
   (interactive "P")
   (let ((gptel-backend llms-chat-gptel-groq-backend)
         (prompt-text (llms-prompt-text))
-        (gptel-model "llama-3.1-70b-versatile")
+        (gptel-model 'llama-3.1-70b-versatile)
         (system-prompt
          (if arg (read-string "Instruction: ")
            (concat "Complete the sentence and reply with just the sentence and nothing else."
@@ -246,16 +246,15 @@
   (interactive "fFile: ")
   (let* ((progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
          (gptel-backend llms-chat-gptel-openai-backend)
-         (gptel-model "gpt-4o")
+         (gptel-model 'gpt-4o)
 
          (instruction (or instruction (read-string "Instruction: ")))
          (base64-image-data (image-file->base64-data-uri file-path))
-         (image-message `( :role  "user"
-                           :content  [( :type  "image_url"
-                                        :image_url ( :url ,base64-image-data
-                                                     :detail  "low" ) )
-                                      ( :type  "text"
-                                        :text  ,instruction )])))
+         (image-message `[( :type  "image_url"
+                            :image_url ( :url ,base64-image-data
+                                         :detail  "low" ) )
+                          ( :type  "text"
+                            :text  ,instruction )]))
     (push image-message llms--interpret-image-history)
     (gptel-request (list image-message)
       :callback (lambda (response info)
@@ -303,7 +302,7 @@
   (let* ((instruction (or instruction (read-string "Instruction: ")))
          (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
          (gptel-backend llms-chat-gptel-openai-backend)
-         (gptel-model "gpt-4o")
+         (gptel-model 'gpt-4o)
          (image-text
           (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
     (gptel-request image-text
@@ -319,7 +318,7 @@
   (let* ((instruction (or instruction (read-string "Instruction: ")))
          (progress-reporter (make-progress-reporter "Sending request to OpenAI..." 0 1))
          (gptel-backend llms-chat-gptel-groq-backend)
-         (gptel-model "llama-3.1-70b-versatile")
+         (gptel-model 'llama-3.1-70b-versatile)
          (image-text
           (shell-command-to-string (format "tesseract %s -" (shell-quote-argument file-path)))))
     (gptel-request image-text
@@ -347,13 +346,17 @@ Example Output Format:
 
 Concise Explanation about the above Word.")
 
+(defvar llms-explain-image--input-image nil)
+
 ;;;###autoload
 (defun llms-explain-image-with-context ()
   (interactive)
-  (let* ((temp-file (make-temp-file "image-with-context-" nil ".jpg"))
-         (_ (shell-command (format "%s -p -f %s"
-                                   llms-screenshot-command
-                                   (shell-quote-argument temp-file))))
+  (let* ((image-file (or llms-explain-image--input-image
+                         (make-temp-file "image-with-context-" nil ".jpg")))
+         (_ (unless llms-explain-image--input-image
+              (shell-command (format "%s -p -f %s"
+                                     llms-screenshot-command
+                                     (shell-quote-argument image-file)))))
 
          (llm-buffer (get-buffer-create " *LLM Interpretation*"))
          (screenshot-image-data-uri ())
@@ -361,11 +364,11 @@ Concise Explanation about the above Word.")
           (lambda ()
             (let ((inhibit-read-only t)
                   (screenshot-image
-                   (create-image temp-file 'imagemagick nil :width (frame-pixel-width))))
+                   (create-image image-file nil nil :width (frame-pixel-width))))
               (end-of-buffer)
               (insert (format "\n\n# ─[%s ]─\n\n" (current-time-string)))
               (insert-image screenshot-image
-                            (format "![Captured Image](%s)" (image-file->base64-data-uri temp-file)))
+                            (format "![Captured Image](%s)" (image-file->base64-data-uri image-file)))
               (insert "\n\n"))
             (visual-line-mode +1)))
          (reinterpret-image
@@ -373,7 +376,7 @@ Concise Explanation about the above Word.")
             (interactive)
             (funcall prepare-buffer)
             (funcall llms-interpret-image-function
-                     temp-file
+                     image-file
                      (read-string "Instruction: ")
                      nil
                      llm-buffer)))
@@ -384,7 +387,7 @@ Concise Explanation about the above Word.")
                               (point-max)
                               (expand-file-name "var/llm-interpretation.log"
                                                 user-emacs-directory))
-              (delete-file temp-file)))))
+              (delete-file image-file)))))
     (with-current-buffer llm-buffer
       (unless (eq major-mode 'gfm-view-mode)
         (gfm-view-mode))
@@ -392,7 +395,7 @@ Concise Explanation about the above Word.")
         (funcall prepare-buffer)
         (display-buffer llm-buffer))
       (funcall llms-interpret-image-function
-               temp-file
+               image-file
                (read-string "Prompt: " nil nil llms-explain-image--default-prompt)
                nil llm-buffer)
 
@@ -438,7 +441,7 @@ Concise Explanation about the above Word.")
             (interactive)
             (when (and (eq (current-buffer) attached-buffer))
               (let ((gptel-backend llms-chat-gptel-openai-backend)
-                    (gptel-model "gpt-4o")
+                    (gptel-model 'gpt-4o)
                     (text (if (region-active-p)
                               (buffer-substring (region-beginning) (region-end))
                             (save-excursion (backward-paragraph)
