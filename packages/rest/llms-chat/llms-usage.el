@@ -26,6 +26,7 @@
 
 (require 'gptel-openai)
 (require 'savehist)
+(require 'dash)
 
 (defun llms-chat--openrouter-model-name (model-name)
   "Given a general model-name, returnt the closest openrouter model name (if possible).
@@ -67,7 +68,8 @@ We use this information to estimate costs."
           :completion-tokens completion-tokens)))
 
 (cl-defmethod gptel--parse-response :around (backend response info)
-  (let* ((response-text (cl-call-next-method backend response info)))
+  (let* ((response-text (cl-call-next-method backend response info))
+         (citations (plist-get response :citations)))
 
     ;; Hack: I need to do this to make sure I can pass this information from
     ;; where it is available, i.e. here in this function, to the callback that
@@ -79,7 +81,13 @@ We use this information to estimate costs."
     (put-text-property 0 (length response-text) 'response response response-text)
 
     ;; Make sure to return the actual response text.
-    response-text))
+    (if citations
+        (format "%s\n\nCitations:\n%s" response-text
+                (->> (mapcar #'identity citations)
+                     (-map-indexed (lambda (idx citation)
+                                     (format "[%s]: %s" (1+ idx) citation)))
+                     (s-join "\n")))
+      response-text)))
 
 (defun llms-chat-model-usage (backend model-name response)
   ;; See: gptel--parse-response :around (backend response info) ^ above.
