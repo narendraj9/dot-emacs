@@ -176,6 +176,16 @@
       :stream t
       :key api-key)))
 
+(defvar llms-chat-gptel-deepseek-backend
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.deepseek.com")))
+    (gptel-make-openai "DeepSeek"
+      :host "api.deepseek.com"
+      :endpoint "/chat/completions"
+      :stream t
+      :key api-key
+      :models '(deepseek-chat deepseek-reasoner deepseek-coder))))
+
+
 (setq gptel-backend llms-chat-gptel-groq-backend
       gptel-model  'llama3-70b-8192)
 
@@ -211,10 +221,13 @@
 
 (defun llms-chat-openrouter-model-search (model-name)
   "Try finding a model with the same name as MODEL-NAME on openrouter.ai"
-  (or (llms-chat-openrouter-model model-name)
-      (car (seq-filter (lambda (model)
-                         (string-suffix-p model-name (plist-get model :id)))
-                       (llms-chat-openrouter-models)))))
+  (let ((model-name (if (symbolp model-name)
+                        (symbol-name model-name)
+                      model-name)))
+    (or (llms-chat-openrouter-model model-name)
+        (car (seq-filter (lambda (model)
+                           (string-suffix-p model-name (plist-get model :id)))
+                         (llms-chat-openrouter-models))))))
 
 (defun llms-chat-models ()
   (seq-concatenate 'list
@@ -266,14 +279,15 @@
   ;;
   ;; (<llm-name> . (<llm-backend> . <llm-model>))
   ;;
-  `(("ollama" . (,llms-chat-gptel-ollama-backend     . "qwen2.5"))
-    ("groq"   . (,llms-chat-gptel-groq-backend       . "llama3-groq-70b-8192-tool-use-preview"))
-    ("sonnet" . (,llms-chat-gptel-openrouter-backend . "@anthropic/claude-3.5-sonnet:beta"))
-    ("openai" . (,llms-chat-gptel-openai-backend     . "gpt-4o"))
-    ("pplx"   . (,llms-chat-gptel-preplexity-backend . "sonar"))
-    ("gemini" . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-pro"))
-    ("flash"  . (,llms-chat-gptel-gemini-backend     . "gemini-1.5-flash"))
-    ("kagi"   . (,llms-chat-gptel-kagi-backend       . "summarize:muriel"))))
+  `(("ollama" . (,llms-chat-gptel-ollama-backend     . qwen2.5))
+    ("groq"   . (,llms-chat-gptel-groq-backend       . llama3-groq-70b-8192-tool-use-preview))
+    ("sonnet" . (,llms-chat-gptel-openrouter-backend . @anthropic/claude-3.5-sonnet:beta))
+    ("openai" . (,llms-chat-gptel-openai-backend     . gpt-4o))
+    ("pplx"   . (,llms-chat-gptel-preplexity-backend . sonar))
+    ("seek"   . (,llms-chat-gptel-deepseek-backend   . deep-reasoner))
+    ("gemini" . (,llms-chat-gptel-gemini-backend     . gemini-1.5-pro))
+    ("flash"  . (,llms-chat-gptel-gemini-backend     . gemini-1.5-flash))
+    ("kagi"   . (,llms-chat-gptel-kagi-backend       . summarize:muriel))))
 
 
 (defvar llms-chat-context-providers

@@ -2434,10 +2434,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom
   (yequake-frames
    '(("LLMShell"
-      (buffer-fns . (chatgpt-shell))
+      (buffer-fns . (yequake-gptel-session))
       (left . 1.0)
-      (width . 1.0)
-      (height . 0.3)
+      (width . 0.30)
+      (height . 1.0)
       (alpha . 1.0)
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
@@ -2453,11 +2453,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                            (skip-taskbar . t)
                            (visibility . t)
                            (sticky . t))))))
-  :init
-  (autoload 'llms-explain-image-with-context
-    "llms")
+  :config
+  (require 'llms)
+  (require 'llms-chat)
 
   :preface
+  (defun yequake-gptel-session ()
+    (let ((gptel-backend llms-chat-gptel-deepseek-backend)
+          (gptel-model 'deepseek-chat))
+      (gptel " *yequake GPTEL* ")))
+
   (defun yequake-screenshot-and-toggle-llm ()
     (let* ((image-file (make-temp-file "image-with-context-" nil ".jpg"))
            (llms-explain-image--input-image image-file))
