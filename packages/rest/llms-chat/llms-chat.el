@@ -168,7 +168,8 @@
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
     (gptel-make-gemini "Gemini"
       :key api-key
-      :models '(gemini-1.5-pro))))
+      :models '(gemini-1.5-pro
+                gemini-2.0-flash))))
 
 (defvar llms-chat-gptel-kagi-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
@@ -279,15 +280,16 @@
   ;;
   ;; (<llm-name> . (<llm-backend> . <llm-model>))
   ;;
-  `(("ollama" . (,llms-chat-gptel-ollama-backend     . qwen2.5))
-    ("groq"   . (,llms-chat-gptel-groq-backend       . llama3-groq-70b-8192-tool-use-preview))
-    ("sonnet" . (,llms-chat-gptel-openrouter-backend . @anthropic/claude-3.5-sonnet:beta))
-    ("openai" . (,llms-chat-gptel-openai-backend     . gpt-4o))
-    ("pplx"   . (,llms-chat-gptel-preplexity-backend . sonar))
-    ("seek"   . (,llms-chat-gptel-deepseek-backend   . deep-reasoner))
-    ("gemini" . (,llms-chat-gptel-gemini-backend     . gemini-1.5-pro))
-    ("flash"  . (,llms-chat-gptel-gemini-backend     . gemini-1.5-flash))
-    ("kagi"   . (,llms-chat-gptel-kagi-backend       . summarize:muriel))))
+  `(("ollama"   . (,llms-chat-gptel-ollama-backend     . qwen2.5))
+    ("groq"     . (,llms-chat-gptel-groq-backend       . llama3-groq-70b-8192-tool-use-preview))
+    ("sonnet"   . (,llms-chat-gptel-openrouter-backend . @anthropic/claude-3.5-sonnet:beta))
+    ("openai"   . (,llms-chat-gptel-openai-backend     . gpt-4o))
+    ("pplx"     . (,llms-chat-gptel-preplexity-backend . sonar))
+    ("seek"     . (,llms-chat-gptel-deepseek-backend   . deep-reasoner))
+    ("deepchat" . (,llms-chat-gptel-deepseek-backend   . deep-chat))
+    ("gemini"   . (,llms-chat-gptel-gemini-backend     . gemini-1.5-pro))
+    ("flash"    . (,llms-chat-gptel-gemini-backend     . gemini-2.0-flash))
+    ("kagi"     . (,llms-chat-gptel-kagi-backend       . summarize:muriel))))
 
 
 (defvar llms-chat-context-providers
