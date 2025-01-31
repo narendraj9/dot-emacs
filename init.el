@@ -252,6 +252,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         initial-major-mode
         (lambda ()
           (lisp-interaction-mode)
+          (llms-chat-minor-mode +1)
           (setq header-line-format
                 '(:eval
                   (format "Emacs Uptime: %-20s | Sys Time: %-20s | System Load: %-20s"
