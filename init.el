@@ -1864,6 +1864,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-hook 'hledger-input-mode-hook #'company-mode-quicker)
 
   :preface
+  (defun hledger-get-balance (account)
+    (let ((balance-output (hledger-shell-command-to-string (format " balance -N %s " account))))
+      (string-match "[0-9]+\.?[0-9]*" balance-output)
+      (string-to-number (match-string 0 balance-output))))
+
   (defun popup-balance-at-point ()
     "Show balance for account at point in a popup."
     (interactive)

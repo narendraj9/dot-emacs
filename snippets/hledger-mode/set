@@ -1,0 +1,10 @@
+# -*- mode: snippet; -*-
+# name: set
+# key: set
+# binding: direct-keybinding
+# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
+# --
+`(format-time-string "%Y-%m-%d")` Groceries
+    assets:bank:savings:n26:groceries  ; balance = € ${1}
+    expenses:housing:groceries         € ${2:<tab to here>$(when (yas-field-value 1) (- (hledger-get-balance "assets:bank:savings:n26:groceries") (string-to-number (yas-field-value 1))))}
+$0
