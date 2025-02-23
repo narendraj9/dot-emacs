@@ -54,11 +54,7 @@
 
   :init
   ;; Used by `chatgpt-shell-load-awesome-prompts'
-  (use-package pcsv :ensure t)
-
-  :config
-  (add-to-list 'chatgpt-shell-model-versions "gpt-4o" t)
-  (add-to-list 'chatgpt-shell-model-versions "o1-preview" t))
+  (use-package pcsv :ensure t))
 
 (use-package dall-e-shell
   :ensure t
