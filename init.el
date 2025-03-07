@@ -3172,6 +3172,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         python-indent-guess-indent-offset nil
         python-indent-offset 2))
 
+(use-package uv-mode
+  :ensure t
+  :hook (python-mode . uv-mode-auto-activate-hook))
+
 (use-package py-autopep8
   :ensure t
   :hook (python-mode . py-autopep8-mode))
