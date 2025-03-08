@@ -3174,11 +3174,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package uv-mode
   :ensure t
-  :hook (python-mode . uv-mode-auto-activate-hook))
+  :hook (python-ts-mode . uv-mode-auto-activate-hook)
+  :init
+  (setq uv-mode-mode-line-format "")
+
+  :config
+  (keymap-unset uv-mode-map "C-c C-s")
+  (keymap-unset uv-mode-map "C-c C-u"))
 
 (use-package py-autopep8
   :ensure t
-  :hook (python-mode . py-autopep8-mode))
+  :hook (python-ts-mode . py-autopep8-mode))
 
 (use-package prolog
   :mode ("\\.pl\\'" . prolog-mode)
