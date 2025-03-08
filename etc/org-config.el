@@ -31,6 +31,7 @@
 (require 'alert)
 (require 'defs)
 (require 'f)
+(require 'org-macs)
 
 (defun import-icalendar-urls (ical-urls)
   "Fetch each input url in ICAL-URLS with `url-copy-file' and place

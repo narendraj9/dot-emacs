@@ -3172,13 +3172,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         python-indent-guess-indent-offset nil
         python-indent-offset 2))
 
-(use-package uv-mode
+(use-package pyvenv
   :ensure t
-  :hook (python-mode . uv-mode-auto-activate-hook))
+  :after python-ts-mode)
 
 (use-package py-autopep8
   :ensure t
-  :hook (python-mode . py-autopep8-mode))
+  :hook (python-ts-mode . py-autopep8-mode))
 
 (use-package prolog
   :mode ("\\.pl\\'" . prolog-mode)
