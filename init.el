@@ -2357,8 +2357,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                   (delete-window))))))))
 
 (use-package eshell
-  :bind ( :map ctl-quote-map ("C-p" . eshell-toggle) )
+  :bind ( :map ctl-quote-map ("C-p" . eshell-toggle)
+          :map eshell-mode-map ( "C-c !" . eshell-restart) )
+  :hook ( eshell-exit-hook . delete-window-if-dedicated-to-eshell )
   :preface
+  (defun delete-window-if-dedicated-to-eshell ()
+    (when (< 1 (count-windows))
+      (delete-window)))
+
+  (defun eshell-restart ()
+    (interactive)
+    (let ((directory default-directory))
+      (eshell-life-is-too-much)
+      (with-current-buffer (eshell)
+        (eshell/cd directory)
+        (eshell-send-input "\n"))))
+
   (defun eshell-toggle (arg)
     (interactive "P")
     (let ((directory default-directory)
