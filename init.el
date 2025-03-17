@@ -2338,10 +2338,26 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package shell
   :custom ( explicit-shell-file-name "bash" )
+  :bind ( :map ctl-quote-map ([C-m] . shell-toggle* ) )
   :init
   (add-hook 'shell-mode-hook #'--shell-mode-kill-buffer-on-exit )
 
   :preface
+  (defun shell-toggle* (arg)
+    (interactive "P")
+    (let ((directory default-directory)
+          (text-in-region
+           (when (region-active-p)
+             (buffer-substring (region-beginning) (region-end)))))
+      (if (eq major-mode 'shell-mode)
+          (set-window-configuration (get this-command :window-config))
+        (put this-command :window-config (current-window-configuration))
+        (shell)
+        (when arg
+          (insert (format "; cd %s ; \n" (shell-quote-argument directory))))
+        (when text-in-region
+          (insert text-in-region)))))
+
   (defun --shell-mode-kill-buffer-on-exit ()
     "Augments the existing sentinal function for a buffer process
      with buffer and window clean up on exit."
@@ -2433,7 +2449,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package eat
   :ensure t
-  :bind ( "s-<return>" . --eat-toggle )
+  :bind ( ( "s-<return>" . --eat-toggle )
+          ( "M-S-<return>" . --eat-toggle ) )
 
   :delight eat-eshell-mode
   :custom ( eat-kill-buffer-on-exit t
@@ -2735,6 +2752,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("C-n" . open-org-file)
          ("C-d" . search-notes-files)
 
+         :map ctl-period-map
+         ("C-n" . open-org-file)
+         ("C-d" . search-notes-files)
+
+
          :map org-agenda-mode-map
          ("C-c g" . google-calendar-import-to-org) )
   :config
@@ -2980,9 +3002,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
     :map ctl-m-map
     ("z" . consult-complex-command)
+    ([C-m] . consult-imenu)
 
     :map ctl-quote-map
     ("o n" . org-record-a-note!)
+    ("o j" . org-jump-to-note!)
     ("C-'" . consult-imenu)
 
     :map ctl-period-map
@@ -3018,7 +3042,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (open-line 1)
         (insert "- Noted on ")
         (org-insert-time-stamp (current-time) t t)
-        (insert "\n  ")))))
+        (insert "\n  "))))
+
+  (defun org-jump-to-note! ()
+    (interactive)
+    (let ((org-use-property-inheritance nil)
+          (org-use-tag-inheritance nil))
+      (consult-org-heading "+note_target" 'agenda)
+      (org-narrow-to-subtree)
+      (org-fold-show-subtree))))
 
 (use-package embark-consult :ensure t :after embark)
 
@@ -3031,7 +3063,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :commands (connected-repl-run connected-repl-run-on-project)
   :config
   (add-to-list 'connected-repl-commands
-               '(elixir-ts-mode . ("iex> " "iex" "-S" "mix"))))
+               '(elixir-ts-mode . ("iex> " "iex" "-S" "mix")))
+
+  (add-to-list 'connected-repl-commands
+               '(scala-mode . ("scala> " "scala-cli" "repl"))))
 
 (use-package java-mode
   :defer t
@@ -3080,17 +3115,25 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         gradle-gradlew-executable "./gradlew"))
 
 (use-package scala-mode
-  :ensure t
   :pin melpa
+  :ensure t
   :defer t
+  :mode  ("\\.sc\\'" . scala-mode)
+  :hook (scala-mode . eglot-ensure)
   :config
   (use-package sbt-mode
     :ensure t
-    :pin melpa)
-
-  (use-package ensime
-    :ensure t
     :pin melpa))
+
+(use-package scala-cli-repl
+  :after scala-mode
+  :vc ( :url "https://github.com/ag91/scala-cli-repl"
+        :rev :neweset )
+  :ensure t)
+
+(use-package spark
+  :path "etc/"
+  :commands (spark-connect!))
 
 (use-package cc-mode
   :bind ( :map c-mode-base-map

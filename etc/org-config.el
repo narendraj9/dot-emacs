@@ -622,19 +622,8 @@ Otherwise, limit to only `org-mode' files."
         "%TODO  %3PRIORITY %TAGS %60ITEM(Task) %10EFFORT(Estimated Effort) {:} %10CLOCKSUM(Time Spent)"))
 
 
-;; (use-package ob-ipython
-;;   :doc "Org-babel with IPython."
-;;   :if (executable-find "jupyter")
-;;   :disabled t
-;;   :defer t
-;;   :config
-;;   (setq ob-ipython-resources-dir
-;;         (expand-file-name "data/obipy-resources" org-directory)))
-
-
 (use-package ob-elixir :ensure t :defer t)
 (use-package ob-go     :ensure t :defer t)
-
 
 (use-package ob-ditaa
   :after ob
@@ -670,8 +659,7 @@ Otherwise, limit to only `org-mode' files."
   :defer t
   :init
   (setq org-babel-load-languages
-        `((plantuml   . t)
-          (emacs-lisp . t)
+        `((emacs-lisp . t)
           (sqlite     . t)
           (sql        . t)
           (lisp       . t)
@@ -687,7 +675,10 @@ Otherwise, limit to only `org-mode' files."
           (elixir     . t)
           (go         . t)
           (haskell    . t)
-          (ditaa      . t)))
+          (ditaa      . t)
+          (verb       . t)
+          (scala-cli  . t)
+          (plantuml   . t)))
 
   (setq org-babel-python-command "python"
         org-confirm-babel-evaluate nil)

@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'seq)
+
 (defcustom connected-repl-commands
   '(
     ;; For a Maven project, check this out:
@@ -46,6 +48,10 @@
 (defvar connected-repl--buffer)
 (make-local-variable 'connected-repl--buffer)
 
+(defvar connected-repl--input-buffer)
+(make-local-variable 'connected-repl--input-buffer)
+
+
 (defvar connected-repl--last-output "")
 (make-local-variable 'connected-repl--last-output)
 
@@ -58,8 +64,8 @@
 
 (defun connected-repl-add-local-bindings ()
   (let ((m (current-local-map)))
-    (define-key m (kbd "C-c C-k") #'connected-repl-send-region)
-    (define-key m (kbd "C-x C-e") #'connected-repl-send-statement)
+    (define-key m (kbd "C-c C-k") #'connected-repl-eval-buffer)
+    (define-key m (kbd "C-x C-e") #'connected-repl-eval)
     (define-key m (kbd "C-c C-z") #'connected-repl-display-buffer)))
 
 
@@ -68,23 +74,65 @@
   `comint-mode'."
   (setq comint-prompt-regexp connected-repl-prompt-regexp)
   (setq comint-process-echoes t)
-  (add-to-list 'comint-output-filter-functions
-               #'connected-repl-collect-output))
+  (keymap-local-set "C-c C-z" connected-repl--back-to-input)
+  (add-to-list 'comint-output-filter-functions #'connected-repl-collect-output))
 
 
 (defun connected-repl--send-string (s)
   (with-current-buffer (get-buffer connected-repl--buffer)
-    (setq connected-repl--last-output "")
-    (comint-send-string (get-buffer-process (current-buffer))
-                        (if (string-suffix-p "\n" s) s (concat s "\n")))))
+    ;; add an initial newline to separate output from prompt
+    (goto-char (point-max))
+    (insert s)
+    (comint-send-input nil t)))
+
+
+(defun connected-repl--back-to-input ()
+  (interactive)
+  (save-excursion
+    (if-let ((active-window
+              (car (seq-filter (lambda (w) (eq connected-repl--input-buffer
+                                               (window-buffer w)))
+                               (window-list)))))
+        (select-window active-window)
+      (set-window-buffer (split-window-horizontally)
+                         connected-repl--input-buffer))))
+
 
 
 (defun connected-repl-display-buffer ()
   (interactive)
   (save-excursion
-    (set-window-buffer (or (split-window-sensibly)
-                           (split-window-below))
-                       connected-repl--buffer)))
+    (if-let ((active-window
+              (car (seq-filter (lambda (w) (eq connected-repl--buffer
+                                               (window-buffer w)))
+                               (window-list)))))
+        (select-window active-window)
+      (set-window-buffer (split-window-right)
+                         connected-repl--buffer))))
+
+
+(defun connected-repl--connect-buffers (input-buffer comint-buffer)
+  (setq-local connected-repl--buffer comint-buffer)
+  (connected-repl-add-local-bindings)
+  (with-current-buffer connected-repl--buffer
+    (setq connected-repl--input-buffer input-buffer)
+    (connected-repl-mode))
+  (connected-repl-display-buffer))
+
+
+(defun connected-repl-connect-manually ()
+  "Manually connect current buffer to an already present comint buffer."
+  (interactive)
+  (let* ((filter-fn (lambda (buffer-name-cons-buffer) ; ( buffer-name . <buffer object> )
+                      (with-current-buffer (car buffer-name-cons-buffer)
+                        (memq major-mode '(comint-mode connected-repl-mode)))))
+         (this-buffer (current-buffer))
+         (comint-buffer (get-buffer (read-buffer "Comint Buffer:" (list) t filter-fn)))
+         (connected-repl-prompt-regexp (read-string "Prompt: ")))
+    (connected-repl--connect-buffers this-buffer comint-buffer)
+    (message "#<buffer %s> connected to #<buffer %s>"
+             (current-buffer)
+             connected-repl--buffer)))
 
 
 ;;;###autoload
@@ -94,23 +142,23 @@
    same frame. With prefix argument, asks for flags to pass
    instead of the ones defined in `connected-repl-commands'."
   (interactive "P")
-  (let* ((repl-entry-for-mode (assoc-default major-mode connected-repl-commands))
+  (let* ((this-buffer (current-buffer))
+         (repl-entry-for-mode (assoc-default major-mode connected-repl-commands))
          (connected-repl-prompt-regexp (car repl-entry-for-mode))
          (connected-repl-command (cadr repl-entry-for-mode))
          (switches (cddr repl-entry-for-mode)))
     (unless connected-repl-command
       (user-error "Add configuration for major-mode: %s in `connected-repl-commands'."
                   major-mode))
-    (setq-local connected-repl--buffer
-                (apply #'make-comint
-                       (generate-new-buffer-name (format "%s [Connected REPL]" major-mode))
-                       connected-repl-command
-                       nil
-                       (if prefix (read-string "Flags: ") switches)))
-    (connected-repl-add-local-bindings)
-    (with-current-buffer connected-repl--buffer
-      (connected-repl-mode))
-    (connected-repl-display-buffer)))
+    (let ((comint-buffer
+           (apply #'make-comint
+                  (generate-new-buffer-name (format "%s [Connected REPL]" major-mode))
+                  connected-repl-command
+                  nil
+                  (if prefix
+                      (split-string (read-string "Flags: ") " ")
+                    switches))))
+      (connected-repl--connect-buffers this-buffer comint-buffer))))
 
 
 ;;;###autoload
@@ -120,22 +168,32 @@
     (connected-repl-run prefix)))
 
 
-(defun connected-repl-send-region (begin end)
-  "Send selected region to `connected-repl--buffer' for evaluation
+(defun connected-repl-eval-buffer ()
+  "Send the whole buffer `connected-repl--buffer' for evaluation
    as a snippet."
   (interactive "r")
   (unless (and (buffer-live-p connected-repl--buffer)
                (eq 'run (process-status (get-buffer-process connected-repl--buffer))))
     (user-error "Connected REPL buffer doesn't exist. Use `connected-repl-run'."))
-  (connected-repl--send-string (buffer-substring begin end)))
+  (connected-repl--send-string (buffer-substring (point-min) (point-max))))
 
 
-(defun connected-repl-send-statement ()
-  (interactive)
+(defun connected-repl-eval (prefix)
+  (interactive "P}")
   (unless (and (buffer-live-p connected-repl--buffer)
                (eq 'run (process-status (get-buffer-process connected-repl--buffer))))
     (user-error "Connected REPL buffer doesn't exist. Use `connected-repl-run'."))
-  (connected-repl--send-string (buffer-substring (line-beginning-position) (line-end-position))))
+  (connected-repl--send-string
+   (cond
+    ((region-active-p)
+     (buffer-substring (region-beginning)
+                       (region-end)))
+
+    (prefix (buffer-substring (point-min)
+                              (line-end-position)))
+
+    (t (buffer-substring (line-beginning-position)
+                         (line-end-position))))))
 
 
 (defun connected-repl-interrupt ()
