@@ -74,7 +74,7 @@
   `comint-mode'."
   (setq comint-prompt-regexp connected-repl-prompt-regexp)
   (setq comint-process-echoes t)
-  (keymap-local-set "C-c C-z" connected-repl--back-to-input)
+  (keymap-local-set "C-c C-z" #'connected-repl--back-to-input)
   (add-to-list 'comint-output-filter-functions #'connected-repl-collect-output))
 
 

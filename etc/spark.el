@@ -26,7 +26,6 @@
 
 (require 'comint)
 (require 'multisession)
-(require 'version)
 
 (define-multisession-variable spark-cluster-host nil)
 (define-multisession-variable spark-cluster-id nil)

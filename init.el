@@ -2733,8 +2733,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-config-capture)
          ("C-c a" . org-agenda)
-         ("C-c n" . org-next-link)
-         ("C-c p" . org-previous-link)
+         ("C-c n" . jump-to-notes-this-week!)
 
          ;; Bindings for using the Timer
          :map ctl-m-map
@@ -3006,6 +3005,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
     :map ctl-quote-map
     ("o n" . org-record-a-note!)
+    ("o N" . jump-to-notes-this-week!)
     ("o j" . org-jump-to-note!)
     ("C-'" . consult-imenu)
 
@@ -3029,6 +3029,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
        (t
         (consult-grep directory initial)))))
 
+  (defun jump-to-notes-this-week! ()
+    (interactive)
+    (with-current-buffer (find-file-noselect org-default-notes-file)
+      (org-datetree-find-iso-week-create (calendar-current-date))
+      (switch-to-buffer (current-buffer))))
 
   (defun org-record-a-note! (prefix-arg)
     (interactive "P")
@@ -3060,7 +3065,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package connected-repl
   :load-path "packages/rest/connected-repl/"
-  :commands (connected-repl-run connected-repl-run-on-project)
+  :commands (connected-repl-run connected-repl-run-on-project connected-repl-connect-manually)
   :config
   (add-to-list 'connected-repl-commands
                '(elixir-ts-mode . ("iex> " "iex" "-S" "mix")))
@@ -3132,7 +3137,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t)
 
 (use-package spark
-  :path "etc/"
+  :load-path "etc/"
   :commands (spark-connect!))
 
 (use-package cc-mode
