@@ -1602,7 +1602,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;; ──────────────────────────────────────────────────────────────────
 
-(use-package dired :custom (dired-kill-when-opening-new-dired-buffer t))
+(use-package dired
+  :custom (dired-kill-when-opening-new-dired-buffer t)
+  :config
+  (use-package dired-hacks
+    :vc  ( :url "https://github.com/Fuco1/dired-hacks.git"
+           :rev :newest )
+    :hook (dired-mode . dired-collapse-mode)
+    :init
+    (require 'dired-collapse)))
+
 (use-package dired-x
   :bind (("C-x C-j" . dired-jump)
          :map dired-mode-map
@@ -1938,7 +1947,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               ((c-mode c++-mode)        . ("clangd"))
                               ((ruby-mode ruby-ts-mode) . ("bundle" "exec" "solargraph" "stdio"))
                               (java-mode                . ,#'java-eclipse-jdt-launcher)
-                              (elixir-ts-mode           . ,#'elixir-lsp-launcher)))
+                              (elixir-ts-mode           . ,#'elixir-lsp-launcher)
+                              (scala-mode               . (,(expand-file-name "bin/metals.sh" user-emacs-directory)))))
     (add-to-list 'eglot-server-programs lang-server-spec)))
 
 
@@ -3134,6 +3144,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :after scala-mode
   :vc ( :url "https://github.com/ag91/scala-cli-repl"
         :rev :neweset )
+  :custom (scala-cli-load-repl-in-sbt-context t)
   :ensure t)
 
 (use-package spark
@@ -3814,6 +3825,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom (terraform-format-on-save  t))
 
 (use-package ansible :ensure t :defer t)
+
+(use-package jsonnet-mode :ensure t)
 
 
 ;;; Version Control

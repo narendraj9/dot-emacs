@@ -48,7 +48,9 @@
             val config = new DatabricksConfig().setProfile(\"%s\")
             val spark = DatabricksSession.builder().host(\"%s\").clusterId(\"%s\").remote().getOrCreate()
             val dbutils = DBUtils.getDBUtils()
-            import spark.implicits._"))
+            import spark.implicits._
+            import org.apache.spark.sql.types._
+            import org.apache.spark.sql.functions._"))
     (format init-template profile host cluster)))
 
 (defun spark-connect! ()
@@ -73,7 +75,44 @@
         (insert (spark-init-script)))
       (comint-send-string (current-buffer)
                           (format ":load %s\n" temp-load-script-file)))
+    ;; Set `completion-at-point-functions' in the current buffer.
+    (add-hook 'completion-at-point-functions #'spark-repl-completion-at-point nil t)
     (message "Try using `connected-repl-connect-manually' to attach the REPL to a source buffer.")))
+
+
+;;; Completions
+;; --------------------------------------------------------------------------------------
+
+(defconst spark-repl-completion-regex "^\\[completions\\] \\(.*\\)$")
+
+(defun spark-repl-get-completions (prefix)
+  "Return a list of completions for PREFIX by querying the REPL process."
+  (let ((proc (get-buffer-process (current-buffer))))
+    (when proc
+      (comint-redirect-results-list (concat ":completions " prefix "\n")
+                                    spark-repl-completion-regex
+                                    1))))
+
+(defun spark-repl-completion-at-point ()
+  "Completion-at-point function for the custom REPL."
+  (when (comint-check-proc (current-buffer))
+    (let* ((bounds (cons (save-excursion
+                           (re-search-backward "\\s-" (point-min) t)
+                           (1+ (point)))
+                         (point)))
+           (start (if bounds (car bounds) (point)))
+           (end   (if bounds (cdr bounds) (point)))
+           (prefix (buffer-substring-no-properties start end))
+           (candidates (and (> (length prefix) 0)
+                            (spark-repl-get-completions prefix)))
+           ;; Compute the bounds again because the command seems to insert
+           ;; newlines in the process buffer.
+           (new-bounds (cons (save-excursion
+                               (re-search-backward "\\s-" (point-min) t)
+                               (1+ (point)))
+                             (point))))
+      (when candidates
+        (list (car new-bounds) (cdr new-bounds) candidates :exclusive 'no)))))
 
 
 (provide 'spark)

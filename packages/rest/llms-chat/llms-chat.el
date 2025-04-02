@@ -135,7 +135,8 @@
 
 (defvar llms-chat-gptel-openai-backend
   (gptel-make-openai "OpenAI"
-    :key openai-secret-key
+    :key (or (and (boundp 'openai-secret-key) openai-secret-key)
+             (llms-chat--api-key-from-auth-source "api.openai.com"))
     :models '("gpt-4o")))
 
 (defvar llms-chat-gptel-anthropic-backend
