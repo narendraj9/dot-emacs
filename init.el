@@ -4402,8 +4402,11 @@ buffer."
           ("t u"   . chatgpt-shell-generate-unit-test))
 
   :config
+  (when (eq system-type 'darwin)
+    (setq llms-chat-show-in-progress-indicator nil))
+
   (add-to-list 'display-buffer-alist
-               '("\\*chatgpt\\*" display-buffer-in-direction
+               '("\\*chatgpt .*\\*" display-buffer-in-direction
                  (window . main)
                  (direction . right)
                  (window-width . 0.5)))

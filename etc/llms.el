@@ -48,18 +48,20 @@
   :autoload (chatgpt-shell--put-source-block-overlays)
   :custom
   (shell-maker-prompt-before-killing-buffer nil)
-  (chatgpt-shell-openai-key openai-secret-key)
+  (chatgpt-shell-welcome-function nil)
+  (chatgpt-shell-openai-key (auth-source-pick-first-password :host "api.openai.com"))
   (chatgpt-shell-system-prompt 2)
   (chatgpt-shell-model-version "gpt-4o")
 
   :init
   ;; Used by `chatgpt-shell-load-awesome-prompts'
-  (use-package pcsv :ensure t))
+  (use-package pcsv :ensure t)
 
-(use-package dall-e-shell
-  :ensure t
-  :defer t
-  :custom (dall-e-shell-openai-key openai-secret-key))
+  :config
+  (add-hook 'chatgpt-shell-mode-hook
+            (lambda ()
+              (make-variable-buffer-local 'kill-buffer-hook)
+              (add-hook 'kill-buffer-hook #'delete-window))))
 
 (use-package copilot
   :defer t
@@ -96,8 +98,8 @@
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
   :config
-  (when (boundp 'openai-secret-key)
-    (setq gptel-api-key openai-secret-key))
+  (setq gptel-api-key
+        (auth-source-pick-first-password :host "api.openai.com"))
 
   (require 'gptel-transient)
   (require 'gptel-curl)
