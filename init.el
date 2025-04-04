@@ -3011,7 +3011,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
     :map ctl-m-map
     ("z" . consult-complex-command)
-    ([C-m] . consult-imenu)
 
     :map ctl-quote-map
     ("o n" . org-record-a-note!)
@@ -4382,7 +4381,10 @@ buffer."
   (dolist (feature (list 'copilot 'chatgpt-shell 'gptel))
     (eval-after-load feature '(require 'llms)))
 
-  :bind ( :map ctl-quote-map
+  :bind ( :map ctl-m-map
+          ([C-m] . llms-chat)
+
+          :map ctl-quote-map
           ("t RET" . llms-chat)
           ("t w"   . llms-spin-up-companion)
           ("t W"   . llms-spin-up-companion-stop)
