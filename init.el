@@ -1444,9 +1444,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package avy
   :ensure t
-  :bind (("M-g w" . avy-goto-word-1)
-         :map ctl-period-map
-         ("C-." . avy-goto-char-timer))
+  :bind ( ("M-g w" . avy-goto-word-1)
+
+          :map ctl-period-map
+          ("C-." . avy-goto-char-timer)
+
+          :map dired-mode-map
+          ("j" . avy-goto-char-timer) )
   :config
   (setq avy-style 'words)
   (avy-setup-default))
@@ -1624,9 +1628,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("M-<"   . dired-to-first-entry)
          ("M->"   . dired-to-last-entry)
          ("z"     . kill-buffer-delete-window)
-         ("j"     . dired-x-find-file)
          ("f"     . project-find-file)
-         ("~"     . dired-go-home))
+         ("~"     . dired-go-home)
+         ("P"     . dired-goto-project-root))
   :hook ( (dired-after-readin . dired-hide-details-mode)
           (dired-mode         . hl-line-mode)
           (dired-mode         . dired-omit-mode) )
@@ -1669,7 +1673,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (defun dired-go-home ()
     "Switch current directory to ~/."
     (interactive)
-    (dired-jump nil (expand-file-name "~/"))))
+    (dired-jump nil (expand-file-name "~/")))
+
+  (defun dired-goto-project-root ()
+    (interactive)
+    (dired-jump nil (expand-file-name (project-root (project-current))))))
 
 (use-package casual-suite
   :ensure t
@@ -3240,11 +3248,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (define-key cargo-mode-map (kbd "C-. C-k") #'cargo-process-check))
 
-
-(use-package python-mode
-  :ensure t
+(use-package python-ts-mode
   :defer t
-  :config
+  :init
   (setq python-indent-guess-indent-offset-verbose nil
         python-indent-guess-indent-offset nil
         python-indent-offset 2))

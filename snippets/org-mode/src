@@ -2,6 +2,6 @@
 # name: src
 # key: src
 # --
-#+begin_src $1 :results output drawer
+#+begin_src $1 :results output drawer :session default
 $0
 #+end_src
