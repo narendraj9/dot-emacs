@@ -57,6 +57,16 @@
   ;; Used by `chatgpt-shell-load-awesome-prompts'
   (use-package pcsv :ensure t)
 
+  :preface
+  (defun chatgpt-shell--toggle-buffer ()
+    "Bury the buffer (major-mode: chatgpt-shell-mode) if it is in the current
+     window, otherwise create a new one."
+    (interactive)
+    (if (eq major-mode 'chatgpt-shell-mode)
+        (progn (bury-buffer)
+               (delete-window))
+      (chatgpt-shell)))
+
   :config
   (add-hook 'chatgpt-shell-mode-hook
             (lambda ()

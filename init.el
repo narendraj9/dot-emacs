@@ -1096,7 +1096,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("o g" . footnote-goto-footnote)) )
 
 (use-package csv-mode      :defer t :ensure t)
-(use-package markdown-mode :defer t :ensure t)
+
+(use-package markdown-mode
+  :defer t
+  :ensure t
+  :hook ( markdown-mode . visual-line-mode ) )
+
 (use-package cdlatex :ensure t :hook (Latex-Mode-Hook . turn-on-cdlatex))
 (use-package auctex
   :pin gnu
@@ -4383,6 +4388,8 @@ buffer."
 
   :bind ( :map ctl-m-map
           ([C-m] . llms-chat)
+          ("c"   . chatgpt-shell--toggle-buffer)
+
 
           :map ctl-quote-map
           ("t RET" . llms-chat)
