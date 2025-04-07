@@ -1363,6 +1363,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive "P")
     (fit-window-to-buffer (next-window))))
 
+(use-package window-x
+  :doc "https://p.bauherren.ovh/blog/tech/new_window_cmds")
+
 
 (use-package winner
   :bind ( :map ctl-m-map ("<" . winner-undo ) )
@@ -2358,6 +2361,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (defun --vterm-ctrl-n ()
     (interactive)
     (vterm-send-key "n" nil nil t)))
+
+(use-package exec-path-from-shell
+  :ensure t
+  :if (eq system-type 'darwin)
+  :init
+  (exec-path-from-shell-initialize))
 
 (use-package shell
   :custom ( explicit-shell-file-name "bash" )
