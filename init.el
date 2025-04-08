@@ -156,6 +156,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c b" . switch-to-buffer-with-mode)
           ("<print>" . snap-it)
 
+          ("M-g S" . switch-to-scratch-new-tab)
+
           :map ctl-m-map
           ("t" . switch-to-scratch-new-tab)
           ("o" . run-in-other-window)
@@ -2468,16 +2470,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (pixel-scroll-mode -1)
               (pixel-scroll-precision-mode -1)))
 
-  (add-to-list 'eshell-expand-input-functions
-               #'eshell-expand-history-references)
-
-  ;; (eval-after-load 'em-cmpl
-  ;;   '(define-key eshell-cmpl-mode-map [tab] #'company-indent-or-complete-common))
-
-  ;; ANSI colors in Eshell buffers.
-  (add-hook 'eshell-preoutput-filter-functions
-            ;; Or filter ANSI escape sequences with 'ansi-color-filter-apply
-            'ansi-color-apply))
+  (add-to-list 'eshell-expand-input-functions #'eshell-expand-history-references))
 
 (use-package eat
   :ensure t
@@ -3263,6 +3256,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq python-indent-guess-indent-offset-verbose nil
         python-indent-guess-indent-offset nil
         python-indent-offset 2))
+
+(use-package flymake-ruff
+  :ensure t
+  :hook (python-ts-mode . flymake-ruff-load))
 
 (use-package pyvenv
   :ensure t

@@ -1167,7 +1167,7 @@ search keyword."
 
 (defun switch-to-scratch-new-tab ()
   (interactive)
-  (tab-bar-new-tab)
+  (tab-bar-select-tab-by-name " #<*scratch*> ")
   (switch-to-buffer "*scratch*"))
 
 (defmacro with-selected-date-time (&rest body)
