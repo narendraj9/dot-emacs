@@ -1366,6 +1366,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (fit-window-to-buffer (next-window))))
 
 (use-package window-x
+  :if (version<= "31.0" emacs-version)
   :doc "https://p.bauherren.ovh/blog/tech/new_window_cmds")
 
 
@@ -2063,6 +2064,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       ;; Before executing the next command remove the overlay. Adding to
       ;; `post-command-hook' => execution right after this function returns.
       (add-hook 'pre-command-hook #'--treesit-remove-overlay-hook))))
+
+(use-package treesit-fold
+  :vc ( :url "https://github.com/emacs-tree-sitter/treesit-fold"
+        :rev :newest ) )
 
 (use-package combobulate
   :vc ( :url "https://github.com/mickeynp/combobulate.git"
