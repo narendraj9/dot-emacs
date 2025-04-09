@@ -3906,7 +3906,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         ;; Showing diffs during commits is currently slow.
         magit-commit-show-diff nil
         ;; More granular diffs for all visible hunks
-        magit-diff-refine-hunk 'all)
+        magit-diff-refine-hunk 't)
 
   (add-hook 'git-commit-mode-hook 'turn-on-flyspell))
 
