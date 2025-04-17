@@ -31,6 +31,19 @@
 (define-multisession-variable spark-cluster-id nil)
 (define-multisession-variable spark-cli-profile nil)
 
+(defun spark-set-parameter ()
+  (interactive)
+  (let ((parameter (completing-read "Parameter: " (list "host" "cluster-id" "profile"))))
+    (cond
+     ((string= parameter "host")
+      (setf (multisession-value spark-cluster-host) (read-string "Host: ")))
+     ((string= parameter "cluster-id")
+      (setf (multisession-value spark-cluster-id) (read-string "Cluster ID: ")))
+     ((string= parameter "profile")
+      (setf (multisession-value spark-cli-profile) (read-string "Profile: ")))
+     (t
+      (message "Invalid parameter")))))
+
 (defun spark--get (var prompt)
   (if (multisession-value var)
       (multisession-value var)

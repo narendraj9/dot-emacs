@@ -1200,6 +1200,13 @@ search keyword."
           (propertize (if enabled? "[L]" "[E]") 'face 'mode-line-dimmed))
     (run-with-timer 60 nil (lambda () (setq swap-ctrl-right-win-status nil)))))
 
+(defun darwin:swap-right-option-between-meta-ctrl ()
+  (interactive)
+  (if (eq mac-right-option-modifier 'meta)
+      (setq mac-right-option-modifier 'ctrl)
+    (setq mac-right-option-modifier 'meta))
+  (message "Right option is now mapped to %s"
+           mac-right-option-modifier))
 
 (defun pretty-format-temporarily ()
   (interactive)
