@@ -124,6 +124,20 @@
         gptel-model 'llama-3.3-70b-versatile))
 
 
+(use-package aidermacs
+  :ensure t
+  :bind ( :map ctl-m-map
+          ("a" . aidermacs-transient-menu) )
+
+  :custom
+  (aidermacs-use-architect-mode t)
+  (aidermacs-default-model "gpt-4o")
+
+  :config
+  (setenv "OPENAI_API_KEY"
+          (auth-source-pick-first-password :host "api.openai.com")))
+
+
 ;;; Expermients
 ;; ──────────────────────────────────────────────────────────────────
 

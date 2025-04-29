@@ -2345,7 +2345,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :defer t
   :delight aggressive-indent-mode
-  :hook ((emacs-lisp-mode clojure-mode racket-mode scheme-mode cc-mode rust-mode) . aggressive-indent-mode))
+  :hook ((emacs-lisp-mode racket-mode scheme-mode cc-mode rust-mode) . aggressive-indent-mode))
 
 (use-package comint
   :defer t
@@ -3348,7 +3348,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
              "./install-clojure-lsp --dir ~/.local/bin/;")))
 
   (setq clojure-indent-style :always-align
-        clojure-align-forms-automatically t)
+        clojure-align-forms-automatically nil)
 
   (add-hook 'project-find-functions #'project-find-clojure-root)
 
