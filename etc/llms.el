@@ -130,12 +130,20 @@
           ("a" . aidermacs-transient-menu) )
 
   :custom
+  (aidermacs-extra-args '("--no-gitignore"))
+  (aidermacs-show-diff-after-change t)
+  (aidermacs-backend 'vterm)
   (aidermacs-use-architect-mode t)
   (aidermacs-default-model "gpt-4o")
 
   :config
   (setenv "OPENAI_API_KEY"
-          (auth-source-pick-first-password :host "api.openai.com")))
+          (auth-source-pick-first-password :host "api.openai.com"))
+
+  (add-to-list 'display-buffer-alist
+               '("\\*aidermacs:.*\\*" display-buffer-in-direction
+                 (direction . right)
+                 (window-width . 0.5))))
 
 
 ;;; Expermients
