@@ -1,4 +1,4 @@
-;;; info-lookmore.el --- more things for info-look.el
+;;; info-lookmore.el --- more things for info-look.el  -*- lexical-binding: t; -*-
 
 ;; Copyright 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2017 Kevin Ryde
 

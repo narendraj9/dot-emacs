@@ -1,4 +1,4 @@
-;;; hledger-mode.el --- A mode for writing journal entries for hledger.
+;;; hledger-mode.el --- A mode for writing journal entries for hledger.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015-2016 Narendra Joshi
 ;; Author: Narendra Joshi <narendraj9@gmail.com>

@@ -1,4 +1,4 @@
-;;; jazz-theme.el --- A warm color theme for Emacs 24+.
+;;; jazz-theme.el --- A warm color theme for Emacs 24+.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2014 Roman Parykin, Bozhidar Batsov
 
