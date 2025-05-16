@@ -134,6 +134,7 @@
   (aidermacs-show-diff-after-change t)
   (aidermacs-backend 'vterm)
   (aidermacs-use-architect-mode t)
+  (aidermacs-architect-model "o1")
   (aidermacs-default-model "gpt-4o")
 
   :config

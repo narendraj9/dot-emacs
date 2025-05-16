@@ -1271,8 +1271,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (put '--scroll-down-other-window 'repeat-exit-timeout 4)
   (put '--scroll-up-other-window 'repeat-exit-timeout 4)
 
-  (define-repeat-map ("j" . --scroll-up-other-window)
-                     ("k" . --scroll-down-other-window))
+  (define-repeat-map ("J" . --scroll-up-other-window)
+                     ("K" . --scroll-down-other-window)
+                     ("j" . pixel-scroll-up)
+                     ("k" . pixel-scroll-down))
 
   :preface
   (defun --scroll-down-other-window ()

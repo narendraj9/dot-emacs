@@ -33,6 +33,12 @@
 (require 'f)
 (require 'org-macs)
 
+(defun org-set-created-property ()
+  (interactive)
+  (org-set-property "CREATED"
+                    (format-time-string (org-time-stamp-format t t)
+                                        (current-time))))
+
 (defun import-icalendar-urls (ical-urls)
   "Fetch each input url in ICAL-URLS with `url-copy-file' and place
 into org files using `ical2org.awk' script.
@@ -121,7 +127,9 @@ Otherwise, limit to only `org-mode' files."
 
 (use-package org
   :demand t
-  :bind ( :map org-mode-map ("M-q" . org-fill-paragraph) )
+  :bind ( :map org-mode-map
+          ("M-q" . org-fill-paragraph)
+          ("C-c t" . org-set-created-property) )
   :init
   (setq org-directory (or (getenv "ORG_DIRECTORY")
                           "~/miscellany/personal/org/")
