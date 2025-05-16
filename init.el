@@ -3209,19 +3209,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                            (statement-case-open after)
                            (substatement-open after)))))
 
-(use-package info-lookmore
-  :doc "Adds extra info manuals for `info-lookup-symbol'."
-  :after info
-  :load-path "packages/lisp/"
-  :config
-  (info-lookmore-coreutils-index)
-  (info-lookmore-makefile-derivatives)
-  (info-lookmore-c++-use-c)
-  (info-lookmore-c-gsl)
-  (info-lookmore-c-readline)
-  (info-lookmore-c-gcc)
-  (info-lookmore-apropos-elisp))
-
 (use-package dtrt-indent
   :doc "Automatically guess offset and tabs-indent for opened file."
   :ensure t
