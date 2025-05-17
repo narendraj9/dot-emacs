@@ -3257,7 +3257,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package pyvenv
   :ensure t
-  :after python-ts-mode)
+  :after python-ts-mode
+  :init
+  (when (file-exists-p "~/.venv")
+    (pyvenv-activate "~/.venv")))
 
 (use-package py-autopep8
   :ensure t
