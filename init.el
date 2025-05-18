@@ -1824,6 +1824,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :defer 5
   :mode "\\.journal\\'"
+  :bind ( :map ledger-mode-map ("+" . hledger-increment-amount) )
   :config
   (setq-default ledger-master-file
                 (expand-file-name "~/miscellany/personal/finance/accounting.journal"))
@@ -1838,13 +1839,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :pin manual
   :load-path "packages/rest/hledger-mode/"
   :mode ("\\.hledger\\'")
-  :bind (("C-c j" . hledger-run-command)
+  :bind ( ("C-c j" . hledger-run-command)
 
-         :map hledger-view-mode-map
-         ("_" . hledger-view-selective-display)
-         ("+" . set-selective-display)
-         ("s" . chart-numbers-on-line)
-         ("z" . calc-store-numbers-on-line))
+          :map hledger-mode-map
+          ("+" . hledger-increment-amount)
+
+          :map hledger-view-mode-map
+          ("_" . hledger-view-selective-display)
+          ("+" . set-selective-display)
+          ("s" . chart-numbers-on-line)
+          ("z" . calc-store-numbers-on-line))
 
   :init
   (use-package async :ensure t :defer t)
@@ -2220,6 +2224,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package realgud
   :doc "`gud' with bells and whistles."
+  :disabled t
   :defer t
   :ensure t)
 
