@@ -1297,7 +1297,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
             (switch-to-buffer-obey-display-actions t)
             (window-resize-pixelwise t)
             (next-screen-context-lines 2)
-            (split-width-threshold (1- (frame-width)))
+            (split-width-threshold 90)
             (split-height-threshold (1- (frame-height))) )
 
   :init
@@ -1972,7 +1972,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (dolist (lang-server-spec `(((rust-mode rust-ts-mode) . ("rustup" "run" "stable" "rust-analyzer"))
                               ((c-mode c++-mode)        . ("clangd"))
                               ((ruby-mode ruby-ts-mode) . ("bundle" "exec" "solargraph" "stdio"))
-                              (java-mode                . ,#'java-eclipse-jdt-launcher)
+                              ((java-mode java-ts-mode) . ,#'java-eclipse-jdt-launcher)
                               (elixir-ts-mode           . ,#'elixir-lsp-launcher)
                               (scala-mode               . (,(expand-file-name "bin/metals.sh" user-emacs-directory)))))
     (add-to-list 'eglot-server-programs lang-server-spec)))

@@ -229,7 +229,6 @@ Otherwise, limit to only `org-mode' files."
   (add-to-list 'org-modules 'org-habit)
   (add-hook 'org-mode-hook (lambda ()
                              (goto-address-mode +1)
-                             (auto-fill-mode +1)
                              (unbind-key "S-<return>" org-mode-map)
                              (unbind-key "C-<return>" org-mode-map)
                              (setq mode-name "Org")
