@@ -3891,6 +3891,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c g" . magit-file-dispatch)
 
           :map ctl-period-map
+          ("C-g" . magit-status)
           ("C-c" . magit-file-dispatch) )
 
   :init
