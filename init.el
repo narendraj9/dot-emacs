@@ -2150,8 +2150,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setq eldoc-echo-area-use-multiline-p nil)
   (global-eldoc-mode +1)
+
   (setq-default eldoc-documentation-strategy
                 #'eldoc-documentation-compose-eagerly)
+
+  (advice-add #'eldoc-display-in-buffer
+              :after
+              (lambda (&rest _args)
+                (when (memq major-mode '(python-mode python-ts-mode))
+                  ;; basedbyright adds HTML entities, e.g. &nbsp; that are not
+                  ;; rendered properly by markdown-mode in an eldoc buffer. This
+                  ;; replaces those literal strings with chars that represents
+                  ;; them visually.
+                  (require 'mm-url)
+                  (with-current-buffer (eldoc-doc-buffer)
+                    (let ((inhibit-read-only t))
+                      (mm-url-decode-entities))))))
 
   :preface
   (defun toggle-eldoc-doc-buffer ()
