@@ -123,7 +123,6 @@
   (setq gptel-backend llms-chat-gptel-groq-backend
         gptel-model 'llama-3.3-70b-versatile))
 
-
 (use-package aidermacs
   :ensure t
   :bind ( :map ctl-m-map

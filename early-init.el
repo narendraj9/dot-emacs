@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (setq package-enable-at-startup t
       ;; This needs to be set before Emacs starts loading `init.el' because
       ;; Emacs will `activate' packages installed in `package-user-dir' before

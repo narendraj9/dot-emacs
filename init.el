@@ -1612,11 +1612,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (company-mode +1)))
 
 
-(use-package company-statistics
+(use-package company-prescient
   :ensure t
-  :hook (after-init . company-statistics-mode)
-  :custom (company-statistics-file (expand-file-name "var/company-statistics.el"
-                                                     user-emacs-directory)))
+  :hook (company-mode . company-prescient-mode))
 
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -3006,15 +3004,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package cape :ensure t)
 
-(use-package orderless
-  :doc
-  "TODO: Opt-in this completion style when needed instead of making it
-   the default because it breaks completion of commands and filenames
-   in minibuffer and eshell.
-
-   If anything with completions breaks, this is usually the culprit."
+(use-package prescient
   :ensure t
-  :custom (completion-styles '(orderless)))
+  :init
+  (add-to-list 'completion-styles 'prescient)
+
+  :config
+  (prescient-persist-mode +1))
 
 (use-package vertico
   :doc "https://github.com/minad/vertico/wiki"
@@ -3022,6 +3018,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind ( :map ctl-m-map ("r" . vertico-repeat) )
   :hook (minibuffer-setup . vertico-repeat-save)
   :init (vertico-mode +1))
+
+(use-package vertico-prescient
+  :ensure t
+  :init
+  (vertico-prescient-mode +1))
 
 (use-package embark
   :ensure t
