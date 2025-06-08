@@ -104,8 +104,7 @@
         :rev :newest )
   :demand t
   :custom ((gptel-use-curl nil)
-           (gtpel-expert-commands t)
-           (gptel-rewrite-default-action 'diff))
+           (gtpel-expert-commands t))
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
@@ -113,13 +112,39 @@
   :config
   (setq gptel-api-key (auth-source-pick-first-password :host "api.openai.com")
         gptel-backend llms-chat-gptel-openai-backend
-        gptel-model 'gpt-4.1-mini)
+        gptel-model 'gpt-4.1)
 
   (require 'gptel-transient)
   (require 'gptel-curl)
   (require 'gptel-gemini)
   (require 'gptel-anthropic)
-  (require 'gptel-kagi))
+  (require 'gptel-kagi)
+  (require 'gptel-rewrite)
+
+  (define-key gptel-rewrite-actions-map
+              (kbd "C-c C-g")
+              #'gptel-generate-inline)
+
+  :preface
+  (defvar gptel-generate-inline--last-prompt "")
+  (defun gptel-generate-inline ()
+    (interactive)
+    (let ((gptel--rewrite-directive
+           "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
+          (gptel--rewrite-message
+           (read-string-from-buffer nil gptel-generate-inline--last-prompt)))
+      (setq gptel-generate-inline--last-prompt gptel--rewrite-message)
+      (if (region-active-p)
+          (call-interactively #'gptel-rewrite)
+        ;; Insert some dummy text and start a rewrite session.
+        (progn
+          ;; Hack:
+          (insert "   ")
+          (set-mark (line-beginning-position))
+          (activate-mark)
+          ;; Hack: using internal function for now. I like gptel-rewrite UI but
+          ;; want it to be a bit faster.
+          (gptel--suffix-rewrite gptel--rewrite-message))))))
 
 (use-package aidermacs
   :ensure t
