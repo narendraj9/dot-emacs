@@ -104,25 +104,22 @@
         :rev :newest )
   :demand t
   :custom ((gptel-use-curl nil)
-           (gtpel-expert-commands t))
+           (gtpel-expert-commands t)
+           (gptel-rewrite-default-action 'diff))
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
+  :hook (gptel-post-response-functions #'gptel-end-of-response)
   :config
-  (setq gptel-api-key
-        (auth-source-pick-first-password :host "api.openai.com"))
+  (setq gptel-api-key (auth-source-pick-first-password :host "api.openai.com")
+        gptel-backend llms-chat-gptel-openai-backend
+        gptel-model 'gpt-4.1-mini)
 
   (require 'gptel-transient)
   (require 'gptel-curl)
   (require 'gptel-gemini)
   (require 'gptel-anthropic)
-  (require 'gptel-kagi)
-
-  (add-hook 'gptel-post-response-functions
-            #'gptel-end-of-response)
-
-  (setq gptel-backend llms-chat-gptel-groq-backend
-        gptel-model 'llama-3.3-70b-versatile))
+  (require 'gptel-kagi))
 
 (use-package aidermacs
   :ensure t

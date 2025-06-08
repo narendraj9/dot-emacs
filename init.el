@@ -2374,9 +2374,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package vterm
   :ensure t
   :custom (vterm-max-scrollback 100000)
-  :bind ( :map global-map ( "s-<return>" . vterm )
-
-          :map vterm-mode-map
+  :bind ( :map vterm-mode-map
           ("M-p" . --vterm-ctrl-p)
           ("M-n" . --vterm-ctrl-n) )
   :preface
@@ -4419,23 +4417,23 @@ buffer."
 
 
           :map ctl-quote-map
+          ("t t"   . copilot-mode)
+
           ("t RET" . llms-chat)
           ("t w"   . llms-spin-up-companion)
           ("t W"   . llms-spin-up-companion-stop)
+
+
           ("t C"   . chatgpt-shell)
-          ("t S"   . chatgpt-shell-send-region)
-          ("t c"   . gptel)
           ("t d"   . chatgpt-shell-describe-code)
           ("t e"   . chatgpt-shell-explain-code)
           ("t i"   . chatgpt-shell-interrupt)
-          ("t j"   . llms-switch-image-interpret-function)
-          ("t l"   . llms-chat-minor-mode)
-          ("t m"   . gptel-menu)
           ("t p"   . chatgpt-shell-proofread-region)
-          ("t r"   . chatgpt-shell-refactor-code)
           ("t s"   . chatgpt-shell-send-and-review-region)
-          ("t t"   . copilot-mode)
-          ("t u"   . chatgpt-shell-generate-unit-test))
+
+          ("t c"   . gptel)
+          ("t m"   . gptel-menu)
+          ("t r"   . gptel-rewrite) )
 
   :config
   (when (eq system-type 'darwin)
