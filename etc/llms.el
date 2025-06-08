@@ -49,6 +49,7 @@
   :custom
   (shell-maker-prompt-before-killing-buffer nil)
   (chatgpt-shell-welcome-function nil)
+  (chatgpt-shell-always-create-new nil)
   (chatgpt-shell-openai-key (auth-source-pick-first-password :host "api.openai.com"))
   (chatgpt-shell-system-prompt 2)
   (chatgpt-shell-model-version "gpt-4.1")
