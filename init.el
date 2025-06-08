@@ -3586,12 +3586,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package coffee-mode     :defer t :ensure t)
 (use-package elm-mode        :defer t :ensure t)
 
-
-(use-package prettier
-  :disabled t
-  :ensure t
-  :init
-  (global-prettier-mode +1))
+(use-package apheleia
+  :doc "Auto-format code after save."
+  :ensure t)
 
 ;;; ERLANG AND ELIXIR
 ;; ──────────────────────────────────────────────────────────────────
