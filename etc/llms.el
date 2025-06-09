@@ -103,9 +103,9 @@
   :vc ( :url "https://github.com/karthink/gptel"
         :rev :newest )
   :demand t
-  :custom ((gptel-use-curl nil)
-           (gptel-rewrite-default-action 'dispatch)
-           (gtpel-expert-commands t))
+  :custom ((gptel-use-curl t)
+           (gtpel-expert-commands t)
+           (gptel-rewrite-default-action 'dispatch))
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
@@ -144,8 +144,9 @@
         (progn
           ;; Hack: using internal function for now. I like gptel-rewrite UI but
           ;; want it to be a bit faster.
-          (insert " ")
-          (push-mark (pos-bol) t t)
+          (unless (get-char-property (point) 'gptel-rewrite)
+            (insert " ")
+            (push-mark (pos-bol) t t))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
 (use-package aidermacs
