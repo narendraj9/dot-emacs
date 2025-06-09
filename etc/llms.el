@@ -34,6 +34,33 @@
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
 
+(defun llms-make-progress-indicator (point)
+  "Create a spinner indicator for some feedback while an API request to an
+LLM is pending."
+  (let* ((indicate-progress-p t)
+         (spinner (spinner-create 'box-in-circle))
+         (indicator-overlay (make-overlay point point))
+         (timeout-seconds 60)
+         (shutdown-fn (lambda ()
+                        (setq indicate-progress-p nil)
+                        ;; `spinner' users timers that should be stopped.
+                        (spinner-stop spinner)
+                        (delete-overlay indicator-overlay))))
+    (spinner-start spinner)
+    ;; If you end up with orphaned threads, send them error/quit signals using
+    ;; the UI provided by `list-threads'.
+    (make-thread (lambda ()
+                   (unwind-protect
+                       (progn (run-with-timer timeout-seconds nil shutdown-fn)
+                              (while (and indicate-progress-p)
+                                (overlay-put indicator-overlay
+                                             'after-string (spinner-print spinner))
+                                (redisplay t)
+                                (sleep-for 0.1)))
+                     (funcall shutdown-fn))))
+    ;; Return the function to shutdown the thread so that the caller can use it.
+    shutdown-fn))
+
 (use-package llms-chat
   :load-path "packages/rest/llms-chat"
   :demand t
@@ -101,7 +128,7 @@
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
-  :hook (gptel-post-response-functions #'gptel-beginning-of-response)
+  :hook (gptel-post-response-functions . gptel-beginning-of-response)
   :config
   (setq gptel-api-key (auth-source-pick-first-password :host "api.openai.com")
         gptel-backend llms-chat-gptel-openai-backend
@@ -125,11 +152,16 @@
     "TODO: Use an overlay in the current buffer to acquire prompt from the
 user instead of using `string-edit'."
     (interactive)
-    (let ((gptel--rewrite-directive
-           "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
-          (gptel--rewrite-message
-           (read-string-from-buffer nil gptel-generate-inline--last-prompt))
-          (use-empty-active-region t))
+    (let* ((gptel--rewrite-directive
+            "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
+           (gptel--rewrite-message
+            (read-string-from-buffer nil gptel-generate-inline--last-prompt))
+           (use-empty-active-region t)
+           (stop-progress-indicator (llms-make-progress-indicator (point)))
+           (post-rewrite-hook (lambda (&rest _args)
+                                (funcall stop-progress-indicator)
+                                (remove-hook 'post-rewrite-functions post-rewrite-hook))))
+      (add-hook 'gptel-post-rewrite-functions post-rewrite-hook)
       (setq gptel-generate-inline--last-prompt gptel--rewrite-message)
       (if (region-active-p)
           (call-interactively #'gptel-rewrite)
@@ -138,6 +170,9 @@ user instead of using `string-edit'."
           ;; Hack: using internal function for now. I like gptel-rewrite UI but
           ;; want it to be a bit faster.
           (unless (get-char-property (point) 'gptel-rewrite)
+            ;; Note: this doesn't work in modes where empty lines are
+            ;; automatically deleted, those modes require some non-space
+            ;; characters to be inserted at point.
             (insert " ")
             (push-mark (pos-bol) t t))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
