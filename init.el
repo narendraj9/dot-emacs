@@ -4409,7 +4409,12 @@ buffer."
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
   (dolist (feature (list 'copilot 'chatgpt-shell 'gptel))
-    (eval-after-load feature '(require 'llms)))
+    (eval-after-load feature
+      '(progn
+         (require 'llms)
+         (require 'llms-writing)
+         (require 'llms-completion)
+         (require 'llms-images))))
 
   :bind ( :map ctl-m-map
           ([C-m] . llms-chat)
@@ -4437,20 +4442,16 @@ buffer."
           ("t r"   . gptel-rewrite) )
 
   :config
+  (dolist (buffer-name-pattern (list "\\*chatgpt .*\\*"
+                                     "\\*Anthropic\\*"))
+    (add-to-list 'display-buffer-alist
+                 `(,buffer-name-pattern display-buffer-in-direction
+                                        (window . main)
+                                        (direction . right)
+                                        (window-width . 0.5))))
+  ;; --- macOS issues:
   (when (eq system-type 'darwin)
-    (setq llms-chat-show-in-progress-indicator nil))
-
-  (add-to-list 'display-buffer-alist
-               '("\\*chatgpt .*\\*" display-buffer-in-direction
-                 (window . main)
-                 (direction . right)
-                 (window-width . 0.5)))
-
-  (add-to-list 'display-buffer-alist
-               '("\\*Anthropic\\*" display-buffer-in-direction
-                 (window . main)
-                 (direction . right)
-                 (window-width . 0.5))))
+    (setq llms-chat-show-in-progress-indicator nil)))
 
 
 (provide 'init)
