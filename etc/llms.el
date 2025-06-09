@@ -142,6 +142,11 @@ user instead of using `string-edit'."
             (push-mark (pos-bol) t t))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
+(use-package gptel-quick
+  :vc ( :url "https://github.com/karthink/gptel-quick.git"
+        :rev :newest )
+  :bind ( :map ctl-quote-map ("t q" . gptel-quick) ))
+
 (use-package llm-tool-collection
   :vc ( :url "https://github.com/skissue/llm-tool-collection.git"
         :rev :newest )
