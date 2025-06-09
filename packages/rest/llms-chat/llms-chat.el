@@ -139,7 +139,7 @@
   (gptel-make-openai "OpenAI"
     :key (or (and (boundp 'openai-secret-key) openai-secret-key)
              (llms-chat--api-key-from-auth-source "api.openai.com"))
-    :models '("gpt-4o")))
+    :models '(gpt-4.1 gpt-4o gpt-o1 gpt-o3)))
 
 (defvar llms-chat-gptel-anthropic-backend
   (gptel-make-anthropic "Anthropic"
@@ -190,8 +190,8 @@
       :models '(deepseek-chat deepseek-reasoner deepseek-coder))))
 
 
-(setq gptel-backend llms-chat-gptel-groq-backend
-      gptel-model  'llama3-70b-8192)
+(setq gptel-backend llms-chat-gptel-openai-backend
+      gptel-model  'gpt-4.1)
 
 (defvar llms-chat-openrouter-models nil)
 (defun llms-chat-openrouter-models ()
@@ -286,7 +286,7 @@
   `(("ollama"   . (,llms-chat-gptel-ollama-backend     . qwen2.5))
     ("groq"     . (,llms-chat-gptel-groq-backend       . llama3-groq-70b-8192-tool-use-preview))
     ("sonnet"   . (,llms-chat-gptel-openrouter-backend . @anthropic/claude-3.5-sonnet:beta))
-    ("openai"   . (,llms-chat-gptel-openai-backend     . gpt-4o))
+    ("openai"   . (,llms-chat-gptel-openai-backend     . gpt-4.1))
     ("pplx"     . (,llms-chat-gptel-preplexity-backend . sonar))
     ("seek"     . (,llms-chat-gptel-deepseek-backend   . deep-reasoner))
     ("deepchat" . (,llms-chat-gptel-deepseek-backend   . deep-chat))

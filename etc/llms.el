@@ -104,6 +104,7 @@
         :rev :newest )
   :demand t
   :custom ((gptel-use-curl nil)
+           (gptel-rewrite-default-action 'dispatch)
            (gtpel-expert-commands t))
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
@@ -127,23 +128,24 @@
 
   :preface
   (defvar gptel-generate-inline--last-prompt "")
+  (make-variable-buffer-local 'gptel-generate-inline--last-prompt)
+
   (defun gptel-generate-inline ()
     (interactive)
     (let ((gptel--rewrite-directive
            "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
           (gptel--rewrite-message
-           (read-string-from-buffer nil gptel-generate-inline--last-prompt)))
+           (read-string-from-buffer nil gptel-generate-inline--last-prompt))
+          (use-empty-active-region t))
       (setq gptel-generate-inline--last-prompt gptel--rewrite-message)
       (if (region-active-p)
           (call-interactively #'gptel-rewrite)
         ;; Insert some dummy text and start a rewrite session.
         (progn
-          ;; Hack:
-          (insert "   ")
-          (set-mark (line-beginning-position))
-          (activate-mark)
           ;; Hack: using internal function for now. I like gptel-rewrite UI but
           ;; want it to be a bit faster.
+          (insert " ")
+          (push-mark (pos-bol) t t)
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
 (use-package aidermacs

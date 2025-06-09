@@ -4433,6 +4433,7 @@ buffer."
 
           ("t c"   . gptel)
           ("t m"   . gptel-menu)
+          ("t g"   . gptel-generate-inline)
           ("t r"   . gptel-rewrite) )
 
   :config
