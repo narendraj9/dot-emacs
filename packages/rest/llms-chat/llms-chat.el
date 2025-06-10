@@ -174,9 +174,7 @@
 (defvar llms-chat-gptel-gemini-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
     (gptel-make-gemini "Gemini"
-      :key api-key
-      :models '(gemini-1.5-pro
-                gemini-2.0-flash))))
+      :key api-key)))
 
 (defvar llms-chat-gptel-kagi-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
@@ -294,7 +292,7 @@
     ("pplx"     . (,llms-chat-gptel-preplexity-backend . sonar))
     ("seek"     . (,llms-chat-gptel-deepseek-backend   . deep-reasoner))
     ("deepchat" . (,llms-chat-gptel-deepseek-backend   . deep-chat))
-    ("gemini"   . (,llms-chat-gptel-gemini-backend     . gemini-1.5-pro))
+    ("gemini"   . (,llms-chat-gptel-gemini-backend     . gemini-2.5-pro-preview-06-05))
     ("flash"    . (,llms-chat-gptel-gemini-backend     . gemini-2.0-flash))
     ("kagi"     . (,llms-chat-gptel-kagi-backend       . summarize:muriel))))
 
