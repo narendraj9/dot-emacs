@@ -124,15 +124,19 @@ LLM is pending."
   :custom ((gptel-use-curl t)
            (gptel-confirm-tool-calls t)
            (gtpel-expert-commands t)
-           (gptel-rewrite-default-action 'dispatch))
+           ;; (gptel-rewrite-default-action 'dispatch)
+           )
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
   :hook (gptel-post-response-functions . gptel-beginning-of-response)
   :config
-  (setq gptel-api-key (auth-source-pick-first-password :host "api.openai.com")
-        gptel-backend llms-chat-gptel-openai-backend
-        gptel-model 'gpt-4.1)
+  (if llms-chat-gptel-anthropic-backend
+      (setq gptel-backend llms-chat-gptel-anthropic-backend
+            gptel-model 'claude-sonnet-4-0)
+    (setq gptel-api-key (auth-source-pick-first-password :host "api.openai.com")
+          gptel-backend llms-chat-gptel-openai-backend
+          gptel-model 'gpt-4.1))
 
   (require 'gptel-transient)
   (require 'gptel-curl)
@@ -152,15 +156,16 @@ LLM is pending."
     "TODO: Use an overlay in the current buffer to acquire prompt from the
 user instead of using `string-edit'."
     (interactive)
-    (let* ((gptel--rewrite-directive
-            "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
-           (gptel--rewrite-message
-            (read-string-from-buffer nil gptel-generate-inline--last-prompt))
-           (use-empty-active-region t)
-           (stop-progress-indicator (llms-make-progress-indicator (point)))
-           (post-rewrite-hook (lambda (&rest _args)
-                                (funcall stop-progress-indicator)
-                                (remove-hook 'post-rewrite-functions post-rewrite-hook))))
+    (letrec ((gptel--rewrite-directive
+              "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
+             (gptel--rewrite-message
+              (read-string-from-buffer nil gptel-generate-inline--last-prompt))
+             (use-empty-active-region t)
+             (stop-progress-indicator (llms-make-progress-indicator (point)))
+             (post-rewrite-hook
+              (lambda (&rest _args)
+                (funcall stop-progress-indicator)
+                (remove-hook 'gptel-post-rewrite-functions post-rewrite-hook))))
       (add-hook 'gptel-post-rewrite-functions post-rewrite-hook)
       (setq gptel-generate-inline--last-prompt gptel--rewrite-message)
       (if (region-active-p)

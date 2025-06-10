@@ -2333,8 +2333,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package highlight-indent-guides
   :ensure t
   :delight highlight-indent-guides-mode
-  :bind ( :map ctl-period-map
-          ("C-l" . highlight-indent-guides-mode))
+  :bind ( :map ctl-period-map ("C-l" . highlight-indent-guides-mode) )
   :config
   (setq highlight-indent-guides-method 'bitmap
         highlight-indent-guides-responsive nil
@@ -2494,7 +2493,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (add-to-list 'eshell-expand-input-functions #'eshell-expand-history-references))
 
+(use-package eshell-atuin
+  :ensure t
+  :after eshell
+  :hook (eshell-mode . eshell-atuin-mode)
+  :config
+  (advice-add 'eshell-atuin--get-input
+              :filter-return
+              (lambda (input)
+                (unless (string-empty-p input)
+                  input))))
+
 (use-package eat
+  :disabled t
   :ensure t
   :bind ( ( "s-<return>" . --eat-toggle )
           ( "M-S-<return>" . --eat-toggle ) )
