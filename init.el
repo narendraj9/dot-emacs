@@ -3267,11 +3267,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (setq python-indent-guess-indent-offset-verbose nil
         python-indent-guess-indent-offset nil
-        python-indent-offset 2))
+        python-indent-offset 4)
+
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\*Python\\*" display-buffer-in-direction
+                 (window . main)
+                 (direction . right)
+                 (window-width . 0.5))))
 
 (use-package flymake-ruff
   :ensure t
   :hook (python-ts-mode . flymake-ruff-load))
+
+(use-package ruff-format
+  :ensure t
+  :hook (python-ts-mode . ruff-format-on-save-mode))
 
 (use-package pyvenv
   :ensure t
