@@ -34,13 +34,14 @@
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
 
-(defun llms-make-progress-indicator (point)
+(defun llms-make-progress-indicator (beg end)
   "Create a spinner indicator for some feedback while an API request to an
 LLM is pending."
   (let* ((indicate-progress-p t)
          (spinner (spinner-create 'box-in-circle))
-         (indicator-overlay (make-overlay point point))
+         (indicator-overlay (make-overlay beg end))
          (timeout-seconds 60)
+         (padding (make-string 20 ? ))
          (shutdown-fn (lambda ()
                         (setq indicate-progress-p nil)
                         ;; `spinner' users timers that should be stopped.
@@ -53,8 +54,12 @@ LLM is pending."
                    (unwind-protect
                        (progn (run-with-timer timeout-seconds nil shutdown-fn)
                               (while (and indicate-progress-p)
+                                (overlay-put indicator-overlay 'after-string padding)
+                                (overlay-put indicator-overlay 'before-string padding)
                                 (overlay-put indicator-overlay
-                                             'after-string (spinner-print spinner))
+                                             'display
+                                             (propertize (spinner-print spinner)
+                                                         'face '(:inherit mode-line-inactive :height 2.4)))
                                 (redisplay t)
                                 (sleep-for 0.1)))
                      (funcall shutdown-fn))))
@@ -131,11 +136,10 @@ LLM is pending."
           ("RET" . gptel-send) )
   :hook (gptel-post-response-functions . gptel-beginning-of-response)
   :config
-  (if llms-chat-gptel-anthropic-backend
+  (if (eq system-type 'darwin)
       (setq gptel-backend llms-chat-gptel-anthropic-backend
             gptel-model 'claude-sonnet-4-0)
-    (setq gptel-api-key (auth-source-pick-first-password :host "api.openai.com")
-          gptel-backend llms-chat-gptel-openai-backend
+    (setq gptel-backend llms-chat-gptel-openai-backend
           gptel-model 'gpt-4.1))
 
   (require 'gptel-transient)
@@ -161,7 +165,10 @@ user instead of using `string-edit'."
              (gptel--rewrite-message
               (read-string-from-buffer nil gptel-generate-inline--last-prompt))
              (use-empty-active-region t)
-             (stop-progress-indicator (llms-make-progress-indicator (point)))
+             (stop-progress-indicator
+              (llms-make-progress-indicator (point)
+                                            (save-excursion (forward-line)
+                                                            (point))))
              (post-rewrite-hook
               (lambda (&rest _args)
                 (funcall stop-progress-indicator)
@@ -178,7 +185,7 @@ user instead of using `string-edit'."
             ;; Note: this doesn't work in modes where empty lines are
             ;; automatically deleted, those modes require some non-space
             ;; characters to be inserted at point.
-            (insert " ")
+            (insert " << remove me >> ")
             (push-mark (pos-bol) t t))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
