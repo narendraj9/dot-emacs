@@ -1485,10 +1485,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ――――――――――――――――――――――――――――――――――――――――
 
 (use-package recentf
-  :custom ( (recentf-auto-cleanup 'never)
+  :custom ( (recentf-auto-cleanup 'mode)
             (recentf-keep '(file-remote-p file-readable-p))
             (recentf-exclude '("\.gpg$"))
-            (recentf-max-saved-items 1000)
+            (recentf-max-saved-items 10000)
             (recentf-save-file (expand-file-name "var/recentf"
                                                  user-emacs-directory)) )
   :init

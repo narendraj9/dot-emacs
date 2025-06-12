@@ -139,7 +139,7 @@
   (gptel-make-openai "OpenAI"
     :key (or (and (boundp 'openai-secret-key) openai-secret-key)
              (llms-chat--api-key-from-auth-source "api.openai.com"))
-    :models '(gpt-4.1 gpt-4o gpt-o1 gpt-o3)))
+    :models '(gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)))
 
 (defvar llms-chat-gptel-anthropic-backend
   (when-let ((api-key (llms-chat--api-key-from-auth-source "api.anthropic.com")))
