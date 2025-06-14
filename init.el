@@ -1840,7 +1840,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind ( ("C-c j" . hledger-run-command)
 
           :map hledger-mode-map
-          ("+" . hledger-increment-amount)
+          ("C-c +" . hledger-increment-amount)
 
           :map hledger-view-mode-map
           ("_" . hledger-view-selective-display)

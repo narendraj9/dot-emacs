@@ -126,15 +126,12 @@ LLM is pending."
   :vc ( :url "https://github.com/karthink/gptel"
         :rev :newest )
   :demand t
-  :custom ((gptel-use-curl t)
-           (gptel-confirm-tool-calls t)
-           (gtpel-expert-commands t)
-           ;; (gptel-rewrite-default-action 'dispatch)
-           )
   :bind ( :map gptel-mode-map
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
-  :hook (gptel-post-response-functions . gptel-beginning-of-response)
+  :custom ((gptel-use-curl t)
+           (gptel-confirm-tool-calls t)
+           (gtpel-expert-commands t))
   :config
   (if (eq system-type 'darwin)
       (setq gptel-backend llms-chat-gptel-anthropic-backend
@@ -199,10 +196,10 @@ user instead of using `string-edit'."
   (use-package templatel :ensure t)
 
   :config
-  (gptel-prompts-update)
-
-  ;; Ensure prompts are updated if prompt files change
-  (gptel-prompts-add-update-watchers))
+  (when (file-exists-p gptel-prompts-directory)
+    (require 'filenotify)
+    (gptel-prompts-update)
+    (gptel-prompts-add-update-watchers)))
 
 (use-package gptel-quick
   :vc ( :url "https://github.com/karthink/gptel-quick.git"
