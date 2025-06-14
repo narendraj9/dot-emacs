@@ -2577,7 +2577,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 (message "Not installed on system: `shellcheck'!")))))
 
 
-(use-package jinja2-mode :defer t :ensure t)
+(use-package jinja2-mode
+  :defer t
+  :ensure t
+  :mode  ("\\.jinja\\'" "\\.j2\\'"))
 
 ;;; HASKELL-MODE
 ;;  ─────────────────────────────────────────────────────────────────
@@ -3462,8 +3465,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-      :where point
-      :duration 'command)
+                                :where point
+                                :duration 'command)
     ;; Preserve the return value.
     value))
 
@@ -3608,7 +3611,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package apheleia
   :doc "Auto-format code after save."
-  :ensure t)
+  :ensure t
+  :delight
+  :init
+  (apheleia-global-mode +1))
 
 ;;; ERLANG AND ELIXIR
 ;; ──────────────────────────────────────────────────────────────────

@@ -189,6 +189,21 @@ user instead of using `string-edit'."
             (push-mark (pos-bol) t t))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
+(use-package gptel-prompts
+  :vc ( :url "https://github.com/jwiegley/gptel-prompts.git"
+        :rev :newest )
+  :after (gptel)
+  :demand t
+  :custom (gptel-prompts-directory "~/code/prompts")
+  :init
+  (use-package templatel :ensure t)
+
+  :config
+  (gptel-prompts-update)
+
+  ;; Ensure prompts are updated if prompt files change
+  (gptel-prompts-add-update-watchers))
+
 (use-package gptel-quick
   :vc ( :url "https://github.com/karthink/gptel-quick.git"
         :rev :newest )
