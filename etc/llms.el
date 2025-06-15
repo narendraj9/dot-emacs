@@ -122,7 +122,22 @@ LLM is pending."
   :init
   (use-package uuidgen :ensure t))
 
-(use-package mcp :ensure t)
+(use-package mcp
+  :ensure t
+  :custom ( (mcp-hub-servers
+             '(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/home/lizqwer/MyProject/")))
+               ("fetch" . (:command "bunx" :args ("mcp-server-fetch")))
+               ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
+               ;; ("qdrant" . (:url "http://localhost:8000/sse"))
+               ;; ("graphlit" . (
+               ;;                :command "npx"
+               ;;                :args ("-y" "graphlit-mcp-server")
+               ;;                :env (
+               ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
+               ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
+               ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
+               ))))
+
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
         :rev :newest )
