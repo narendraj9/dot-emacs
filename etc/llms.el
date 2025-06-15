@@ -122,6 +122,7 @@ LLM is pending."
   :init
   (use-package uuidgen :ensure t))
 
+(use-package mcp :ensure t)
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
         :rev :newest )
@@ -144,6 +145,7 @@ LLM is pending."
   (require 'gptel-gemini)
   (require 'gptel-anthropic)
   (require 'gptel-rewrite)
+  (require 'gptel-integrations)
 
   (define-key gptel-rewrite-actions-map
               (kbd "C-c C-g")

@@ -64,6 +64,8 @@
 (setq use-package-compute-statistics t)
 
 (use-package use-package-ensure-system-package)
+(use-package system-packages :ensure t)
+
 (use-package delight :ensure t :demand t)
 (use-package bind-key :ensure t)
 
@@ -1297,8 +1299,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
             (switch-to-buffer-obey-display-actions t)
             (window-resize-pixelwise t)
             (next-screen-context-lines 2)
-            (split-width-threshold 90)
-            (split-height-threshold (1- (frame-height))) )
+            (split-width-threshold 140)
+            (split-window-preferred-direction 'longest) )
 
   :init
   ;; Adds an entry to `emulation-mode-map-alists' which take precedence over all
@@ -2824,6 +2826,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq diary-file (expand-file-name "diary" org-directory))
 
   :init
+  (dolist (buffer-regex '("\\` \\*Agenda Commands\\*\\'"
+                          "\\`\\*Org Capture\\*\\'"
+                          "\\`\\*Org Select\\*\\'"
+                          "\\`\\*Org Tags\\*\\'"
+                          "\\`\\*Org Links\\*\\'"))
+    (add-to-list 'display-buffer-alist
+                 `(,buffer-regex display-buffer-at-bottom)))
+
   (add-hook 'org-mode-hook
             (lambda ()
               (let ((typo-abbrevs-file (expand-file-name "lib/abbrevs/typos-defs"
@@ -3897,6 +3907,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setq diff-font-lock-prettify t
         diff-font-lock-syntax nil))
+
+(use-package difftastic
+  :ensure-system-package ((difft . "difftastic"))
+  :ensure t)
 
 (use-package autorevert
   :delight auto-revert-mode

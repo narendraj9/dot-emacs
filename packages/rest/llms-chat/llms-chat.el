@@ -119,7 +119,8 @@
 
 (defvar llms-chat-gptel-ollama-backend
   (gptel-make-ollama "Ollama"
-    :models '("ollama3.2")))
+    :models '("ollama3.2")
+    :stream t))
 
 (defvar llms-chat-gptel-openrouter-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "openrouter.ai")))
@@ -139,7 +140,8 @@
   (gptel-make-openai "OpenAI"
     :key (or (and (boundp 'openai-secret-key) openai-secret-key)
              (llms-chat--api-key-from-auth-source "api.openai.com"))
-    :models '(gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)))
+    :models '(gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)
+    :stream t))
 
 (defvar llms-chat-gptel-anthropic-backend
   (when-let ((api-key (llms-chat--api-key-from-auth-source "api.anthropic.com")))
@@ -147,7 +149,8 @@
       :key api-key
       :models '(claude-opus-4-0
                 claude-sonnet-4-0
-                claude-3-7-sonnet-latest))))
+                claude-3-7-sonnet-latest)
+      :stream t)))
 
 (defvar llms-chat-gptel-groq-backend
   (gptel-make-openai "Groq"
@@ -174,7 +177,8 @@
 (defvar llms-chat-gptel-gemini-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
     (gptel-make-gemini "Gemini"
-      :key api-key)))
+      :key api-key
+      :stream t)))
 
 (defvar llms-chat-gptel-kagi-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
