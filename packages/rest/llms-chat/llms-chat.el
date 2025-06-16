@@ -144,7 +144,7 @@
     :stream t))
 
 (defvar llms-chat-gptel-anthropic-backend
-  (when-let ((api-key (llms-chat--api-key-from-auth-source "api.anthropic.com")))
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.anthropic.com")))
     (gptel-make-anthropic "Anthropic"
       :key api-key
       :models '(claude-opus-4-0

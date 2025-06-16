@@ -240,7 +240,8 @@ user instead of using `string-edit'."
         :rev :newest )
   :after gptel
   :config
-  (apply #'gptel-make-tool llm-tc/list-directory))
+  (mapcar (apply-partially #'apply #'gptel-make-tool)
+          (llm-tool-collection-get-all)))
 
 (use-package aidermacs
   :ensure t
