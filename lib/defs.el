@@ -619,7 +619,7 @@ this."
                                         (1+ (point)))
       (set-transient-map (let ((map (make-sparse-keymap)))
                            (define-key map (vector goto-char)
-                             #'goto-char-in-line)
+                                       #'goto-char-in-line)
                            map)))))
 
 (defun underline-text (arg)
@@ -856,20 +856,20 @@ Note: Don't waste your time trying to understanding all this."
 Uses https://api.coinmarketcap.com/v1/ticker/$COIN-NAME/"
   (interactive "sCoin: ")
   (request (format "https://api.coinmarketcap.com/v1/ticker/%s/" coin-name)
-           :parser 'json-read
-           :success (cl-function
-                     (lambda (&key data &allow-other-keys)
-                       (let* ((result (aref data 0))
-                              (coin-id (alist-get 'id result))
-                              (usd-price (alist-get 'price_usd result)))
-                         (display-message-or-buffer
-                          (format "%s ($ %s)\n%s"
-                                  coin-id
-                                  usd-price
-                                  (format-alist result))))))
-           :error (cl-function
-                   (lambda (&key error-thrown &allow-other-keys)
-                     (message "Failed with: %s" error-thrown)))))
+    :parser 'json-read
+    :success (cl-function
+              (lambda (&key data &allow-other-keys)
+                (let* ((result (aref data 0))
+                       (coin-id (alist-get 'id result))
+                       (usd-price (alist-get 'price_usd result)))
+                  (display-message-or-buffer
+                   (format "%s ($ %s)\n%s"
+                           coin-id
+                           usd-price
+                           (format-alist result))))))
+    :error (cl-function
+            (lambda (&key error-thrown &allow-other-keys)
+              (message "Failed with: %s" error-thrown)))))
 
 (defun do-when-idle (f g interval)
   "Call F when idle for INTERVAL seconds and then G when there is activity.
@@ -964,10 +964,10 @@ From Emacs Wiki."
     (fill-paragraph nil)))
 
 (def-lineup fill-or-unfill
-  "Sequence filling/unfilling with the same biding."
-  #'auto-fill-current-line
-  #'fill-paragraph
-  #'unfill-paragraph)
+            "Sequence filling/unfilling with the same biding."
+            #'auto-fill-current-line
+            #'fill-paragraph
+            #'unfill-paragraph)
 
 (defun comment-auto-fill ()
   "Auto-fill comments."
@@ -1083,7 +1083,7 @@ search keyword."
                       (buffer-substring-no-properties (region-beginning) (region-end))
                     (read-string "Query: " (word-at-point))))
            (url (format (or base-url "https://duckduckgo.com/?q=%s") query)))
-    (eww-browse-url url)))
+    (browse-url url)))
 
 (defun search-linguee ()
   "Search for word at Linguee.com."

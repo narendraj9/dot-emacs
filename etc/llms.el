@@ -125,9 +125,21 @@ LLM is pending."
 (use-package mcp
   :ensure t
   :custom ( (mcp-hub-servers
-             '(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/home/lizqwer/MyProject/")))
-               ("fetch" . (:command "bunx" :args ("mcp-server-fetch")))
+             `(
+               ;; Anthropic's reference servers
+               ("time"  . (:command "uvx" :args ("mcp-server-time" "--local-timezone=Europe/Berlin")))
+               ("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
+               ("filesystem" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/tmp/server-filesystem/")))
+               ("memory" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-memory")))
+               ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+
+               ;; --
+               ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
+               ("deepwiki" . (:command "bunx" :args ("mcp-remote" "https://mcp.deepwiki.com/sse")))
+               ;; --
                ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
+
+               ;; --
                ;; ("qdrant" . (:url "http://localhost:8000/sse"))
                ;; ("graphlit" . (
                ;;                :command "npx"
