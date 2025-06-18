@@ -159,7 +159,8 @@ LLM is pending."
           ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
            (gptel-confirm-tool-calls t)
-           (gtpel-expert-commands t))
+           (gptel-expert-commands t)
+           (gptel-default-mode 'org-mode))
   :config
   (if (eq system-type 'darwin)
       (setq gptel-backend llms-chat-gptel-anthropic-backend

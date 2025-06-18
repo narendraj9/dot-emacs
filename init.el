@@ -3136,6 +3136,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Programming Languages
 ;;; ──────────────────────────────────────────────────────────────────
 
+(use-package dumb-jump
+  :ensure t
+  :init
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+
 (use-package connected-repl
   :load-path "packages/rest/connected-repl/"
   :commands (connected-repl-run connected-repl-run-on-project connected-repl-connect-manually)
@@ -3475,8 +3480,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-                                :where point
-                                :duration 'command)
+      :where point
+      :duration 'command)
     ;; Preserve the return value.
     value))
 
