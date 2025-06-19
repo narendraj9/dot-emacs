@@ -2836,6 +2836,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (add-hook 'org-mode-hook
             (lambda ()
+              (visual-line-mode +1)
+              (visual-wrap-prefix-mode +1)
               (let ((typo-abbrevs-file (expand-file-name "lib/abbrevs/typos-defs"
                                                          user-emacs-directory)))
                 (when (file-exists-p typo-abbrevs-file)
