@@ -46,6 +46,7 @@
 ;;;###autoload
 (defun llms-writing-spin-up-companion (instruction)
   (interactive "sInstruction: ")
+  (require 'markdown-overlays)
   (let* ((attached-buffer (current-buffer))
          (window-configuration (current-window-configuration))
          (stop (lambda ()
@@ -92,8 +93,10 @@
                                             t
                                             buffer)
                             (with-current-buffer buffer
-                              (ansi-color-apply-on-region (point-min) (point-max))))))))
-                  (chatgpt-shell--put-source-block-overlays)))))))
+                              (ansi-color-apply-on-region (point-min) (point-max))
+                              (visual-line-mode +1)
+                              (visual-wrap-prefix-mode +1)))))))
+                  (markdown-overlays-put)))))))
     (add-to-list 'display-buffer-alist
                  `(,(buffer-name buffer) display-buffer-in-direction
                    (window . main)

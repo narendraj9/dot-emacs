@@ -4472,8 +4472,8 @@ buffer."
           ("t t"   . copilot-mode)
 
           ("t RET" . llms-chat)
-          ("t w"   . llms-spin-up-companion)
-          ("t W"   . llms-spin-up-companion-stop)
+          ("t w"   . llms-writing-spin-up-companion)
+          ("t W"   . llms-writing-shutdown)
 
 
           ("t C"   . chatgpt-shell)
