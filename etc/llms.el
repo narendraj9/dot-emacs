@@ -216,6 +216,10 @@ user instead of using `string-edit'."
             (push-mark (pos-bol) t t))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
+
+(use-package gptel-custom-tools :after gptel :load-path "etc/")
+(use-package gptel-ext :after gptel :load-path "etc/")
+
 (use-package gptel-prompts
   :vc ( :url "https://github.com/jwiegley/gptel-prompts.git"
         :rev :newest )
