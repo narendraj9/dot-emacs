@@ -3482,8 +3482,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-      :where point
-      :duration 'command)
+                                :where point
+                                :duration 'command)
     ;; Preserve the return value.
     value))
 
@@ -4466,9 +4466,8 @@ buffer."
          (require 'llms-images))))
 
   :bind ( :map ctl-m-map
-          ([C-m] . llms-chat)
-          ("c"   . chatgpt-shell--toggle-buffer)
-
+          ([C-m] . gptel-send)
+          ("c" . gptel-buffer-toggle)
 
           :map ctl-quote-map
           ("t t"   . copilot-mode)
@@ -4478,13 +4477,14 @@ buffer."
           ("t W"   . llms-writing-shutdown)
 
 
-          ("t C"   . chatgpt-shell)
-          ("t d"   . chatgpt-shell-describe-code)
-          ("t e"   . chatgpt-shell-explain-code)
-          ("t i"   . chatgpt-shell-interrupt)
-          ("t p"   . chatgpt-shell-proofread-region)
-          ("t s"   . chatgpt-shell-send-and-review-region)
+          ;; ("t C"   . chatgpt-shell)
+          ;; ("t d"   . chatgpt-shell-describe-code)
+          ;; ("t e"   . chatgpt-shell-explain-code)
+          ;; ("t i"   . chatgpt-shell-interrupt)
+          ;; ("t p"   . chatgpt-shell-proofread-region)
+          ;; ("t s"   . chatgpt-shell-send-and-review-region)
 
+          ("")
           ("t c"   . gptel)
           ("t m"   . gptel-menu)
           ("t g"   . gptel-generate-inline)

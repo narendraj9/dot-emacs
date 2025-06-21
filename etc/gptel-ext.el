@@ -35,8 +35,9 @@
   :tools (list "fetch_url")
   :confirm-tool-calls nil)
 
-(gptel-make-preset 'emacs-help
+(gptel-make-preset 'emacs-aid
   :description "Help with an Emacs question."
+  :system 'emacs-aid
   :backend "OpenAI"
   :model 'gpt-3.5-turbo
   :tools (list "find_functions" "get_function_docstring")

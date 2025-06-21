@@ -180,6 +180,26 @@ LLM is pending."
               #'gptel-generate-inline)
 
   :preface
+  (defun gptel-buffer-toggle ()
+    "Toggle display of buffers with `gptel-mode' enabled.
+   If there is exactly one such buffer, switch to it if not current,
+   or return to the previous buffer if already current.
+   If none or more than one, call `gptel' interactively to prompt for action."
+    (interactive)
+    (let ((gptel-buffers (seq-filter
+                          (lambda (buffer)
+                            (with-current-buffer buffer
+                              (bound-and-true-p gptel-mode)))
+                          (buffer-list))))
+      (if (= (length gptel-buffers) 1)
+          (let ((buffer (car gptel-buffers)))
+            (if (not (eq buffer (current-buffer)))
+                (switch-to-buffer buffer)
+              (let ((prev-buffer (other-buffer buffer t)))
+                (when (buffer-live-p prev-buffer)
+                  (switch-to-buffer prev-buffer)))))
+        (call-interactively #'gptel))))
+
   (defvar gptel-generate-inline--last-prompt "")
   (make-variable-buffer-local 'gptel-generate-inline--last-prompt)
 
@@ -214,7 +234,7 @@ user instead of using `string-edit'."
             ;; characters to be inserted at point.
             (insert " << remove me >> ")
             (push-mark (pos-bol) t t))
-          (gptel--suffix-rewrite gptel--rewrite-message))))))
+          (gptel--suffix-rewrite gptel--rewrite-message)))))))
 
 
 (use-package gptel-custom-tools :after gptel :load-path "etc/")
