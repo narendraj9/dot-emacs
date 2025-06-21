@@ -159,6 +159,7 @@ LLM is pending."
           ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
            (gptel-confirm-tool-calls t)
+           (gptel-include-tool-results t)
            (gptel-expert-commands t)
            (gptel-default-mode 'org-mode))
   :config
@@ -234,7 +235,7 @@ user instead of using `string-edit'."
             ;; characters to be inserted at point.
             (insert " << remove me >> ")
             (push-mark (pos-bol) t t))
-          (gptel--suffix-rewrite gptel--rewrite-message)))))))
+          (gptel--suffix-rewrite gptel--rewrite-message))))))
 
 
 (use-package gptel-custom-tools :after gptel :load-path "etc/")
