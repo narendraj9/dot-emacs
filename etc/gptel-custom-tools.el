@@ -52,7 +52,7 @@ this tool. Then afterwards, you can process the contents yourself.")))
 ;;; Thanks to jwiegley:
 ;;
 
-(defun find-functions-with-keyword (keywords)
+(defun tools/find-functions-with-keyword (keywords)
   "Find functions containing all KEYWORDS in their name or docstring."
   (interactive "sEnter keyword: ")
   (let ((results '()))
@@ -83,7 +83,7 @@ this tool. Then afterwards, you can process the contents yourself.")))
       (format "No functions found containing '%s'" keyword))))
 
 (gptel-make-tool
- :function #'find-functions-with-keyword
+ :function #'tools/find-functions-with-keyword
  :name "find_functions"
  :description "Find available functions whose name or definitions matches a set of keywords.
 
@@ -96,14 +96,14 @@ You will usually follow this call with a subsequent call to
 `get_function_docstring' in order to learn more about how to call those
 functions. This call is extremely cheap and should be used liberally."
  :args (list
-        '(:name "keyword"
-                :type "array"
-                :items (:type "string")
-                :description "Keywords used to lookup up defined functions"))
+        '( :name "keyword"
+           :type "array"
+           :items (:type "string")
+           :description "Keywords used to lookup up defined functions"))
  :category "emacs"
  :confirm nil)
 
-(defun get-function-docstring (name)
+(defun tools/get-function-docstring (name)
   "Return the documentation for a given function NAME."
   (let ((sym (intern-soft name)))
     (and sym
@@ -111,16 +111,16 @@ functions. This call is extremely cheap and should be used liberally."
          (documentation sym))))
 
 (gptel-make-tool
- :function #'get-function-docstring
+ :function #'tools/get-function-docstring
  :name "get_function_docstring"
  :description "Return the documentation for a given function.
 Call this tool in order to determine the arguments, convensations, and
 return value of a particular function by name. This call is extremely
 cheap and should be used liberally."
  :args (list
-        '(:name "name"
-                :type "string"
-                :description "Name of the function whose documentation is needed"))
+        '( :name "name"
+           :type "string"
+           :description "Name of the function whose documentation is needed"))
  :category "emacs"
  :confirm nil)
 
@@ -129,15 +129,39 @@ cheap and should be used liberally."
              (format "The value of x and y multiplied is: %s" (* x y)))
  :name "multiply_numbers"
  :description "Multiply two numbers together"
- :args (list '(:name "x"
-                     :type "integer"
-                     :description "The first number to be multiplied")
-             '(:name "y"
-                     :type "integer"
-                     :description "The second number to be multiplied"))
+ :args (list '( :name "x"
+                :type "integer"
+                :description "The first number to be multiplied")
+             '( :name "y"
+                :type "integer"
+                :description "The second number to be multiplied"))
  :category "math"
  :confirm nil)
+
+(defun tools/compose-mail (to subject body)
+  (message-mail to subject nil t)
+  (insert body))
+
+(gptel-make-tool
+ :name "compose_email"
+ :category "misc"
+ :function #'tools/compose-mail
+ :args '(( :name "to"
+           :type "string"
+           :description "Sender's email address." )
+         ( :name "subject"
+           :type "string"
+           :description "Email's subject." )
+         ( :name "body"
+           :type "string"
+           :description "Content of the email message.") )
+ :description "Prepare an email to be sent in a *mail* buffer. This tool prepares an
+email for review by the user. It will not send the email.")
 
 
 (provide 'gptel-custom-tools)
 ;;; gptel-custom-tools.el ends here
+
+;; Local Variables:
+;; read-symbol-shorthands: (("tools/" . "gptel-custom-tools-"))
+;; End:

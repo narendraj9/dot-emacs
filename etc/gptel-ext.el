@@ -39,7 +39,7 @@
   :description "Help with an Emacs question."
   :system 'emacs-aid
   :backend "OpenAI"
-  :model 'gpt-3.5-turbo
+  :model 'gpt-4.1
   :tools (list "find_functions" "get_function_docstring")
   :confirm-tool-calls nil)
 

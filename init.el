@@ -4468,6 +4468,7 @@ buffer."
   :bind ( :map ctl-m-map
           ([C-m] . gptel-send)
           ("c" . gptel-buffer-toggle)
+          ("p" . gptel--preset)
 
           :map ctl-quote-map
           ("t t"   . copilot-mode)
