@@ -1294,6 +1294,30 @@ search keyword."
   (dolist (overlay (get 'watch :overlays))
     (delete-overlay overlay)))
 
+(define-minor-mode sourcegraph-mode
+  "Minor mode for sourcegraph search results."
+  :lighter " SG"
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "g") 'sourcegraph-search)
+            (define-key map (kbd "q") 'quit-window)
+            map))
+
+(defun sourcegraph-search ()
+  "Simple Sourcegraph search with keymap for quit and refresh."
+  (interactive)
+  (let* ((query (read-string "Search: "))
+         (command (format "COLOR=1 src search -less=0 -- 'context:global %s';"
+                          (shell-quote-argument query)))
+         (results (shell-command-to-string command))
+         (inhibit-read-only t))
+    (with-current-buffer (get-buffer-create "*sourcegraph*")
+      (erase-buffer)
+      (insert results)
+      (ansi-color-apply-on-region (point-min) (point-max))
+      (sourcegraph-mode)
+      (display-buffer-full-frame (current-buffer) (list))
+      (goto-char (point-min)))))
+
 
 (provide 'defs)
 ;;; defs.el ends here

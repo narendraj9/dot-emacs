@@ -174,6 +174,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("c e" . vicarie/eval-print-last-sexp)
           ("c =" . vicarie/eval-replace-last-sexp)
           ("c r" . rename-file-and-buffer)
+          ("c s" . sourcegraph-search)
+
           ;; ("C-a" . emacspeak-wizards-execute-asynchronously)
           ("M-x" . async-M-x)
 
@@ -2391,6 +2393,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :if (eq system-type 'darwin)
   :init
+  ;; (add-to-list 'exec-path-from-shell-variables "SRC_ACCESS_TOKEN")
+  ;; (add-to-list 'exec-path-from-shell-variables "SRC_ENDPOINT")
   (exec-path-from-shell-initialize))
 
 (use-package shell

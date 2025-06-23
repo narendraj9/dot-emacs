@@ -134,8 +134,8 @@ LLM is pending."
                ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
 
                ;; --
-               ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
-               ("deepwiki" . (:command "bunx" :args ("mcp-remote" "https://mcp.deepwiki.com/sse")))
+               ("globalping" . (:url "https://mcp.globalping.dev/sse"))
+               ("deepwiki" . (:url "https://mcp.deepwiki.com/sse"))
                ;; --
                ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
 
@@ -155,6 +155,7 @@ LLM is pending."
         :rev :newest )
   :demand t
   :bind ( :map gptel-mode-map
+          ("C-c s" . gptel-system-prompt)
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
