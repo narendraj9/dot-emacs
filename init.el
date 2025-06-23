@@ -127,6 +127,33 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 ;;
 ;;  ─────────────────────────────────────────────────────────────────
+
+(use-package repeat
+  :init
+  ;; If a symbol property named `repeat-map' exists for a command and it's a
+  ;; keymap, it's activate as a transient-map after command is executed.
+  (let ((inhibit-message t))
+    (repeat-mode +1))
+
+  :config
+  (setq repeat-exit-timeout 30)
+
+  :preface
+  (defmacro define-repeat-map (&rest bindings)
+    ;; TODO: add a keyword argument to provide a name for the keymap instead of
+    ;; the auto-generated name.
+    (declare (indent 0))
+    ;; Use gensym just for the name of the symbol, let the generated
+    ;; symbol be garbage collected. `intern' then creates a new symbol
+    ;; that is used and remains valid globally.
+    (let ((keymap-symbol (intern (symbol-name (gensym "repeat-map--")))))
+      `(let* ((m (make-sparse-keymap)))
+         (dolist (binding (quote ,bindings))
+           (define-key m (kbd (car binding)) (cdr binding))
+           (put (cdr binding) 'repeat-map (quote ,keymap-symbol)))
+         (defvar ,keymap-symbol m)))))
+
+
 (use-package defs
   :doc "Var and function definitions that must be loaded before
   everything else."
@@ -153,12 +180,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (bind-keys* :prefix "C-;"   :prefix-map ctl-semicolon-map)
   (bind-keys* :prefix "C-h x" :prefix-map ctl-h-x-map)
 
+  :config
+  (define-repeat-map ("f" . jump-to-next-url)
+                     ("b" . jump-to-previous-url))
+
   :bind ( ("C-c m" . switch-to-minibuffer)
           ("C-c 0" . quick-switch-themes)
           ("C-c b" . switch-to-buffer-with-mode)
           ("<print>" . snap-it)
 
           ("M-g S" . switch-to-scratch-new-tab)
+          ("M-g f" . jump-to-next-url)
+          ("M-g b" . jump-to-previous-url)
 
           :map ctl-m-map
           ("t" . switch-to-scratch-new-tab)
@@ -832,32 +865,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :config
   (selected-global-mode +1))
-
-(use-package repeat
-  :init
-  ;; If a symbol property named `repeat-map' exists for a command and it's a
-  ;; keymap, it's activate as a transient-map after command is executed.
-  (let ((inhibit-message t))
-    (repeat-mode +1))
-
-  :config
-  (setq repeat-exit-timeout 30)
-
-  :preface
-  (defmacro define-repeat-map (&rest bindings)
-    ;; TODO: add a keyword argument to provide a name for the keymap instead of
-    ;; the auto-generated name.
-    (declare (indent 0))
-    ;; Use gensym just for the name of the symbol, let the generated
-    ;; symbol be garbage collected. `intern' then creates a new symbol
-    ;; that is used and remains valid globally.
-    (let ((keymap-symbol (intern (symbol-name (gensym "repeat-map--")))))
-      `(let* ((m (make-sparse-keymap)))
-         (dolist (binding (quote ,bindings))
-           (define-key m (kbd (car binding)) (cdr binding))
-           (put (cdr binding) 'repeat-map (quote ,keymap-symbol)))
-         (defvar ,keymap-symbol m)))))
-
 
 (use-package misc
   :bind ( :map ctl-period-map ("d" . duplicate-dwim) )

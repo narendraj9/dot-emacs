@@ -25,6 +25,7 @@
 
 ;;; Code:
 
+(require 'ffap)
 (require 'repeat)
 (require 'seq)
 (require 's)
@@ -1294,6 +1295,16 @@ search keyword."
   (dolist (overlay (get 'watch :overlays))
     (delete-overlay overlay)))
 
+(defun jump-to-next-url ()
+  (interactive)
+  (unless (re-search-forward ffap-url-regexp (point-max) t)
+    (message "No urls found in this buffer.")))
+
+(defun jump-to-previous-url ()
+  (interactive)
+  (unless (re-search-backward ffap-url-regexp (point-min) t)
+    (message "No urls found in this buffer.")))
+
 (define-minor-mode sourcegraph-mode
   "Minor mode for sourcegraph search results."
   :lighter " SG"
@@ -1307,7 +1318,7 @@ search keyword."
   (interactive)
   (let* ((query (read-string "Search: "))
          (command (format "COLOR=1 src search -less=0 -- 'context:global %s';"
-                          (shell-quote-argument query)))
+                          query))
          (results (shell-command-to-string command))
          (inhibit-read-only t))
     (with-current-buffer (get-buffer-create "*sourcegraph*")
