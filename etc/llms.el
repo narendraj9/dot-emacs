@@ -214,19 +214,28 @@ LLM is pending."
   (defvar gptel-generate-inline--last-prompt "")
   (make-variable-buffer-local 'gptel-generate-inline--last-prompt)
 
-  (defun gptel-generate-inline ()
-    "TODO: Use an overlay in the current buffer to acquire prompt from the
-user instead of using `string-edit'."
-    (interactive)
-    (letrec ((gptel--rewrite-directive
+  (defun gptel-generate-inline (&optional arg)
+    (interactive "P")
+    (letrec ((buffer (current-buffer))
+             (starting-point (point))
+             (gptel--rewrite-directive
               "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
              (gptel--rewrite-message
-              (read-string-from-buffer nil gptel-generate-inline--last-prompt))
-             (use-empty-active-region t)
+              (posframe-read-string "Instruction: " gptel-generate-inline--last-prompt))
+             (gptel-rewrite-directives-hook
+              (when arg
+                (list (lambda ()
+                        (format "<<point>> shows the location of where your code will end up:"
+                                "\n--- beginning of context ----\n"
+                                (buffer-substring-no-properties (point-min)
+                                                                (point))
+                                "<<point>>"
+                                (buffer-substring-no-properties (1+ (point))
+                                                                (point-max))
+                                "\n--- end of context ----\n")))))
              (stop-progress-indicator
-              (llms-make-progress-indicator (point)
-                                            (save-excursion (forward-line)
-                                                            (point))))
+              (llms-make-progress-indicator (line-beginning-position)
+                                            (line-beginning-position)))
              (post-rewrite-hook
               (lambda (&rest _args)
                 (funcall stop-progress-indicator)
@@ -235,16 +244,9 @@ user instead of using `string-edit'."
       (setq gptel-generate-inline--last-prompt gptel--rewrite-message)
       (if (region-active-p)
           (call-interactively #'gptel-rewrite)
-        ;; Insert some dummy text and start a rewrite session.
         (progn
-          ;; Hack: using internal function for now. I like gptel-rewrite UI but
-          ;; want it to be a bit faster.
           (unless (get-char-property (point) 'gptel-rewrite)
-            ;; Note: this doesn't work in modes where empty lines are
-            ;; automatically deleted, those modes require some non-space
-            ;; characters to be inserted at point.
-            (insert " << remove me >> ")
-            (push-mark (pos-bol) t t))
+            (put-text-property (point) (point) 'gptel-rewrite "<< your code here >>"))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
 

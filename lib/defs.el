@@ -31,6 +31,7 @@
 (require 's)
 (require 'cl-lib)
 (require 'treesit)
+(require 'posframe)
 
 (defvar emacs-assets-directory
   (expand-file-name "~/miscellany/assets/")
@@ -1142,7 +1143,6 @@ search keyword."
                             'timestamp
                             (current-time))))))))
 
-
 (defun start-emacspeak ()
   (interactive)
   (load-file (expand-file-name "~/code/emacspeak/lisp/emacspeak-setup.el")))
@@ -1287,6 +1287,7 @@ search keyword."
   (dolist (overlay (get 'watch :overlays))
     (delete-overlay overlay)))
 
+
 (defun jump-to-next-url ()
   (interactive)
   (unless (re-search-forward ffap-url-regexp (point-max) t)
@@ -1333,6 +1334,52 @@ search keyword."
       (setq mac-command-modifier 'meta)
       (setq mac-right-option-modifier 'ctrl)
       (setq mac-function-modifier 'ctrl))))
+
+(defun posframe-read-string (prompt &optional initial-input)
+  "Prompt user for a string using a posframe at point, not the minibuffer."
+  (let* ((buffer-name "*posframe-read-string*")
+         (prompt-str (if (string-suffix-p ": " prompt) prompt (concat prompt ": ")))
+         (input (or initial-input ""))
+         (position (save-excursion
+                     (previous-line)
+                     (point)))
+         (done nil)
+         (result nil))
+    (unwind-protect
+        (progn
+          (with-current-buffer (get-buffer-create buffer-name)
+            (erase-buffer)
+            (let ((inhibit-read-only t))
+              (while (not done)
+                (erase-buffer)
+                (insert prompt-str input)
+                (posframe-show buffer-name
+                               :position position
+                               :min-width 40
+                               :min-height 1
+                               :border-width 2
+                               :left-fringe 2)
+                (let ((key (read-key)))
+                  (cond
+                   ((= 13 key)                  ; Enter
+                    (setq result input)
+                    (setq done t))
+
+                   ((= ?\C-g key)
+                    (keyboard-quit))
+
+                   ((and (= 127 key) (> (length input) 0)) ; Backspace
+                    (setq input (substring input 0 -1)))
+
+                   ((and (characterp key) (char-displayable-p key))
+                    (setq input (concat input (string key))))))))))
+
+      (posframe-hide buffer-name)
+
+      (when (get-buffer buffer-name)
+        (kill-buffer buffer-name)))
+
+    result))
 
 
 (provide 'defs)
