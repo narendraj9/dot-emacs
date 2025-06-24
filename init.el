@@ -2480,9 +2480,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
            eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
            eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra
            eshell-elecslash
-           ;; Disabled because it's hard to get used to it.
+           ;; Earlier disabled because it's hard to get used to it.
            ;;          See: (info "(eshell) Smart scrolling")
-           ;; eshell-smart
+           eshell-smart
            ))
 
   (setq eshell-prompt-regexp "([^#$]*) [#$] "

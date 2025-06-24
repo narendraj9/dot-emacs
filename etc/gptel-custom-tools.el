@@ -124,17 +124,30 @@ cheap and should be used liberally."
  :category "emacs"
  :confirm nil)
 
+(defun tools/calculate (x y op)
+  "Perform operation OP on X and Y. OP: one of '+, -, *, /, %, expt."
+  (cl-case (intern op)
+    ((+ add sum) (format "The sum of %s and %s is: %s" x y (+ x y)))
+    ((- subtract) (format "The difference of %s and %s is: %s" x y (- x y)))
+    ((* multiply) (format "The product of %s and %s is: %s" x y (* x y)))
+    ((/ divide)
+     (if (zerop y)
+         "Error: division by zero."
+       (format "The quotient of %s divided by %s is: %s" x y (/ x y))))
+    ((% mod rem)
+     (if (zerop y)
+         "Error: modulo by zero."
+       (format "The remainder of %s divided by %s is: %s" x y (% x y))))
+    ((expt pow) (format "%s raised to the power of %s is: %s" x y (expt x y)))
+    (t (format "Unknown operation: %s" op))))
+
 (gptel-make-tool
- :function (lambda (x y)
-             (format "The value of x and y multiplied is: %s" (* x y)))
- :name "multiply_numbers"
- :description "Multiply two numbers together"
- :args (list '( :name "x"
-                :type "integer"
-                :description "The first number to be multiplied")
-             '( :name "y"
-                :type "integer"
-                :description "The second number to be multiplied"))
+ :function #'tools/calculate
+ :name "calculate"
+ :description "Perform a basic arithmetic operation on two numbers. Supported: + - * / % expt"
+ :args '(( :name "x" :type "integer" :description "First number" )
+         ( :name "y" :type "integer" :description "Second number" )
+         ( :name "op" :type "string" :description "Operation: one of +, -, *, /, %, expt" ))
  :category "math"
  :confirm nil)
 

@@ -40,7 +40,7 @@
   :system 'emacs-aid
   :backend "OpenAI"
   :model 'gpt-4.1
-  :tools (list "find_functions" "get_function_docstring")
+  :tools (list "find_functions" "get_function_docstring" "calculate")
   :confirm-tool-calls nil)
 
 

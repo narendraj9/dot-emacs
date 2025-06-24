@@ -1,6 +1,7 @@
-alias with-jvm $SHELL -c "${cs java --env --jvm $1} ; $@*[1..]"
-alias cdp cd (project-root (project-current))
-alias send-to-tab bluetooth-sendto --device ${(format "%s" tablet-mac-address)} $*
-alias nu nu -c $@*
-alias sg src search -less=0 -- "context:global $@*"
+alias claude bun x @anthropic-ai/claude-code
 alias clear clear-scrollback
+alias sg src search -less=0 -- "context:global $@*"
+alias nu nu -c $@*
+alias send-to-tab bluetooth-sendto --device ${(format "%s" tablet-mac-address)} $*
+alias cdp cd (project-root (project-current))
+alias with-jvm $SHELL -c "${cs java --env --jvm $1} ; $@*[1..]"

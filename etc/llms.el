@@ -155,6 +155,7 @@ LLM is pending."
         :rev :newest )
   :demand t
   :bind ( :map gptel-mode-map
+          ("C-c C-o" . gptel--clear)
           ("C-c s" . gptel-system-prompt)
           ("C-j" . gptel-send)
           ("RET" . gptel-send) )
@@ -182,6 +183,13 @@ LLM is pending."
               #'gptel-generate-inline)
 
   :preface
+  (defun gptel--clear ()
+    (interactive)
+    (forward-line -1)
+    (delete-region (point-min) (point))
+    (forward-line)
+    (end-of-line))
+
   (defun gptel-buffer-toggle ()
     "Toggle display of buffers with `gptel-mode' enabled.
    If there is exactly one such buffer, switch to it if not current,
