@@ -43,6 +43,16 @@
   :tools (list "find_functions" "get_function_docstring" "calculate")
   :confirm-tool-calls nil)
 
+(gptel-make-preset 'brainstorming
+  :description nil :backend "Anthropic" :model 'claude-opus-4-0 :system
+  'programming :tools
+  '("fetch" "get-library-docs" "resolve-library-id" "ask_question"
+    "read_wiki_contents" "read_wiki_structure" "sequentialthinking"
+    "find_functions" "get_function_docstring")
+  :stream t :temperature 1.0 :max-tokens nil :use-context 'system :track-media
+  nil :include-reasoning t)
+
+
 
 (provide 'gptel-ext)
 ;;; gptel-ext.el ends here

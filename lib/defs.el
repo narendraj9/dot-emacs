@@ -1201,14 +1201,6 @@ search keyword."
           (propertize (if enabled? "[L]" "[E]") 'face 'mode-line-dimmed))
     (run-with-timer 60 nil (lambda () (setq swap-ctrl-right-win-status nil)))))
 
-(defun darwin:swap-right-option-between-meta-ctrl ()
-  (interactive)
-  (if (eq mac-right-option-modifier 'meta)
-      (setq mac-right-option-modifier 'ctrl)
-    (setq mac-right-option-modifier 'meta))
-  (message "Right option is now mapped to %s"
-           mac-right-option-modifier))
-
 (defun pretty-format-temporarily ()
   (interactive)
   (let* ((super-local-keymap (make-sparse-keymap))
@@ -1328,6 +1320,19 @@ search keyword."
       (sourcegraph-mode)
       (display-buffer-full-frame (current-buffer) (list))
       (goto-char (point-min)))))
+
+(defun macos-fix-keyboard-modifiers ()
+  (interactive)
+  (let ((usb-devices (->> "ioreg -p IOUSB -l | awk -F'\"' '/\"USB Product Name\"/ {print $4}'"
+                          (shell-command-to-string)
+                          (s-split "\n") )))
+    (if (seq-contains-p usb-devices "Ergodox EZ")
+        ;; External keyboard
+        (setq mac-option-modifier 'meta)
+      ;; Apple keyboard
+      (setq mac-command-modifier 'meta)
+      (setq mac-right-option-modifier 'ctrl)
+      (setq mac-function-modifier 'ctrl))))
 
 
 (provide 'defs)

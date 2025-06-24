@@ -197,7 +197,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("t" . switch-to-scratch-new-tab)
           ("o" . run-in-other-window)
           ("s" . swap-ctrl-right-win)
-          ("S" . darwin:swap-right-option-between-meta-ctrl)
+          ("S" . macos-fix-keyboard-modifiers)
 
           :map ctl-quote-map
           ("g"   . websearch-it)
@@ -4223,14 +4223,8 @@ buffer."
      ;; for some reason, selection highlight isn't turned on by default
      (transient-mark-mode t))
     (`darwin
-     ;; Modify the CMD key to be Meta key
-     (setq mac-command-modifier 'meta)
-     ;; This is very stupid of Apple keyboards
-     (setq mac-right-option-modifier 'ctrl)
-     ;; I don't need a fn
-     (setq mac-function-modifier 'ctrl)
-     (when (< emacs-major-version 25)
-       (setq visible-bell nil)))
+     (macos-fix-keyboard-modifiers))
+
     (`gnu/linux
      (midnight-delay-set 'midnight-delay -7200)
      (midnight-mode +1)
