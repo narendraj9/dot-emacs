@@ -813,16 +813,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package hideshow
   :defer t
   :delight hs-minor-mode
+  :hook (prog-mode . hs-minor-mode)
   :bind ( :map hs-minor-mode-map
           ([backtab] . hs-toggle-hiding)
           ("C-c @ a"  . my-toggle-hideshow-all)
           ("C-c @ s"  . hs-show-block)
           ("C-c @ h"  . hs-hide-block))
-  :init
-  (add-hook 'prog-mode-hook #'hs-minor-mode)
 
-  :config
-  (setq hs-set-up-overlay #'display-code-line-counts)
+  :custom
+  (hs-display-lines-hidden t)
 
   :preface
   (defvar my-hs-hide nil "Current state of hideshow for toggling all.")
@@ -832,21 +831,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (setq my-hs-hide (not my-hs-hide))
     (if my-hs-hide
         (hs-hide-all)
-      (hs-show-all)))
-
-  (defun display-code-line-counts (ov)
-    (when-let ((line-count (and (eq 'code (overlay-get ov 'hs))
-                                (count-lines (overlay-start ov)
-                                             (overlay-end ov)))))
-      (overlay-put ov
-                   'display
-                   (propertize (format "  +%s " line-count)
-                               'face 'highlight))
-      (overlay-put ov
-                   'before-string
-                   (propertize " "
-                               'display
-                               '(left-fringe right-arrow highlight))))))
+      (hs-show-all))))
 
 (use-package wrap-region
   :doc "Wrap region with custom chars."
