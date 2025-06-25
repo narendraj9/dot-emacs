@@ -246,7 +246,7 @@ LLM is pending."
           (call-interactively #'gptel-rewrite)
         (progn
           (unless (get-char-property (point) 'gptel-rewrite)
-            (put-text-property (point) (point) 'gptel-rewrite "<< your code here >>"))
+            (put-text-property (point) (1+ (point)) 'gptel-rewrite ""))
           (gptel--suffix-rewrite gptel--rewrite-message))))))
 
 

@@ -1283,6 +1283,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (with-selected-window (next-window (selected-window))
       (pixel-scroll-up))))
 
+(use-package ultra-scroll
+  :vc ( :url "https://github.com/jdtsmith/ultra-scroll"
+        :rev :newest )
+  :init
+  (setq scroll-conservatively 3
+        scroll-margin 0)
+  :config
+  (ultra-scroll-mode +1))
+
 (use-package window
   :bind ( :map window-prefix-map
           ("+" . fit-window-to-buffer*)
