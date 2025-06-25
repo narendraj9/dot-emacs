@@ -31,7 +31,7 @@
 (gptel-make-tool
  :function (lambda (url)
              (if (executable-find "pandoc")
-                 (shell-command-to-string (format "pandoc --from html --to markdown %s"
+                 (shell-command-to-string (format "pandoc --from html --to plain %s"
                                                   url))
                (with-current-buffer (url-retrieve-synchronously url)
                  (shr-render-region (point-min) (point-max))
