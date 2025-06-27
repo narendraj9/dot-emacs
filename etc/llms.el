@@ -133,13 +133,18 @@ LLM is pending."
                ("memory" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-memory")))
                ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
 
+               ;; -- Using `mcp-remote' because these require OAuth support
+               ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
+               ("cloudflare-dns" . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/sse")))
+               ("cloudflare-radar" . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/sse")))
                ;; --
-               ("globalping" . (:url "https://mcp.globalping.dev/sse"))
+
+               ;; --
                ("deepwiki" . (:url "https://mcp.deepwiki.com/sse"))
-               ;; --
                ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
 
                ;; --
+               ;; ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
                ;; ("qdrant" . (:url "http://localhost:8000/sse"))
                ;; ("graphlit" . (
                ;;                :command "npx"
