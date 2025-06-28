@@ -178,7 +178,8 @@
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "generativelanguage.googleapis.com")))
     (gptel-make-gemini "Gemini"
       :key api-key
-      :stream t)))
+      ;; There is bug in gptel's parsing of streaming respones from Gemini.
+      :stream nil)))
 
 (defvar llms-chat-gptel-kagi-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "kagi.com")))
