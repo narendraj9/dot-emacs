@@ -144,6 +144,8 @@ LLM is pending."
                ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
 
                ;; --
+               ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
+               ;; --
                ;; ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
                ;; ("qdrant" . (:url "http://localhost:8000/sse"))
                ;; ("graphlit" . (
@@ -161,8 +163,9 @@ LLM is pending."
   :demand t
   :bind ( :map gptel-mode-map
           ("C-c C-o" . gptel--clear)
+          ("C-c 1"   . gptel-menu)
           ("C-c s" . gptel-system-prompt)
-          ("C-j" . gptel-send)
+          ("C-c t" . gptel-tools)
           ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
            (gptel-confirm-tool-calls t)
@@ -278,7 +281,12 @@ LLM is pending."
         :rev :newest )
   :bind ( :map ctl-quote-map ("t q" . gptel-quick) ))
 
+(use-package macher
+  :vc ( :url "https://github.com/kmontag/macher"
+        :rev :newest ))
+
 (use-package llm-tool-collection
+  :disabled t
   :vc ( :url "https://github.com/skissue/llm-tool-collection.git"
         :rev :newest )
   :after gptel
