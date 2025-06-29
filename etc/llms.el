@@ -127,13 +127,14 @@ LLM is pending."
   :custom ( (mcp-hub-servers
              `(
                ;; Anthropic's reference servers
-               ("time"  . (:command "uvx" :args ("mcp-server-time" "--local-timezone=Europe/Berlin")))
-               ("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
+               ("time"  . (:command "uvx" :args ("--isolated" "mcp-server-time" "--local-timezone=Europe/Berlin")))
+               ("fetch" . (:command "uvx" :args ("--isolated" "mcp-server-fetch")))
                ("filesystem" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/tmp/server-filesystem/")))
                ("memory" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-memory")))
                ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
 
                ;; -- Using `mcp-remote' because these require OAuth support
+               ("cloudflare-docs" . (:command "bunx" :args ("mcp-remote" "https://docs.mcp.cloudflare.com/sse")))
                ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
                ("cloudflare-dns" . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/sse")))
                ("cloudflare-radar" . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/sse")))
@@ -142,6 +143,7 @@ LLM is pending."
                ;; --
                ("deepwiki" . (:url "https://mcp.deepwiki.com/sse"))
                ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
+               ("nixos" . (:command "uvx" :args ("--isolated" "mcp-nixos")))
 
                ;; --
                ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
@@ -284,6 +286,8 @@ LLM is pending."
 (use-package macher
   :vc ( :url "https://github.com/kmontag/macher"
         :rev :newest ))
+
+(use-package minuet :ensure t)
 
 (use-package llm-tool-collection
   :disabled t
