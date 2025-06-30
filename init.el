@@ -3936,7 +3936,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (use-package transient-defs :load-path "etc/"))
 
-(use-package browse-at-remote :ensure t)
+(use-package browse-at-remote
+  :ensure t
+  :config
+  (add-to-list 'browse-at-remote-remote-type-regexps
+               '(:host "^.*gitlab.*\\.io$" :type "gitlab")))
 
 (use-package magit
   :ensure t

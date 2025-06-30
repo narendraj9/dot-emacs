@@ -129,7 +129,6 @@ LLM is pending."
                ;; Anthropic's reference servers
                ("time"  . (:command "uvx" :args ("--isolated" "mcp-server-time" "--local-timezone=Europe/Berlin")))
                ("fetch" . (:command "uvx" :args ("--isolated" "mcp-server-fetch")))
-               ("filesystem" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/tmp/server-filesystem/")))
                ("memory" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-memory")))
                ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
 
@@ -138,17 +137,21 @@ LLM is pending."
                ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
                ("cloudflare-dns" . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/sse")))
                ("cloudflare-radar" . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/sse")))
-               ;; --
 
-               ;; --
+
                ("deepwiki" . (:url "https://mcp.deepwiki.com/sse"))
                ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
                ("nixos" . (:command "uvx" :args ("--isolated" "mcp-nixos")))
 
-               ;; --
+               ,(when (file-exists-p "~/code/mcp-projects/")
+                  `("filesystem" . ( :command "bunx"
+                                     :args ("-y" "@modelcontextprotocol/server-filesystem" "~/code/mcp-projects/") )))
+
+               ("aws-docs" . (:command "uvx" :args ("awslabs.aws-documentation-mcp-server@latest")))
                ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
-               ;; --
-               ;; ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
+
+               ;; -- TBD
+               ;; ("globalping" . (:url "https://mcp.globalping.dev/sse"))
                ;; ("qdrant" . (:url "http://localhost:8000/sse"))
                ;; ("graphlit" . (
                ;;                :command "npx"

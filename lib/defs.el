@@ -1329,7 +1329,8 @@ search keyword."
                           (s-split "\n") )))
     (if (seq-contains-p usb-devices "Ergodox EZ")
         ;; External keyboard
-        (setq mac-option-modifier 'meta)
+        (setq mac-option-modifier 'meta
+              mac-right-option-modifier 'meta)
       ;; Apple keyboard
       (setq mac-command-modifier 'meta)
       (setq mac-right-option-modifier 'ctrl)
