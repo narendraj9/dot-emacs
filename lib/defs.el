@@ -31,7 +31,6 @@
 (require 's)
 (require 'cl-lib)
 (require 'treesit)
-(require 'posframe)
 
 (defvar emacs-assets-directory
   (expand-file-name "~/miscellany/assets/")
@@ -1338,6 +1337,7 @@ search keyword."
 
 (defun posframe-read-string (prompt &optional initial-input)
   "Prompt user for a string using a posframe at point, not the minibuffer."
+  (require 'posframe)
   (let* ((buffer-name "*posframe-read-string*")
          (prompt-str (if (string-suffix-p ": " prompt) prompt (concat prompt ": ")))
          (input (or initial-input ""))
