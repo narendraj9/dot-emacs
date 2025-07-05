@@ -3069,6 +3069,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-B"   . vertico-multiform-buffer)
           ("<tab>" . vertico-insert) )
   :custom
+  (vertico-multiform-categories
+   '((imenu buffer)))
+
   (vertico-multiform-commands
    '((consult-imenu buffer)
      (consult-line buffer)
@@ -3089,7 +3092,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (execute-extended-command unobtrusive)))
 
   :init
-  (vertico-multiform-mode 1))
+  (vertico-multiform-mode +1))
 
 (use-package vertico-prescient
   :ensure t
@@ -3098,7 +3101,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package embark
   :ensure t
-  :bind ( ("C-c C-." . embark-act)
+  :bind ( ("C-c x" . embark-act)
 
           :map minibuffer-mode-map
           ("C-c C-o" . embark-collect)
@@ -3979,11 +3982,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (use-package transient-defs :load-path "etc/"))
 
-(use-package browse-at-remote
+(use-package git-link
   :ensure t
   :config
-  (add-to-list 'browse-at-remote-remote-type-regexps
-               '(:host "^.*gitlab.*\\.io$" :type "gitlab")))
+  (add-to-list 'git-link-remote-alist
+               '("\\.gitlab.*\\.io" git-link-gitlab))
+  (add-to-list 'git-link-web-host-alist
+               ;; TBD
+               '("ssh\\.gitlab.*.io" . "gitlab..com")))
 
 (use-package magit
   :ensure t
@@ -4076,7 +4082,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq remote-file-name-inhibit-cache 300)
   ;; Make `vc-mode' ignore remote files
   (setq vc-ignore-dir-regexp
-        (format "%s\\|%s"
+        (format "%s\|%s"
                 vc-ignore-dir-regexp
                 tramp-file-name-regexp))
   ;; https://lists.gnu.org/archive/html/emacs-devel/2018-11/msg00326.html
