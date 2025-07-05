@@ -3078,17 +3078,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (consult-ripgrep buffer)
      (xref-find-references buffer)
 
-     (describe-symbol vertical)
-     (describe-variable vertical)
-     (describe-function vertical)
+     ;; -- here: nil => vertical
+     (describe-symbol)
+     (describe-variable)
+     (describe-function)
+
+     (embark-bindings grid)
 
      (consult-yank-pop unobtrusive)
-     (embark-bindings grid)))
-  (vertico-multiform-categories
-   '((embark-keybinding grid)
-     (t unobtrusive)))
+     (execute-extended-command unobtrusive)))
 
-  :config
+  :init
   (vertico-multiform-mode 1))
 
 (use-package vertico-prescient
