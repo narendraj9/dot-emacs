@@ -515,8 +515,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Utilities
 ;; ──────────────────────────────────────────────────────────────────
 
-
-
 (use-package net-utils
   :bind ( :map net-utils-mode-map ("G" . netutils--revert-buffer) )
   :preface
@@ -1380,7 +1378,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :if (version<= "31.0" emacs-version)
   :doc "https://p.bauherren.ovh/blog/tech/new_window_cmds")
 
-
 (use-package winner
   :bind ( :map ctl-m-map ("<" . winner-undo ) )
   :init
@@ -1390,6 +1387,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (define-key winner-repeat-map ">" #'winner-redo)
   (define-key winner-repeat-map "<" #'winner-undo))
+
+(use-package popper
+  :ensure t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))
 
 (use-package exwm
   :disabled t
@@ -3074,7 +3086,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (vertico-multiform-commands
    '((consult-imenu buffer)
-     (consult-line buffer)
      (consult-grep buffer)
      (consult-grep-dwim buffer)
      (consult-git-grep buffer)
@@ -3085,14 +3096,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (describe-symbol)
      (describe-variable)
      (describe-function)
+     (consult-line)
+     (consult-yank-pop reverse)
 
      (embark-bindings grid)
-
-     (consult-yank-pop unobtrusive)
-     (execute-extended-command unobtrusive)))
+     (execute-extended-command grid reverse)))
 
   :init
   (vertico-multiform-mode +1))
+
+(use-package vertico-quick
+  :after vertico
+  :bind ( :map vertico-map ("M-q" . vertico-quick-jump) ))
 
 (use-package vertico-prescient
   :ensure t
@@ -3115,7 +3130,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ("M-s f"   . consult-find)
     ("M-s M-s" . consult-grep-dwim)
     ("C-x b"   . consult-buffer)
-    ("M-y"     . yank-pop)
+    ("M-y"     . consult-yank-pop)
 
     :map ctl-x-map
     ("<C-m>" . consult-grep-dwim)
