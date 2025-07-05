@@ -515,8 +515,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Utilities
 ;; ──────────────────────────────────────────────────────────────────
 
-
-
 (use-package net-utils
   :bind ( :map net-utils-mode-map ("G" . netutils--revert-buffer) )
   :preface
@@ -1380,7 +1378,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :if (version<= "31.0" emacs-version)
   :doc "https://p.bauherren.ovh/blog/tech/new_window_cmds")
 
-
 (use-package winner
   :bind ( :map ctl-m-map ("<" . winner-undo ) )
   :init
@@ -1390,6 +1387,31 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (define-key winner-repeat-map ">" #'winner-redo)
   (define-key winner-repeat-map "<" #'winner-undo))
+
+(use-package popper
+  :ensure t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1)
+
+  :config
+  (setq popper-display-function #'popper--display-buffer-on-right)
+
+  :preface
+  (defun popper--display-buffer-on-right (buffer alist)
+    (-> buffer
+        (display-buffer-in-direction (cons (cons 'direction 'right)
+                                           alist))
+        (select-window))))
 
 (use-package exwm
   :disabled t
@@ -3074,7 +3096,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (vertico-multiform-commands
    '((consult-imenu buffer)
-     (consult-line buffer)
      (consult-grep buffer)
      (consult-grep-dwim buffer)
      (consult-git-grep buffer)
@@ -3082,17 +3103,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (xref-find-references buffer)
 
      ;; -- here: nil => vertical
-     (describe-symbol)
-     (describe-variable)
-     (describe-function)
+     (consult-line)
+     (consult-yank-pop reverse)
 
-     (embark-bindings grid)
-
-     (consult-yank-pop unobtrusive)
+     (embark-bindings grid reverse)
+     (describe-symbol grid reverse)
+     (describe-variable grid reverse)
+     (describe-function grid reverse)
      (execute-extended-command unobtrusive)))
 
   :init
   (vertico-multiform-mode +1))
+
+(use-package vertico-quick
+  :after vertico
+  :bind ( :map vertico-map ("M-q" . vertico-quick-jump) ))
 
 (use-package vertico-prescient
   :ensure t
@@ -3115,7 +3140,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ("M-s f"   . consult-find)
     ("M-s M-s" . consult-grep-dwim)
     ("C-x b"   . consult-buffer)
-    ("M-y"     . yank-pop)
+    ("M-y"     . consult-yank-pop)
 
     :map ctl-x-map
     ("<C-m>" . consult-grep-dwim)
@@ -3533,8 +3558,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-                                :where point
-                                :duration 'command)
+      :where point
+      :duration 'command)
     ;; Preserve the return value.
     value))
 
