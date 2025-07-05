@@ -1562,6 +1562,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq ispell-program-name "aspell")
   (setq ispell-personal-dictionary personal-dictionary-file))
 
+(use-package jinx
+  :diminish jinx-mode
+  :bind
+  ("M-$" . jinx-correct)
+  ("C-M-$" . jinx-languages)
+  :config
+  (eval-when-compile
+    (require 'vertico-multiform))
+  (add-to-list 'vertico-multiform-categories
+               '(jinx grid (vertico-grid-annotate . 20))))
+
 ;; ──────────────────────────────────────────────────────────────────
 
 (use-package popup
@@ -3046,7 +3057,32 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( :map ctl-m-map ("r" . vertico-repeat) )
   :hook (minibuffer-setup . vertico-repeat-save)
-  :init (vertico-mode +1))
+  :init (vertico-mode +1)
+  :config
+  (use-package vertico-multiform
+    :demand t
+    :bind ( :map vertico-map
+            ("M-i"   . vertico-multiform-vertical)
+            ("M-G"   . vertico-multiform-grid)
+            ("M-B"   . vertico-multiform-buffer)
+            ("<tab>" . vertico-insert) )
+    :custom
+    (vertico-multiform-commands
+     '((consult-imenu buffer)
+       (consult-line buffer)
+       (consult-grep buffer)
+       (consult-grep-dwim buffer)
+       (consult-git-grep buffer)
+       (consult-ripgrep buffer)
+       (consult-yank-pop)
+       (embark-bindings grid)
+       (xref-find-references buffer)))
+    (vertico-multiform-categories
+     '((embark-keybinding grid)
+       (t unobtrusive)))
+
+    :config
+    (vertico-multiform-mode 1)))
 
 (use-package vertico-prescient
   :ensure t

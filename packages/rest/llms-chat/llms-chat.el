@@ -158,11 +158,10 @@
     :endpoint "/openai/v1/chat/completions"
     :stream t
     :key (llms-chat--api-key-from-auth-source "api.groq.com")
-    :models '(llama-3.3-70b-versatile
-              mixtral-8x7b-32768
-              gemma-7b-it
-              llama2-70b-4096
-              llama3-70b-8192)))
+    :models '(gemma2-9b-it
+              meta-llama/llama-guard-4-12b
+              deepseek-r1-distill-llama-70b
+              meta-llama/llama-4-maverick-17b-128e-instruct)))
 
 (defvar llms-chat-gptel-preplexity-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.perplexity.ai")))
