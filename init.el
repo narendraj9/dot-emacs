@@ -796,7 +796,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ─────────────────────────────────────────────────────────────────
 
 (use-package elec-pair :init (electric-pair-mode +1))
-(use-package wgrep :ensure t)
+
+(use-package grep-edit-mode
+  :commands grep-change-to-grep-edit-mode
+  :bind ( :map ctl-m-map ("e" . grep-change-to-grep-edit-mode) ))
 
 (use-package outline-minor-mode
   :defer t
@@ -2821,7 +2824,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("x S" . org-timer-stop)
          ("x c" . org-timer-set-timer)
          ("x ." . org-timer)
-         ("e"   . org-agenda)
          ("l"   . lower-frame)
          ("L"   . raise-frame)
 
@@ -3057,32 +3059,37 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( :map ctl-m-map ("r" . vertico-repeat) )
   :hook (minibuffer-setup . vertico-repeat-save)
-  :init (vertico-mode +1)
-  :config
-  (use-package vertico-multiform
-    :demand t
-    :bind ( :map vertico-map
-            ("M-i"   . vertico-multiform-vertical)
-            ("M-G"   . vertico-multiform-grid)
-            ("M-B"   . vertico-multiform-buffer)
-            ("<tab>" . vertico-insert) )
-    :custom
-    (vertico-multiform-commands
-     '((consult-imenu buffer)
-       (consult-line buffer)
-       (consult-grep buffer)
-       (consult-grep-dwim buffer)
-       (consult-git-grep buffer)
-       (consult-ripgrep buffer)
-       (consult-yank-pop)
-       (embark-bindings grid)
-       (xref-find-references buffer)))
-    (vertico-multiform-categories
-     '((embark-keybinding grid)
-       (t unobtrusive)))
+  :init (vertico-mode +1))
 
-    :config
-    (vertico-multiform-mode 1)))
+(use-package vertico-multiform
+  :after vertico
+  :bind ( :map vertico-map
+          ("M-i"   . vertico-multiform-vertical)
+          ("M-G"   . vertico-multiform-grid)
+          ("M-B"   . vertico-multiform-buffer)
+          ("<tab>" . vertico-insert) )
+  :custom
+  (vertico-multiform-commands
+   '((consult-imenu buffer)
+     (consult-line buffer)
+     (consult-grep buffer)
+     (consult-grep-dwim buffer)
+     (consult-git-grep buffer)
+     (consult-ripgrep buffer)
+     (xref-find-references buffer)
+
+     (describe-symbol vertical)
+     (describe-variable vertical)
+     (describe-function vertical)
+
+     (consult-yank-pop unobtrusive)
+     (embark-bindings grid)))
+  (vertico-multiform-categories
+   '((embark-keybinding grid)
+     (t unobtrusive)))
+
+  :config
+  (vertico-multiform-mode 1))
 
 (use-package vertico-prescient
   :ensure t
