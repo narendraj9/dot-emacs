@@ -4562,7 +4562,6 @@ buffer."
           ;; ("t p"   . chatgpt-shell-proofread-region)
           ;; ("t s"   . chatgpt-shell-send-and-review-region)
 
-          ("")
           ("t c"   . gptel)
           ("t m"   . gptel-menu)
           ("t g"   . gptel-generate-inline)
