@@ -1400,11 +1400,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           "\\*Async Shell Command\\*"
           help-mode
           compilation-mode))
+  (setq popper-display-function #'popper--display-buffer-on-right)
+
   (popper-mode +1)
   (popper-echo-mode +1)
-
-  :config
-  (setq popper-display-function #'popper--display-buffer-on-right)
 
   :preface
   (defun popper--display-buffer-on-right (buffer alist)
@@ -3248,7 +3247,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 "-data"
                 (expand-file-name (format "%s-%s" (md5 root-directory)
                                           (file-name-base (directory-file-name root-directory )))
-                                  "~/code/jdt-workspace/"))
+                                  "~/code/jdtls-workspace/"))
         (message "Failed to find any JDT jar files.")
         nil))))
 
@@ -3558,8 +3557,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-      :where point
-      :duration 'command)
+                                :where point
+                                :duration 'command)
     ;; Preserve the return value.
     value))
 
