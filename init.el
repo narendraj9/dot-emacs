@@ -1733,10 +1733,16 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun pick--casual-suite ()
     (interactive)
-    (let* ((menus '(("Calendar" . casual-calendar-tmenu)
-                    ("Calc" . casual-calc-tmenu)))
-           (selected-menu (completing-read "Menu:" menus)))
-      (call-interactively (assoc-default selected-menu menus)))))
+    (let* ((transient-menus)
+           (selected-menu))
+      (mapatoms
+       (lambda (symbol)
+         (when (string-match "^casual.*-tmenu$" (symbol-name symbol))
+           (push (cons (symbol-name symbol) symbol)
+                 transient-menus))))
+      (-> (completing-read "Menu:" transient-menus)
+          (assoc-default transient-menus)
+          (call-interactively)))))
 
 ;;; SNIPPETS and ABBREVS
 ;; ――――――――――――――――――――――――――――――――――――――――
@@ -3557,8 +3563,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-                                :where point
-                                :duration 'command)
+      :where point
+      :duration 'command)
     ;; Preserve the return value.
     value))
 
