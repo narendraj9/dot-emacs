@@ -1,4 +1,3 @@
-alias claude bun x @anthropic-ai/claude-code
 alias clear clear-scrollback
 alias sg src search -less=0 -- "context:global $@*"
 alias nu nu -c $@*

@@ -207,7 +207,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("c e" . vicarie/eval-print-last-sexp)
           ("c =" . vicarie/eval-replace-last-sexp)
           ("c r" . rename-file-and-buffer)
-          ("c s" . sourcegraph-search)
 
           ;; ("C-a" . emacspeak-wizards-execute-asynchronously)
           ("M-x" . async-M-x)
@@ -292,7 +291,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         initial-major-mode
         (lambda ()
           (lisp-interaction-mode)
-          (llms-chat-minor-mode +1)
           (setq header-line-format
                 '(:eval
                   (format "Emacs Uptime: %-20s | Sys Time: %-20s | System Load: %-20s"
@@ -1407,10 +1405,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :preface
   (defun popper--display-buffer-on-right (buffer alist)
-    (-> buffer
-        (display-buffer-in-direction (cons (cons 'direction 'right)
-                                           alist))
-        (select-window))))
+    (if (popper-popup-p (window-buffer))
+        ;; Reuse the popper window for displaying another popup.
+        (display-buffer-same-window buffer alist)
+      ;; Create a popper window on the right side.
+      (-> buffer
+          (display-buffer-in-direction (cons (cons 'direction 'right)
+                                             alist))
+          (select-window)))))
 
 (use-package exwm
   :disabled t
@@ -1988,7 +1990,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
   (setq read-process-output-max (* 1024 1024))
 
-  (hook-into-modes #'eglot-ensure
+  (hook-into-modes #'--eglot-ensure
       'clojure-mode 'clojure-ts-mode
       'java-mode 'java-ts-mode
       'rust-mode 'rust-ts-mode
@@ -2019,7 +2021,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               ((java-mode java-ts-mode) . ,#'java-eclipse-jdt-launcher)
                               (elixir-ts-mode           . ,#'elixir-lsp-launcher)
                               (scala-mode               . (,(expand-file-name "bin/metals.sh" user-emacs-directory)))))
-    (add-to-list 'eglot-server-programs lang-server-spec)))
+    (add-to-list 'eglot-server-programs lang-server-spec))
+
+  :preface
+  (defun --eglot-ensure ()
+    (when-let ((project-root (project-current)))
+      (eglot-ensure))))
 
 
 (use-package dape
@@ -2118,7 +2125,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package treesit-fold
   :vc ( :url "https://github.com/emacs-tree-sitter/treesit-fold"
-        :rev :newest ) )
+        :rev :newest )
+  :bind ( :map ctl-m-map ("TAB" . treesit-fold-toggle) )
+  :delight treesit-fold-mode
+  :init
+  (global-treesit-fold-mode +1))
 
 (use-package combobulate
   :vc ( :url "https://github.com/mickeynp/combobulate.git"
@@ -2294,8 +2305,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package xref
   :doc "Find definitions like the coolest kid."
   :ensure t
-  :bind (("M-." . xref-find-definitions)
-         ("M-," . xref-go-back)))
+  :bind ( ("M-." . xref-find-definitions)
+          ("M-," . xref-go-back) )
+  :config
+  (define-key xref--xref-buffer-mode-map (kbd "W") #'delete-other-windows))
 
 (use-package subword
   ;; :hook (prog-mode . subword-mode)
@@ -2399,7 +2412,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                       list list_comprehension
                                       dictionary dictionary_comprehension
                                       parenthesized_expression subscript)))
-  :hook ((python-base-mode yaml-mode) . indent-bars-mode))
+  :hook ((python-base-mode yaml-mode) . indent-bars-mode)
+  :config
+  ;; https://github.com/jdtsmith/indent-bars/blob/main/examples.md#minimal-colorpop
+  (setq indent-bars-color '(highlight :face-bg t :blend 0.15)
+        indent-bars-pattern "."
+        indent-bars-width-frac 0.1
+        indent-bars-pad-frac 0.1
+        indent-bars-zigzag nil
+        indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1) ; blend=1: blend with BG only
+        indent-bars-highlight-current-depth '(:blend 0.5) ; pump up the BG blend on current
+        indent-bars-display-on-blank-lines t))
 
 (use-package track-changes
   :config
@@ -2572,6 +2595,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 
 (use-package yequake
+  :disabled t
   :ensure t
   :demand t
   :custom
@@ -3254,13 +3278,39 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package java-mode
   :defer t
   :hook ( (java-mode . company-mode-quicker) )
-  :config
+  :init
   (cl-defmethod eglot-handle-notification
     (server (_method (eql language/status)) &key type message &allow-other-keys)
     (when (equal type "Started")
       (message "LSP server ready: %s" (eglot-project-nickname server))))
 
+  ;; See:
+  ;; https://github.com/eclipse-jdtls/eclipse.jdt.ls/issues/2322#issuecomment-1423092394
+  (add-to-list 'file-name-handler-alist '("\\`jdt://" . java-eclipse-jdt-file-name-handler))
+  (add-to-list 'recentf-exclude "^/tmp/.eglot/.*")
+
   :preface
+  (defun java-eclipse-jdt-file-name-handler (operation &rest args)
+    "Support Eclipse jdtls `jdt://' uri scheme."
+    (let* ((uri (car args))
+           (cache-dir "/tmp/.eglot")
+           (source-file
+            (expand-file-name
+             (file-name-concat
+              cache-dir
+              (save-match-data
+                (when (string-match "jdt://contents/\\(.*?\\)/\\(.*\\)\.class\\?" uri)
+                  (format "%s.java" (replace-regexp-in-string "/" "." (match-string 2 uri) t t))))))))
+      (unless (file-readable-p source-file)
+        (let ((content (jsonrpc-request (eglot-current-server) :java/classFileContents (list :uri uri)))
+              (metadata-file (format "%s.%s.metadata"
+                                     (file-name-directory source-file)
+                                     (file-name-base source-file))))
+          (unless (file-directory-p cache-dir) (make-directory cache-dir t))
+          (with-temp-file source-file (insert content))
+          (with-temp-file metadata-file (insert uri))))
+      source-file))
+
   (defun java-eclipse-jdt-launcher (_arg)
     "Returns a command to start Eclipse JDT launcher script `jdtls'."
     (let ((launcher-script (expand-file-name "org.eclipse.jdt.ls.product/target/repository/bin/jdtls" "~/code/eclipse.jdt.ls/"))
@@ -3270,7 +3320,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 "-data"
                 (expand-file-name (format "%s-%s" (md5 root-directory)
                                           (file-name-base (directory-file-name root-directory )))
-                                  "~/code/jdtls-workspace/"))
+                                  "~/code/jdtls-workspace/")
+                :initializationOptions '(:extendedClientCapabilities
+                                         (:classFileContentsSupport t)))
         (message "Failed to find any JDT jar files.")
         nil))))
 
@@ -3580,8 +3632,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-      :where point
-      :duration 'command)
+                                :where point
+                                :duration 'command)
     ;; Preserve the return value.
     value))
 
@@ -4551,6 +4603,10 @@ buffer."
 
 (use-package keycast :disabled t :ensure t :defer t)
 
+(use-package sourcegraph
+  :load-path "etc/"
+  :bind ( :map ctl-quote-map ("c s" . sourcegraph-search) ))
+
 (use-package llms
   :load-path "etc/"
   :init
@@ -4570,7 +4626,8 @@ buffer."
           ("p" . gptel--preset)
 
           :map ctl-quote-map
-          ("t t"   . copilot-mode)
+          ("t t" . copilot-mode)
+          ("t a" . launch-claude-code)
 
           ("t RET" . llms-chat)
           ("t w"   . llms-writing-spin-up-companion)

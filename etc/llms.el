@@ -285,7 +285,8 @@ LLM is pending."
 (use-package gptel-quick
   :vc ( :url "https://github.com/karthink/gptel-quick.git"
         :rev :newest )
-  :bind ( :map ctl-quote-map ("t q" . gptel-quick) ))
+  :bind ( :map ctl-quote-map ("t q" . gptel-quick) )
+  :custom (gptel-quick-timeout 60))
 
 (use-package macher
   :vc ( :url "https://github.com/kmontag/macher"

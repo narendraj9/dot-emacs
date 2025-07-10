@@ -1297,30 +1297,6 @@ search keyword."
   (unless (re-search-backward ffap-url-regexp (point-min) t)
     (message "No urls found in this buffer.")))
 
-(define-minor-mode sourcegraph-mode
-  "Minor mode for sourcegraph search results."
-  :lighter " SG"
-  :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "g") 'sourcegraph-search)
-            (define-key map (kbd "q") 'quit-window)
-            map))
-
-(defun sourcegraph-search ()
-  "Simple Sourcegraph search with keymap for quit and refresh."
-  (interactive)
-  (let* ((query (read-string "Search: "))
-         (command (format "COLOR=1 src search -less=0 -- 'context:global %s';"
-                          query))
-         (results (shell-command-to-string command))
-         (inhibit-read-only t))
-    (with-current-buffer (get-buffer-create "*sourcegraph*")
-      (erase-buffer)
-      (insert results)
-      (ansi-color-apply-on-region (point-min) (point-max))
-      (sourcegraph-mode)
-      (display-buffer-full-frame (current-buffer) (list))
-      (goto-char (point-min)))))
-
 (defun macos-fix-keyboard-modifiers ()
   (interactive)
   (let ((usb-devices (->> "ioreg -p IOUSB -l | awk -F'\"' '/\"USB Product Name\"/ {print $4}'"
@@ -1381,6 +1357,17 @@ search keyword."
         (kill-buffer buffer-name)))
 
     result))
+
+
+(defun launch-claude-code ()
+  (interactive)
+  ;; eat provides the best flicker-free experience for highly interactive
+  ;; console applications.
+  (use-package eat :ensure t)
+  (let ((eat-kill-buffer-on-exit t))
+    (with-current-buffer (eat "bunx @anthropic-ai/claude-code && exit 0;")
+      (rename-buffer "*Claude Code*" t)
+      (setq-local cursor-type nil))))
 
 
 (provide 'defs)
