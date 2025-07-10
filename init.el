@@ -3129,6 +3129,23 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (vertico-prescient-mode +1))
 
+(use-package marginalia
+  :ensure t
+  :bind ( :map minibuffer-local-map
+          ("M-A" . marginalia-cycle) )
+  :init
+  (marginalia-mode +1)
+
+  :config
+  ;; Keep built-in annotators of the following categories
+  (let ((categories '(file)))
+    (mapc (lambda (annotator)
+            (when (memq (car annotator) categories)
+              (setcdr annotator
+                      (cons 'builtin    ; pushing 'builtin to the front
+                            (remq 'builtin (cdr annotator))))))
+          marginalia-annotators)))
+
 (use-package embark
   :ensure t
   :bind ( ("C-c x" . embark-act)
