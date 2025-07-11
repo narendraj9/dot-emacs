@@ -128,6 +128,12 @@ LLM is pending."
   (mcp-hub-start-all-server (lambda () :ok)
                             (list "time" "fetch" "memory"))
 
+  :config
+  (when (file-exists-p "~/code/mcp-projects/")
+    (add-to-list 'mcp-hub-servers
+                 '("filesystem" . ( :command "bunx"
+                                    :args ("-y" "@modelcontextprotocol/server-filesystem" "~/code/mcp-projects/") ))))
+
   :custom ( (mcp-hub-servers
              `(
                ;; Anthropic's reference servers
@@ -148,10 +154,6 @@ LLM is pending."
                ("deepwiki" . (:url "https://mcp.deepwiki.com/sse"))
                ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
                ("nixos" . (:command "uvx" :args ("--isolated" "mcp-nixos")))
-
-               ,(when (file-exists-p "~/code/mcp-projects/")
-                  `("filesystem" . ( :command "bunx"
-                                     :args ("-y" "@modelcontextprotocol/server-filesystem" "~/code/mcp-projects/") )))
 
                ("aws-docs" . (:command "uvx" :args ("awslabs.aws-documentation-mcp-server@latest")))
                ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
@@ -201,6 +203,9 @@ LLM is pending."
   (define-key gptel-rewrite-actions-map
               (kbd "C-c C-g")
               #'gptel-generate-inline)
+
+  (gptel-mcp-connect (list "time" "fetch" "memory")
+                     #'gptel-mcp--activate-tools)
 
   :preface
   (defun gptel--clear ()
