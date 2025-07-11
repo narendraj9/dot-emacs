@@ -4074,7 +4074,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package difftastic
   :ensure-system-package ((difft . "difftastic"))
-  :ensure t)
+  :ensure t
+  :after magit
+  :config
+  (define-key magit-mode-map (kbd "C-c d") #'difftastic-magit-show ))
 
 (use-package autorevert
   :delight auto-revert-mode
