@@ -27,6 +27,20 @@
 (require 'gptel)
 (require 'gptel-custom-tools)
 
+(gptel-make-preset 'general
+  :backend "Anthropic"
+  :model 'claude-sonnet-4-0
+  :system 'default
+  :tools '("add_observations" "convert_time" "create_entities"
+           "create_relations" "delete_entities" "delete_observations"
+           "delete_relations" "fetch" "get_current_time" "open_nodes"
+           "read_graph" "search_nodes")
+  :stream t
+  :temperature 1.0
+  :use-context 'system
+  :include-reasoning t
+  :confirm-tool-calls nil)
+
 (gptel-make-preset 'summarize
   :description "Summarize the contents of a web URL."
   :backend "OpenAI"

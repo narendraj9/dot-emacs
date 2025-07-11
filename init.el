@@ -2576,16 +2576,23 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                   input))))
 
 (use-package eat
-  :disabled t
   :ensure t
-  :bind ( ( "s-<return>" . --eat-toggle )
-          ( "M-S-<return>" . --eat-toggle ) )
+  :bind (
+         :map eat-mode-map
+         ("<C-m> h" . --eat-hide-cursor)
+         ;; ( "s-<return>" . --eat-toggle )
+         ;; ( "M-S-<return>" . --eat-toggle )
+         )
 
   :delight eat-eshell-mode
   :custom ( eat-kill-buffer-on-exit t
             eshell-visual-commands (list) )
 
   :preface
+  (defun --eat-hide-cursor ()
+    (interactive)
+    (setq-local cursor-type nil))
+
   (defun --eat-toggle ()
     (interactive)
     (if (eq major-mode 'eat-mode)

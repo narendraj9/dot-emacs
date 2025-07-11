@@ -124,12 +124,18 @@ LLM is pending."
 
 (use-package mcp
   :ensure t
+  :init
+  (mcp-hub-start-all-server (lambda () :ok)
+                            (list "time" "fetch" "memory"))
+
   :custom ( (mcp-hub-servers
              `(
                ;; Anthropic's reference servers
                ("time"  . (:command "uvx" :args ("--isolated" "mcp-server-time" "--local-timezone=Europe/Berlin")))
                ("fetch" . (:command "uvx" :args ("--isolated" "mcp-server-fetch")))
-               ("memory" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-memory")))
+               ("memory" . ( :command "bunx"
+                             :args ("-y" "@modelcontextprotocol/server-memory")
+                             :env ( :MEMORY_FILE_PATH ,(expand-file-name "mcp-memory.json" emacs-assets-directory) )))
                ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
 
                ;; -- Using `mcp-remote' because these require OAuth support
