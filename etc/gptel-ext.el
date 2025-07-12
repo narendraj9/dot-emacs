@@ -28,8 +28,8 @@
 (require 'gptel-custom-tools)
 
 (gptel-make-preset 'general
-  :backend "Anthropic"
-  :model 'claude-sonnet-4-0
+  :backend "OpenAI"
+  :model 'gpt-4.1
   :system 'default
   :tools '("add_observations" "convert_time" "create_entities"
            "create_relations" "delete_entities" "delete_observations"
@@ -44,7 +44,7 @@
 (gptel-make-preset 'summarize
   :description "Summarize the contents of a web URL."
   :backend "OpenAI"
-  :model 'gpt-4o
+  :model 'gpt-4.1
   :system "Summarize the contents of this web URL."
   :tools (list "fetch_url")
   :confirm-tool-calls nil)
@@ -58,13 +58,18 @@
   :confirm-tool-calls nil)
 
 (gptel-make-preset 'brainstorming
-  :description nil :backend "Anthropic" :model 'claude-opus-4-0 :system
-  'programming :tools
+  :description nil
+  :backend "Anthropic"
+  :model 'claude-opus-4-0
+  :system 'programming
+  :tools
   '("fetch" "get-library-docs" "resolve-library-id" "ask_question"
     "read_wiki_contents" "read_wiki_structure" "sequentialthinking"
     "find_functions" "get_function_docstring")
-  :stream t :temperature 1.0 :max-tokens nil :use-context 'system :track-media
-  nil :include-reasoning t)
+  :stream t
+  :include-reasoning t
+  :temperature 1.0
+  :use-context 'system)
 
 
 

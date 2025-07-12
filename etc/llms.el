@@ -75,37 +75,6 @@ LLM is pending."
   (add-hook 'llms-chat-post-response-hook
             #'chatgpt-shell--put-source-block-overlays))
 
-(use-package chatgpt-shell
-  :ensure t
-  :autoload (chatgpt-shell--put-source-block-overlays)
-  :custom
-  (shell-maker-prompt-before-killing-buffer nil)
-  (chatgpt-shell-welcome-function nil)
-  (chatgpt-shell-always-create-new nil)
-  (chatgpt-shell-openai-key (auth-source-pick-first-password :host "api.openai.com"))
-  (chatgpt-shell-system-prompt 2)
-  (chatgpt-shell-model-version "gpt-4.1")
-
-  :init
-  ;; Used by `chatgpt-shell-load-awesome-prompts'
-  (use-package pcsv :ensure t)
-
-  :preface
-  (defun chatgpt-shell--toggle-buffer ()
-    "Bury the buffer (major-mode: chatgpt-shell-mode) if it is in the current
-     window, otherwise create a new one."
-    (interactive)
-    (if (eq major-mode 'chatgpt-shell-mode)
-        (progn (bury-buffer)
-               (delete-window))
-      (chatgpt-shell)))
-
-  :config
-  (add-hook 'chatgpt-shell-mode-hook
-            (lambda ()
-              (make-variable-buffer-local 'kill-buffer-hook)
-              (add-hook 'kill-buffer-hook #'delete-window))))
-
 (use-package copilot
   :defer t
   :vc ( :url "https://github.com/copilot-emacs/copilot.el.git"
@@ -134,41 +103,49 @@ LLM is pending."
                  '("filesystem" . ( :command "bunx"
                                     :args ("-y" "@modelcontextprotocol/server-filesystem" "~/code/mcp-projects/") ))))
 
-  :custom ( (mcp-hub-servers
-             `(
-               ;; Anthropic's reference servers
-               ("time"  . (:command "uvx" :args ("--isolated" "mcp-server-time" "--local-timezone=Europe/Berlin")))
-               ("fetch" . (:command "uvx" :args ("--isolated" "mcp-server-fetch")))
-               ("memory" . ( :command "bunx"
-                             :args ("-y" "@modelcontextprotocol/server-memory")
-                             :env ( :MEMORY_FILE_PATH ,(expand-file-name "mcp-memory.json" emacs-assets-directory) )))
-               ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
-
-               ;; -- Using `mcp-remote' because these require OAuth support
-               ("cloudflare-docs" . (:command "bunx" :args ("mcp-remote" "https://docs.mcp.cloudflare.com/sse")))
-               ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
-               ("cloudflare-dns" . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/sse")))
-               ("cloudflare-radar" . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/sse")))
+  :custom
+  ((mcp-hub-servers
+    `(
+      ;; Anthropic's reference servers
+      ("time"                . (:command "uvx" :args ("--isolated" "mcp-server-time" "--local-timezone=Europe/Berlin")))
+      ("fetch"               . (:command "uvx" :args ("--isolated" "mcp-server-fetch")))
+      ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+      ("memory"              . ( :command "bunx"
+                                 :args ("-y" "@modelcontextprotocol/server-memory")
+                                 :env ( :MEMORY_FILE_PATH ,(expand-file-name "mcp-memory.json" emacs-assets-directory) )))
 
 
-               ("deepwiki" . (:url "https://mcp.deepwiki.com/sse"))
-               ("context7" . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
-               ("nixos" . (:command "uvx" :args ("--isolated" "mcp-nixos")))
+      ;; -- Using `mcp-remote' because these require OAuth support
+      ("cloudflare-docs"    . (:command "bunx" :args ("mcp-remote" "https://docs.mcp.cloudflare.com/sse")))
+      ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
+      ("cloudflare-dns"     . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/sse")))
+      ("cloudflare-radar"   . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/sse")))
 
-               ("aws-docs" . (:command "uvx" :args ("awslabs.aws-documentation-mcp-server@latest")))
-               ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
 
-               ;; -- TBD
-               ;; ("globalping" . (:url "https://mcp.globalping.dev/sse"))
-               ;; ("qdrant" . (:url "http://localhost:8000/sse"))
-               ;; ("graphlit" . (
-               ;;                :command "npx"
-               ;;                :args ("-y" "graphlit-mcp-server")
-               ;;                :env (
-               ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
-               ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
-               ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
-               ))))
+      ("deepwiki"   . (:url "https://mcp.deepwiki.com/sse"))
+      ("context7"   . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
+      ("nixos"      . (:command "uvx" :args ("--isolated" "mcp-nixos")))
+      ("aws-docs"   . (:command "uvx" :args ("awslabs.aws-documentation-mcp-server@latest")))
+      ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
+
+      ;; -- Experimental
+      ;; (dolist (tool gptel-tools)
+      ;;   (unless (gptel-tool-description tool)
+      ;;     (setf (gptel-tool-description tool) (gptel-tool-name tool))))
+      ;; This MCP server adds tools with missing description fields. That
+      ;; doesn't work with most LLM API.
+      ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
+
+
+      ;; ("qdrant" . (:url "http://localhost:8000/sse"))
+      ;; ("graphlit" . (
+      ;;                :command "npx"
+      ;;                :args ("-y" "graphlit-mcp-server")
+      ;;                :env (
+      ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
+      ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
+      ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
+      ))))
 
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
@@ -283,7 +260,7 @@ LLM is pending."
         :rev :newest )
   :after (gptel)
   :demand t
-  :custom (gptel-prompts-directory "~/code/prompts")
+  :custom (gptel-prompts-directory (expand-file-name "prompts" emacs-assets-directory))
   :init
   (use-package templatel :ensure t)
 

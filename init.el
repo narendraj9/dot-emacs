@@ -66,6 +66,9 @@
 (use-package use-package-ensure-system-package)
 (use-package system-packages :ensure t)
 
+(use-package package-vc
+  :custom (package-vc-allow-build-commands t))
+
 (use-package delight :ensure t :demand t)
 (use-package bind-key :ensure t)
 
@@ -2939,11 +2942,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (use-package org-ql :ensure t :defer t))
 
-
 (use-package xeft
   :after org-config
   :ensure t
   :bind ("M-s x" . xeft)
+  :ensure-system-package (("/usr/include/xapian.h" . xapian-core))
+  :custom ( xeft-directory (expand-file-name "notes/" org-directory)
+            xeft-default-extension "org"
+            xeft-recursive t
+            xeft-database (expand-file-name "xeft.db" emacs-assets-directory)
+            xeft-file-filter (lambda (file-path)
+                               (string-equal "org" (file-name-extension file-path))))
   :custom-face
   ;; Thanks to @jwiegley:
   (xeft-excerpt-body
@@ -2951,18 +2960,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (xeft-excerpt-title
    ((t (:inherit (bold underline) :foreground "sky blue"))))
   (xeft-inline-highlight
-   ((t (:inherit underline :extend t :foreground "DarkOliveGreen2"))))
-
-  :init
-  (setq xeft-directory (expand-file-name "notes/" org-directory)
-        xeft-default-extension "org"
-        xeft-recursive t
-        xeft-database (expand-file-name "xeft.db" emacs-assets-directory)
-        xeft-file-filter
-        (lambda (file-path)
-          (string-equal "org" (file-name-extension file-path)))))
-
-
+   ((t (:inherit underline :extend t :foreground "DarkOliveGreen2")))))
 
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
@@ -4351,11 +4349,6 @@ buffer."
   (setd pdf-view-restore-filename "var/pdf-view-restore.el")
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
 
-(use-package nov
-  :ensure t
-  :defer t
-  :mode ("\\.epub\\'" . nov-mode))
-
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package erc-config :commands erc-start! :load-path "etc/" :defer t)
@@ -4642,14 +4635,6 @@ buffer."
           ("t RET" . llms-chat)
           ("t w"   . llms-writing-spin-up-companion)
           ("t W"   . llms-writing-shutdown)
-
-
-          ;; ("t C"   . chatgpt-shell)
-          ;; ("t d"   . chatgpt-shell-describe-code)
-          ;; ("t e"   . chatgpt-shell-explain-code)
-          ;; ("t i"   . chatgpt-shell-interrupt)
-          ;; ("t p"   . chatgpt-shell-proofread-region)
-          ;; ("t s"   . chatgpt-shell-send-and-review-region)
 
           ("t c"   . gptel)
           ("t m"   . gptel-menu)
