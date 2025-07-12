@@ -678,10 +678,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom (xwidget-webkit-cookie-file
            (expand-file-name "webkit-cookies.txt" emacs-assets-directory))
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\*xwidget-webkit:" display-buffer-in-direction
-                 (direction . right)
-                 (window-width . 0.5))))
+  (ensure-windows-on-right "\\*xwidget-webkit:"))
 
 (use-package eww
   :defer t
@@ -1332,26 +1329,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; (advice-add #'scroll-up-command :before #'highlight-context-lines-before-scroll)
 
   (dolist (display-spec
-           '( ("\\`\\*e?shell" display-buffer-at-bottom)
-              ("\\*vterm\\*" display-buffer-at-bottom)
-              ("\\*Calendar\\*" display-buffer-at-bottom)
-              ("\\*Async Shell Command\\*" display-buffer-no-window)
-              ("\\`\\*Flycheck errors\\*\\'" (display-buffer-reuse-window
-                                              display-buffer-in-side-window)
-               (side            . bottom)
-               (reusable-frames . visible)
-               (window-height   . 10))) )
+           '(("\\*Async Shell Command\\*" display-buffer-no-window)
+             ("\\`\\*Flycheck errors\\*\\'" (display-buffer-reuse-window
+                                             display-buffer-in-side-window)
+              (side            . bottom)
+              (reusable-frames . visible)
+              (window-height   . 10))) )
     (add-to-list 'display-buffer-alist display-spec))
 
-  (dolist (buffer-regex '("\\` ?\\*eldoc\\*\\'"
-                          "\\` ?\\*Dictionary\\*\\'"
-                          "\\`magit: .*\\'"
-                          "\\`\\*cider-doc\\*\\'"))
-    (add-to-list 'display-buffer-alist
-                 `(,buffer-regex display-buffer-in-direction
-                                 (window . main)
-                                 (direction . right)
-                                 (window-width . 0.5))))
+  (ensure-windows-at-bottom "\\`\\*e?shell" "\\*vterm\\*" "\\*Calendar\\*")
+  (ensure-windows-on-right "\\` ?\\*eldoc\\*\\'" "\\` ?\\*Dictionary\\*\\'"
+                           "\\`magit: .*\\'" "\\`\\*cider-doc\\*\\'")
 
   :preface
   (defun highlight-context-lines-before-scroll (&rest _args)
@@ -1555,11 +1543,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind ( :map ctl-quote-map ("w" . wiki-summary) )
   :ensure t
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\*wiki" display-buffer-in-direction
-                 (window . main)
-                 (direction . right)
-                 (window-width . 0.5))))
+  (ensure-windows-on-right "\\*wiki"))
 
 (use-package flyspell
   :delight flyspell-mode
@@ -2187,11 +2171,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq compilation-scroll-output t
         compilation-always-kill t)
 
-  (add-to-list 'display-buffer-alist
-               '("\\*compilation\\*" display-buffer-in-direction
-                 (window . main)
-                 (direction . right)
-                 (window-width . 0.5)))
+  (ensure-windows-on-right "\\*compilation\\*")
 
   ;; Switch to compilation buffer after starting compilation
   ;; (add-hook 'compilation-start-hook
@@ -3456,11 +3436,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         python-indent-offset 4)
 
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\*Python\\*" display-buffer-in-direction
-                 (window . main)
-                 (direction . right)
-                 (window-width . 0.5))))
+  (ensure-windows-on-right "\\*Python\\*"))
 
 (use-package flymake-ruff
   :ensure t
@@ -3826,11 +3802,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         alchemist-goto-elixir-source-dir (expand-file-name "~/code/elixir/")
         alchemist-goto-erlang-source-dir (expand-file-name "~/code/otp/"))
 
-  (add-to-list 'display-buffer-alist
-               '("\\*alchemist-eval-mode\\*" display-buffer-in-direction
-                 (window . main)
-                 (direction . right)
-                 (window-width . 0.5)))
+  (ensure-windows-on-right "\\*alchemist-eval-mode\\*")
 
   (add-hook 'alchemist-help-minor-mode-hook
             (lambda ()
@@ -3920,11 +3892,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind ( :map ruby-mode-map ("C-c y" . yari)
           :map ruby-ts-mode-map ("C-c y" . yari) )
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\*yari " display-buffer-in-direction
-                 (window . main)
-                 (direction . right)
-                 (window-width . 0.5))))
+  (ensure-windows-on-right "\\*yari "))
 
 (use-package inf-ruby
   :after ruby-mode
@@ -4395,10 +4363,7 @@ buffer."
   :ensure t
   :bind ( :map ctl-h-x-map ("d" . devdocs-lookup) )
   :config
-  (add-to-list 'display-buffer-alist
-               '("\\*devdocs\\*\\'" display-buffer-in-direction
-                 (direction . right)
-                 (window-width . 0.5))))
+  (ensure-windows-on-right "\\*devdocs\\*\\'"))
 
 (use-package highlight :ensure t :defer t)
 (use-package tldr
@@ -4642,13 +4607,8 @@ buffer."
           ("t r"   . gptel-rewrite) )
 
   :config
-  (dolist (buffer-name-pattern (list "\\*chatgpt .*\\*"
-                                     "\\*Anthropic\\*"))
-    (add-to-list 'display-buffer-alist
-                 `(,buffer-name-pattern display-buffer-in-direction
-                                        (window . main)
-                                        (direction . right)
-                                        (window-width . 0.5))))
+  (ensure-windows-on-right "\\*chatgpt .*\\*" "\\*Anthropic\\*")
+
   ;; --- macOS issues:
   (when (eq system-type 'darwin)
     (setq llms-chat-show-in-progress-indicator nil)))

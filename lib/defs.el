@@ -84,6 +84,19 @@
       (other-window -1)
     (other-window +1)))
 
+(defun ensure-windows-on-right (buffer-name-regexp &rest buffer-name-regexps)
+  (dolist (buffer-name-pattern (cons buffer-name-regexp buffer-name-regexps))
+    (add-to-list 'display-buffer-alist
+                 `(,buffer-name-pattern display-buffer-in-direction
+                                        (window . main)
+                                        (direction . right)
+                                        (window-width . 0.5)))))
+
+(defun ensure-windows-at-bottom (buffer-name-regexp &rest buffer-name-regexps)
+  (dolist (buffer-name-pattern (cons buffer-name-regexp buffer-name-regexps))
+    (add-to-list 'display-buffer-alist
+                 `(,buffer-name-pattern display-buffer-at-bottom))))
+
 (defun center-text-for-reading (&optional arg)
   "Setup margins for reading long texts.
 If ARG is supplied, reset margins and fringes to zero."
