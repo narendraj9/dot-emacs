@@ -1378,6 +1378,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (define-key winner-repeat-map "<" #'winner-undo))
 
 (use-package popper
+  :disabled t
   :ensure t
   :bind (("C-`"   . popper-toggle)
          ("M-`"   . popper-cycle)
@@ -1388,6 +1389,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           "Output\\*$"
           "\\*Async Shell Command\\*"
           help-mode
+          magit-status-mode
           compilation-mode))
   (setq popper-display-function #'popper--display-buffer-on-right)
 
@@ -3198,18 +3200,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     ("r"     . consult-ripgrep) )
 
   :preface
-  (defun consult-grep-dwim ()
-    (interactive)
+  (defun consult-grep-dwim (&optional directory initial)
+    (interactive "P")
     (require 'vc)
-    (let ((directory (project-root (project-current)))
-          (initial (when (region-active-p)
-                     (buffer-substring (region-beginning) (region-end)))))
-      (cond
-       ((eq 'Git (vc-deduce-backend))
-        (consult-git-grep directory initial))
-
-       (t
-        (consult-grep directory initial)))))
+    (if (eq 'Git (vc-deduce-backend))
+        (call-interactively #'consult-git-grep)
+      (call-interactively #'consult-grep)))
 
   (defun jump-to-notes-this-week! ()
     (interactive)
@@ -3262,7 +3258,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package java-mode
   :defer t
-  :hook ( (java-mode . company-mode-quicker) )
+  :hook ( (java-mode . company-mode-quicker)
+          (java-ts-mode . company-mode-quicker) )
   :init
   (cl-defmethod eglot-handle-notification
     (server (_method (eql language/status)) &key type message &allow-other-keys)
@@ -4061,10 +4058,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :config
   (add-to-list 'git-link-remote-alist
-               '("\\.gitlab.*\\.io" git-link-gitlab))
-  (add-to-list 'git-link-web-host-alist
-               ;; TBD
-               '("ssh\\.gitlab.*.io" . "gitlab..com")))
+               '("\\.gitlab.*\\.io" git-link-gitlab)))
 
 (use-package magit
   :ensure t

@@ -61,6 +61,24 @@
             (goto-line 5)))
       (message "No valid Sourcegraph URL found at point"))))
 
+(defun sourcegraph-browse-repo-mrs ()
+  "Search for a repo via Sourcegraph CLI and browse to its merge requests page."
+  (interactive)
+  (let* ((query (read-string "Repository search query: "))
+         (author (if (boundp 'my/user-full-name)
+                     my/user-full-name
+                   (read-string "Author filter (optional): " (user-full-name))))
+         (command (format "src repos list -query='%s' -first=10" query))
+         (command-output (shell-command-to-string command)))
+    (if (string-empty-p (string-trim command-output))
+        (message "No repositories found")
+      (let* ((repos (split-string command-output))
+             (selected-repo (if (< 1 (length repos))
+                                (completing-read "Select repository: " repos)
+                              (car repos)))
+             (mr-url (format "https://%s/-/merge_requests?author_username=%s" selected-repo author)))
+        (browse-url mr-url)))))
+
 (defun sourcegraph-parse-url (url)
   "Parse a Sourcegraph URL and extract repository, branch, and file path."
   (when (and url (string-match "https://[^/]+/\\(.+?\\)\\(@\\([^/]+\\)\\)?/-/blob/\\(.+\\)" url))

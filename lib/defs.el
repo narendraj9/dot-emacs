@@ -1377,7 +1377,8 @@ search keyword."
   ;; eat provides the best flicker-free experience for highly interactive
   ;; console applications.
   (use-package eat :ensure t)
-  (let ((eat-kill-buffer-on-exit t))
+  (let ((eat-kill-buffer-on-exit t)
+        (default-directory (project-root (project-current))))
     (with-current-buffer (eat "bunx @anthropic-ai/claude-code && exit 0;")
       (rename-buffer "*Claude Code*" t)
       (setq-local cursor-type nil))))
