@@ -258,7 +258,6 @@ LLM is pending."
 (use-package gptel-prompts
   :vc ( :url "https://github.com/jwiegley/gptel-prompts.git"
         :rev :newest )
-  :after (gptel)
   :demand t
   :custom (gptel-prompts-directory (expand-file-name "prompts" emacs-assets-directory))
   :init

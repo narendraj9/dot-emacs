@@ -199,7 +199,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           :map ctl-m-map
           ("t" . switch-to-scratch-new-tab)
           ("o" . run-in-other-window)
-          ("s" . swap-ctrl-right-win)
           ("S" . macos-fix-keyboard-modifiers)
 
           :map ctl-quote-map
@@ -2520,12 +2519,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (require 'em-hist)
   (setq eshell-modules-list
         '( eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs
-           eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt
-           eshell-script eshell-term eshell-tramp eshell-unix eshell-xtra
-           eshell-elecslash
+           eshell-extpipe eshell-glob eshell-hist eshell-ls eshell-pred
+           eshell-prompt eshell-script eshell-term eshell-tramp
+           eshell-unix eshell-xtra eshell-elecslash
            ;; Earlier disabled because it's hard to get used to it.
            ;;          See: (info "(eshell) Smart scrolling")
-           eshell-smart
+           ;; eshell-smart
            ))
 
   (setq eshell-prompt-regexp "([^#$]*) [#$] "
@@ -4567,7 +4566,7 @@ buffer."
 
 (use-package sourcegraph
   :load-path "etc/"
-  :bind ( :map ctl-quote-map ("c s" . sourcegraph-search) ))
+  :bind-keymap ("<C-m> s" . sourcegraph-mode-map ))
 
 (use-package llms
   :load-path "etc/"
