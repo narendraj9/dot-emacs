@@ -178,7 +178,7 @@ LLM is pending."
               (kbd "C-c C-g")
               #'gptel-generate-inline)
 
-  (gptel-mcp-connect (list "time" "fetch" "memory")
+  (gptel-mcp-connect (list "time" "fetch" "memory" "sequential-thinking")
                      #'gptel-mcp--activate-tools)
 
   :preface

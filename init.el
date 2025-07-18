@@ -4599,6 +4599,7 @@ buffer."
           ("i W"   . llms-writing-shutdown)
 
           ("i c"   . gptel)
+          ("i z"   . gptel-buffer-toggle)
           ("i m"   . gptel-menu)
           ("i g"   . gptel-generate-inline)
           ("i r"   . gptel-rewrite) )
