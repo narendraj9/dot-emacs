@@ -181,7 +181,7 @@
    ((app/font-availablep "Noto Serif Medium")
     (set-face-attribute 'variable-pitch nil
                         :family "Noto Serif Medium"
-                        :height 1.2
+                        :height 1.0
                         :weight 'medium))
 
    ((app/font-availablep "Symbola")
@@ -191,7 +191,7 @@
     ;; with hooks.
     (set-face-attribute 'variable-pitch nil
                         :family "Symbola"
-                        :height 1.6
+                        :height 1.0
                         :weight 'normal))))
 
 ;;;###autoload

@@ -193,12 +193,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-c b" . switch-to-buffer-with-mode)
           ("<print>" . snap-it)
 
-          ("M-g S" . switch-to-scratch-new-tab)
+          ("M-g s" . switch-to-scratch-new-tab)
           ("M-g f" . jump-to-next-url)
           ("M-g b" . jump-to-previous-url)
 
           :map ctl-m-map
-          ("t" . switch-to-scratch-new-tab)
           ("o" . run-in-other-window)
           ("S" . macos-fix-keyboard-modifiers)
 
@@ -608,21 +607,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ──────────────────────────────────────────────────────────────────
 
 (use-package tab-bar
-  :bind ( :map tab-prefix-map
-          ("s" . tab-bar-new-scratch*)
-          ("S" . tab-switcher) )
   :doc
   "This built-in package provides a way to keep a set of window
    configurations around that can be switched to easily."
   :config
   (tab-bar-history-mode +1)
   (setq tab-bar-show nil
-        tab-bar-tab-name-function #'tab-bar-tab-name-all)
-  :preface
-  (defun tab-bar-new-scratch* ()
-    (interactive)
-    (tab-new)
-    (switch-to-buffer "*scratch*")))
+        tab-bar-tab-name-function #'tab-bar-tab-name-all))
 
 (use-package calendar
   :defer t
@@ -1202,14 +1193,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
            (seq-filter #'s-present?)
            (completing-read "Find File: ")
            (find-file)))))
-
-(use-package project-x
-  :disabled t
-  :load-path "etc/"
-  :after project
-  :custom (project-x-local-identifier ".project-x")
-  :config
-  (add-hook 'project-find-functions 'project-x-try-local -100))
 
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
@@ -2034,8 +2017,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package treesit
   :defer t
   :when (treesit-available-p)
-  :bind ( :map ctl-period-map
-          ("C-M-u" . --treesit-backward-up) )
+  :bind (("M-g u" . --treesit-backward-up) )
   :doc
   "[2023-02-08 Wed 22:48] Tree-sitter support is now built into Emacs.
    The directory where shared libraries for language grammars are
@@ -2056,7 +2038,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (add-to-list 'major-mode-remap-alist mode-remap-entry))
 
   (define-repeat-map repeat/treesit-backward-up
-    ("C-M-u" . --treesit-backward-up))
+    ("u" . --treesit-backward-up))
 
   :config
   (dolist (grammar '((lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
@@ -2097,7 +2079,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (delete-overlay --treesit-highlight-overlay)
     (remove-hook 'pre-command-hook #'--treesit-remove-overlay-hook))
 
-  (defun --treesit-backward-up ()
+  (defun --treesit-backward-up (&optional highlight)
     "Inspired by `paredit-backward-up'."
     (interactive)
     (letrec ((original-point (point))
@@ -2130,7 +2112,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package combobulate
   :vc ( :url "https://github.com/mickeynp/combobulate.git"
-        :rev :newest ))
+        :rev :newest )
+  :bind ("M-g d" . combobulate))
 
 (use-package ts-movement
   :vc ( :url "https://github.com/haritkapadia/ts-movement.git"
@@ -4034,6 +4017,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :hook ( jsonnet-mode . eglot-ensure )
   :config
   (add-to-list 'eglot-server-programs
+               ;; https://github.com/grafana/jsonnet-language-server
                '(jsonnet-mode . ("jsonnet-language-server"))))
 
 

@@ -93,11 +93,8 @@ LLM is pending."
 
 (use-package mcp
   :ensure t
-  :init
-  (mcp-hub-start-all-server (lambda () :ok)
-                            (list "time" "fetch" "memory"))
-
   :config
+  (require 'mcp-hub)
   (when (file-exists-p "~/code/mcp-projects/")
     (add-to-list 'mcp-hub-servers
                  '("filesystem" . ( :command "bunx"
@@ -300,8 +297,7 @@ LLM is pending."
   :preface
   (defun claude-code* ()
     (interactive)
-    (let ((eat-kill-buffer-on-exit t))
-      (claude-code '(4)))))
+    (claude-code '(4))))
 
 (use-package aidermacs
   :ensure t
