@@ -2025,40 +2025,48 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    `user-emacs-directory'."
 
   :init
-  (dolist (mode-remap-entry '((rust-mode   . rust-ts-mode)
-                              (go-mode     . go-ts-mode)
-                              (c-mode      . c-ts-mode)
-                              (c++-mode    . c++-ts-mode)
-                              (python-mode . python-ts-mode)
-                              (ruby-mode   . ruby-ts-mode)
-                              (java-mode   . java-ts-mode)
-                              (js-mode     . js-ts-mode)
-                              (lua-mode    . lua-ts-mode)
-                              (elixir-mode . elixir-ts-mode)))
-    (add-to-list 'major-mode-remap-alist mode-remap-entry))
+  (dolist (lang '( bash c c++ css elixir go html java js json lua markdown
+                   python ruby rust scala typescript ))
+    (add-to-list 'major-mode-remap-alist
+                 (cons (intern (format "%s-mode" lang))
+                       (intern (format "%s-ts-mode" lang)))))
 
   (define-repeat-map repeat/treesit-backward-up
     ("u" . --treesit-backward-up))
 
   :config
-  (dolist (grammar '((lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-                     (bash "https://github.com/tree-sitter/tree-sitter-bash")
-                     (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-                     (css "https://github.com/tree-sitter/tree-sitter-css")
-                     (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main")
-                     (go "https://github.com/tree-sitter/tree-sitter-go")
-                     (heex "https://github.com/phoenixframework/tree-sitter-heex" "main")
-                     (java "https://github.com/tree-sitter/tree-sitter-java")
-                     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-                     (python "https://github.com/tree-sitter/tree-sitter-python")
-                     (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-                     (rust "https://github.com/tree-sitter/tree-sitter-rust")
-                     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-                     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-                     (yaml "https://github.com/ikatyang/tree-sitter-yaml")
-                     (c "https://github.com/tree-sitter/tree-sitter-c")))
-    (add-to-list 'treesit-language-source-alist grammar)
-    (install-tree-sitter-grammer-if-required (car grammar) t))
+  ;; Official grammar implementations
+  (dolist (source
+           '( (bash "tree-sitter-bash")
+              (c "tree-sitter-c")
+              (cpp "tree-sitter-cpp")
+              (css "tree-sitter-css")
+              (go "tree-sitter-go")
+              (html "tree-sitter-html")
+              (java "tree-sitter-java")
+              (javascript "tree-sitter-javascript" "master" "src")
+              (python "tree-sitter-python")
+              (ruby "tree-sitter-ruby")
+              (rust "tree-sitter-rust")
+              (scala "tree-sitter-scala")
+              (tsx "tree-sitter-typescript" "master" "tsx/src")
+              (typescript "tree-sitter-typescript" "master" "typescript/src")))
+    (setf (cadr source)
+          (concat "https://github.com/tree-sitter/%s" (cadr source)))
+    (add-to-list 'treesit-language-source-alist source))
+
+  ;; Community maintained grammar implementations
+  (dolist (source
+           '((heex "https://github.com/phoenixframework/tree-sitter-heex" "main")
+             (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main")
+             (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+             (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
+             (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown")
+             (hcl "https://github.com/tree-sitter-grammars/tree-sitter-hcl")))
+    (add-to-list 'treesit-language-source-alist source))
+
+  (dolist (source treesit-language-source-alist)
+    (install-tree-sitter-grammer-if-required (car source)))
 
   :preface
   (defun install-tree-sitter-grammer-if-required (language &optional quiet)
