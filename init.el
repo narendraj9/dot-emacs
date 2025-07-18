@@ -142,14 +142,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq repeat-exit-timeout 30)
 
   :preface
-  (defmacro define-repeat-map (&rest bindings)
+  (defmacro define-repeat-map (name &rest bindings)
     ;; TODO: add a keyword argument to provide a name for the keymap instead of
     ;; the auto-generated name.
-    (declare (indent 0))
+    (declare (indent 1))
     ;; Use gensym just for the name of the symbol, let the generated
     ;; symbol be garbage collected. `intern' then creates a new symbol
     ;; that is used and remains valid globally.
-    (let ((keymap-symbol (intern (symbol-name (gensym "repeat-map--")))))
+    (let ((keymap-symbol (or name (intern (symbol-name (gensym "repeat-map--"))))))
       `(let* ((m (make-sparse-keymap)))
          (dolist (binding (quote ,bindings))
            (define-key m (kbd (car binding)) (cdr binding))
@@ -184,8 +184,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (bind-keys* :prefix "C-h x" :prefix-map ctl-h-x-map)
 
   :config
-  (define-repeat-map ("f" . jump-to-next-url)
-                     ("b" . jump-to-previous-url))
+  (define-repeat-map repeat/url-navigation
+    ("f" . jump-to-next-url)
+    ("b" . jump-to-previous-url))
 
   :bind ( ("C-c m" . switch-to-minibuffer)
           ("C-c 0" . quick-switch-themes)
@@ -887,7 +888,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (shell-command (buffer-substring-no-properties beg end)))
 
   :config
-  (define-repeat-map ("C-u" . delete-indentation))
+  (define-repeat-map repeat/deletion
+    ("C-u" . delete-indentation))
 
   ;; Multiple-cursors changes transient-mark-mode to (only only .. t),
   ;; if shift-select-mode is enabled.
@@ -1064,7 +1066,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( :map ctl-x-map ("C-SPC" . goto-last-change) )
   :init
-  (define-repeat-map ("C-SPC" .  goto-last-change)))
+  (define-repeat-map repeat/goto
+    ("C-SPC" .  goto-last-change)))
 
 (use-package goto-line-preview
   :ensure t
@@ -1184,7 +1187,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               ))
 
   :config
-  (autoload #'magit-status "magit" nil t)
+  (autoload #'magit-project-status "magit-extras" nil t)
+
+  :config
+  (add-to-list 'project-switch-commands
+               '(magit-project-status "Magit Status" ?m))
 
   :preface
   (defun git-ls-files-find-file ()
@@ -1265,10 +1272,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (put '--scroll-down-other-window 'repeat-exit-timeout 4)
   (put '--scroll-up-other-window 'repeat-exit-timeout 4)
 
-  (define-repeat-map ("J" . --scroll-up-other-window)
-                     ("K" . --scroll-down-other-window)
-                     ("j" . pixel-scroll-up)
-                     ("k" . pixel-scroll-down))
+  (define-repeat-map repeat/scroll-window
+    ("J" . --scroll-up-other-window)
+    ("K" . --scroll-down-other-window)
+    ("j" . pixel-scroll-up)
+    ("k" . pixel-scroll-down))
 
   :preface
   (defun --scroll-down-other-window ()
@@ -1423,7 +1431,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( :map goto-map ("TAB" . mwim) )
   :init
-  (define-repeat-map ("TAB" . mwim)))
+  (define-repeat-map repeat/mwim
+    ("TAB" . mwim)))
 
 (use-package isearch
   :doc "Search for the string in the active region, if there is any."
@@ -1605,9 +1614,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package company
   :ensure t
-  :bind ( :map ctl-m-map
-          (("i"   . company-complete)
-           ("C-c" . company-complete)) )
+  :bind ( :map ctl-m-map ("C-c" . company-complete) )
   :hook (after-init . global-company-mode)
   :delight company-mode
   :config
@@ -1677,7 +1684,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         dired-hide-details-hide-information-lines nil)
 
   :config
-  (define-repeat-map ("u" . dired-up-directory))
+  (define-repeat-map repeat/dired-up-directory
+    ("u" . dired-up-directory))
 
   (setq dired-auto-revert-buffer t)
 
@@ -2047,7 +2055,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                               (elixir-mode . elixir-ts-mode)))
     (add-to-list 'major-mode-remap-alist mode-remap-entry))
 
-  (define-repeat-map ("C-M-u" . --treesit-backward-up))
+  (define-repeat-map repeat/treesit-backward-up
+    ("C-M-u" . --treesit-backward-up))
 
   :config
   (dolist (grammar '((lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
@@ -2325,9 +2334,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :config
   (require 'popup)
-  (define-repeat-map ("<" . scan-buf-previous-region)
-                     (">" . scan-buf-next-region)
-                     ("." . display-help-at-pt-dwim))
+  (define-repeat-map repeat/help-at-pt
+    ("<" . scan-buf-previous-region)
+    (">" . scan-buf-next-region)
+    ("." . display-help-at-pt-dwim))
 
   :preface
   (defun display-help-at-pt-dwim (&optional prefix)
@@ -3324,7 +3334,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package gradle-mode
   :doc "Gradle integration in Emacs."
   :ensure t
-  :hook (java-mode . gradle-mode)
+  :hook ((java-mode . gradle-mode)
+         (java-ts-mode . gradle-mode))
   :delight gradle-mode
   :config
   (setq gradle-use-gradlew t
@@ -4582,25 +4593,31 @@ buffer."
          (require 'llms-images))))
 
   :bind ( :map ctl-m-map
-          ([C-m] . gptel-send)
-          ("c" . gptel-buffer-toggle)
-          ("p" . gptel--preset)
-
-          :map ctl-quote-map
-          ("t t" . copilot-mode)
-          ("t a" . launch-claude-code)
-
-          ("t RET" . llms-chat)
-          ("t w"   . llms-writing-spin-up-companion)
-          ("t W"   . llms-writing-shutdown)
-
-          ("t c"   . gptel)
-          ("t m"   . gptel-menu)
-          ("t g"   . gptel-generate-inline)
-          ("t r"   . gptel-rewrite) )
+          ("i RET" . gptel-send)
+          ("i t" . copilot-mode)
+          ("i a" . launch-claude-code)
+          ("i b" . llms-chat)
+          ("i w"   . llms-writing-spin-up-companion)
+          ("i W"   . llms-writing-shutdown)
+          ("i c"   . gptel)
+          ("i m"   . gptel-menu)
+          ("i g"   . gptel-generate-inline)
+          ("i r"   . gptel-rewrite) )
 
   :config
   (ensure-windows-on-right "\\*chatgpt .*\\*" "\\*Anthropic\\*")
+
+  ;; (define-repeat-map repeat/llms
+  ;;   ("RET" . gptel-send)
+  ;;   ("t" . copilot-mode)
+  ;;   ("a" . launch-claude-code)
+  ;;   ("b" . llms-chat)
+  ;;   ("w"   . llms-writing-spin-up-companion)
+  ;;   ("W"   . llms-writing-shutdown)
+  ;;   ("c"   . gptel)
+  ;;   ("m"   . gptel-menu)
+  ;;   ("g"   . gptel-generate-inline)
+  ;;   ("r"   . gptel-rewrite))
 
   ;; --- macOS issues:
   (when (eq system-type 'darwin)
