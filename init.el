@@ -4029,7 +4029,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package ansible :ensure t :defer t)
 
-(use-package jsonnet-mode :ensure t)
+(use-package jsonnet-mode
+  :ensure t
+  :hook ( jsonnet-mode . eglot-ensure )
+  :config
+  (add-to-list 'eglot-server-programs
+               '(jsonnet-mode . ("jsonnet-language-server"))))
 
 
 ;;; Version Control
@@ -4594,11 +4599,13 @@ buffer."
 
   :bind ( :map ctl-m-map
           ("i RET" . gptel-send)
-          ("i t" . copilot-mode)
-          ("i a" . launch-claude-code)
-          ("i b" . llms-chat)
+          ("i t"   . copilot-mode)
+          ("i a"   . claude-code*)
+
+          ("i b"   . llms-chat)
           ("i w"   . llms-writing-spin-up-companion)
           ("i W"   . llms-writing-shutdown)
+
           ("i c"   . gptel)
           ("i m"   . gptel-menu)
           ("i g"   . gptel-generate-inline)
@@ -4606,18 +4613,6 @@ buffer."
 
   :config
   (ensure-windows-on-right "\\*chatgpt .*\\*" "\\*Anthropic\\*")
-
-  ;; (define-repeat-map repeat/llms
-  ;;   ("RET" . gptel-send)
-  ;;   ("t" . copilot-mode)
-  ;;   ("a" . launch-claude-code)
-  ;;   ("b" . llms-chat)
-  ;;   ("w"   . llms-writing-spin-up-companion)
-  ;;   ("W"   . llms-writing-shutdown)
-  ;;   ("c"   . gptel)
-  ;;   ("m"   . gptel-menu)
-  ;;   ("g"   . gptel-generate-inline)
-  ;;   ("r"   . gptel-rewrite))
 
   ;; --- macOS issues:
   (when (eq system-type 'darwin)
