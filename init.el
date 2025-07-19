@@ -1987,9 +1987,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       'terraform-mode
       'lua-ts-mode)
 
-  (if (executable-find "harper-ls")
-      (hook-into-modes #'--eglot-ensure 'markdown-mode 'text-mode 'org-mode)
-    (message "harper-ls isn't installed on system."))
+  ;; (if (executable-find "harper-ls")
+  ;;     (hook-into-modes #'--eglot-ensure 'markdown-mode 'text-mode 'org-mode)
+  ;;   (message "harper-ls isn't installed on system."))
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
