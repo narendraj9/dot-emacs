@@ -1987,23 +1987,27 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       'terraform-mode
       'lua-ts-mode)
 
+  (if (executable-find "harper-ls")
+      (hook-into-modes #'--eglot-ensure 'markdown-mode 'text-mode 'org-mode)
+    (message "harper-ls isn't installed on system."))
+
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
   ;; separately in a hook.
   (setq eglot-stay-out-of '(eldoc-documentation-strategy))
-
   (setq eglot-inlay-hints-mode nil)
-
-  :config
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
 
-  (dolist (lang-server-spec `(((rust-mode rust-ts-mode) . ("rustup" "run" "stable" "rust-analyzer"))
-                              ((c-mode c++-mode)        . ("clangd"))
-                              ((ruby-mode ruby-ts-mode) . ("bundle" "exec" "solargraph" "stdio"))
-                              ((java-mode java-ts-mode) . ,#'java-eclipse-jdt-launcher)
-                              (elixir-ts-mode           . ,#'elixir-lsp-launcher)
-                              (scala-mode               . (,(expand-file-name "bin/metals.sh" user-emacs-directory)))))
+  :config
+  (dolist (lang-server-spec
+           `(((c-mode c++-mode)        . ("clangd"))
+             ((ruby-mode ruby-ts-mode) . ("bundle" "exec" "solargraph" "stdio"))
+             ((rust-mode rust-ts-mode) . ("rustup" "run" "stable" "rust-analyzer"))
+             ((text-mode markdown-mode org-mode) . ("harper-ls" "--stdio"))
+             (scala-mode               . (,(expand-file-name "bin/metals.sh" user-emacs-directory)))
+             ((java-mode java-ts-mode) . ,#'java-eclipse-jdt-launcher)
+             (elixir-ts-mode           . ,#'elixir-lsp-launcher)))
     (add-to-list 'eglot-server-programs lang-server-spec))
 
   :preface
@@ -4585,7 +4589,7 @@ buffer."
   :init
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
-  (dolist (feature (list 'copilot 'chatgpt-shell 'gptel))
+  (dolist (feature (list 'copilot 'gptel))
     (eval-after-load feature
       '(progn
          (require 'llms)
