@@ -1606,29 +1606,29 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package completion-preview
   :init
-  (global-completion-preview-mode +1))
+  (global-completion-preview-mode +1)
+
+  :custom
+  (completion-preview-overlay-priority 1200))
 
 (use-package company
   :ensure t
+  :delight company-mode
   :bind ( :map ctl-m-map ("C-c" . company-complete) )
   :hook (after-init . global-company-mode)
-  :delight company-mode
+  :custom
+  (company-idle-delay 2.0)
+  (company-tooltip-align-annotations t)
+  (company-tooltip-flip-when-above t)
+  (company-tooltip-offset-display 'lines)
+  (company-format-margin-function nil)
+
+  :bind ( :map company-active-map
+          ("C-j"   . company-complete-selection)
+          ("C-n"   . company-select-next-or-abort)
+          ("C-p"   . company-select-previous-or-abort) )
+
   :config
-  (define-key company-mode-map [remap indent-for-tab-command]
-              #'company-indent-or-complete-common)
-
-  (bind-keys :map company-active-map
-             ("C-j"   . company-complete-selection)
-             ("<tab>" . company-complete-common-or-cycle)
-             ("C-n"   . company-select-next-or-abort)
-             ("C-p"   . company-select-previous-or-abort))
-
-  (setq company-idle-delay 2.0
-        company-tooltip-align-annotations t
-        company-tooltip-flip-when-above t
-        company-tooltip-offset-display 'lines
-        company-format-margin-function nil)
-
   ;; https://www.reddit.com/r/emacs/comments/nichkl/how_to_use_different_completion_styles_in_the/
   (advice-add 'company-capf
               :around
