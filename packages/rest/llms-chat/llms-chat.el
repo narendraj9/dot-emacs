@@ -195,6 +195,13 @@
       :key api-key
       :models '(deepseek-chat deepseek-reasoner deepseek-coder))))
 
+(defvar llms-chat-xai-backend
+  (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.x.ai")))
+    (gptel-make-xai "Grok"
+      :key api-key
+      :stream t
+      :models '(grok-4))))
+
 
 (setq gptel-backend llms-chat-gptel-openai-backend
       gptel-model  'gpt-4.1)

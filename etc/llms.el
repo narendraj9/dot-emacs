@@ -150,11 +150,12 @@ LLM is pending."
   :demand t
   :bind ( :map gptel-mode-map
           ("C-c C-o" . gptel--clear)
-          ("C-c 1"   . gptel-menu)
-          ("C-c s" . gptel-system-prompt)
-          ("C-c t" . gptel-tools)
-          ("RET" . gptel-send)
-          ("C-c g" . gptel-abort) )
+          ("C-c M-t" . gptel--auto-tool-calls)
+          ("C-c M-s" . gptel-system-prompt)
+          ("C-c M-m" . gptel--infix-provider)
+          ("C-c M-s" . gptel-menu)
+          ("C-c C-g" . gptel-abort)
+          ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
            (gptel-confirm-tool-calls t)
            (gptel-include-tool-results t)
@@ -182,6 +183,10 @@ LLM is pending."
                      #'gptel-mcp--activate-tools)
 
   :preface
+  (defun gptel--auto-tool-calls ()
+    (interactive)
+    (setq-local gptel-confirm-tool-calls 'auto))
+
   (defun gptel--clear ()
     (interactive)
     (forward-line -1)

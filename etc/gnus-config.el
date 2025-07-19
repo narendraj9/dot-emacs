@@ -88,10 +88,32 @@
 ;;; Disable auto-centering in Gnus Summary buffer
 (setq gnus-auto-center-summary nil)
 
-;; (setq gnus-user-date-format-alist '((t . "%Y %b %d (%H:%M)")))
+(defun gnus-user-format-function-a (header)
+  (when-let ((date-str (mail-header-date header))
+             (time (ignore-errors (date-to-time date-str))))
+    (let* ((now (float-time (current-time)))
+           (seconds-elapsed (if time (- now (float-time time)) 0)))
+      (cond
+       ((< seconds-elapsed 3600)
+        (format "%2dm" (floor (/ seconds-elapsed 60))))
+
+       ((< seconds-elapsed 86400)
+        (format "%2dh" (floor (/ seconds-elapsed 3600))))
+
+       ((< seconds-elapsed (* 7 86400))
+        (format "%2dd" (floor (/ seconds-elapsed 86400))))
+
+       ((< seconds-elapsed (* 30 86400))
+        (format "%2dW" (floor (/ seconds-elapsed (* 7 86400)))))
+
+       ((< seconds-elapsed (* 365 86400))
+        (format "%2dM" (floor (/ seconds-elapsed (* 30 86400)))))
+
+       (t (format "%dY" (floor (/ seconds-elapsed (* 365 86400)))))))))
+
 (setq gnus-summary-display-arrow t
       ;; Use the default gnus summary line.
-      ;; gnus-summary-line-format "%&user-date; %U%R%z%I%(%[%4L: %-23,23f%]%) %s\n"
+      gnus-summary-line-format "%ua │%U%R%z%I%(%[%4L: %-23,23f%]%) %s\n"
       gnus-sum-thread-tree-single-indent " "
       gnus-sum-thread-tree-root "ŧ "
       gnus-sum-thread-tree-single-leaf "⤷ "
