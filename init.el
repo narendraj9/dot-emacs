@@ -1573,6 +1573,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :bind
   ("M-$" . jinx-correct)
   ("C-M-$" . jinx-languages)
+  :init
+  ;; Another interesting package that looks promising and might improve further
+  ;; in the future is harper. It provides an LSP server that can be used to
+  ;; correct grammar and spelling mistakes in buffers that have plain text.
+  ;; ---
+  ;; (if (executable-find "harper-ls")
+  ;;     (hook-into-modes #'--eglot-ensure 'markdown-mode 'text-mode 'org-mode)
+  ;;   (message "harper-ls isn't installed on system."))
+
   :config
   (eval-when-compile
     (require 'vertico-multiform))
@@ -1986,10 +1995,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       'elixir-ts-mode
       'terraform-mode
       'lua-ts-mode)
-
-  ;; (if (executable-find "harper-ls")
-  ;;     (hook-into-modes #'--eglot-ensure 'markdown-mode 'text-mode 'org-mode)
-  ;;   (message "harper-ls isn't installed on system."))
 
   ;; `eglot' changes the `eldoc-documentation-strategy' to a value that I do not
   ;; like. Ask `elgot' to stop messing with `eldoc' and set these parameters
