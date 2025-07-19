@@ -1595,6 +1595,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package completion-preview
+  :init
+  (global-completion-preview-mode +1))
+
 (use-package company
   :ensure t
   :bind ( :map ctl-m-map ("C-c" . company-complete) )
