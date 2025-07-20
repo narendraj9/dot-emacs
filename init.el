@@ -1611,10 +1611,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom
   (completion-preview-overlay-priority 1200))
 
+(use-package corfu
+  :ensure t
+  :bind ( :map corfu-map
+          ("TAB" . nil)
+          ("RET" . nil))
+  :init
+  (global-corfu-mode))
+
 (use-package company
   :ensure t
   :delight company-mode
-  :bind ( :map ctl-m-map ("C-c" . company-complete) )
   :hook (after-init . global-company-mode)
   :custom
   (company-idle-delay 2.0)
@@ -1643,7 +1650,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (make-local-variable 'company-idle-delay)
     (setq-local company-idle-delay 0.1)
     (company-mode +1)))
-
 
 (use-package company-prescient
   :ensure t
@@ -3095,7 +3101,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (add-to-list 'savehist-additional-variables 'minibuffer-command-history))
 
-(use-package cape :ensure t)
+(use-package cape
+  :ensure t
+  :init
+  (dolist (cape-function '( cape-abbrev cape-dabbrev cape-dict
+                            cape-history cape-keyword cape-emoji ))
+    (add-hook 'completion-at-point-functions cape-function)))
 
 (use-package prescient
   :ensure t
@@ -4331,6 +4342,12 @@ buffer."
   (setd pdf-view-restore-filename "var/pdf-view-restore.el")
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
 
+(use-package reader
+  :doc "Package `libmupdf' is a dependency."
+  :vc ( :url "https://codeberg.org/divyaranjan/emacs-reader"
+        :rev :newest
+        :make "all" ))
+
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package erc-config :commands erc-start! :load-path "etc/" :defer t)
@@ -4611,11 +4628,11 @@ buffer."
           ("i w"   . llms-writing-spin-up-companion)
           ("i W"   . llms-writing-shutdown)
 
+
           ("i c"   . gptel)
-          ("i z"   . gptel-buffer-toggle)
           ("i m"   . gptel-menu)
-          ("i g"   . gptel-generate-inline)
-          ("i r"   . gptel-rewrite) )
+          ("i r"   . gptel-rewrite)
+          ("i z"   . gptel-buffer-toggle*))
 
   :config
   (ensure-windows-on-right "\\*chatgpt .*\\*" "\\*Anthropic\\*")

@@ -125,6 +125,16 @@ LLM is pending."
       ("aws-docs"   . (:command "uvx" :args ("awslabs.aws-documentation-mcp-server@latest")))
       ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
 
+      ;; --
+      ("smithery.ai/google-maps" .
+       ( :command "bunx"
+         :args ("mcp-remote"
+                ,(apply #'format
+                        "https://server.smithery.ai/@smithery-ai/google-maps/mcp?profile=%s&api_key=%s"
+                        (when-let ((user-password (auth-source-user-and-password "server.smithery.ai")))
+                          (list (car user-password)
+                                (cadr user-password)))))) )
+
       ;; -- Experimental
       ;; (dolist (tool gptel-tools)
       ;;   (unless (gptel-tool-description tool)
@@ -149,12 +159,13 @@ LLM is pending."
         :rev :newest )
   :demand t
   :bind ( :map gptel-mode-map
-          ("C-c C-o" . gptel--clear)
-          ("C-c M-t" . gptel--auto-tool-calls)
+          ("C-c C-o" . gptel-clear*)
+          ("C-c C-t" . gptel-tools)
+          ("C-c M-t" . gptel-auto-tool-calls*)
+          ("C-c M-m" . gptel-switch-model*)
           ("C-c M-s" . gptel-system-prompt)
-          ("C-c M-m" . gptel--infix-provider)
           ("C-c M-s" . gptel-menu)
-          ("C-c C-g" . gptel-abort)
+          ("C-c M-g" . gptel-abort)
           ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
            (gptel-confirm-tool-calls t)
@@ -175,26 +186,28 @@ LLM is pending."
   (require 'gptel-rewrite)
   (require 'gptel-integrations)
 
-  (define-key gptel-rewrite-actions-map
-              (kbd "C-c C-g")
-              #'gptel-generate-inline)
-
   (gptel-mcp-connect (list "time" "fetch" "memory" "sequential-thinking")
                      #'gptel-mcp--activate-tools)
 
   :preface
-  (defun gptel--auto-tool-calls ()
+  (defun gptel-switch-model* ()
+    (interactive)
+    ;; TODO: this doesn't work yet.
+    (call-interactively #'gptel-menu)
+    (call-interactively #'gptel--infix-provider))
+
+  (defun gptel-auto-tool-calls* ()
     (interactive)
     (setq-local gptel-confirm-tool-calls 'auto))
 
-  (defun gptel--clear ()
+  (defun gptel-clear* ()
     (interactive)
     (forward-line -1)
     (delete-region (point-min) (point))
     (forward-line)
     (end-of-line))
 
-  (defun gptel-buffer-toggle ()
+  (defun gptel-buffer-toggle* ()
     "Toggle display of buffers with `gptel-mode' enabled.
    If there is exactly one such buffer, switch to it if not current,
    or return to the previous buffer if already current.
@@ -215,43 +228,7 @@ LLM is pending."
                   (switch-to-buffer prev-buffer)))))
         (call-interactively #'gptel))))
 
-  (defvar gptel-generate-inline--last-prompt "")
-  (make-variable-buffer-local 'gptel-generate-inline--last-prompt)
-
-  (defun gptel-generate-inline (&optional arg)
-    (interactive "P")
-    (letrec ((buffer (current-buffer))
-             (starting-point (point))
-             (gptel--rewrite-directive
-              "IMPORTANT: No comments, no markdown, just the answer / code / text requested.")
-             (gptel--rewrite-message
-              (posframe-read-string "Instruction: " gptel-generate-inline--last-prompt))
-             (gptel-rewrite-directives-hook
-              (when arg
-                (list (lambda ()
-                        (format "<<point>> shows the location of where your code will end up:"
-                                "\n--- beginning of context ----\n"
-                                (buffer-substring-no-properties (point-min)
-                                                                (point))
-                                "<<point>>"
-                                (buffer-substring-no-properties (1+ (point))
-                                                                (point-max))
-                                "\n--- end of context ----\n")))))
-             (stop-progress-indicator
-              (llms-make-progress-indicator (line-beginning-position)
-                                            (line-beginning-position)))
-             (post-rewrite-hook
-              (lambda (&rest _args)
-                (funcall stop-progress-indicator)
-                (remove-hook 'gptel-post-rewrite-functions post-rewrite-hook))))
-      (add-hook 'gptel-post-rewrite-functions post-rewrite-hook)
-      (setq gptel-generate-inline--last-prompt gptel--rewrite-message)
-      (if (region-active-p)
-          (call-interactively #'gptel-rewrite)
-        (progn
-          (unless (get-char-property (point) 'gptel-rewrite)
-            (put-text-property (point) (1+ (point)) 'gptel-rewrite ""))
-          (gptel--suffix-rewrite gptel--rewrite-message))))))
+  )
 
 
 (use-package gptel-custom-tools :after gptel :load-path "etc/")
@@ -274,12 +251,34 @@ LLM is pending."
 (use-package gptel-quick
   :vc ( :url "https://github.com/karthink/gptel-quick.git"
         :rev :newest )
-  :bind ( :map ctl-quote-map ("t q" . gptel-quick) )
-  :custom (gptel-quick-timeout 60))
+  :bind ( :map ctl-m-map ("i q" . gptel-quick*) )
+  :custom
+  (gptel-quick-timeout 60)
+
+  :config
+  (setq gptel-quick-system-message
+        (lambda (count)
+          (concat (format "Write an informative summary in roughly %s words." count)
+                  "- If you are given a short sentence in a foreign language, explain it in English."
+                  "  Help me learn the foreign language."
+                  "- Do not repeat the instructions, be concise and optimize for providing"
+                  "  correct information in as few words as possible."
+                  "- Use tools to fetch relevant information if needed.")))
+
+  :preface
+  (defun gptel-quick* ()
+    (interactive)
+    (if (region-active-p)
+        (gptel-quick (buffer-substring-no-properties (region-beginning)
+                                                     (region-end)))
+      (gptel-quick (read-string "Prompt: ")))))
 
 (use-package macher
   :vc ( :url "https://github.com/kmontag/macher"
-        :rev :newest ))
+        :rev :newest )
+  :after gptel
+  :custom (macher-action-buffer-ui 'org)
+  :config (macher-install))
 
 (use-package minuet :ensure t)
 

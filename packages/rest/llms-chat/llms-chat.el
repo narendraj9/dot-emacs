@@ -200,7 +200,7 @@
     (gptel-make-xai "Grok"
       :key api-key
       :stream t
-      :models '(grok-4))))
+      :models '(grok-4 grok-3))))
 
 
 (setq gptel-backend llms-chat-gptel-openai-backend
