@@ -1609,6 +1609,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (global-completion-preview-mode +1)
 
+  :bind ( :map completion-preview-active-mode-map
+          ("C-i" . completion-preview-insert)
+          ("M-i" . completion-preview-complete)
+          ("M-n" . completion-preview-next-candidate)
+          ("M-p" . completion-preview-prev-candidate) )
+
   :custom
   (completion-preview-overlay-priority 1200))
 

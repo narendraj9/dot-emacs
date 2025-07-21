@@ -192,19 +192,20 @@ Otherwise, limit to only `org-mode' files."
   (setq org-todo-keywords
         ;; state logging for org-habit (! => with timestamp) (@ => timestamp
         ;; + note)
-        '((sequence "TODO" "NEXT" "PARKED(p!)" "|" "DONE(d!)" "NOT_DONE(x@)")
+        '((sequence "TODO" "IN PROGRESS(i)" "NEXT" "PARKED(p!)" "|" "DONE(d!)" "NOT_DONE(x@)")
           (sequence "BLOCKED(b@)" "|" "CANCELLED(c@)")
           (sequence "TRACKING(r)" "TRACKED(g@)"))
         org-todo-keyword-faces
-        '(("TODO"      (:foreground "red" :weight bold))
-          ("PARKED"    (:foreground "IndianRed" :weight bold))
-          ("NEXT"      (:foreground "OrangeRed" :weight bold))
-          ("BLOCKED"   (:foreground "orange" :weight bold))
-          ("DONE"      (:foreground "forest green" :weight bold))
-          ("NOT_DONE"  (:foreground "indian red" :weight bold))
-          ("CANCELLED" (:foreground "forest green" :weight bold))
-          ("TRACKING"  (:foreground "light green" :weight bold))
-          ("TRACKED"   (:foreground "forest green" :weight bold))))
+        '(("TODO"        (:foreground "red" :weight bold))
+          ("IN PROGRESS" (:foreground "blue" :weight bold))
+          ("PARKED"      (:foreground "IndianRed" :weight bold))
+          ("NEXT"        (:foreground "OrangeRed" :weight bold))
+          ("BLOCKED"     (:foreground "orange" :weight bold))
+          ("DONE"        (:foreground "forest green" :weight bold))
+          ("NOT_DONE"    (:foreground "indian red" :weight bold))
+          ("CANCELLED"   (:foreground "forest green" :weight bold))
+          ("TRACKING"    (:foreground "light green" :weight bold))
+          ("TRACKED"     (:foreground "forest green" :weight bold))))
 
   (add-hook 'org-after-todo-state-change-hook
             ;; Remove scheduled date and deadline if new state is "NEXT"
@@ -352,6 +353,8 @@ Otherwise, limit to only `org-mode' files."
                     ((org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'todo
                                                  '("ONGOING" "NEXT" "PARKED" "BLOCKED")))))
+            (todo "IN PROGRESS"
+                  ((org-agenda-overriding-header "  IN PROGRESS:\n  ═══════════")))
             (todo "PARKED"
                   ((org-agenda-overriding-header "  Parked Tasks:\n  ════════════")))
             (todo "NEXT"
