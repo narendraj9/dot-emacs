@@ -4637,7 +4637,11 @@ buffer."
           ("i c"   . gptel)
           ("i m"   . gptel-menu)
           ("i r"   . gptel-rewrite)
-          ("i z"   . gptel-buffer-toggle*))
+          ("i z"   . gptel-buffer-toggle*)
+
+          ("i I" . macher-implement)
+          ("i R" . macher-revise)
+          ("i A" . macher-abort) )
 
   :config
   (ensure-windows-on-right "\\*chatgpt .*\\*" "\\*Anthropic\\*")
