@@ -1569,6 +1569,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq ispell-personal-dictionary personal-dictionary-file))
 
 (use-package jinx
+  :ensure t
   :diminish jinx-mode
   :bind
   ("M-$" . jinx-correct)
@@ -2071,7 +2072,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (tsx "tree-sitter-typescript" "master" "tsx/src")
               (typescript "tree-sitter-typescript" "master" "typescript/src")))
     (setf (cadr source)
-          (concat "https://github.com/tree-sitter/%s" (cadr source)))
+          (format "https://github.com/tree-sitter/%s" (cadr source)))
     (add-to-list 'treesit-language-source-alist source))
 
   ;; Community maintained grammar implementations
@@ -2080,8 +2081,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
              (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main")
              (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
              (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
-             (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown")
-             (hcl "https://github.com/tree-sitter-grammars/tree-sitter-hcl")))
+             (hcl "https://github.com/tree-sitter-grammars/tree-sitter-hcl")
+             ;; --
+             ;; (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src")
+             ;; (markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")
+             ;; --
+             ))
     (add-to-list 'treesit-language-source-alist source))
 
   (dolist (source treesit-language-source-alist)
@@ -2090,7 +2095,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun install-tree-sitter-grammer-if-required (language &optional quiet)
     "Given a language symbol install tree-sitter grammer if not
-       already avaialble."
+    already avaialble."
     (if (treesit-language-available-p language)
         (unless quiet
           (message "Tree-sitter grammar for %s already installed." language))
@@ -2179,7 +2184,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :preface
   (defun compilation-escape-colors-to-ansi-colors ()
     "Colorize from `compilation-filter-start' to `point'.
-  https://endlessparentheses.com/ansi-colors-in-the-compilation-buffer-output.html"
+    https://endlessparentheses.com/ansi-colors-in-the-compilation-buffer-output.html"
     (let ((inhibit-read-only t))
       (ansi-color-apply-on-region compilation-filter-start (point))))
   :init
@@ -2241,8 +2246,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun freeze-eldoc-buffer ()
     "Capture the current contents of the *eldoc* buffer. Make sure
-     that the newly created buffer is visible at all times instead of
-     the default *eldoc* buffer."
+    that the newly created buffer is visible at all times instead of
+    the default *eldoc* buffer."
     (interactive)
     (with-current-buffer eldoc--doc-buffer
       (let ((contents (buffer-substring (point-min)
@@ -4341,12 +4346,6 @@ buffer."
   :config
   (setd pdf-view-restore-filename "var/pdf-view-restore.el")
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
-
-(use-package reader
-  :doc "Package `libmupdf' is a dependency."
-  :vc ( :url "https://codeberg.org/divyaranjan/emacs-reader"
-        :rev :newest
-        :make "all" ))
 
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────
