@@ -325,5 +325,17 @@ LLM is pending."
                  (direction . right)
                  (window-width . 0.5))))
 
+(use-package llm :ensure t)
+(use-package esi-dictate
+  :vc ( :url "https://github.com/narendraj9/emacs-speech-input"
+        :rev :newest )
+  :bind ( :map esi-dictate-mode-map ("C-g" . esi-dictate-stop) )
+  :hook (esi-dictate-speech-final . esi-dictate-fix-context)
+  :config
+  (require 'gptel)
+  (setq esi-dictate-dg-api-key (gptel-api-key-from-auth-source "api.deepgram.com"))
+  (setq esi-dictate-llm-provider (make-llm-openai :key (gptel-api-key-from-auth-source "api.openai.com")
+                                                  :chat-model "gpt-4o-mini")))
+
 (provide 'llms)
 ;;; llms.el ends here

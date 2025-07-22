@@ -1620,16 +1620,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (completion-preview-overlay-priority 1200)
   (completion-preview-exact-match-only t))
 
+
 (use-package corfu
   :ensure t
   :bind ( :map corfu-map
-          ("C-c C-n" . corfu-complete)
-
-          :map corfu-map
-          ("TAB" . nil)
-          ("RET" . nil))
-  :init
-  (global-corfu-mode))
+          ("TAB" . corfu-next)
+          ("C-n" . corfu-next)
+          ("C-p" . corfu-previous) )
+  :hook (after-init . global-corfu-mode)
+  :custom
+  (corfu-auto-delay 2.0)
+  (corfu-left-margin-width 1.0)
+  (corfu-right-margin-width 1.0))
 
 (use-package company
   :ensure t
@@ -4570,7 +4572,7 @@ buffer."
 
 ;;; -----------------------------------------------------------------
 
-(use-package ipcalc        :ensure t :commands ipcalc)
+(use-package ipcalc :ensure t :commands ipcalc)
 
 (use-package memory-report
   :doc "Built-in package to print information about Emacs memory usage."
@@ -4628,6 +4630,7 @@ buffer."
           ("i w"   . llms-writing-spin-up-companion)
           ("i W"   . llms-writing-shutdown)
 
+          ("i d"   . esi-dictate-start)
 
           ("i c"   . gptel)
           ("i m"   . gptel-menu)
