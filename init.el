@@ -1606,6 +1606,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ――――――――――――――――――――――――――――――――――――――――
 
 (use-package completion-preview
+  :delight t
   :init
   (global-completion-preview-mode +1)
 
