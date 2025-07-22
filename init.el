@@ -1622,6 +1622,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package corfu
   :ensure t
   :bind ( :map corfu-map
+          ("C-c C-n" . corfu-complete)
+
+          :map corfu-map
           ("TAB" . nil)
           ("RET" . nil))
   :init
@@ -2008,6 +2011,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq eglot-inlay-hints-mode nil)
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
+  (setq eglot-code-action-indications '(eldoc-hint))
 
   :config
   (dolist (lang-server-spec
@@ -2464,7 +2468,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package exec-path-from-shell
   :ensure t
   :if (eq system-type 'darwin)
-  :init
+  :config
   (add-to-list 'exec-path-from-shell-variables "SRC_ACCESS_TOKEN")
   (add-to-list 'exec-path-from-shell-variables "SRC_ENDPOINT")
   (exec-path-from-shell-initialize))
