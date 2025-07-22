@@ -1616,7 +1616,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-p" . completion-preview-prev-candidate) )
 
   :custom
-  (completion-preview-overlay-priority 1200))
+  (completion-preview-overlay-priority 1200)
+  (completion-preview-exact-match-only t))
 
 (use-package corfu
   :ensure t
@@ -2464,8 +2465,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :if (eq system-type 'darwin)
   :init
-  ;; (add-to-list 'exec-path-from-shell-variables "SRC_ACCESS_TOKEN")
-  ;; (add-to-list 'exec-path-from-shell-variables "SRC_ENDPOINT")
+  (add-to-list 'exec-path-from-shell-variables "SRC_ACCESS_TOKEN")
+  (add-to-list 'exec-path-from-shell-variables "SRC_ENDPOINT")
   (exec-path-from-shell-initialize))
 
 (use-package shell
