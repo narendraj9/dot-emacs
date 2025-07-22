@@ -1648,15 +1648,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               :around
               (lambda (capf-fn &rest args)
                 (let ((completion-styles '(basic partial-completion)))
-                  (apply capf-fn args))))
-
-  :preface
-  (defun company-mode-quicker ()
-    "Makes `company-mode' show completions quickly in a buffer."
-    (interactive)
-    (make-local-variable 'company-idle-delay)
-    (setq-local company-idle-delay 0.1)
-    (company-mode +1)))
+                  (apply capf-fn args)))))
 
 (use-package company-prescient
   :ensure t
@@ -1947,7 +1939,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :config
   (setq hledger-input-buffer-height 20)
-  (add-hook 'hledger-input-mode-hook #'company-mode-quicker)
 
   :preface
   (defun hledger-get-balance (account)
@@ -3293,8 +3284,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package java-mode
   :defer t
-  :hook ( (java-mode . company-mode-quicker)
-          (java-ts-mode . company-mode-quicker) )
   :init
   (cl-defmethod eglot-handle-notification
     (server (_method (eql language/status)) &key type message &allow-other-keys)
