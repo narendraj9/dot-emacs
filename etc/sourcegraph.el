@@ -129,7 +129,7 @@
           :branch (or (match-string 3 url) "master")
           :path (match-string 4 url))))
 
-(define-minor-mode sourcegraph-mode
+(define-derived-mode sourcegraph-mode help-mode
   "Minor mode for sourcegraph search results."
   :lighter " SG"
   :keymap (let ((map (make-sparse-keymap)))
