@@ -327,6 +327,7 @@ LLM is pending."
 
 (use-package llm :ensure t)
 (use-package esi-dictate
+  :demand t
   :vc ( :url "https://github.com/narendraj9/emacs-speech-input"
         :rev :newest )
   :bind ( :map esi-dictate-mode-map ("C-g" . esi-dictate-stop) )

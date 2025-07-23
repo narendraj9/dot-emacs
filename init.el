@@ -4606,14 +4606,15 @@ buffer."
 
 (use-package sourcegraph
   :load-path "etc/"
-  :bind-keymap ("<C-m> s" . sourcegraph-mode-map ))
+  :bind-keymap ("<C-m> s" . sourcegraph-mode-map )
+  :hook (sourcegraph-mode . goto-address-mode))
 
 (use-package llms
   :load-path "etc/"
   :init
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
-  (dolist (feature (list 'copilot 'gptel))
+  (dolist (feature (list 'copilot 'gptel 'esi-dictate))
     (eval-after-load feature
       '(progn
          (require 'llms)

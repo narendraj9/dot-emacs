@@ -144,8 +144,7 @@
 (define-derived-mode sourcegraph-mode help-mode
   "Minor mode for sourcegraph search results."
   :lighter " SG"
-  :keymap sourcegraph-mode-map
-  (goto-address-mode sourcegraph-mode))
+  :keymap sourcegraph-mode-map)
 
 
 (provide 'sourcegraph)
