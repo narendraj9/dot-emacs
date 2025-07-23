@@ -186,7 +186,8 @@ LLM is pending."
   (require 'gptel-rewrite)
   (require 'gptel-integrations)
 
-  (gptel-mcp-connect (list "time" "fetch" "memory" "sequential-thinking")
+  (gptel-mcp-connect (list "time" "fetch" "memory" ;; "sequential-thinking"
+                           )
                      #'gptel-mcp--activate-tools)
 
   :preface

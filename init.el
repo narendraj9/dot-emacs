@@ -370,7 +370,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (let ((appearance-enable-time-based-theme-switching nil))
     (appearance-init))
-  (load-theme 'ef-dark))
+  (load-theme 'ef-dream))
 
 (use-package mode-line-config
   :demand t
@@ -687,12 +687,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (cond
    ((executable-find "firefox")
     (setq browse-url-browser-function 'browse-url-firefox))
-   ((featurep 'xwidget-internal)
-    (setq browse-url-browser-function 'xwidget-webkit-browse-url))
    ((executable-find "chromium")
     (setq browse-url-browser-function 'browse-url-chromium))
    ((executable-find "google-chrome")
-    (setq browse-url-browser-function 'browse-url-chrome))))
+    (setq browse-url-browser-function 'browse-url-chrome))
+   ((featurep 'xwidget-internal)
+    (setq browse-url-browser-function 'xwidget-webkit-browse-url))))
 
 
 (use-package atomic-chrome
