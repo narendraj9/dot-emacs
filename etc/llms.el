@@ -333,7 +333,8 @@ LLM is pending."
   :hook (esi-dictate-speech-final . esi-dictate-fix-context)
   :config
   (require 'gptel)
-  (setq esi-dictate-dg-api-key (gptel-api-key-from-auth-source "api.deepgram.com"))
+  (setq llm-warn-on-nonfree nil)
+  (setq esi-dictate-transcribe-api-key (gptel-api-key-from-auth-source "api.openai.com"))
   (setq esi-dictate-llm-provider (make-llm-openai :key (gptel-api-key-from-auth-source "api.openai.com")
                                                   :chat-model "gpt-4o-mini")))
 

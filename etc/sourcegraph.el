@@ -129,19 +129,22 @@
           :branch (or (match-string 3 url) "master")
           :path (match-string 4 url))))
 
+(defvar sourcegraph-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "s") 'sourcegraph-search)
+    (define-key map (kbd "n") 'sourcegraph-next-url)
+    (define-key map (kbd "p") 'sourcegraph-previous-url)
+    (define-key map (kbd "RET") 'goto-address-at-point)
+    (define-key map (kbd "v") 'sourcegraph-fetch-file-at-point)
+    (define-key map (kbd "r") 'sourcegraph-browse-repo-mrs)
+    (define-key map (kbd "g") 'sourcegraph-search)
+    (define-key map (kbd "q") 'quit-window)
+    map))
+
 (define-derived-mode sourcegraph-mode help-mode
   "Minor mode for sourcegraph search results."
   :lighter " SG"
-  :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "s") 'sourcegraph-search)
-            (define-key map (kbd "n") 'sourcegraph-next-url)
-            (define-key map (kbd "p") 'sourcegraph-previous-url)
-            (define-key map (kbd "RET") 'goto-address-at-point)
-            (define-key map (kbd "v") 'sourcegraph-fetch-file-at-point)
-            (define-key map (kbd "r") 'sourcegraph-browse-repo-mrs)
-            (define-key map (kbd "g") 'sourcegraph-search)
-            (define-key map (kbd "q") 'quit-window)
-            map)
+  :keymap sourcegraph-mode-map
   (goto-address-mode sourcegraph-mode))
 
 
