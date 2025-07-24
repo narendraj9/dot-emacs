@@ -4055,7 +4055,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package jsonnet-mode
   :ensure t
   :hook ( jsonnet-mode . eglot-ensure )
-  :config
+  :init
   (add-to-list 'eglot-server-programs
                ;; https://github.com/grafana/jsonnet-language-server
                '(jsonnet-mode . ("jsonnet-language-server"))))

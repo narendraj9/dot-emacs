@@ -269,10 +269,11 @@ LLM is pending."
   :preface
   (defun gptel-quick* ()
     (interactive)
-    (if (region-active-p)
-        (gptel-quick (buffer-substring-no-properties (region-beginning)
-                                                     (region-end)))
-      (gptel-quick (read-string "Prompt: ")))))
+    (let ((gptel-use-tools nil)
+          (prompt (if (region-active-p)
+                      (buffer-substring-no-properties (region-beginning) (region-end))
+                    (read-string "Prompt: "))))
+      (gptel-quick prompt))))
 
 (use-package macher
   :vc ( :url "https://github.com/kmontag/macher"
