@@ -682,17 +682,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package browse-url
   :defer t
   :config
-  (setq browse-url-new-window-flag nil)
-
-  (cond
-   ((executable-find "firefox")
-    (setq browse-url-browser-function 'browse-url-firefox))
-   ((executable-find "chromium")
-    (setq browse-url-browser-function 'browse-url-chromium))
-   ((executable-find "google-chrome")
-    (setq browse-url-browser-function 'browse-url-chrome))
-   ((featurep 'xwidget-internal)
-    (setq browse-url-browser-function 'xwidget-webkit-browse-url))))
+  (setq browse-url-new-window-flag nil))
 
 
 (use-package atomic-chrome
@@ -2024,7 +2014,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
              ((text-mode markdown-mode org-mode) . ("harper-ls" "--stdio"))
              (scala-mode               . (,(expand-file-name "bin/metals.sh" user-emacs-directory)))
              ((java-mode java-ts-mode) . ,#'java-eclipse-jdt-launcher)
-             (elixir-ts-mode           . ,#'elixir-lsp-launcher)))
+             (elixir-ts-mode           . ,#'elixir-lsp-launcher)
+             (jsonnet-mode             . ("jsonnet-language-server"))))
     (add-to-list 'eglot-server-programs lang-server-spec))
 
   :preface
@@ -4054,11 +4045,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package jsonnet-mode
   :ensure t
-  :hook ( jsonnet-mode . eglot-ensure )
-  :init
-  (add-to-list 'eglot-server-programs
-               ;; https://github.com/grafana/jsonnet-language-server
-               '(jsonnet-mode . ("jsonnet-language-server"))))
+  :hook ( jsonnet-mode . eglot-ensure ))
 
 
 ;;; Version Control
