@@ -4045,7 +4045,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package jsonnet-mode
   :ensure t
-  :hook ( jsonnet-mode . eglot-ensure ))
+  :hook ( jsonnet-mode . --eglot-ensure ))
 
 
 ;;; Version Control
@@ -4620,6 +4620,7 @@ buffer."
 
           ("i d"   . esi-dictate-start)
 
+          ("i q"   . gptel-quick)
           ("i c"   . gptel)
           ("i m"   . gptel-menu)
           ("i r"   . gptel-rewrite)

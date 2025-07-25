@@ -252,7 +252,6 @@ LLM is pending."
 (use-package gptel-quick
   :vc ( :url "https://github.com/karthink/gptel-quick.git"
         :rev :newest )
-  :bind ( :map ctl-m-map ("i q" . gptel-quick*) )
   :custom
   (gptel-quick-timeout 60)
 
