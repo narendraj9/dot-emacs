@@ -2564,6 +2564,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               ;; Disable pixel scrolling to make sure that prompt is always
               ;; fully visible even when it is present at the bottom edge of the
               ;; screen.
+              (completion-preview-mode -1)
               (pixel-scroll-mode -1)
               (pixel-scroll-precision-mode -1)))
 

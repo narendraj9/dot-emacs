@@ -34,6 +34,12 @@
   :ensure t
   :defer t
   :config
+  (setq ef-dream-palette-overrides
+        '((magenta         "#ffaacf")
+          (magenta-warmer  "#f498c0")
+          (magenta-cooler  "#d0b0ff")
+          (magenta-faint   "#e3b0c0")))
+
   (setq ef-dark-palette-overrides
         '((yellow "burlywood")
           (bg-main "#160f0f")
@@ -43,12 +49,9 @@
   (setq ef-trio-dark-palette-overrides
         '((cursor "floral white")
           (builtin "light coral")
-          ;; Replace with colors that you like more.
-          ;; (magenta "#7fa5f6")
-          ;; (magenta-warmer "#8895ff")
-          ;; (magenta-intense "#72afff")
-          ))
-
+          (magenta "#7fa5f6")
+          (magenta-warmer "#8895ff")
+          (magenta-intense "#72afff")))
   :init
   (add-hook 'ef-themes-post-load-hook #'my-ef-themes-mode-line)
 
