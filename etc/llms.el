@@ -378,3 +378,5 @@ LLM is pending."
 
 (provide 'llms)
 ;;; llms.el ends here
+Assertion failed: (eq eshell-foreground-command entry)
+esh/restart

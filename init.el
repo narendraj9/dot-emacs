@@ -1619,7 +1619,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-p" . corfu-previous) )
   :hook (after-init . global-corfu-mode)
   :custom
-  (corfu-auto-delay 2.0)
+  (corfu-auto t)
+  (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
   (corfu-right-margin-width 1.0))
 
@@ -1628,7 +1629,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :delight company-mode
   :hook (after-init . global-company-mode)
   :custom
-  (company-idle-delay 2.0)
+  (company-idle-delay 1.0)
   (company-tooltip-align-annotations t)
   (company-tooltip-flip-when-above t)
   (company-tooltip-offset-display 'lines)
@@ -2502,15 +2503,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                                   (delete-window))))))))
 
 (use-package eshell
-  :bind ( :map ctl-quote-map ("C-p" . eshell-toggle)
-          :map eshell-mode-map ( "C-c !" . eshell-restart) )
+  :bind ( :map ctl-quote-map ("C-p" . eshell-toggle) )
   :hook ( eshell-exit-hook . delete-window-if-dedicated-to-eshell )
   :preface
   (defun delete-window-if-dedicated-to-eshell ()
     (when (< 1 (count-windows))
       (delete-window)))
 
-  (defun eshell-restart ()
+  (defun eshell/restart ()
     (interactive)
     (let ((directory default-directory))
       (eshell-life-is-too-much)
