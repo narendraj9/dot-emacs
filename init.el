@@ -1596,7 +1596,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; ――――――――――――――――――――――――――――――――――――――――
 
 (use-package completion-preview
-  :delight t
+  :delight completion-preview-mode
   :init
   (global-completion-preview-mode +1)
 
@@ -1614,7 +1614,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package corfu
   :ensure t
   :bind ( :map corfu-map
-          ("TAB" . corfu-next)
+          ("TAB" . corfu-complete)
           ("C-n" . corfu-next)
           ("C-p" . corfu-previous) )
   :hook (after-init . global-corfu-mode)
@@ -2089,12 +2089,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (install-tree-sitter-grammer-if-required (car source)))
 
   :preface
-  (defun install-tree-sitter-grammer-if-required (language &optional quiet)
+  (defun install-tree-sitter-grammer-if-required (language)
     "Given a language symbol install tree-sitter grammer if not
     already avaialble."
-    (if (treesit-language-available-p language)
-        (unless quiet
-          (message "Tree-sitter grammar for %s already installed." language))
+    (unless (treesit-language-available-p language)
       (message "Installing tree-sitter grammar for %s" language)
       (treesit-install-language-grammar language)))
 
@@ -3437,7 +3435,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :config
   (when (treesit-available-p)
-    (install-tree-sitter-grammer-if-required 'rust t)))
+    (install-tree-sitter-grammer-if-required 'rust)))
 
 (use-package flycheck-rust
   :hook (rust-mode . flycheck-rust-setup)
