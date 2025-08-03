@@ -85,12 +85,6 @@ LLM is pending."
   :custom ( (copilot-indent-offset-warning-disable t)
             (copilot-max-char -1) ))
 
-(use-package cody
-  :vc ( :url "https://github.com/sourcegraph/emacs-cody.git"
-        :rev :newest )
-  :init
-  (use-package uuidgen :ensure t))
-
 (use-package mcp
   :ensure t
   :config
