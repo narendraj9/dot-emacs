@@ -1553,8 +1553,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq flyspell-delay 5))
 
 (use-package ispell
-  :bind (:map ctl-period-map
-              ("f" . ispell-word))
+  :defer t
   :config
   (setq ispell-program-name "aspell")
   (setq ispell-personal-dictionary personal-dictionary-file))
@@ -1563,8 +1562,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :diminish jinx-mode
   :bind
-  ("M-$" . jinx-correct)
-  ("C-M-$" . jinx-languages)
+  ( :map ctl-period-map ("f" . jinx-correct-word))
+
+  ( :map global-map
+    ("M-$" . jinx-correct)
+    ("C-M-$" . jinx-languages) )
   :init
   ;; Another interesting package that looks promising and might improve further
   ;; in the future is harper. It provides an LSP server that can be used to
