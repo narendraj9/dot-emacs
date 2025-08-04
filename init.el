@@ -798,7 +798,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ([backtab] . hs-toggle-hiding)
           ("C-c @ a"  . my-toggle-hideshow-all)
           ("C-c @ s"  . hs-show-block)
-          ("C-c @ h"  . hs-hide-block))
+          ("C-c @ h"  . hs-hide-block) )
 
   :custom
   (hs-display-lines-hidden t)
@@ -1122,7 +1122,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package volatile-highlights
   :ensure t
   :delight volatile-highlights-mode
-  :hook (after-init . volatile-highlights-mode))
+  :hook (after-init . volatile-highlights-mode)
+  :custom (vhl/use-pulsing-visual-effect-p t))
 
 (use-package info
   :config
