@@ -106,6 +106,8 @@ LLM is pending."
                                  :env ( :MEMORY_FILE_PATH ,(expand-file-name "mcp-memory.json" emacs-assets-directory) )))
 
 
+      ("motherduck" . (:command "uvx" :args ("mcp-server-motherduck" "--db-path" ":memory:")))
+
       ;; -- Using `mcp-remote' because these require OAuth support
       ("cloudflare-docs"    . (:command "bunx" :args ("mcp-remote" "https://docs.mcp.cloudflare.com/sse")))
       ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
