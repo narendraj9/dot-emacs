@@ -2514,7 +2514,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (defun eshell/restart ()
     (interactive)
     (let ((directory default-directory))
-      (eshell-life-is-too-much)
+      (kill-buffer-delete-window )
       (with-current-buffer (eshell)
         (eshell/cd directory)
         (eshell-send-input "\n"))))
@@ -3469,10 +3469,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package pyvenv
   :ensure t
-  :after python-ts-mode
+  :demand t
   :init
   (when (file-exists-p "~/.venv")
-    (pyvenv-activate "~/.venv")))
+    (pyvenv-activate (expand-file-name "~/.venv"))))
 
 (use-package py-autopep8
   :ensure t
