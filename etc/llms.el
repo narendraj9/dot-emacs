@@ -272,6 +272,8 @@ LLM is pending."
   :vc ( :url "https://github.com/kmontag/macher"
         :rev :newest )
   :after gptel
+  :init
+  (use-package buttercup :ensure t)
   :custom (macher-action-buffer-ui 'org)
   :config (macher-install))
 
@@ -378,5 +380,3 @@ LLM is pending."
 
 (provide 'llms)
 ;;; llms.el ends here
-Assertion failed: (eq eshell-foreground-command entry)
-esh/restart
