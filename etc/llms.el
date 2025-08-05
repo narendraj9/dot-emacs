@@ -167,13 +167,14 @@ LLM is pending."
            (gptel-confirm-tool-calls t)
            (gptel-include-tool-results t)
            (gptel-expert-commands t)
-           (gptel-default-mode 'org-mode))
+           (gptel-default-mode 'org-mode)
+           (gptel-curl-file-size-threshold 1300000))
   :config
   (if (eq system-type 'darwin)
       (setq gptel-backend llms-chat-gptel-anthropic-backend
             gptel-model 'claude-sonnet-4-0)
-    (setq gptel-backend llms-chat-gptel-openai-backend
-          gptel-model 'gpt-4.1))
+    (setq gptel-backend llms-chat-gptel-groq-backend
+          gptel-model 'moonshotai/kimi-k2-instruct))
 
   (require 'gptel-transient)
   (require 'gptel-curl)

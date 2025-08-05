@@ -158,7 +158,8 @@
     :endpoint "/openai/v1/chat/completions"
     :stream t
     :key (llms-chat--api-key-from-auth-source "api.groq.com")
-    :models '(gemma2-9b-it
+    :models '(moonshotai/kimi-k2-instruct
+              gemma2-9b-it
               meta-llama/llama-guard-4-12b
               deepseek-r1-distill-llama-70b
               meta-llama/llama-4-maverick-17b-128e-instruct)))

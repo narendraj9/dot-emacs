@@ -4633,6 +4633,7 @@ buffer."
           ("i m"   . gptel-menu)
           ("i r"   . gptel-rewrite)
           ("i z"   . gptel-buffer-toggle*)
+          ("C-z"   . gptel-buffer-toggle*)
 
           ("i I" . macher-implement)
           ("i R" . macher-revise)
