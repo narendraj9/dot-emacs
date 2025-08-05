@@ -1622,21 +1622,28 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package corfu
   :ensure t
-  :bind ( :map corfu-map
-          ("TAB" . corfu-complete)
+  :bind ( :map global-map
+          ("TAB" . indent-for-tab-command)
+
+          :map corfu-map
+          ("TAB" . corfu-expand)
+          ("RET" . corfu-complete)
           ("C-n" . corfu-next)
           ("C-p" . corfu-previous) )
   :hook (after-init . global-corfu-mode)
   :custom
+  (corfu-preselect 'first)
   (corfu-auto t)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
   (corfu-right-margin-width 1.0))
 
+(use-package corfu-prescient :ensure t)
+
 (use-package company
   :ensure t
   :delight company-mode
-  :hook (after-init . global-company-mode)
+  ;; :hook (after-init . global-company-mode)
   :custom
   (company-idle-delay 1.0)
   (company-tooltip-align-annotations t)
@@ -1909,8 +1916,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (add-hook 'hledger-mode-hook
             (lambda ()
+              (require 'company)
               (make-local-variable 'company-backends)
-              (add-to-list 'company-backends 'hledger-company)))
+              (add-to-list 'company-backends 'hledger-company)
+              (setq-local completion-styles '(basic partial-completion))
+              (setq corfu-auto-delay 0.1)
+              (add-to-list 'completion-at-point-functions
+                           (cape-company-to-capf 'hledger-company))))
 
   (add-hook 'hledger-view-mode-hook #'hl-line-mode)
   (add-hook 'hledger-view-mode-hook
@@ -3073,7 +3085,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom ( enable-recursive-minibuffers t
             history-delete-duplicates t
             history-length 1000
-            read-file-name-completion-ignore-case t)
+            read-file-name-completion-ignore-case t
+            completion-cycle-threshold 3)
 
   :config
   (minibuffer-depth-indicate-mode +1)
@@ -3084,11 +3097,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :init
   ;; `partial-completion' is very useful for `completion-at-point'
-  (advice-add 'completion-at-point
-              :around
-              (lambda (compl-at-point &rest args)
-                (let ((completion-styles '(basic partial-completion)))
-                  (apply compl-at-point args))))
+  ;; (advice-add 'completion-at-point
+  ;;             :around
+  ;;             (lambda (compl-at-point &rest args)
+  ;;               (let ((completion-styles '(basic partial-completion)))
+  ;;                 (apply compl-at-point args))))
   :preface
   (defun yank-symbol-to-minibuffer-or-kill-region (&optional arg)
     (interactive "P")
