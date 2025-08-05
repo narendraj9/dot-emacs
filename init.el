@@ -1560,14 +1560,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package jinx
   :ensure t
-  :diminish jinx-mode
+  :delight jinx-mode
   :bind
   ( :map ctl-period-map ("f" . jinx-correct-word))
+
+  :custom
+  (jinx-languages "en_US de")
 
   ( :map global-map
     ("M-$" . jinx-correct)
     ("C-M-$" . jinx-languages) )
   :init
+  (global-jinx-mode +1)
+
   ;; Another interesting package that looks promising and might improve further
   ;; in the future is harper. It provides an LSP server that can be used to
   ;; correct grammar and spelling mistakes in buffers that have plain text.
@@ -1579,6 +1584,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (eval-when-compile
     (require 'vertico-multiform))
+
   (add-to-list 'vertico-multiform-categories
                '(jinx grid (vertico-grid-annotate . 20))))
 
