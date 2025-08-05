@@ -3126,8 +3126,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package cape
   :ensure t
   :init
-  (dolist (cape-function '( cape-abbrev cape-dabbrev cape-dict
-                            cape-history cape-keyword cape-emoji ))
+  (dolist (cape-function '( cape-dict cape-history cape-keyword cape-emoji ))
     (add-hook 'completion-at-point-functions cape-function)))
 
 (use-package prescient
