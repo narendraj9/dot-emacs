@@ -291,17 +291,9 @@ LLM is pending."
   (mapcar (apply-partially #'apply #'gptel-make-tool)
           (llm-tool-collection-get-all)))
 
-(use-package claude-code
-  :vc ( :url "https://github.com/stevemolitor/claude-code.el"
-        :rev :newest )
-  :custom
-  (claude-code-program "bunx")
-  (claude-code-program-switches '("@anthropic-ai/claude-code"))
-
-  :preface
-  (defun claude-code* ()
-    (interactive)
-    (claude-code '(4))))
+(use-package claude-code-ide
+  :vc ( :url "https://github.com/manzaltu/claude-code-ide.el"
+        :rev :newest ))
 
 (use-package aidermacs
   :ensure t
