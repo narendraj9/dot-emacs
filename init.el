@@ -1630,15 +1630,30 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("RET" . corfu-complete)
           ("C-n" . corfu-next)
           ("C-p" . corfu-previous) )
+
   :hook (after-init . global-corfu-mode)
+
   :custom
   (corfu-preselect 'first)
   (corfu-auto t)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
-  (corfu-right-margin-width 1.0))
+  (corfu-right-margin-width 1.0)
 
-(use-package corfu-prescient :ensure t)
+  :config
+  (use-package prescient
+    :ensure t
+    :bind ( :map corfu-map ("M-s" . prescient-toggle-map) )
+    :init
+    (prescient-persist-mode +1)
+    (add-to-list 'completion-styles 'prescient))
+
+  (use-package corfu-prescient
+    :ensure t
+    :after corfu
+    :custom (corfu-prescient-enable-filtering t)
+    :init
+    (corfu-prescient-mode +1)))
 
 (use-package company
   :ensure t
@@ -3128,14 +3143,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (dolist (cape-function '( cape-dict cape-history cape-keyword cape-emoji ))
     (add-hook 'completion-at-point-functions cape-function)))
-
-(use-package prescient
-  :ensure t
-  :init
-  (add-to-list 'completion-styles 'prescient)
-
-  :config
-  (prescient-persist-mode +1))
 
 (use-package vertico
   :doc "https://github.com/minad/vertico/wiki"
