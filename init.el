@@ -1561,15 +1561,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package jinx
   :ensure t
   :delight jinx-mode
-  :bind
-  ( :map ctl-period-map ("f" . jinx-correct-word))
+  :bind ( :map ctl-period-map
+          ("f" . jinx-correct-word)
+
+          :map global-map
+          ("M-$" . jinx-correct)
+          ("C-M-$" . jinx-languages)  )
 
   :custom
   (jinx-languages "en_US de")
 
-  ( :map global-map
-    ("M-$" . jinx-correct)
-    ("C-M-$" . jinx-languages) )
+
   :init
   (global-jinx-mode +1)
 
