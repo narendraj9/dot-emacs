@@ -1631,11 +1631,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("C-n" . corfu-next)
           ("C-p" . corfu-previous) )
 
-  :hook (after-init . global-corfu-mode)
+  :hook
+  (after-init . global-corfu-mode)
+  (prog-mode . (lambda () (setq-local corfu-auto t)))
 
   :custom
   (corfu-preselect 'first)
-  (corfu-auto t)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
   (corfu-right-margin-width 1.0)
