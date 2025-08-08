@@ -663,6 +663,7 @@ Otherwise, limit to only `org-mode' files."
         org-ditaa-jar-path
         (expand-file-name "~/miscellany/assets/ditaa/ditaa.jar")))
 
+(use-package ob-mermaid :ensure t)
 
 (use-package ob
   :after org

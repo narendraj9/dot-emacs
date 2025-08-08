@@ -97,11 +97,14 @@
                               repo branch path))
                (command (format "src api -query='%s' | jq -r .data.repository.commit.file.content" query)))
           (message "Command: %s" command)
-          (with-current-buffer (get-buffer-create "*sourcegraph-output*")
+          (with-current-buffer (get-buffer-create " *sourcegraph file content*")
+            (erase-buffer)
             (insert (shell-command-to-string command))
             (goto-char (point-min))
-            ;; TODO: Fix
-            (goto-line 5)))
+            (goto-line 5)
+            (funcall (assoc-default path auto-mode-alist 'string-match))
+            (display-buffer-in-direction (current-buffer) '((direction . right)))
+            (font-lock-fontify-buffer)))
       (message "No valid Sourcegraph URL found at point"))))
 
 (defun sourcegraph-browse-repo-mrs ()

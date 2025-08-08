@@ -2893,6 +2893,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq timeclock-file
         (expand-file-name "timelog" emacs-assets-directory)))
 
+(use-package mermaid-mode
+  :ensure t)
+
 (use-package org-agenda
   :defer t
   :bind ( :map org-agenda-mode-map
