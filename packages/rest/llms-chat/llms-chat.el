@@ -140,7 +140,7 @@
   (gptel-make-openai "OpenAI"
     :key (or (and (boundp 'openai-secret-key) openai-secret-key)
              (llms-chat--api-key-from-auth-source "api.openai.com"))
-    :models '(gpt-3.5-turbo gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)
+    :models '(gpt-5 gpt-3.5-turbo gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)
     :stream t))
 
 (defvar llms-chat-gptel-anthropic-backend
@@ -203,9 +203,6 @@
       :stream t
       :models '(grok-4 grok-3))))
 
-
-(setq gptel-backend llms-chat-gptel-openai-backend
-      gptel-model  'gpt-4.1)
 
 (defvar llms-chat-openrouter-models nil)
 (defun llms-chat-openrouter-models ()
