@@ -3814,7 +3814,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package apheleia
   :doc "Auto-format code after save."
   :ensure t
-  :delight
+  :delight apheleia-mode
   :init
   (apheleia-global-mode +1))
 
