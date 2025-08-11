@@ -4078,6 +4078,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package jsonnet-mode
   :ensure t
+  :bind ( :map jsonnet-mode-map ("C-M-a" . backward-sentence) )
   :hook ( jsonnet-mode . --eglot-ensure ))
 
 
