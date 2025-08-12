@@ -2960,6 +2960,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
             (lambda ()
               (visual-line-mode +1)
               (visual-wrap-prefix-mode +1)
+              (add-to-list 'completion-at-point-functions #'cape-emoji)
               (let ((typo-abbrevs-file (expand-file-name "lib/abbrevs/typos-defs"
                                                          user-emacs-directory)))
                 (when (file-exists-p typo-abbrevs-file)
