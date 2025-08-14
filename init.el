@@ -2082,7 +2082,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :init
   (dolist (lang '( bash c c++ css elixir go html java js json lua markdown
-                   python ruby rust scala typescript ))
+                   python ruby rust typescript ))
     (add-to-list 'major-mode-remap-alist
                  (cons (intern (format "%s-mode" lang))
                        (intern (format "%s-ts-mode" lang)))))
