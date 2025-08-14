@@ -4647,7 +4647,7 @@ buffer."
   :bind ( :map ctl-m-map
           ("i RET" . gptel-send)
           ("i t"   . copilot-mode)
-          ("i a"   . claude-code*)
+          ("i a"   . claude-code-ide)
 
           ("i b"   . llms-chat)
           ("i w"   . llms-writing-spin-up-companion)
@@ -4655,7 +4655,8 @@ buffer."
 
           ("i d"   . esi-dictate-start)
 
-          ("i q"   . gptel-quick)
+          ("i q"   . gptel-quick*)
+          ("i Q"   . gptel-quick-comment*)
           ("i c"   . gptel)
           ("i m"   . gptel-menu)
           ("i r"   . gptel-rewrite)

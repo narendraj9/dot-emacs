@@ -268,8 +268,23 @@ LLM is pending."
     (let ((gptel-use-tools nil)
           (prompt (if (region-active-p)
                       (buffer-substring-no-properties (region-beginning) (region-end))
-                    (read-string "Prompt: "))))
-      (gptel-quick prompt))))
+                    (read-string "Text: "))))
+      (gptel-quick prompt)))
+
+  (defun gptel-quick-comment* ()
+    (interactive)
+    (let ((gptel-use-tools nil)
+          (gptel-quick-system-message
+           (lambda (count)
+             (concat "Write a review of the text I share with you.\n"
+                     "Limit yourself to " (number-to-string count) " words but make sure you convey information within the word limit.\n"
+                     "- If you see code, do a concise code review focusing on common community conventions.\n"
+                     "- If you see general text, help me improve the clarity and highlight mistakes that might cause confusion."
+                     "- If there is non-English text, help me understand the meaning and teach me specifics so that my knowledge of the foreign langauge improves.")))
+          (query-text (if (region-active-p)
+                          (buffer-substring-no-properties (region-beginning) (region-end))
+                        (read-string "Text: "))))
+      (gptel-quick query-text))))
 
 (use-package macher
   :vc ( :url "https://github.com/kmontag/macher"
@@ -293,7 +308,8 @@ LLM is pending."
 
 (use-package claude-code-ide
   :vc ( :url "https://github.com/manzaltu/claude-code-ide.el"
-        :rev :newest ))
+        :rev :newest )
+  :custom (claude-code-ide-terminal-backend 'eat))
 
 (use-package aidermacs
   :ensure t
