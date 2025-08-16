@@ -1639,18 +1639,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("TAB" . indent-for-tab-command)
 
           :map corfu-map
-          ("M-s" . prescient-toggle-map)
-          ("TAB" . corfu-expand)
-          ("RET" . corfu-complete)
-          ("C-n" . corfu-next)
-          ("C-p" . corfu-previous) )
+          ("M-s"   . prescient-toggle-map)
+          ("TAB"   . corfu-complete)
+          ("M-TAB" . corfu-expand)
+          ("C-n"   . corfu-next)
+          ("C-p"   . corfu-previous) )
 
   :hook
   (after-init . global-corfu-mode)
   (prog-mode . (lambda () (setq-local corfu-auto t)))
 
   :custom
-  (corfu-preselect 'first)
+  (corfu-preselect 'valid)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
   (corfu-right-margin-width 1.0))
