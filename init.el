@@ -2381,6 +2381,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (beginning-of-line)
     (recenter 0 t)))
 
+(use-package helpful
+  :ensure t
+  :bind
+  (("C-h f" . helpful-callable)
+   ("C-h v" . helpful-variable)
+   ("C-h o" . helpful-symbol)))
+
 (use-package help-at-pt
   :bind ( :map ctl-m-map ("." . display-help-at-pt-dwim) )
 
@@ -3188,6 +3195,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (describe-symbol grid reverse)
      (describe-variable grid reverse)
      (describe-function grid reverse)
+     (helpful-symbol grid reverse)
+     (helpful-variable grid reverse)
+     (helpful-callable grid reverse)
      (execute-extended-command unobtrusive)))
 
   :init
