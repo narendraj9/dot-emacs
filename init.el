@@ -1629,8 +1629,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-p" . completion-preview-prev-candidate) )
 
   :custom
+  (completion-preview-sort-function #'prescient-completion-sort)
   (completion-preview-overlay-priority 1200)
-  (completion-preview-exact-match-only t))
+  (completion-preview-exact-match-only nil))
 
 (use-package corfu
   :ensure t
