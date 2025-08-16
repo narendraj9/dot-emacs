@@ -1606,6 +1606,17 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package prescient
+  :ensure t
+  :demand t
+  :custom
+  (prescient-filter-method '(literal-prefix fuzzy))
+  (prescient-history-length 1024)
+
+  :config
+  (prescient-persist-mode +1)
+  (add-to-list 'completion-styles 'prescient))
+
 (use-package completion-preview
   :delight completion-preview-mode
   :init
@@ -1621,13 +1632,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (completion-preview-overlay-priority 1200)
   (completion-preview-exact-match-only t))
 
-
 (use-package corfu
   :ensure t
   :bind ( :map global-map
           ("TAB" . indent-for-tab-command)
 
           :map corfu-map
+          ("M-s" . prescient-toggle-map)
           ("TAB" . corfu-expand)
           ("RET" . corfu-complete)
           ("C-n" . corfu-next)
@@ -1641,22 +1652,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (corfu-preselect 'first)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
-  (corfu-right-margin-width 1.0)
+  (corfu-right-margin-width 1.0))
 
-  :config
-  (use-package prescient
-    :ensure t
-    :bind ( :map corfu-map ("M-s" . prescient-toggle-map) )
-    :init
-    (prescient-persist-mode +1)
-    (add-to-list 'completion-styles 'prescient))
-
-  (use-package corfu-prescient
-    :ensure t
-    :after corfu
-    :custom (corfu-prescient-enable-filtering t)
-    :init
-    (corfu-prescient-mode +1)))
+(use-package corfu-prescient
+  :ensure t
+  :after corfu
+  :custom (corfu-prescient-enable-filtering t)
+  :init
+  (corfu-prescient-mode +1))
 
 (use-package company
   :ensure t
@@ -1899,7 +1902,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :defer 5
   :mode "\\.journal\\'"
-  :bind ( :map ledger-mode-map ("+" . hledger-increment-amount) )
+  :bind ( :map ledger-mode-map ("C-c +" . hledger-increment-amount) )
   :config
   (setq-default ledger-master-file
                 (expand-file-name "~/miscellany/personal/finance/accounting.journal"))
@@ -3227,6 +3230,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package consult
   :ensure t
   :custom (consult-preview-key "M-.")
+  :config
+  (require 'consult-imenu)
+
   :bind
   ( :map global-map
     ("M-s f"   . consult-find)
