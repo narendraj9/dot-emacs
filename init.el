@@ -1457,6 +1457,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (split-window-vertically)
     (call-interactively 'isearch-forward)))
 
+(use-package ctrlf
+  :ensure t
+  :bind ( :map ctrlf-minibuffer-mode-map
+          ("TAB" . ctrlf-next-match)
+          ("<backtab>" . ctrlf-previous-match) )
+  :init
+  (ctrlf-mode +1))
+
 (use-package avy
   :ensure t
   :bind ( ("M-g w" . avy-goto-word-1)
@@ -1623,15 +1631,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (global-completion-preview-mode +1)
 
   :bind ( :map completion-preview-active-mode-map
-          ("C-i" . completion-preview-insert)
-          ("M-i" . completion-preview-complete)
-          ("M-n" . completion-preview-next-candidate)
-          ("M-p" . completion-preview-prev-candidate) )
+          ("RET"   . completion-preview-insert*)
+          ("C-i"   . completion-preview-insert)
+          ("M-i"   . completion-preview-complete)
+          ("M-n"   . completion-preview-next-candidate)
+          ("M-p"   . completion-preview-prev-candidate) )
 
   :custom
   (completion-preview-sort-function #'prescient-completion-sort)
   (completion-preview-overlay-priority 1200)
-  (completion-preview-exact-match-only nil))
+  (completion-preview-exact-match-only nil)
+
+  :preface
+  (defun completion-preview-insert* ()
+    (interactive)
+    (completion-preview-insert)
+    (newline-and-indent)))
 
 (use-package corfu
   :ensure t
