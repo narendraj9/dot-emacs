@@ -312,6 +312,7 @@ LLM is pending."
   :custom
   (claude-code-ide-terminal-backend 'eat)
   (claude-code-ide-cli-extra-flags "--model opus")
+  (claude-code-ide-use-side-window nil)
 
   :config
   (claude-code-ide-emacs-tools-setup))
