@@ -309,10 +309,12 @@ LLM is pending."
 (use-package claude-code-ide
   :vc ( :url "https://github.com/manzaltu/claude-code-ide.el"
         :rev :newest )
+  :demand t
   :custom
   (claude-code-ide-terminal-backend 'eat)
   (claude-code-ide-cli-extra-flags "--model opus")
   (claude-code-ide-use-side-window nil)
+  (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
 
   :config
   (claude-code-ide-emacs-tools-setup))

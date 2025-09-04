@@ -375,6 +375,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package mode-line-config
   :demand t
   :load-path "etc/"
+  :bind ( :map ctl-m-map ("m" . mode-line-config-flash-cleaner-line) )
   :config
   (set-face-attribute 'mode-line-active nil :inherit 'mode-line)
   (set-face-attribute 'mode-line-inactive nil :inherit 'mode-line)
@@ -1458,6 +1459,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (call-interactively 'isearch-forward)))
 
 (use-package ctrlf
+  :disabled t
   :ensure t
   :bind ( :map ctrlf-minibuffer-mode-map
           ("TAB" . ctrlf-next-match)
@@ -1618,7 +1620,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :demand t
   :custom
-  (prescient-filter-method '(literal-prefix fuzzy))
+  (prescient-filter-method '(literal-prefix literal fuzzy))
   (prescient-history-length 1024)
 
   :config
@@ -2646,29 +2648,19 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package eat
   :ensure t
-  :bind (
-         :map eat-mode-map
-         ("<C-m> h" . --eat-hide-cursor)
-         ;; ( "s-<return>" . --eat-toggle )
-         ;; ( "M-S-<return>" . --eat-toggle )
-         )
+  :bind ( :map ctl-quote-map ( "C-c" . --eat-toggle ) )
 
   :delight eat-eshell-mode
-  :custom ( eat-kill-buffer-on-exit t
-            eshell-visual-commands (list) )
+  :custom
+  (eat-kill-buffer-on-exit t)
 
   :preface
-  (defun --eat-hide-cursor ()
-    (interactive)
-    (setq-local cursor-type nil))
-
   (defun --eat-toggle ()
     (interactive)
     (if (eq major-mode 'eat-mode)
         (set-window-configuration (get this-command :window-config))
       (put this-command :window-config (current-window-configuration))
       (eat))))
-
 
 (use-package yequake
   :disabled t
@@ -3196,14 +3188,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    '((imenu buffer)))
 
   (vertico-multiform-commands
-   '((consult-imenu buffer)
-     (consult-grep buffer)
+   '((consult-grep buffer)
      (consult-grep-dwim buffer)
      (consult-git-grep buffer)
      (consult-ripgrep buffer)
      (xref-find-references buffer)
 
      ;; -- here: nil => vertical
+     (consult-imenu)
      (consult-line)
      (consult-yank-pop reverse)
 
@@ -4120,8 +4112,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package vc
   :bind ("C-x v C-s" . vc-log-search)
-  :config
-  (setq vc-display-status t))
+  :custom
+  (vc-display-status nil))
 
 (use-package diff-mode
   :config
@@ -4668,7 +4660,7 @@ buffer."
   :init
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
-  (dolist (feature (list 'copilot 'gptel 'esi-dictate))
+  (dolist (feature (list 'copilot 'gptel 'esi-dictate 'claude-code-ide))
     (eval-after-load feature
       '(progn
          (require 'llms)
