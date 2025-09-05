@@ -1620,7 +1620,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :demand t
   :custom
-  (prescient-filter-method '(literal-prefix literal fuzzy))
+  (prescient-filter-method '(literal regexp initialism))
   (prescient-history-length 1024)
 
   :config
@@ -2648,7 +2648,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package eat
   :ensure t
-  :bind ( :map ctl-quote-map ( "C-c" . --eat-toggle ) )
+  :bind ( :map ctl-quote-map ( "C-c" . --eat-toggle )
+          :map ctl-m-map ("C-c" . --eat-toggle-cursor) )
 
   :delight eat-eshell-mode
   :custom
@@ -2660,7 +2661,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (if (eq major-mode 'eat-mode)
         (set-window-configuration (get this-command :window-config))
       (put this-command :window-config (current-window-configuration))
-      (eat))))
+      (eat)))
+
+  (defun --eat-toggle-cursor ()
+    (interactive)
+    (if cursor-type
+        (progn (put this-command 'cursor-type cursor-type)
+               (setq-local cursor-type nil))
+      (setq-local cursor-type
+                  (get this-command 'cursor-type)))))
 
 (use-package yequake
   :disabled t
