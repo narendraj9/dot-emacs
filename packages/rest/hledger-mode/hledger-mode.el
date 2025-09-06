@@ -167,6 +167,10 @@ COMMAND, ARG and IGNORED the regular meanings."
   (hledger-mode-init)
   (hledger-init-thing-at-point))
 
+(defun hledger-refresh-accounts-cache ()
+  (interactive)
+  (setq hledger-accounts-cache (hledger-get-accounts)))
+
 ;;;###autoload
 (define-derived-mode hledger-view-mode special-mode "HLedger View" ()
   "Major mode for viewing hledger reports. I have a separate major mode
