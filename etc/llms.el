@@ -164,6 +164,7 @@ LLM is pending."
           ("C-c M-g" . gptel-abort)
           ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
+           (gptel-cache t)
            (gptel-confirm-tool-calls t)
            (gptel-include-tool-results t)
            (gptel-expert-commands t)
