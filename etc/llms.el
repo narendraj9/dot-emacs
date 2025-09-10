@@ -165,7 +165,7 @@ LLM is pending."
           ("RET" . gptel-send) )
   :custom ((gptel-use-curl t)
            (gptel-cache t)
-           (gptel-confirm-tool-calls t)
+           (gptel-confirm-tool-calls 'auto)
            (gptel-include-tool-results t)
            (gptel-expert-commands t)
            (gptel-default-mode 'org-mode)
@@ -312,6 +312,7 @@ LLM is pending."
         :rev :newest )
   :demand t
   :custom
+  (claude-code-ide-use-ide-diff nil)
   (claude-code-ide-terminal-backend 'eat)
   (claude-code-ide-cli-extra-flags "--model opus")
   (claude-code-ide-use-side-window nil)
