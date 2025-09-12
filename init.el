@@ -1179,7 +1179,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (defvar project-find-file-dwim* (list))
   (defun project-find-file-dwim* (arg)
     (interactive "P")
-    (let* ((project-root (project-root (project-current)))
+    (let* ((project (or (project-current)
+                        (project-read-project)))
+           (project-root (project-root project))
            (default-directory (or (when arg
                                     (read-directory-name "Directory: "))
                                   (plist-get project-find-file-dwim* project-root #'equal)
@@ -1187,11 +1189,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (when arg
         (setq project-find-file-dwim*
               (plist-put project-find-file-dwim* project-root default-directory #'equal)))
-      (->> (shell-command-to-string "git ls-files")
-           (s-lines)
-           (seq-filter #'s-present?)
-           (completing-read (format "[%s]: " default-directory))
-           (find-file)))))
+      (if (not (equal '(vc Git) (take 2 project)))
+          (consult-find default-directory)
+        (->> (shell-command-to-string "git ls-files")
+             (s-lines)
+             (seq-filter #'s-present?)
+             (completing-read (format "[%s]: " default-directory))
+             (find-file))))))
 
 
 
