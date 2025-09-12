@@ -319,7 +319,17 @@ LLM is pending."
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
 
   :config
-  (claude-code-ide-emacs-tools-setup))
+  (claude-code-ide-emacs-tools-setup)
+
+  :init
+  ;; Claude Code uses a few symbols that constantly change the line height in
+  ;; Emacs. This is an attempt to fix that.
+  ;; I am rescaling these fonts so that if they are used for unicode characters
+  ;; appearining in animations, the line height isn't increased temporarily.
+  (add-to-list 'face-font-rescale-alist
+               '(".*STIX Two Math.*" . 0.7))
+  (add-to-list 'face-font-rescale-alist
+               '(".*Arial Unicode MS.*" . 0.7)))
 
 (use-package aidermacs
   :ensure t

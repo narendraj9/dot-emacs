@@ -165,7 +165,7 @@
 
 (defun app/font-setup ()
   ;; Setup my favorite fonts [if available]
-  (dolist (font (list "Symbola" "Noto Sans" "Fira Code"))
+  (dolist (font (list "Symbola" "SF Compact Rounded" "Noto Sans" "Fira Code"))
     (if (app/font-availablep font)
         (set-fontset-font "fontset-default" nil
                           (font-spec :name font :size 15)

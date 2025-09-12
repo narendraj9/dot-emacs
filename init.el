@@ -1143,15 +1143,14 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package project
   :bind ( :map project-prefix-map
-          ("o" . git-ls-files-find-file)
           ("m" . magit-status)
 
           :map global-map
           ("M-RET" . project-find-file)
 
           :map ctl-m-map
-          ("C-f" . git-ls-files-find-file)
-          ("f"   . git-ls-files-find-file) )
+          ("C-f" . project-find-file-dwim*)
+          ("f"   . project-find-file-dwim*) )
 
   :init
   (setq find-program
@@ -1177,14 +1176,24 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                '(magit-project-status "Magit Status" ?m))
 
   :preface
-  (defun git-ls-files-find-file ()
-    (interactive)
-    (let ((default-directory (project-root (project-current))))
+  (defvar project-find-file-dwim* (list))
+  (defun project-find-file-dwim* (arg)
+    (interactive "P")
+    (let* ((project-root (project-root (project-current)))
+           (default-directory (or (when arg
+                                    (read-directory-name "Directory: "))
+                                  (plist-get project-find-file-dwim* project-root #'equal)
+                                  project-root)))
+      (when arg
+        (setq project-find-file-dwim*
+              (plist-put project-find-file-dwim* project-root default-directory #'equal)))
       (->> (shell-command-to-string "git ls-files")
            (s-lines)
            (seq-filter #'s-present?)
-           (completing-read "Find File: ")
+           (completing-read (format "[%s]: " default-directory))
            (find-file)))))
+
+
 
 ;;; SESSIONS and BOOKMARKS
 ;; ──────────────────────────────────────────────────────────────────
