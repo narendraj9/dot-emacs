@@ -1629,17 +1629,23 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
 
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles partial-completion)))))
+
 (use-package completion-preview
   :delight completion-preview-mode
   :init
   (global-completion-preview-mode +1)
 
   :bind ( :map completion-preview-active-mode-map
-          ("RET"   . completion-preview-insert*)
-          ("C-i"   . completion-preview-insert)
-          ("M-i"   . completion-preview-complete)
-          ("M-n"   . completion-preview-next-candidate)
-          ("M-p"   . completion-preview-prev-candidate) )
+          ("TAB" . indent-for-tab-command)
+          ("RET" . completion-preview-insert*)
+          ("M-i" . completion-preview-insert)
+          ("M-n" . completion-preview-next-candidate)
+          ("M-p" . completion-preview-prev-candidate) )
 
   :custom
   (completion-preview-overlay-priority 1200)
@@ -1657,8 +1663,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("TAB" . indent-for-tab-command)
 
           :map corfu-map
-          ("TAB"   . corfu-complete)
-          ("M-TAB" . corfu-expand)
+          ("TAB"   . corfu-expand)
           ("C-n"   . corfu-next)
           ("C-p"   . corfu-previous) )
 
@@ -1948,7 +1953,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (require 'company)
               (make-local-variable 'company-backends)
               (add-to-list 'company-backends 'hledger-company)
-              (setq-local completion-styles '(basic partial-completion))
+              (setq-local completion-styles '(basic partial-completion orderless))
               (setq corfu-auto-delay 0.1)
               (add-to-list 'completion-at-point-functions
                            (cape-company-to-capf 'hledger-company))))
@@ -3134,13 +3139,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (when (< 10 (minibuffer-depth))
                 (top-level))))
 
-  :init
-  ;; `partial-completion' is very useful for `completion-at-point'
-  ;; (advice-add 'completion-at-point
-  ;;             :around
-  ;;             (lambda (compl-at-point &rest args)
-  ;;               (let ((completion-styles '(basic partial-completion)))
-  ;;                 (apply compl-at-point args))))
   :preface
   (defun yank-symbol-to-minibuffer-or-kill-region (&optional arg)
     (interactive "P")
