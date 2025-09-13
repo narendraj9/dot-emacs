@@ -1629,17 +1629,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; Completion at Point
 ;; ――――――――――――――――――――――――――――――――――――――――
 
-(use-package prescient
-  :ensure t
-  :demand t
-  :custom
-  (prescient-filter-method '(literal regexp initialism))
-  (prescient-history-length 1024)
-
-  :config
-  (prescient-persist-mode +1)
-  (add-to-list 'completion-styles 'prescient))
-
 (use-package completion-preview
   :delight completion-preview-mode
   :init
@@ -1653,7 +1642,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-p"   . completion-preview-prev-candidate) )
 
   :custom
-  (completion-preview-sort-function #'prescient-completion-sort)
   (completion-preview-overlay-priority 1200)
   (completion-preview-exact-match-only nil)
 
@@ -1669,7 +1657,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("TAB" . indent-for-tab-command)
 
           :map corfu-map
-          ("M-s"   . prescient-toggle-map)
           ("TAB"   . corfu-complete)
           ("M-TAB" . corfu-expand)
           ("C-n"   . corfu-next)
@@ -1677,6 +1664,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :hook
   (after-init . global-corfu-mode)
+  (after-init . corfu-history-mode)
   (prog-mode . (lambda () (setq-local corfu-auto t)))
 
   :custom
@@ -1684,13 +1672,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
   (corfu-right-margin-width 1.0))
-
-(use-package corfu-prescient
-  :ensure t
-  :after corfu
-  :custom (corfu-prescient-enable-filtering t)
-  :init
-  (corfu-prescient-mode +1))
 
 (use-package company
   :ensure t
@@ -1715,10 +1696,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (lambda (capf-fn &rest args)
                 (let ((completion-styles '(basic partial-completion)))
                   (apply capf-fn args)))))
-
-(use-package company-prescient
-  :ensure t
-  :hook (company-mode . company-prescient-mode))
 
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -3236,11 +3213,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package vertico-quick
   :after vertico
   :bind ( :map vertico-map ("M-q" . vertico-quick-jump) ))
-
-(use-package vertico-prescient
-  :ensure t
-  :init
-  (vertico-prescient-mode +1))
 
 (use-package marginalia
   :ensure t
