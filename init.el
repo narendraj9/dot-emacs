@@ -1673,6 +1673,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (prog-mode . (lambda () (setq-local corfu-auto t)))
 
   :custom
+  (corfu-preview-current t)
   (corfu-preselect 'valid)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
