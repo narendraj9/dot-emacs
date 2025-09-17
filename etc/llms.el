@@ -253,6 +253,10 @@ LLM is pending."
   (gptel-quick-timeout 60)
 
   :config
+  (unless (eq system-type 'darwin)
+    (setq gptel-quick-model 'groq/compound-mini)
+    (setq gptel-quick-backend llms-chat-gptel-groq-backend))
+
   (setq gptel-quick-system-message
         (lambda (count)
           (concat (format "Write an informative summary in roughly %s words." count)

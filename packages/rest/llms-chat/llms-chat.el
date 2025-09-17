@@ -159,6 +159,8 @@
     :stream t
     :key (llms-chat--api-key-from-auth-source "api.groq.com")
     :models '(moonshotai/kimi-k2-instruct
+              groq/compound
+              groq/compound-mini
               gemma2-9b-it
               meta-llama/llama-guard-4-12b
               deepseek-r1-distill-llama-70b
