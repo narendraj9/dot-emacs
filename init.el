@@ -4682,7 +4682,12 @@ buffer."
 
           ("i I" . macher-implement)
           ("i R" . macher-revise)
-          ("i A" . macher-abort) )
+          ("i A" . macher-abort)
+
+          :map ctl-period-map
+          ("h" . gptel-quick*)
+          ("z" . gptel-buffer-toggle*)
+          ("c" . gptel))
 
   :config
   (ensure-windows-on-right "\\*chatgpt .*\\*" "\\*Anthropic\\*")

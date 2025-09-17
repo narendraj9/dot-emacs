@@ -384,7 +384,7 @@ easily."
   (let ((jbuffer (hledger-get-perfin-buffer keep-bufferp))
         (jcommand (concat "hledger -f "
                           (shell-quote-argument hledger-jfile)
-                          " "
+                          " --color=no "
                           command
                           (or extra-args hledger-extra-args))))
     (with-current-buffer jbuffer
