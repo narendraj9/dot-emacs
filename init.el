@@ -697,7 +697,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-hook 'atomic-chrome-edit-done-hook
             (lambda ()
               (when (window-configuration-p atomic-chrome--saved-window-configuration)
-                (set-window-configuration atomic-chrome--saved-window-configuration)))))
+                (set-window-configuration atomic-chrome--saved-window-configuration))))
+  :config
+  ;; Start the server to enable browser extension connectivity
+  ;; Supports both Chrome and Firefox via GhostText extension
+  (atomic-chrome-start-server))
 
 (use-package paren
   :config
