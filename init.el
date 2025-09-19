@@ -1143,6 +1143,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package project
   :bind ( :map project-prefix-map
+          ("a" . ag-project)
           ("m" . magit-status)
 
           :map global-map
@@ -2632,6 +2633,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-to-list 'eshell-expand-input-functions #'eshell-expand-history-references))
 
 (use-package eshell-atuin
+  :disabled t
   :ensure t
   :after eshell
   :hook (eshell-mode . eshell-atuin-mode)
@@ -4686,6 +4688,7 @@ buffer."
 
           :map ctl-period-map
           ("h" . gptel-quick*)
+          ("H" . gptel-quick-comment*)
           ("z" . gptel-buffer-toggle*)
           ("c" . gptel))
 
