@@ -139,23 +139,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (repeat-mode +1))
 
   :config
-  (setq repeat-exit-timeout 30)
-
-  :preface
-  (defmacro define-repeat-map (name &rest bindings)
-    ;; TODO: add a keyword argument to provide a name for the keymap instead of
-    ;; the auto-generated name.
-    (declare (indent 1))
-    ;; Use gensym just for the name of the symbol, let the generated
-    ;; symbol be garbage collected. `intern' then creates a new symbol
-    ;; that is used and remains valid globally.
-    (let ((keymap-symbol (or name (intern (symbol-name (gensym "repeat-map--"))))))
-      `(let* ((m (make-sparse-keymap)))
-         (dolist (binding (quote ,bindings))
-           (define-key m (kbd (car binding)) (cdr binding))
-           (put (cdr binding) 'repeat-map (quote ,keymap-symbol)))
-         (defvar ,keymap-symbol m)))))
-
+  (setq repeat-exit-timeout 30))
 
 (use-package defs
   :doc "Var and function definitions that must be loaded before
@@ -184,9 +168,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (bind-keys* :prefix "C-h x" :prefix-map ctl-h-x-map)
 
   :config
-  (define-repeat-map repeat/url-navigation
-    ("f" . jump-to-next-url)
-    ("b" . jump-to-previous-url))
+  (defvar-keymap repeat/url-navigation
+    :repeat t
+    "f" #'jump-to-next-url
+    "b" #'jump-to-previous-url)
 
   :bind ( ("C-c m" . switch-to-minibuffer)
           ("C-c 0" . quick-switch-themes)
@@ -1038,8 +1023,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( :map ctl-x-map ("C-SPC" . goto-last-change) )
   :init
-  (define-repeat-map repeat/goto
-    ("C-SPC" .  goto-last-change)))
+  (defvar-keymap repeat/goto
+    :repeat t
+    "C-SPC" #'goto-last-change))
 
 (use-package goto-line-preview
   :ensure t
@@ -1251,11 +1237,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (put '--scroll-down-other-window 'repeat-exit-timeout 4)
   (put '--scroll-up-other-window 'repeat-exit-timeout 4)
 
-  (define-repeat-map repeat/scroll-window
-    ("J" . --scroll-up-other-window)
-    ("K" . --scroll-down-other-window)
-    ("j" . pixel-scroll-up)
-    ("k" . pixel-scroll-down))
+  (defvar-keymap repeat/scroll-window
+    :repeat t
+    "J" #'--scroll-up-other-window
+    "K" #'--scroll-down-other-window
+    "j" #'pixel-scroll-up
+    "k" #'pixel-scroll-down)
 
   :preface
   (defun --scroll-down-other-window ()
@@ -1410,8 +1397,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :bind ( :map goto-map ("TAB" . mwim) )
   :init
-  (define-repeat-map repeat/mwim
-    ("TAB" . mwim)))
+  (defvar-keymap repeat/mwim
+    :repeat t
+    "TAB" #'mwim))
 
 (use-package isearch
   :doc "Search for the string in the active region, if there is any."
@@ -1727,8 +1715,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         dired-hide-details-hide-information-lines nil)
 
   :config
-  (define-repeat-map repeat/dired-up-directory
-    ("u" . dired-up-directory))
+  (defvar-keymap repeat/dired-up-directory
+    :repeat t
+    "u" #'dired-up-directory)
 
   (setq dired-auto-revert-buffer t)
 
@@ -2101,8 +2090,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                  (cons (intern (format "%s-mode" lang))
                        (intern (format "%s-ts-mode" lang)))))
 
-  (define-repeat-map repeat/treesit-backward-up
-    ("u" . --treesit-backward-up))
+  (defvar-keymap repeat/treesit-backward-up
+    :repeat t
+    "u" #'--treesit-backward-up)
 
   :config
   ;; Official grammar implementations
@@ -2404,10 +2394,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :config
   (require 'popup)
-  (define-repeat-map repeat/help-at-pt
-    ("<" . scan-buf-previous-region)
-    (">" . scan-buf-next-region)
-    ("." . display-help-at-pt-dwim))
+  (defvar-keymap repeat/help-at-pt
+    :repeat t
+    "<" #'scan-buf-previous-region
+    ">" #'scan-buf-next-region
+    "." #'display-help-at-pt-dwim)
 
   :preface
   (defun display-help-at-pt-dwim (&optional prefix)

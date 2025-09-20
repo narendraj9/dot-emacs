@@ -336,6 +336,9 @@ LLM is pending."
 
 (use-package eca
   :ensure t
+  :bind ( :map eca-chat-mode-map
+          ("C-c C-n" . eca-chat-go-to-next-expandable-block)
+          ("C-c C-p" . eca-chat-go-to-prev-expandable-block) )
   :config
   (when-let (api-key (and (eq system-type 'gnu/linux)
                           (gptel-api-key-from-auth-source "api.openai.com")))
@@ -369,6 +372,7 @@ LLM is pending."
 
 (use-package llm :ensure t)
 (use-package esi-dictate
+  :disabled t
   :demand t
   :vc ( :url "https://github.com/narendraj9/emacs-speech-input"
         :rev :newest )
@@ -387,10 +391,10 @@ LLM is pending."
   :after gptel
   :init
   (gptel-make-preset 'introspect
-    :pre (lambda () (require 'ragmacs))
-    :tools '("introspection")
-    :system
-    "You are pair programming with the user in Emacs and on Emacs.
+                     :pre (lambda () (require 'ragmacs))
+                     :tools '("introspection")
+                     :system
+                     "You are pair programming with the user in Emacs and on Emacs.
 
  Your job is to dive into Elisp code and understand the APIs and
  structure of elisp libraries and Emacs.  Use the provided tools to do
