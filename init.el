@@ -859,6 +859,28 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("s &" . async-shell-command)
          ("s ." . shell-command-from-region) )
   :hook ((prog-mode hledger-mode)  . comment-auto-fill)
+  :custom
+  (
+   ;; Multiple-cursors changes transient-mark-mode to (only only .. t),
+   ;; if shift-select-mode is enabled.
+   (shift-select-mode nil)
+
+   ;; Make text copied/cut from outside Emacs part of Emacs kill-ring on first
+   ;; kill inside Emacs.
+   (kill-ring-max 1024)
+   (save-interprogram-paste-before-kill t)
+   (kill-do-not-save-duplicates t)
+
+   ;; C-w kill the previous word when no region is active.
+   (kill-region-dwim 'emacs-word)
+
+   (suggest-key-bindings t)
+   (extended-command-suggest-shorter nil)
+   (async-shell-command-buffer 'new-buffer)
+   (set-mark-command-repeat-pop t)
+   (column-number-mode t)
+   (size-indication-mode t) )
+
   :preface
   (defun exchange-point-and-mark* (arg)
     (interactive "P")
@@ -873,15 +895,23 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (define-repeat-map repeat/deletion
     ("C-u" . delete-indentation))
 
-  ;; Multiple-cursors changes transient-mark-mode to (only only .. t),
-  ;; if shift-select-mode is enabled.
-  (setq shift-select-mode nil)
+  ;; ----------------------------------------------------------------------------
 
-  ;; Make text copied/cut from outside Emacs part of Emacs kill-ring on first
-  ;; kill inside Emacs.
-  (setq kill-ring-max 1024
-        save-interprogram-paste-before-kill t
-        kill-do-not-save-duplicates t)
+  (setq-default indent-tabs-mode nil)
+  (delight 'visual-line-mode nil "simple")
+
+  ;; This BROKE multiple cursors! Multiple-cursor uses
+  ;; `exchange-point-and-mark' and creates overlays for active region around
+  ;; fake cursors. This advice was deactivating region after multiple-cursors
+  ;; called `exchange-point-and-mark' for the first time which resulted in
+  ;; strange behaviour when used after activating region.
+  ;;
+  ;; (add-function :after
+  ;;               (symbol-function #'exchange-point-and-mark)
+  ;;               (lambda (&rest _args) (deactivate-mark nil)))
+  (define-key global-map [remap exchange-point-and-mark] #'exchange-point-and-mark*)
+  (add-hook 'activate-mark-hook (lambda () (setq cursor-type (cons 'bar 4))))
+  (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t)))
 
   ;; Temporary
   ;; ----------------------------------------------------------------------------
@@ -902,37 +932,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (message-or-box (mapconcat (lambda (command-freq)
                                    (format "%s: %s" (car command-freq) (cdr command-freq)))
                                  (sort items (lambda (a b) (> (cdr a) (cdr b))))
-                                 "\n"))))
-
-  ;; ----------------------------------------------------------------------------
-
-  (setq suggest-key-bindings t
-        extended-command-suggest-shorter nil)
-
-  (setq-default indent-tabs-mode nil)
-
-  (setq async-shell-command-buffer 'new-buffer
-        set-mark-command-repeat-pop t
-        column-number-mode t
-        size-indication-mode t)
-
-  (delight 'visual-line-mode nil "simple")
-
-  ;; This BROKE multiple cursors! Multiple-cursor uses
-  ;; `exchange-point-and-mark' and creates overlays for active region around
-  ;; fake cursors. This advice was deactivating region after multiple-cursors
-  ;; called `exchange-point-and-mark' for the first time which resulted in
-  ;; strange behaviour when used after activating region.
-  ;;
-  ;; (add-function :after
-  ;;               (symbol-function #'exchange-point-and-mark)
-  ;;               (lambda (&rest _args) (deactivate-mark nil)))
-  (define-key global-map
-              [remap exchange-point-and-mark]
-              #'exchange-point-and-mark*)
-
-  (add-hook 'activate-mark-hook (lambda () (setq cursor-type (cons 'bar 4))))
-  (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t))))
+                                 "\n")))))
 
 (use-package visual-wrap
   :init
@@ -1638,6 +1638,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package completion-preview
   :delight completion-preview-mode
+  :after corfu
   :init
   (global-completion-preview-mode +1)
 
@@ -1651,6 +1652,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :custom
   (completion-preview-overlay-priority 1200)
   (completion-preview-exact-match-only nil)
+  (completion-preview-sort-function corfu-sort-function)
 
   :preface
   (defun completion-preview-insert* ()
