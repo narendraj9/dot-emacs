@@ -337,13 +337,13 @@ LLM is pending."
 (use-package eca
   :ensure t
   :config
-  (cond-let
-    ([api-key (gptel-api-key-from-auth-source "api.anthropic.com")]
-     (setenv "ANTHROPIC_API_KEY"
-             api-key))
+  (when-let (api-key (and (eq system-type 'gnu/linux)
+                          (gptel-api-key-from-auth-source "api.openai.com")))
+    (setenv "OPENAI_API_KEY" api-key))
 
-    ([api-key (gptel-api-key-from-auth-source "api.openai.com")]
-     (setenv "OPENAI_API_KEY" api-key))))
+  (when-let (api-key (and (eq system-type 'darwin)
+                          (gptel-api-key-from-auth-source "api.anthropic.com")))
+    (setenv "ANTHROPIC_API_KEY" api-key)))
 
 (use-package aidermacs
   :ensure t

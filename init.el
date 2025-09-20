@@ -773,7 +773,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;; TEXT-EDITING, FOLDING and NAVIGATION
 ;; ─────────────────────────────────────────────────────────────────
 
-(use-package elec-pair :init (electric-pair-mode +1))
+(use-package elec-pair
+  :init (electric-pair-mode +1))
 
 (use-package grep-edit-mode
   :commands grep-change-to-grep-edit-mode
@@ -814,21 +815,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         (hs-hide-all)
       (hs-show-all))))
 
-(use-package wrap-region
-  :doc "Wrap region with custom chars."
-  :ensure t
-  :hook (after-init . wrap-region-mode)
-  :delight
-  :config
-  (wrap-region-add-wrappers
-   '(("=" "=" nil (org-mode))
-     ("~" "~" nil (org-mode))))
-  (wrap-region-global-mode +1)
-  (wrap-region-remove-wrapper "<" 'org-mode))
-
 (use-package selected
-  :delight selected-minor-mode
+  :disabled t
   :ensure t
+  :delight selected-minor-mode
   :config
   (selected-global-mode +1))
 
@@ -892,8 +882,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (shell-command (buffer-substring-no-properties beg end)))
 
   :config
-  (define-repeat-map repeat/deletion
-    ("C-u" . delete-indentation))
+  (defvar-keymap repeat/deletion
+    :repeat t
+    "C-u" #'delete-indentation)
 
   ;; ----------------------------------------------------------------------------
 
