@@ -816,7 +816,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (hs-show-all))))
 
 (use-package selected
-  :disabled t
   :ensure t
   :delight selected-minor-mode
   :config
@@ -4652,7 +4651,7 @@ buffer."
   :init
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
-  (dolist (feature (list 'copilot 'gptel 'esi-dictate 'claude-code-ide))
+  (dolist (feature (list 'eca 'copilot 'gptel 'esi-dictate 'claude-code-ide))
     (eval-after-load feature
       '(progn
          (require 'llms)
@@ -4670,6 +4669,7 @@ buffer."
           ("i W"   . llms-writing-shutdown)
 
           ("i d"   . esi-dictate-start)
+          ("i e"   . eca)
 
           ("i q"   . gptel-quick*)
           ("i Q"   . gptel-quick-comment*)
