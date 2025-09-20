@@ -334,6 +334,17 @@ LLM is pending."
   (add-to-list 'face-font-rescale-alist
                '(".*Arial Unicode MS.*" . 0.7)))
 
+(use-package eca
+  :ensure t
+  :config
+  (cond-let
+    ([api-key (gptel-api-key-from-auth-source "api.anthropic.com")]
+     (setenv "ANTHROPIC_API_KEY"
+             api-key))
+
+    ([api-key (gptel-api-key-from-auth-source "api.openai.com")]
+     (setenv "OPENAI_API_KEY" api-key))))
+
 (use-package aidermacs
   :ensure t
   :bind ( :map ctl-m-map
