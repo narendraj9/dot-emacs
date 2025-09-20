@@ -2098,7 +2098,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    installed is not configurable yet (fixed to tree-sitter under
    `user-emacs-directory'."
 
+  :custom (treesit-enabled-modes t)
   :init
+  ;; Settings `treesit-enabled-modes' enables *-ts-mode for every possible
+  ;; language in newer versions of Emacs. TBD: Remove it once Emacs is up to
+  ;; date on every machine.
   (dolist (lang '( bash c c++ css elixir go html java js json lua markdown
                    python ruby rust typescript ))
     (add-to-list 'major-mode-remap-alist
