@@ -342,7 +342,7 @@ LLM is pending."
 
 
   :custom
-  (eca-chat-use-side-window t)
+  (eca-chat-use-side-window nil)
   (eca-chat-prompt-prefix-loading "◾ ")
   (eca-chat-expandable-block-open-symbol "➕")
   (eca-chat-expandable-block-close-symbol "➖")
