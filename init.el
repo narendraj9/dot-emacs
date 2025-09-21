@@ -1614,30 +1614,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles partial-completion)))))
 
-(use-package completion-preview
-  :delight completion-preview-mode
-  :after corfu
-  :init
-  (global-completion-preview-mode +1)
-
-  :bind ( :map completion-preview-active-mode-map
-          ("TAB" . indent-for-tab-command)
-          ("RET" . completion-preview-insert*)
-          ("M-i" . completion-preview-insert)
-          ("M-n" . completion-preview-next-candidate)
-          ("M-p" . completion-preview-prev-candidate) )
-
-  :custom
-  (completion-preview-overlay-priority 1200)
-  (completion-preview-exact-match-only nil)
-  (completion-preview-sort-function corfu-sort-function)
-
-  :preface
-  (defun completion-preview-insert* ()
-    (interactive)
-    (completion-preview-insert)
-    (newline-and-indent)))
-
 (use-package corfu
   :ensure t
   :bind ( :map global-map
@@ -1653,12 +1629,39 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (after-init . corfu-history-mode)
   (prog-mode . (lambda () (setq-local corfu-auto t)))
 
+  :init
+  (add-hook 'corfu-history-mode-hook
+            (lambda ()
+              (setopt completion-preview-sort-function corfu-sort-function)))
+
   :custom
   (corfu-preview-current t)
   (corfu-preselect 'valid)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
   (corfu-right-margin-width 1.0))
+
+(use-package completion-preview
+  :delight completion-preview-mode
+  :after corfu
+  :hook (after-init. global-completion-preview-mode)
+
+  :bind ( :map completion-preview-active-mode-map
+          ("TAB" . indent-for-tab-command)
+          ("RET" . completion-preview-insert*)
+          ("M-i" . completion-preview-insert)
+          ("M-n" . completion-preview-next-candidate)
+          ("M-p" . completion-preview-prev-candidate) )
+
+  :custom
+  (completion-preview-overlay-priority 1200)
+  (completion-preview-exact-match-only nil)
+
+  :preface
+  (defun completion-preview-insert* ()
+    (interactive)
+    (completion-preview-insert)
+    (newline-and-indent)))
 
 (use-package company
   :ensure t

@@ -178,7 +178,7 @@ LLM is pending."
           gptel-model 'moonshotai/kimi-k2-instruct))
 
   (require 'gptel-transient)
-  (require 'gptel-curl)
+  (require 'gptel-request)
   (require 'gptel-gemini)
   (require 'gptel-anthropic)
   (require 'gptel-rewrite)

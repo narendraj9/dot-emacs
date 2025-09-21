@@ -36,7 +36,7 @@
 
 (require 'gptel)
 (require 'gptel-transient)
-(require 'gptel-curl)
+(require 'gptel-request)
 (require 'gptel-gemini)
 (require 'gptel-anthropic)
 (require 'gptel-kagi)
