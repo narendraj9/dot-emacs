@@ -339,6 +339,17 @@ LLM is pending."
   :bind ( :map eca-chat-mode-map
           ("C-c C-n" . eca-chat-go-to-next-expandable-block)
           ("C-c C-p" . eca-chat-go-to-prev-expandable-block) )
+
+
+  :custom
+  (eca-chat-use-side-window t)
+  (eca-chat-prompt-prefix-loading "◾ ")
+  (eca-chat-expandable-block-open-symbol "➕")
+  (eca-chat-expandable-block-close-symbol "➖")
+  (eca-chat-mcp-tool-call-loading-symbol "⏳")
+  (eca-chat-mcp-tool-call-error-symbol "✖")
+  (eca-chat-mcp-tool-call-success-symbol "✓")
+
   :config
   (when-let (api-key (and (eq system-type 'gnu/linux)
                           (gptel-api-key-from-auth-source "api.openai.com")))
@@ -391,10 +402,10 @@ LLM is pending."
   :after gptel
   :init
   (gptel-make-preset 'introspect
-                     :pre (lambda () (require 'ragmacs))
-                     :tools '("introspection")
-                     :system
-                     "You are pair programming with the user in Emacs and on Emacs.
+    :pre (lambda () (require 'ragmacs))
+    :tools '("introspection")
+    :system
+    "You are pair programming with the user in Emacs and on Emacs.
 
  Your job is to dive into Elisp code and understand the APIs and
  structure of elisp libraries and Emacs.  Use the provided tools to do

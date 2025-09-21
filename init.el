@@ -386,7 +386,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     something that requires immediate attention.")
 
   (defun fringe-set-louder ()
-    (fringe-mode 20)
+    (fringe-mode 2)
     (set-face-attribute 'fringe nil :inverse-video t))
 
   (defun fringe-restore-default ()
