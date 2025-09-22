@@ -177,13 +177,6 @@ LLM is pending."
     (setq gptel-backend llms-chat-gptel-groq-backend
           gptel-model 'moonshotai/kimi-k2-instruct))
 
-  (require 'gptel-transient)
-  (require 'gptel-request)
-  (require 'gptel-gemini)
-  (require 'gptel-anthropic)
-  (require 'gptel-rewrite)
-  (require 'gptel-integrations)
-
   (gptel-mcp-connect (list "time" "memory" "playwright")
                      #'gptel-mcp--activate-tools)
 
