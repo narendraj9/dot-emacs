@@ -1100,7 +1100,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :delight volatile-highlights-mode
   :hook (after-init . volatile-highlights-mode)
-  :custom (vhl/use-pulsing-visual-effect-p t))
+  :custom
+  (vhl/animation-style 'pulse))
 
 (use-package info
   :config
