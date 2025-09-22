@@ -155,7 +155,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (define-key input-decode-map
               ;; Default: \C-[ => ESC
-              "\C-[" "\C-x")
+              "\C-[" "\C-i")
 
   (define-key input-decode-map
               ;; Default: \C-m => RET
