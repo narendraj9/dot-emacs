@@ -98,13 +98,13 @@ LLM is pending."
   ((mcp-hub-servers
     `(
       ;; Anthropic's reference servers
+      ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
       ("time"                . (:command "uvx" :args ("--isolated" "mcp-server-time" "--local-timezone=Europe/Berlin")))
       ("fetch"               . (:command "uvx" :args ("--isolated" "mcp-server-fetch")))
-      ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+      ("git"                 . (:command "uvx" :args ("--isolated" "mcp-server-git")))
       ("memory"              . ( :command "bunx"
                                  :args ("-y" "@modelcontextprotocol/server-memory")
                                  :env ( :MEMORY_FILE_PATH ,(expand-file-name "mcp-memory.json" emacs-assets-directory) )))
-
 
       ("motherduck" . (:command "uvx" :args ("mcp-server-motherduck" "--db-path" ":memory:")))
 
@@ -178,7 +178,7 @@ LLM is pending."
           gptel-model 'moonshotai/kimi-k2-instruct))
 
   (require 'gptel-integrations)
-  (gptel-mcp-connect (list "time" "memory" "playwright")
+  (gptel-mcp-connect (list "time" "memory" "fetch" "git")
                      #'gptel-mcp--activate-tools)
 
   :preface
