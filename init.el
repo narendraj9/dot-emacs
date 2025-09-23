@@ -3522,6 +3522,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :mode ("\\.pl\\'" . prolog-mode)
   :custom (prolog-system 'gnu))
 
+(use-package lisp
+  :bind ( :map ctl-period-map
+          ("l d" . delete-pair) ))
+
 (use-package emacs-lisp-mode
   :bind (:map emacs-lisp-mode-map
               ("C-c C-k" . eval-buffer*))
@@ -4668,7 +4672,6 @@ buffer."
           ("i w"   . llms-writing-spin-up-companion)
           ("i W"   . llms-writing-shutdown)
 
-          ("i d"   . esi-dictate-start)
           ("i e"   . eca)
 
           ("i q"   . gptel-quick*)
@@ -4679,6 +4682,7 @@ buffer."
           ("i z"   . gptel-buffer-toggle*)
           ("C-z"   . gptel-buffer-toggle*)
 
+          ("i M" . macher-action)
           ("i I" . macher-implement)
           ("i R" . macher-revise)
           ("i A" . macher-abort)
