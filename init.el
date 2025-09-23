@@ -1586,12 +1586,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;;     (hook-into-modes #'--eglot-ensure 'markdown-mode 'text-mode 'org-mode)
   ;;   (message "harper-ls isn't installed on system."))
 
-  :config
-  (eval-when-compile
-    (require 'vertico-multiform))
-
-  (add-to-list 'vertico-multiform-categories
-               '(jinx grid (vertico-grid-annotate . 20))))
+  )
 
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -3176,7 +3171,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("<tab>" . vertico-insert) )
   :custom
   (vertico-multiform-categories
-   '((imenu buffer)))
+   '((imenu buffer)
+     (jinx grid (vertico-grid-annotate . 20))))
 
   (vertico-multiform-commands
    '((consult-grep buffer)
@@ -3189,6 +3185,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (consult-imenu)
      (consult-line)
      (consult-yank-pop reverse)
+     (execute-extended-command)
 
      (embark-bindings grid reverse)
      (describe-symbol grid reverse)
@@ -3196,8 +3193,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      (describe-function grid reverse)
      (helpful-symbol grid reverse)
      (helpful-variable grid reverse)
-     (helpful-callable grid reverse)
-     (execute-extended-command unobtrusive)))
+     (helpful-callable grid reverse)))
 
   :init
   (vertico-multiform-mode +1))
