@@ -1140,7 +1140,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
         ;; Useful for marking sub-directories inside a version controlled
         ;; project but doesn't work without version control.
         project-vc-extra-root-markers
-        (list ".project-x" "Cargo.toml"
+        (list ".project" ".project-x" "Cargo.toml"
               ;; Projects with multiple `pom.xml' files encounter issues with
               ;; the following:
               ;; "pom.xml"
