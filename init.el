@@ -1167,7 +1167,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       (when arg
         (setq project-find-file-dwim*
               (plist-put project-find-file-dwim* project-root default-directory #'equal)))
-      (if (not (equal '(vc Git) (take 2 project)))
+      (if (not (equal 'vc (car project)))
           (consult-find default-directory)
         (->> (shell-command-to-string "git ls-files")
              (s-lines)
@@ -3678,8 +3678,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-                                :where point
-                                :duration 'command)
+      :where point
+      :duration 'command)
     ;; Preserve the return value.
     value))
 
