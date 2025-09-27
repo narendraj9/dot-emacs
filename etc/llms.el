@@ -293,17 +293,6 @@ LLM is pending."
   :custom (macher-action-buffer-ui 'org)
   :config (macher-install))
 
-(use-package minuet :ensure t)
-
-(use-package llm-tool-collection
-  :disabled t
-  :vc ( :url "https://github.com/skissue/llm-tool-collection.git"
-        :rev :newest )
-  :after gptel
-  :config
-  (mapcar (apply-partially #'apply #'gptel-make-tool)
-          (llm-tool-collection-get-all)))
-
 (use-package claude-code-ide
   :vc ( :url "https://github.com/manzaltu/claude-code-ide.el"
         :rev :newest )
@@ -353,29 +342,6 @@ LLM is pending."
                           (gptel-api-key-from-auth-source "api.anthropic.com")))
     (setenv "ANTHROPIC_API_KEY" api-key)))
 
-(use-package aidermacs
-  :ensure t
-  :bind ( :map ctl-m-map
-          ("a" . aidermacs-transient-menu) )
-
-  :custom
-  (aidermacs-extra-args '("--no-gitignore"))
-  (aidermacs-show-diff-after-change nil)
-  (aidermacs-backend 'vterm)
-  (aidermacs-use-architect-mode t)
-  (aidermacs-architect-model "o1-mini")
-  (aidermacs-default-model "gpt-4.1")
-
-  :config
-  (setenv "OPENAI_API_KEY"
-          (auth-source-pick-first-password :host "api.openai.com"))
-
-  (add-to-list 'display-buffer-alist
-               '("\\*aidermacs:.*\\*" display-buffer-in-direction
-                 (direction . right)
-                 (window-width . 0.5))))
-
-(use-package llm :ensure t)
 (use-package esi-dictate
   :disabled t
   :demand t
@@ -396,10 +362,10 @@ LLM is pending."
   :after gptel
   :init
   (gptel-make-preset 'introspect
-    :pre (lambda () (require 'ragmacs))
-    :tools '("introspection")
-    :system
-    "You are pair programming with the user in Emacs and on Emacs.
+                     :pre (lambda () (require 'ragmacs))
+                     :tools '("introspection")
+                     :system
+                     "You are pair programming with the user in Emacs and on Emacs.
 
  Your job is to dive into Elisp code and understand the APIs and
  structure of elisp libraries and Emacs.  Use the provided tools to do
@@ -431,6 +397,10 @@ LLM is pending."
  2. If you use LaTeX notation, enclose math in \( and \), or \[ and \] delimiters.
  </formatting>"))
 
+
+(use-package shell-maker :ensure t)
+(use-package acp :vc (:url "https://github.com/xenodium/acp.el"))
+(use-package agent-shell :vc (:url "https://github.com/xenodium/agent-shell"))
 
 (provide 'llms)
 ;;; llms.el ends here
