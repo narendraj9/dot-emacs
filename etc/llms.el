@@ -34,6 +34,22 @@
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
 
+(defun gptel-archive-buffer-on-kill ()
+  "Save the contents of the current buffer before it's killed, if in gptel-mode."
+  (when (memq 'gptel-mode local-minor-modes)
+    (let* ((archive-dir (expand-file-name "gptel-archive" emacs-assets-directory))
+           (timestamp (format-time-string "%Y-%m-%d_%H:%M:%S"))
+           (filename (expand-file-name (format "gptel-chat-%s.org" timestamp)
+                                       archive-dir))
+           (contents (buffer-string)))
+      (make-directory archive-dir t)
+      (with-temp-file filename
+        (insert (format "#+ARCHIVED: %s\n" timestamp)
+                (format "#+SOURCE: %s\n" (buffer-name))
+                (format "#+GPTEL_BACKEND: %s\n" (gptel-backend-name gptel-backend))
+                (format "#+GPTEL_MODEL: %s\n\n" gptel-model))
+        (insert contents)))))
+
 (defun llms-make-progress-indicator (beg end)
   "Create a spinner indicator for some feedback while an API request to an
 LLM is pending."
@@ -180,6 +196,13 @@ LLM is pending."
   (require 'gptel-integrations)
   (gptel-mcp-connect (list "time" "memory" "fetch" "git")
                      #'gptel-mcp--activate-tools)
+
+  (add-hook 'gptel-mode-hook
+            (lambda ()
+              (add-hook 'kill-buffer-hook
+                        #'gptel-archive-buffer-on-kill
+                        nil
+                        t)))
 
   :preface
   (defun gptel-switch-model* ()
