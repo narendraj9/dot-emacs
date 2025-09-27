@@ -2618,18 +2618,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (add-to-list 'eshell-expand-input-functions #'eshell-expand-history-references))
 
-(use-package eshell-atuin
-  :disabled t
-  :ensure t
-  :after eshell
-  :hook (eshell-mode . eshell-atuin-mode)
-  :config
-  (advice-add 'eshell-atuin--get-input
-              :filter-return
-              (lambda (input)
-                (unless (string-empty-p input)
-                  input))))
-
 (use-package eat
   :ensure t
   :bind ( :map ctl-quote-map ( "C-c" . --eat-toggle )
