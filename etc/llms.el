@@ -34,6 +34,28 @@
 (use-package request :ensure t :demand t)
 (use-package spinner :ensure t :demand t)
 
+(defvar gptel-quick-rewrite* nil
+  "History list for rewrite prompts.")
+
+(defun gptel-quick-rewrite* ()
+  "Quick rewrite region using last prompt (or prompt anew). Useful for
+copying text from websites and storing it in a specific format."
+  (interactive)
+  (let* ((default (car gptel-quick-rewrite*))
+         (prompt (read-string
+                  (if default
+                      (format "Rewrite prompt (default %s): " default)
+                    "Rewrite prompt: ")
+                  nil 'gptel-quick-rewrite* default))
+         (text (buffer-substring-no-properties
+                (region-beginning) (region-end))))
+    (delete-region (region-beginning) (region-end))
+    (gptel-request (concat prompt "\n\n" text)
+      :callback
+      (lambda (result info)
+        (with-current-buffer (plist-get info :buffer)
+          (insert result))))))
+
 (defun gptel-archive-buffer-on-kill ()
   "Save the contents of the current buffer before it's killed, if in gptel-mode."
   (when (memq 'gptel-mode local-minor-modes)

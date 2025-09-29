@@ -988,7 +988,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :custom (mc/always-run-for-all t)
   :init
-  (setd mc/list-file "var/mc-lists.el")
+  (setd mc/list-file (locate-user-emacs-file "etc/mc-lists.el"))
   (add-hook 'multiple-cursors-mode-hook
             (lambda ()
               (if multiple-cursors-mode
@@ -3667,8 +3667,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun endless/eval-overlay (value point)
     (cider--make-result-overlay (format "%S" value)
-      :where point
-      :duration 'command)
+                                :where point
+                                :duration 'command)
     ;; Preserve the return value.
     value))
 
