@@ -1631,8 +1631,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               (setopt completion-preview-sort-function corfu-sort-function)))
 
   :custom
-  (corfu-preview-current t)
-  (corfu-preselect 'valid)
+  (corfu-preview-current 'insert)
+  (corfu-preselect 'prompt)
+  (corfu-auto t)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
   (corfu-right-margin-width 1.0))

@@ -103,6 +103,8 @@ LLM is pending."
 
 (use-package mcp
   :ensure t
+  :vc ( :url "https://github.com/lizqwerscott/mcp.el"
+        :rev :newest )
   :config
   (require 'mcp-hub)
   (when (file-exists-p "~/code/mcp-projects/")
@@ -385,10 +387,10 @@ LLM is pending."
   :after gptel
   :init
   (gptel-make-preset 'introspect
-                     :pre (lambda () (require 'ragmacs))
-                     :tools '("introspection")
-                     :system
-                     "You are pair programming with the user in Emacs and on Emacs.
+    :pre (lambda () (require 'ragmacs))
+    :tools '("introspection")
+    :system
+    "You are pair programming with the user in Emacs and on Emacs.
 
  Your job is to dive into Elisp code and understand the APIs and
  structure of elisp libraries and Emacs.  Use the provided tools to do
