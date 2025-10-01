@@ -4641,6 +4641,7 @@ buffer."
 
 (use-package llms
   :load-path "etc/"
+  :commands (gptel-quick-rewrite*)
   :init
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
