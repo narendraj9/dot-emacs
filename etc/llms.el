@@ -56,7 +56,7 @@ copying text from websites and storing it in a specific format."
         (with-current-buffer (plist-get info :buffer)
           (insert result))))))
 
-(defun gptel-archive-buffer-on-kill ()
+(defun gptel-archive-buffer-contents ()
   "Save the contents of the current buffer before it's killed, if in gptel-mode."
   (when (memq 'gptel-mode local-minor-modes)
     (let* ((archive-dir (expand-file-name "gptel-archive" emacs-assets-directory))
@@ -224,7 +224,7 @@ LLM is pending."
   (add-hook 'gptel-mode-hook
             (lambda ()
               (add-hook 'kill-buffer-hook
-                        #'gptel-archive-buffer-on-kill
+                        #'gptel-archive-buffer-contents
                         nil
                         t)))
 
@@ -241,6 +241,7 @@ LLM is pending."
 
   (defun gptel-clear* ()
     (interactive)
+    (gptel-archive-buffer-contents)
     (forward-line -1)
     (delete-region (point-min) (point))
     (forward-line)
