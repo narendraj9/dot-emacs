@@ -265,10 +265,7 @@ LLM is pending."
                 (delete-windows-on)
                 (when (buffer-live-p prev-buffer)
                   (switch-to-buffer prev-buffer)))))
-        (call-interactively #'gptel))))
-
-  )
-
+        (call-interactively #'gptel)))))
 
 (use-package gptel-custom-tools :after gptel :load-path "etc/")
 (use-package gptel-ext :after gptel :load-path "etc/")
