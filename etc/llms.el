@@ -271,6 +271,32 @@ LLM is pending."
 (use-package gptel-custom-tools :after gptel :load-path "etc/")
 (use-package gptel-ext :after gptel :load-path "etc/")
 
+(use-package inline-diff
+  :vc ( :url "https://code.tecosaur.net/tec/inline-diff"
+        :rev :newest )
+  :after gptel-rewrite)
+
+(use-package gptel-rewrite
+  :after gptel
+  :bind ( :map gptel-rewrite-actions-map
+          ("C-c C-i" . gptel--rewrite-inline-diff) )
+  :config
+  (defun gptel--rewrite-inline-diff (&optional ovs)
+    "Start an inline-diff session on OVS."
+    (interactive (list (gptel--rewrite-overlay-at)))
+    (unless (require 'inline-diff nil t)
+      (user-error "Inline diffs require the inline-diff package."))
+    (when-let* ((ov-buf (overlay-buffer (or (car-safe ovs) ovs)))
+                ((buffer-live-p ov-buf)))
+      (with-current-buffer ov-buf
+        (cl-loop for ov in (ensure-list ovs)
+                 for ov-beg = (overlay-start ov)
+                 for ov-end = (overlay-end ov)
+                 for response = (overlay-get ov 'gptel-rewrite)
+                 do (delete-overlay ov)
+                 (inline-diff-words
+                  ov-beg ov-end response))))))
+
 (use-package gptel-prompts
   :vc ( :url "https://github.com/jwiegley/gptel-prompts.git"
         :rev :newest )
