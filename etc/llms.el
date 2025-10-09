@@ -211,11 +211,8 @@ LLM is pending."
            (gptel-default-mode 'org-mode)
            (gptel-curl-file-size-threshold 1300000))
   :config
-  (if (eq system-type 'darwin)
-      (setq gptel-backend llms-chat-gptel-anthropic-backend
-            gptel-model 'claude-sonnet-4-0)
-    (setq gptel-backend llms-chat-gptel-groq-backend
-          gptel-model 'moonshotai/kimi-k2-instruct))
+  (setq gptel-backend llms-chat-gptel-anthropic-backend
+        gptel-model 'claude-sonnet-4-0)
 
   (require 'gptel-integrations)
   (gptel-mcp-connect (list "time" "memory" "fetch" "git")
