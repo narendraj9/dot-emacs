@@ -1616,7 +1616,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("TAB" . indent-for-tab-command)
 
           :map corfu-map
-          ("TAB"   . corfu-expand)
+          ("TAB"   . corfu-complete)
           ("C-n"   . corfu-next)
           ("C-p"   . corfu-previous) )
 
@@ -1632,7 +1632,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :custom
   (corfu-preview-current 'insert)
-  (corfu-preselect 'prompt)
+  (corfu-preselect 'first)
   (corfu-auto t)
   (corfu-auto-delay 1.0)
   (corfu-left-margin-width 1.0)
