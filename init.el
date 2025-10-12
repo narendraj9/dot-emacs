@@ -3006,6 +3006,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (xeft-inline-highlight
    ((t (:inherit underline :extend t :foreground "DarkOliveGreen2")))))
 
+
+(use-package tmr
+  :doc "Timer management package."
+  :ensure t)
+
 (use-package pomodoro
   :load-path "packages/rest/pomodoro"
   :defer 5
