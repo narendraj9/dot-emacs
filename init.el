@@ -1125,6 +1125,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
           :map global-map
           ("M-RET" . project-find-file)
+          ("C-x g" . magit-status)
 
           :map ctl-m-map
           ("C-f" . project-find-file-dwim*)
@@ -3146,7 +3147,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package cape
   :ensure t
   :init
-  (dolist (cape-function '( cape-dict cape-history cape-keyword cape-emoji ))
+  (dolist (cape-function '( cape-dabbrev cape-file cape-keyword cape-history cape-emoji ))
     (add-hook 'completion-at-point-functions cape-function)))
 
 (use-package vertico

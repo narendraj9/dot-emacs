@@ -162,6 +162,12 @@ LLM is pending."
       ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
 
       ;; --
+      ("vantage-instances"   . (:command "bunx" :args ("mcp-remote" "https://instances-mcp.vantage.sh/mcp")))
+      ("local-sandbox"       . (:command "docker" :args ("compose"
+                                                         "-f"
+                                                         ,(expand-file-name "~/code/sandbox-mcp/docker-compose.yml")
+                                                         "up"
+                                                         "jupyter-mcp")))
       ("smithery.ai/google-maps" .
        ( :command "bunx"
          :args ("mcp-remote"
@@ -212,7 +218,7 @@ LLM is pending."
            (gptel-curl-file-size-threshold 1300000))
   :config
   (setq gptel-backend llms-chat-gptel-anthropic-backend
-        gptel-model 'claude-opus-4-1-20250805)
+        gptel-model 'claude-sonnet-4-5)
 
   (require 'gptel-integrations)
   (gptel-mcp-connect (list "time" "memory" "fetch" "git")
@@ -467,8 +473,8 @@ LLM is pending."
 
 
 (use-package shell-maker :ensure t)
-(use-package acp :vc (:url "https://github.com/xenodium/acp.el"))
-(use-package agent-shell :vc (:url "https://github.com/xenodium/agent-shell"))
+(use-package acp :vc (:url "https://github.com/xenodium/acp.el" :rev :newest))
+(use-package agent-shell :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest))
 
 (provide 'llms)
 ;;; llms.el ends here
