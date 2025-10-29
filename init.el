@@ -1819,16 +1819,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :defer 2
   :ensure t
   :delight yas-minor-mode
-  :bind (("C-c & C-h" . yas-describe-tables)
-         :map yas-keymap
-         ("<tab>" . my-yas-next-field-or-maybe-expand))
-  :preface
-  (defun my-yas-next-field-or-maybe-expand ()
-    "When in company, stay in company."
-    (interactive)
-    (if (company-tooltip-visible-p)
-        (company-complete-common-or-cycle)
-      (yas-next-field-or-maybe-expand)))
+  :bind (("C-c & C-h" . yas-describe-tables))
   :init
   (setq yas-verbosity 2)
 
@@ -4383,6 +4374,11 @@ buffer."
   :config
   (setd pdf-view-restore-filename "var/pdf-view-restore.el")
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
+
+(use-package reader
+  :vc ( :url "https://codeberg.org/divyaranjan/emacs-reader"
+        :make "all"
+        :rev :newest ))
 
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────

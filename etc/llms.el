@@ -162,12 +162,8 @@ LLM is pending."
       ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
 
       ;; --
-      ("vantage-instances"   . (:command "bunx" :args ("mcp-remote" "https://instances-mcp.vantage.sh/mcp")))
-      ("local-sandbox"       . (:command "docker" :args ("compose"
-                                                         "-f"
-                                                         ,(expand-file-name "~/code/sandbox-mcp/docker-compose.yml")
-                                                         "up"
-                                                         "jupyter-mcp")))
+      ("vantage-instances"       . (:command "bunx" :args ("mcp-remote" "https://instances-mcp.vantage.sh/mcp")))
+      ("local-sandbox"           . (:url "http://localhost:3000/mcp"))
       ("smithery.ai/google-maps" .
        ( :command "bunx"
          :args ("mcp-remote"

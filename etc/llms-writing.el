@@ -59,12 +59,17 @@
             (when (and (eq (current-buffer) attached-buffer))
               (let ((gptel-backend llms-chat-gptel-openai-backend)
                     (gptel-model 'gpt-4o)
+                    (system-prompt (if (string-empty-p instruction)
+                                       (alist-get 'writing gptel-directives)
+                                     instruction))
                     (text (if (region-active-p)
                               (buffer-substring (region-beginning) (region-end))
-                            (save-excursion (backward-paragraph)
-                                            (buffer-substring (point)
-                                                              (progn (forward-paragraph)
-                                                                     (point))))))
+                            (buffer-substring (save-excursion (if (re-search-backward "\n\n" (point-min) t)
+                                                                  (point)
+                                                                (point-min)))
+                                              (save-excursion (if (re-search-forward "\n\n" (point-max) t)
+                                                                  (point)
+                                                                (point-max))))))
                     (inhibit-read-only t))
                 (with-current-buffer buffer
                   (setq diff-mode-read-only nil)
@@ -73,29 +78,30 @@
                         (format "Last Updated: %s\n" (current-time-string)))
                   (insert text)
                   (gptel-request nil
-                    :system instruction
+                    :system system-prompt
                     :in-place t
                     :callback
                     (lambda (response info)
                       (let ((inhibit-read-only t)
                             (diff-use-labels nil)
-                            (diff-command "delta"))
+                            (diff-command "difft"))
                         (with-temp-buffer
                           (if (not response)
                               (error "Error talking to LLM API" info)
                             (insert response)
-                            (diff-no-select buffer (current-buffer)
-                                            ""
+                            (diff-no-select buffer
+                                            (current-buffer)
                                             ;; If using `difftastic', the
-                                            ;; following flags make sense:
-                                            ;; (format "--color always --display side-by-side --width %s --exit-code --strip-cr on"
-                                            ;;         (shell-quote-argument (number-to-string (window-text-width))))
+                                            ;; following flags make sense
+                                            (format "--color always --display inline --width %s --exit-code --strip-cr on"
+                                                    (shell-quote-argument (number-to-string (window-text-width))))
                                             t
                                             buffer)
                             (with-current-buffer buffer
                               (ansi-color-apply-on-region (point-min) (point-max))
                               (visual-line-mode +1)
-                              (visual-wrap-prefix-mode +1)))))))
+                              (visual-wrap-prefix-mode +1)
+                              (difftastic-mode)))))))
                   (markdown-overlays-put)))))))
     (add-to-list 'display-buffer-alist
                  `(,(buffer-name buffer) display-buffer-in-direction
