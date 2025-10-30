@@ -51,10 +51,10 @@ copying text from websites and storing it in a specific format."
                 (region-beginning) (region-end))))
     (delete-region (region-beginning) (region-end))
     (gptel-request (concat prompt "\n\n" text)
-      :callback
-      (lambda (result info)
-        (with-current-buffer (plist-get info :buffer)
-          (insert result))))))
+                   :callback
+                   (lambda (result info)
+                     (with-current-buffer (plist-get info :buffer)
+                       (insert result))))))
 
 (defun gptel-archive-buffer-contents ()
   "Save the contents of the current buffer before it's killed, if in gptel-mode."
@@ -162,6 +162,7 @@ LLM is pending."
       ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
 
       ;; --
+      ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
       ("vantage-instances"       . (:command "bunx" :args ("mcp-remote" "https://instances-mcp.vantage.sh/mcp")))
       ("local-sandbox"           . (:url "http://localhost:3000/mcp"))
       ("smithery.ai/google-maps" .
@@ -171,26 +172,7 @@ LLM is pending."
                         "https://server.smithery.ai/@smithery-ai/google-maps/mcp?profile=%s&api_key=%s"
                         (when-let ((user-password (auth-source-user-and-password "server.smithery.ai")))
                           (list (car user-password)
-                                (cadr user-password)))))) )
-
-      ;; -- Experimental
-      ;; (dolist (tool gptel-tools)
-      ;;   (unless (gptel-tool-description tool)
-      ;;     (setf (gptel-tool-description tool) (gptel-tool-name tool))))
-      ;; This MCP server adds tools with missing description fields. That
-      ;; doesn't work with most LLM API.
-      ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
-
-
-      ;; ("qdrant" . (:url "http://localhost:8000/sse"))
-      ;; ("graphlit" . (
-      ;;                :command "npx"
-      ;;                :args ("-y" "graphlit-mcp-server")
-      ;;                :env (
-      ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
-      ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
-      ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
-      ))))
+                                (cadr user-password)))))))))))
 
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
@@ -432,10 +414,10 @@ LLM is pending."
   :after gptel
   :init
   (gptel-make-preset 'introspect
-    :pre (lambda () (require 'ragmacs))
-    :tools '("introspection")
-    :system
-    "You are pair programming with the user in Emacs and on Emacs.
+                     :pre (lambda () (require 'ragmacs))
+                     :tools '("introspection")
+                     :system
+                     "You are pair programming with the user in Emacs and on Emacs.
 
  Your job is to dive into Elisp code and understand the APIs and
  structure of elisp libraries and Emacs.  Use the provided tools to do
