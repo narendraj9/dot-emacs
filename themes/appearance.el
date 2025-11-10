@@ -53,7 +53,7 @@
           (magenta-warmer "#8895ff")
           (magenta-intense "#72afff")))
   :init
-  (add-hook 'ef-themes-post-load-hook #'my-ef-themes-mode-line)
+  (add-hook 'modus-themes-post-load-hook #'my-ef-themes-mode-line)
 
   :preface
   (defun my-ef-themes-mode-line ()

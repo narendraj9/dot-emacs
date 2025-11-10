@@ -51,10 +51,10 @@ copying text from websites and storing it in a specific format."
                 (region-beginning) (region-end))))
     (delete-region (region-beginning) (region-end))
     (gptel-request (concat prompt "\n\n" text)
-                   :callback
-                   (lambda (result info)
-                     (with-current-buffer (plist-get info :buffer)
-                       (insert result))))))
+      :callback
+      (lambda (result info)
+        (with-current-buffer (plist-get info :buffer)
+          (insert result))))))
 
 (defun gptel-archive-buffer-contents ()
   "Save the contents of the current buffer before it's killed, if in gptel-mode."
@@ -350,9 +350,9 @@ LLM is pending."
         :rev :newest )
   :demand t
   :custom
+  ;; (claude-code-ide-cli-extra-flags "--model opus")
   (claude-code-ide-use-ide-diff nil)
   (claude-code-ide-terminal-backend 'eat)
-  (claude-code-ide-cli-extra-flags "--model opus")
   (claude-code-ide-use-side-window nil)
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
 
@@ -360,6 +360,7 @@ LLM is pending."
   (claude-code-ide-emacs-tools-setup)
 
   :init
+  (setenv "DISABLE_AUTOUPDATER" "true")
   ;; Claude Code uses a few symbols that constantly change the line height in
   ;; Emacs. This is an attempt to fix that.
   ;; I am rescaling these fonts so that if they are used for unicode characters
@@ -414,10 +415,10 @@ LLM is pending."
   :after gptel
   :init
   (gptel-make-preset 'introspect
-                     :pre (lambda () (require 'ragmacs))
-                     :tools '("introspection")
-                     :system
-                     "You are pair programming with the user in Emacs and on Emacs.
+    :pre (lambda () (require 'ragmacs))
+    :tools '("introspection")
+    :system
+    "You are pair programming with the user in Emacs and on Emacs.
 
  Your job is to dive into Elisp code and understand the APIs and
  structure of elisp libraries and Emacs.  Use the provided tools to do
