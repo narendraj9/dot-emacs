@@ -3016,8 +3016,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("x e"        . pomodoro-edit-title)
           ("x b"        . pomodoro-start-break)
           ("x B"        . pomodoro-start-long-break) )
-  ;; :init
-  ;; (add-hook 'org-agenda-finalize-hook #'pomodoro-append-to-org-agenda)
   :config
   (pomodoro-mode +1))
 
@@ -4376,6 +4374,7 @@ buffer."
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
 
 (use-package reader
+  :disabled t
   :vc ( :url "https://codeberg.org/divyaranjan/emacs-reader"
         :make "all"
         :rev :newest ))
