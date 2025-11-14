@@ -195,8 +195,11 @@ LLM is pending."
            (gptel-default-mode 'org-mode)
            (gptel-curl-file-size-threshold 1300000))
   :config
-  (setq gptel-backend llms-chat-gptel-anthropic-backend
-        gptel-model 'claude-sonnet-4-5)
+  (if (eq system-type 'gnu/linux)
+      (setq gptel-backend llms-chat-gptel-gemini-backend
+            gptel-model 'gemini-3-pro-preview)
+    (setq gptel-backend llms-chat-gptel-anthropic-backend
+          gptel-model 'claude-sonnet-4-5))
 
   (require 'gptel-integrations)
   (gptel-mcp-connect (list "time" "memory" "fetch" "git")
@@ -453,7 +456,8 @@ LLM is pending."
 
 (use-package shell-maker :ensure t)
 (use-package acp :vc (:url "https://github.com/xenodium/acp.el" :rev :newest))
-(use-package agent-shell :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest))
+(use-package agent-shell
+  :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest))
 
 (provide 'llms)
 ;;; llms.el ends here
