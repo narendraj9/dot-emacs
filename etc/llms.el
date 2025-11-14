@@ -453,7 +453,8 @@ LLM is pending."
 
 (use-package shell-maker :ensure t)
 (use-package acp :vc (:url "https://github.com/xenodium/acp.el" :rev :newest))
-(use-package agent-shell :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest))
+(use-package agent-shell
+  :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest))
 
 (provide 'llms)
 ;;; llms.el ends here

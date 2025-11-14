@@ -4662,6 +4662,7 @@ buffer."
           ("i W"   . llms-writing-shutdown)
 
           ("i e"   . eca)
+          ("i g"   . agent-shell-google-start-gemini)
 
           ("i q"   . gptel-quick*)
           ("i Q"   . gptel-quick-comment*)
