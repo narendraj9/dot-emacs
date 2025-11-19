@@ -324,6 +324,18 @@ LLM is pending."
                     (read-string "Text: "))))
       (gptel-quick prompt)))
 
+  (defun gptel-quick-proofread* ()
+    (interactive)
+    (let ((gptel-use-tools nil)
+          (gptel-quick-system-message
+           (lambda (_count)
+             (alist-get 'proof gptel-directives)))
+          (prompt
+           (if (region-active-p)
+               (buffer-substring-no-properties (region-beginning) (region-end))
+             (read-string "Text: "))))
+      (gptel-quick (format "Here's the text:---\n%s\n---"  prompt))))
+
   (defun gptel-quick-comment* ()
     (interactive)
     (let ((gptel-use-tools nil)
@@ -353,10 +365,10 @@ LLM is pending."
         :rev :newest )
   :demand t
   :custom
-  ;; (claude-code-ide-cli-extra-flags "--model opus")
+  (claude-code-ide-window-width 80)
   (claude-code-ide-use-ide-diff nil)
   (claude-code-ide-terminal-backend 'eat)
-  (claude-code-ide-use-side-window nil)
+  (Claude-code-ide-use-side-window nil)
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
 
   :config

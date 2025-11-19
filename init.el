@@ -3811,7 +3811,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :delight apheleia-mode
   :init
-  (apheleia-global-mode +1))
+  (apheleia-global-mode +1)
+
+  :config
+  (add-to-list 'apheleia-mode-alist '(jinja2-mode . prettier)))
 
 ;;; ERLANG AND ELIXIR
 ;; ──────────────────────────────────────────────────────────────────
@@ -4665,6 +4668,7 @@ buffer."
           ("i g"   . agent-shell-google-start-gemini)
 
           ("i q"   . gptel-quick*)
+          ("i p"   . gptel-quick-proofread*)
           ("i Q"   . gptel-quick-comment*)
           ("i c"   . gptel)
           ("i m"   . gptel-menu)
