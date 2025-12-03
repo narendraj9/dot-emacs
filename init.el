@@ -1227,14 +1227,21 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (undelete-frame-mode +1))
 
-(use-package pixel-scroll
+(use-package ultra-scroll
   :bind ( :map ctl-m-map
           ("j" . --scroll-up-other-window)
           ("k" . --scroll-down-other-window) )
-  :custom (pixel-scroll-precision-use-momentum t)
+  :vc ( :url "https://github.com/jdtsmith/ultra-scroll"
+        :rev :newest )
+  :config
+  (ultra-scroll-mode +1)
+
   :init
-  (pixel-scroll-mode +1)
-  (pixel-scroll-precision-mode +1)
+  (setq scroll-conservatively 3
+        scroll-margin 0)
+
+  (defvar scroll-down-command #'pixel-scroll-down)
+  (defvar scroll-up-command #'pixel-up-down)
 
   (put '--scroll-down-other-window 'repeat-exit-timeout 4)
   (put '--scroll-up-other-window 'repeat-exit-timeout 4)
@@ -1250,21 +1257,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (defun --scroll-down-other-window ()
     (interactive)
     (with-selected-window (next-window (selected-window))
-      (pixel-scroll-down)))
+      (funcall scroll-down-command*)))
 
   (defun --scroll-up-other-window ()
     (interactive)
     (with-selected-window (next-window (selected-window))
-      (pixel-scroll-up))))
-
-(use-package ultra-scroll
-  :vc ( :url "https://github.com/jdtsmith/ultra-scroll"
-        :rev :newest )
-  :init
-  (setq scroll-conservatively 3
-        scroll-margin 0)
-  :config
-  (ultra-scroll-mode +1))
+      (funcall scroll-up-command*)))  )
 
 (use-package window
   :bind ( :map window-prefix-map
@@ -2619,6 +2617,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :delight eat-eshell-mode
   :custom
   (eat-kill-buffer-on-exit t)
+  (eat-minimum-latency 0.02)
+  (eat-maximum-latency 0.1)
 
   :preface
   (defun --eat-toggle ()
