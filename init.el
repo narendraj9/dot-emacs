@@ -2617,8 +2617,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :delight eat-eshell-mode
   :custom
   (eat-kill-buffer-on-exit t)
-  (eat-minimum-latency 0.02)
-  (eat-maximum-latency 0.1)
 
   :preface
   (defun --eat-toggle ()
