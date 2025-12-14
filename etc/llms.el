@@ -303,8 +303,8 @@ LLM is pending."
 
   :config
   (unless (eq system-type 'darwin)
-    (setq gptel-quick-model 'groq/compound-mini)
-    (setq gptel-quick-backend llms-chat-gptel-groq-backend))
+    (setq gptel-quick-model 'gemini-3-pro-preview)
+    (setq gptel-quick-backend llms-chat-gptel-gemini-backend))
 
   (setq gptel-quick-system-message
         (lambda (count)
@@ -471,5 +471,9 @@ LLM is pending."
 (use-package agent-shell
   :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest))
 
-(provide 'llms)
-;;; llms.el ends here
+(use-package shell-maker
+  :custom
+  (shell-maker-transcript-default-path
+   (expand-file-name "agent-shell-archive/" emacs-assets-directory))
+  (shell-maker-transcript-default-filename
+   (lambda () (format-time-string "%F-%T-agent-shell.txt"))))

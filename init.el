@@ -3331,6 +3331,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     :pin melpa))
 
 (use-package scala-cli-repl
+  :defer t
   :after scala-mode
   :vc ( :url "https://github.com/ag91/scala-cli-repl"
         :rev :neweset )

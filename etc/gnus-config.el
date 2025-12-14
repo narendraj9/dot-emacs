@@ -150,8 +150,6 @@
           ("from" "rustlang@discoursemail.com" "Newsletters")
           ("from" "morningcupofcoding@humanreadablemag.com" "Newsletters")
           ("from" "channing@indiehackers.com" "Newsletters")
-          ("from" ".*@googlegroups.com" "Google Groups")
-          ("to" ".*@googlegroups.com" "Google Groups")
           ("to" ".*\+newsletters?@gmail.com" "Newsletters")
           ("from" "marketing@portablecto.com" "Business")
           ;; Unmatched mail goes to the catch all
