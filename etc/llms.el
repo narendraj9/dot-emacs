@@ -477,3 +477,6 @@ LLM is pending."
    (expand-file-name "agent-shell-archive/" emacs-assets-directory))
   (shell-maker-transcript-default-filename
    (lambda () (format-time-string "%F-%T-agent-shell.txt"))))
+
+
+(provide 'llms)
