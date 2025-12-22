@@ -2546,6 +2546,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package eshell
   :bind ( :map ctl-quote-map ("C-p" . eshell-toggle) )
   :hook ( eshell-exit-hook . delete-window-if-dedicated-to-eshell )
+  :custom (eshell-history-size 8192)
   :preface
   (defun delete-window-if-dedicated-to-eshell ()
     (when (< 1 (count-windows))
