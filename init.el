@@ -4318,12 +4318,6 @@ buffer."
   (setd pdf-view-restore-filename "var/pdf-view-restore.el")
   (add-hook 'pdf-view-mode-hook #'pdf-view-restore-mode))
 
-(use-package reader
-  :disabled t
-  :vc ( :url "https://codeberg.org/divyaranjan/emacs-reader"
-        :make "all"
-        :rev :newest ))
-
 ;;; ERC
 ;;  ─────────────────────────────────────────────────────────────────
 (use-package erc-config :commands erc-start! :load-path "etc/" :defer t)
