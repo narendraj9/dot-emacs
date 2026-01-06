@@ -129,6 +129,11 @@ LLM is pending."
         :rev :newest )
   :config
   (require 'mcp-hub)
+
+  (when (boundp 'additional-mcp-servers)
+    (dolist (mcp-server additional-mcp-servers)
+      (add-to-list 'mcp-hub-servers mcp-server)))
+
   (when (file-exists-p "~/code/mcp-projects/")
     (add-to-list 'mcp-hub-servers
                  '("filesystem" . ( :command "bunx"
@@ -153,7 +158,6 @@ LLM is pending."
       ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
       ("cloudflare-dns"     . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/sse")))
       ("cloudflare-radar"   . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/sse")))
-
 
       ("deepwiki"   . (:url "https://mcp.deepwiki.com/sse"))
       ("context7"   . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
@@ -202,7 +206,7 @@ LLM is pending."
           gptel-model 'claude-sonnet-4-5))
 
   (require 'gptel-integrations)
-  (gptel-mcp-connect (list "time" "memory" "fetch" "git")
+  (gptel-mcp-connect (list "time" "fetch")
                      #'gptel-mcp--activate-tools)
 
   (add-hook 'gptel-mode-hook
