@@ -469,18 +469,23 @@ LLM is pending."
  2. If you use LaTeX notation, enclose math in \( and \), or \[ and \] delimiters.
  </formatting>"))
 
-
-(use-package shell-maker :ensure t)
-(use-package acp :vc (:url "https://github.com/xenodium/acp.el" :rev :newest))
-(use-package agent-shell
-  :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest))
-
 (use-package shell-maker
+  :ensure t
   :custom
   (shell-maker-transcript-default-path
    (expand-file-name "agent-shell-archive/" emacs-assets-directory))
   (shell-maker-transcript-default-filename
    (lambda () (format-time-string "%F-%T-agent-shell.txt"))))
+
+(use-package acp
+  :vc ( :url "https://github.com/xenodium/acp.el"
+        :rev :newest ))
+
+(use-package agent-shell
+  :vc ( :url "https://github.com/xenodium/agent-shell"
+        :rev :newest ))
+
+
 
 
 (provide 'llms)
