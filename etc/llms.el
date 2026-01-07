@@ -154,16 +154,17 @@ LLM is pending."
       ("motherduck" . (:command "uvx" :args ("mcp-server-motherduck" "--db-path" ":memory:")))
 
       ;; -- Using `mcp-remote' because these require OAuth support
-      ("cloudflare-docs"    . (:command "bunx" :args ("mcp-remote" "https://docs.mcp.cloudflare.com/sse")))
-      ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/sse")))
-      ("cloudflare-dns"     . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/sse")))
-      ("cloudflare-radar"   . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/sse")))
+      ("cloudflare-docs"    . (:command "bunx" :args ("mcp-remote" "https://docs.mcp.cloudflare.com/mcp")))
+      ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/mcp")))
+      ("cloudflare-dns"     . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/mcp")))
+      ("cloudflare-radar"   . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/mcp")))
 
       ("deepwiki"   . (:url "https://mcp.deepwiki.com/sse"))
       ("context7"   . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
       ("nixos"      . (:command "uvx" :args ("--isolated" "mcp-nixos")))
       ("aws-docs"   . (:command "uvx" :args ("awslabs.aws-documentation-mcp-server@latest")))
       ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
+      ("devtools"   . (:command "bunx" :args ("chrome-devtools-mcp@latest")))
 
       ;; --
       ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
@@ -206,7 +207,7 @@ LLM is pending."
           gptel-model 'claude-sonnet-4-5))
 
   (require 'gptel-integrations)
-  (gptel-mcp-connect (list "time" "fetch")
+  (gptel-mcp-connect (list "time" "cloudflare-browser")
                      #'gptel-mcp--activate-tools)
 
   (add-hook 'gptel-mode-hook
