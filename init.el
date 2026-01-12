@@ -2171,6 +2171,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (global-treesit-fold-mode +1))
 
 (use-package combobulate
+  :disabled t
   :vc ( :url "https://github.com/mickeynp/combobulate.git"
         :rev :newest )
   :bind ("M-g d" . combobulate))
@@ -3333,11 +3334,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package scala-cli-repl
   :defer t
+  :ensure t
   :after scala-mode
   :vc ( :url "https://github.com/ag91/scala-cli-repl"
         :rev :neweset )
-  :custom (scala-cli-load-repl-in-sbt-context t)
-  :ensure t)
+  :custom (scala-cli-load-repl-in-sbt-context t))
 
 (use-package spark
   :load-path "etc/"
