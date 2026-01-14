@@ -484,7 +484,8 @@ LLM is pending."
 
 (use-package agent-shell
   :vc ( :url "https://github.com/xenodium/agent-shell"
-        :rev :newest ))
+        :rev :newest )
+  :hook (agent-shell-mode . hl-line-mode))
 
 
 
