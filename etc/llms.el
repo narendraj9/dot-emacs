@@ -207,7 +207,7 @@ LLM is pending."
           gptel-model 'claude-sonnet-4-5))
 
   (require 'gptel-integrations)
-  (gptel-mcp-connect (list "time" "cloudflare-browser")
+  (gptel-mcp-connect (list "time" "fetch")
                      #'gptel-mcp--activate-tools)
 
   (add-hook 'gptel-mode-hook
@@ -372,7 +372,7 @@ LLM is pending."
   :custom
   (claude-code-ide-window-width 80)
   (claude-code-ide-use-ide-diff nil)
-  (claude-code-ide-terminal-backend 'eat)
+  (claude-code-ide-terminal-backend 'vterm)
   (claude-code-ide-use-side-window nil)
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
 
@@ -485,9 +485,9 @@ LLM is pending."
 (use-package agent-shell
   :vc ( :url "https://github.com/xenodium/agent-shell"
         :rev :newest )
+  :demand t
+  :commands (agent-shell-anthropic-start-claude-code agent-shell-google-start-gemini)
   :hook (agent-shell-mode . hl-line-mode))
-
-
 
 
 (provide 'llms)
