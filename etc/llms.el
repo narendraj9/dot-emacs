@@ -200,6 +200,9 @@ LLM is pending."
            (gptel-default-mode 'org-mode)
            (gptel-curl-file-size-threshold 1300000))
   :config
+  (add-to-list 'gptel-prompt-prefix-alist
+               '(org-mode . "* "))
+
   (if (eq system-type 'gnu/linux)
       (setq gptel-backend llms-chat-gptel-gemini-backend
             gptel-model 'gemini-3-pro-preview)
