@@ -1233,10 +1233,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("k" . --scroll-down-other-window) )
   :vc ( :url "https://github.com/jdtsmith/ultra-scroll"
         :rev :newest )
-  :config
-  (ultra-scroll-mode +1)
 
   :init
+  (ultra-scroll-mode +1)
+
   (setq scroll-conservatively 3
         scroll-margin 0)
 
@@ -1262,7 +1262,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (defun --scroll-up-other-window ()
     (interactive)
     (with-selected-window (next-window (selected-window))
-      (funcall scroll-up-command*)))  )
+      (funcall scroll-up-command)))  )
 
 (use-package window
   :bind ( :map window-prefix-map
