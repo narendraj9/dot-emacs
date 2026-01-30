@@ -1372,5 +1372,17 @@ search keyword."
     result))
 
 
+(defvar build-emacs-source-dir (expand-file-name "~/code/emacs")
+  "Directory containing Emacs source code.")
+
+(defun build-emacs-from-source ()
+  "Build Emacs from source and install to /Applications."
+  (interactive)
+  (let ((default-directory build-emacs-source-dir))
+    (unless (file-directory-p default-directory)
+      (user-error "Emacs source not found at %s" build-emacs-source-dir))
+    (compile (format "%s && cp -r ./nextstep/Emacs.app /Applications/"
+                     (expand-file-name "~/.emacs.d/etc/build-emacs-macos.sh")))))
+
 (provide 'defs)
 ;;; defs.el ends here

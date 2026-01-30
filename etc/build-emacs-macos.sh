@@ -62,10 +62,5 @@ NCPU=$(sysctl -n hw.ncpu)
 echo "=== Building with $NCPU cores ==="
 gmake -j"$NCPU"
 
-# Install
-echo "=== Installing ==="
-sudo gmake install
-cp -r ./nextstep/Emacs.app /Applications/
-
 echo "=== Done! ==="
-echo "Emacs.app installed to /Applications/"
+echo "Build complete. Emacs.app is at ./nextstep/Emacs.app"
