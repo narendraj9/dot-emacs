@@ -140,13 +140,13 @@
   (gptel-make-openai "OpenAI"
     :key (or (and (boundp 'openai-secret-key) openai-secret-key)
              (llms-chat--api-key-from-auth-source "api.openai.com"))
-    :models '(gpt-5 gpt-3.5-turbo gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)
+    :models '(gpt-5.2 gpt-5 gpt-3.5-turbo gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)
     :stream t))
 
 (defvar llms-chat-gptel-anthropic-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.anthropic.com")))
     (gptel-make-anthropic "Anthropic"
-      :models '(claude-sonnet-4-5 claude-opus-4-1 claude-sonnet-4-1)
+      :models '(claude-sonnet-4-5 claude-opus-4-5 claude-haiku-4-5)
       :key api-key
       :stream t)))
 
