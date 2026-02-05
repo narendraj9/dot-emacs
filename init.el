@@ -2050,8 +2050,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   :preface
   (defun --eglot-ensure ()
-    (when-let ((project-root (project-current)))
-      (eglot-ensure))))
+    (if (derived-mode-p 'text-mode)     ; harper-ls
+        (eglot-ensure)
+      (when-let ((project-root (project-current)))
+        (eglot-ensure)))))
 
 
 (use-package dape
