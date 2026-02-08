@@ -205,12 +205,12 @@ LLM is pending."
 
   (if (eq system-type 'gnu/linux)
       (setq gptel-backend llms-chat-gptel-gemini-backend
-            gptel-model 'gemini-3-pro-preview)
+            gptel-model 'gemini-pro-latest)
     (setq gptel-backend llms-chat-gptel-anthropic-backend
           gptel-model 'claude-opus-4-6))
 
   (require 'gptel-integrations)
-  (gptel-mcp-connect (list "time" "fetch")
+  (gptel-mcp-connect (list "time")
                      #'gptel-mcp--activate-tools)
 
   (add-hook 'gptel-mode-hook
@@ -311,7 +311,7 @@ LLM is pending."
 
   :config
   (unless (eq system-type 'darwin)
-    (setq gptel-quick-model 'gemini-3-pro-preview)
+    (setq gptel-quick-model 'gemini-flash-latest)
     (setq gptel-quick-backend llms-chat-gptel-gemini-backend))
 
   (setq gptel-quick-system-message
