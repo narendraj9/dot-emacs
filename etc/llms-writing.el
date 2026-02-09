@@ -113,7 +113,7 @@
     (funcall refresh-buffer)
     (with-current-buffer attached-buffer
       (define-key (current-local-map)
-                  (kbd "C-c r")
+                  (kbd "C-c 1")
                   refresh-buffer))))
 
 (provide 'llms-writing)
