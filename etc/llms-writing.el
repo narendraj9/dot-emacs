@@ -31,7 +31,16 @@
 ;; remain available.
 (with-eval-after-load 'inline-diff
   (keymap-unset inline-diff-overlay-map "RET" t)
-  (keymap-unset inline-diff-overlay-map "<ret>" t))
+  (keymap-unset inline-diff-overlay-map "<ret>" t)
+
+  (define-advice inline-diff--overlay-at (:around (orig-fn &optional pt) zero-width-fix)
+    "Also find zero-width overlays that `overlays-at' misses."
+    (or (funcall orig-fn pt)
+        (cl-loop for o in (overlays-in pt (1+ pt))
+                 when (and (eq (overlay-get o 'category) 'inline-diff-overlay)
+                           (= (overlay-start o) pt)
+                           (= (overlay-start o) (overlay-end o)))
+                 return o))))
 
 (defvar-local llms-writing--last-instruction nil
   "Last rewrite instruction used in this buffer.")
@@ -172,15 +181,15 @@ The mode auto-disables when all changes are handled.
   (unless (string-empty-p instruction)
     (setq llms-writing--last-instruction instruction))
   (let* ((beg (if (region-active-p) (region-beginning)
-               (car (llms-writing--get-surrounding-paragraph))))
+                (car (llms-writing--get-surrounding-paragraph))))
          (end (if (region-active-p) (region-end)
-               (cdr (llms-writing--get-surrounding-paragraph))))
+                (cdr (llms-writing--get-surrounding-paragraph))))
          (original-text (buffer-substring-no-properties beg end))
          (source-buffer (current-buffer))
          (beg-marker (copy-marker beg))
          (end-marker (copy-marker end t))
          (gptel-backend llms-chat-gptel-openai-backend)
-         (gptel-model 'gpt-4o)
+         (gptel-model 'gpt-5.2)
          (system-prompt (or llms-writing--last-instruction
                             (alist-get 'writing gptel-directives))))
     (when (region-active-p) (deactivate-mark))
