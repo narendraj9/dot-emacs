@@ -4601,8 +4601,8 @@ buffer."
           ("i a"   . claude-code-ide)
 
           ("i b"   . llms-chat)
-          ("i w"   . llms-writing-spin-up-companion)
-          ("i W"   . llms-writing-shutdown)
+          ("i w"   . llms-writing-rewrite-inline)
+          ("i W"   . llms-writing-dismiss-inline-diff)
 
           ("i e"   . eca)
           ("i G"   . agent-shell-google-start-gemini)

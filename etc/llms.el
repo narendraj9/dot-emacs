@@ -492,5 +492,30 @@ LLM is pending."
   :commands (agent-shell-anthropic-start-claude-code agent-shell-google-start-gemini)
   :hook (agent-shell-mode . hl-line-mode))
 
+(use-package minuet
+  :ensure t
+  :custom
+  (minuet-provider 'claude)
+
+  :config
+  (setq minuet-claude-options
+        `( :model "claude-haiku-4-5"
+           :end-point "https://api.anthropic.com/v1/messages"
+           :max_tokens 256
+           :api-key (gptel-api-key-from-auth-source "api.anthropic.com")
+           :system
+           ( :template minuet-default-system-template
+             :prompt minuet-default-prompt
+             :guidelines minuet-default-guidelines
+             :n-completions-template minuet-default-n-completion-template )
+           :fewshots minuet-default-fewshots
+           :chat-input
+           ( :template minuet-default-chat-input-template
+             :language-and-tab minuet--default-chat-input-language-and-tab-function
+             :context-before-cursor minuet--default-chat-input-before-cursor-function
+             :context-after-cursor minuet--default-chat-input-after-cursor-function)
+           :transform ()
+           :optional nil )))
+
 
 (provide 'llms)
