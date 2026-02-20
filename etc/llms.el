@@ -210,8 +210,9 @@ LLM is pending."
           gptel-model 'claude-opus-4-6))
 
   (require 'gptel-integrations)
-  (gptel-mcp-connect (list "time")
-                     #'gptel-mcp--activate-tools)
+  ;;
+  ;; (gptel-mcp-connect (list "time")
+  ;;                    #'gptel-mcp--activate-tools)
 
   (add-hook 'gptel-mode-hook
             (lambda ()
