@@ -4607,6 +4607,7 @@ buffer."
           ("i e"   . eca)
           ("i G"   . agent-shell-google-start-gemini)
           ("i g"   . agent-shell-anthropic-start-claude-code)
+          ("i o"   . agent-shell-opencode-start-agent)
 
           ("i q"   . gptel-quick*)
           ("i p"   . gptel-quick-proofread*)
