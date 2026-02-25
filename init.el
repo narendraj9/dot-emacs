@@ -2041,7 +2041,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
            `(((c-mode c++-mode)        . ("clangd"))
              ((ruby-mode ruby-ts-mode) . ("bundle" "exec" "solargraph" "stdio"))
              ((rust-mode rust-ts-mode) . ("rustup" "run" "stable" "rust-analyzer"))
-             ((text-mode markdown-mode org-mode) . ("harper-ls" "--stdio"))
+             ((org-mode) . ("harper-ls" "--stdio"))
              (scala-mode               . (,(expand-file-name "bin/metals.sh" user-emacs-directory)))
              ((java-mode java-ts-mode) . ,#'java-eclipse-jdt-launcher)
              (elixir-ts-mode           . ,#'elixir-lsp-launcher)
