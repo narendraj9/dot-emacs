@@ -1384,5 +1384,22 @@ search keyword."
     (compile (format "%s && cp -r ./nextstep/Emacs.app /Applications/"
                      (expand-file-name "~/.emacs.d/etc/build-emacs-macos.sh")))))
 
+(defun augment-srt-file (input-srt output-srt language proficiency-level)
+  "Augment INPUT-SRT with translations using Groq API and save to OUTPUT-SRT."
+  (interactive
+   (list (read-file-name "Input SRT file: ")
+         (read-file-name "Output SRT file: ")
+         (read-string "Language (e.g., German): ")
+         (read-string "Proficiency level (e.g., B1): ")))
+  (let* ((api-key (gptel-api-key-from-auth-source "api.groq.com"))
+         (process-environment (cons (format "GROQ_API_KEY=%s" api-key) process-environment))
+         (script-path (expand-file-name "bin/augment_srt.py" user-emacs-directory)))
+    (compile (format "%s %s %s %s %s"
+                     (shell-quote-argument script-path)
+                     (shell-quote-argument (expand-file-name input-srt))
+                     (shell-quote-argument (expand-file-name output-srt))
+                     (shell-quote-argument language)
+                     (shell-quote-argument proficiency-level)))))
+
 (provide 'defs)
 ;;; defs.el ends here

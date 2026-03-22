@@ -188,8 +188,8 @@ The mode auto-disables when all changes are handled.
          (source-buffer (current-buffer))
          (beg-marker (copy-marker beg))
          (end-marker (copy-marker end t))
-         (gptel-backend llms-chat-gptel-openai-backend)
-         (gptel-model 'gpt-5.2)
+         (gptel-backend llms-chat-gptel-gemini-backend)
+         (gptel-model 'gemini-pro-latest)
          (system-prompt (or llms-writing--last-instruction
                             (alist-get 'writing gptel-directives))))
     (when (region-active-p) (deactivate-mark))

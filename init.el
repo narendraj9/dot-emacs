@@ -3299,6 +3299,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 
 (use-package connected-repl
+  :defer t
   :load-path "packages/rest/connected-repl/"
   :commands (connected-repl-run connected-repl-run-on-project connected-repl-connect-manually)
   :config
@@ -3338,7 +3339,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package scala-cli-repl
   :defer t
   :ensure t
-  :after scala-mode
   :vc ( :url "https://github.com/ag91/scala-cli-repl"
         :rev :neweset )
   :custom (scala-cli-load-repl-in-sbt-context t))
