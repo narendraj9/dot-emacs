@@ -108,7 +108,7 @@ Return ONLY the JSON object matching the required schema."""
             print(f"\nError: {type(e).__name__}: {str(e)}", file=sys.stderr)
             time.sleep(2)
 
-    return []  # Return empty array if all retries fail
+    return None  # Return None if all retries fail
 
 
 def apply_translations(original_text, difficult_words):
@@ -170,6 +170,14 @@ def process_srt(input_file, output_file, language, level, api_key):
         )
 
         results = process_batch(api_key, batch, language, level)
+
+        if results is None:
+            failed_ids = [item["id"] for item in batch]
+            print(
+                f"\nFailed to process batch. Giving up on subtitle IDs: {', '.join(failed_ids)}",
+                file=sys.stderr,
+            )
+            results = []
 
         # Map results to a dictionary keyed by the subtitle ID
         result_map = {
