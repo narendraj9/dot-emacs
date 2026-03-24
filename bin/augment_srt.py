@@ -5,6 +5,7 @@ import urllib.request
 import json
 import re
 import time
+import csv
 from urllib.error import HTTPError
 
 
@@ -12,8 +13,12 @@ def process_subtitle(api_key, subtitle, language, level, max_retries=4):
     system_prompt = f"""You are a helpful language teacher. The user is watching a movie in {language} and their proficiency level is {level}.
 You will be provided with a single subtitle text.
 Identify any words that might be difficult for someone at this level.
-For each difficult word, provide its base form (including definite article for nouns, or infinitive for verbs) and its English translation.
+For each difficult word, provide:
+1. Its dictionary base form.
+2. Its English translation.
+3. Exactly two simple example sentences in {language} using the word.
 If there are no difficult words, return an empty array.
+
 Return ONLY the JSON object matching the required schema."""
 
     schema = {
@@ -24,20 +29,23 @@ Return ONLY the JSON object matching the required schema."""
                 "items": {
                     "type": "object",
                     "properties": {
-                        "word": {
+                        "word": {"type": "string"},
+                        "base_form": {"type": "string"},
+                        "translation": {"type": "string"},
+                        "example_1": {
                             "type": "string",
-                            "description": f"The difficult word in {language} exactly as it appears in the text",
+                            "description": "First example sentence",
                         },
-                        "base_form": {
+                        "example_2": {
                             "type": "string",
-                            "description": "The dictionary base form. For nouns, include the definite article (der/die/das). For verbs, use the infinitive.",
-                        },
-                        "translation": {
-                            "type": "string",
-                            "description": "The English translation of the word in this context",
+                            "description": "Second example sentence",
                         },
                     },
-                    "required": ["word", "base_form", "translation"],
+                    "required": [
+                        "word",
+                        "base_form",
+                        "translation",
+                    ],
                     "additionalProperties": False,
                 },
             }
@@ -87,7 +95,10 @@ Return ONLY the JSON object matching the required schema."""
                 print(f"\nRate limit hit. Retrying in {wait_time}s...", file=sys.stderr)
                 time.sleep(wait_time)
             else:
-                print(f"\nHTTP Error {e.code}: {e.reason}", file=sys.stderr)
+                error_body = e.read().decode("utf-8")
+                print(
+                    f"\nHTTP Error {e.code}: {e.reason}, {error_body}", file=sys.stderr
+                )
                 time.sleep(2)
         except Exception as e:
             print(f"\nError: {type(e).__name__}: {str(e)}", file=sys.stderr)
@@ -106,15 +117,35 @@ def apply_translations(original_text, difficult_words):
         if word and translation:
             escaped_word = re.escape(word)
             pattern = r"(?i)\b" + escaped_word + r"\b"
-
-            # Format: Original [der Baseform: translation]
             annotation = f"{base_form}: {translation}" if base_form else translation
             text = re.sub(pattern, lambda m: f"{m.group(0)} [{annotation}]", text)
 
     return text
 
 
-def process_srt(input_file, output_file, language, level, api_key):
+def export_to_anki(all_words, output_file):
+    unique_words = {}
+    for word_data in all_words:
+        base = word_data.get("base_form")
+        if base and base not in unique_words:
+            unique_words[base] = word_data
+
+    # Using tab delimiter as Anki parses TSV files reliably without quote escaping issues
+    with open(output_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, delimiter="\t")
+        for w in unique_words.values():
+            writer.writerow(
+                [
+                    w.get("base_form", ""),
+                    w.get("translation", ""),
+                    w.get("example_1", ""),
+                    w.get("example_2", ""),
+                ]
+            )
+    print(f"Exported {len(unique_words)} unique words to {output_file} for Anki.")
+
+
+def process_srt(input_file, output_srt, output_anki, language, level, api_key):
     with open(input_file, "r", encoding="utf-8") as f:
         content = f.read().replace("\r\n", "\n")
 
@@ -135,6 +166,8 @@ def process_srt(input_file, output_file, language, level, api_key):
     total_items = len(subtitle_items)
     print(f"Processing {total_items} subtitle blocks sequentially...")
 
+    global_difficult_words = []
+
     for i, item in enumerate(subtitle_items):
         print(f"Processing item {i + 1}/{total_items}...", end="\r")
 
@@ -144,10 +177,8 @@ def process_srt(input_file, output_file, language, level, api_key):
             print(f"\nFailed to process subtitle ID: {item['id']}", file=sys.stderr)
             continue
 
+        global_difficult_words.extend(difficult_words)
         item["text"] = apply_translations(item["text"], difficult_words)
-
-        # Rate limit protection for sequential processing
-        time.sleep(2.5)
 
     print("\nProcessing complete!")
 
@@ -158,15 +189,17 @@ def process_srt(input_file, output_file, language, level, api_key):
         else:
             new_blocks.append(b["raw"])
 
-    with open(output_file, "w", encoding="utf-8") as f:
+    with open(output_srt, "w", encoding="utf-8") as f:
         f.write("\n\n".join(new_blocks) + "\n")
-    print(f"Saved augmented subtitles to {output_file}")
+    print(f"Saved augmented subtitles to {output_srt}")
+
+    export_to_anki(global_difficult_words, output_anki)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 6:
         print(
-            "Usage: python augment_srt.py <input.srt> <output.srt> <language> <proficiency_level>"
+            "Usage: python augment_srt.py <input.srt> <output.srt> <anki_output.tsv> <language> <proficiency_level>"
         )
         sys.exit(1)
 
@@ -175,4 +208,6 @@ if __name__ == "__main__":
         print("Error: GROQ_API_KEY environment variable is not set.", file=sys.stderr)
         sys.exit(1)
 
-    process_srt(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], api_key)
+    process_srt(
+        sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], api_key
+    )
