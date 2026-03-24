@@ -8,66 +8,56 @@ import time
 from urllib.error import HTTPError
 
 
-def process_batch(api_key, batch, language, level, max_retries=4):
+def process_subtitle(api_key, subtitle, language, level, max_retries=4):
     system_prompt = f"""You are a helpful language teacher. The user is watching a movie in {language} and their proficiency level is {level}.
-You will be provided with a JSON array of subtitle objects, each containing an 'id' and 'text'.
+You will be provided with a single subtitle text.
 Identify any words that might be difficult for someone at this level.
-For each difficult word, provide its English translation.
-If there are no difficult words in a subtitle, return an empty array for that id.
+For each difficult word, provide its base form (including definite article for nouns, or infinitive for verbs) and its English translation.
+If there are no difficult words, return an empty array.
 Return ONLY the JSON object matching the required schema."""
 
-    # Define the JSON schema to strictly enforce the output structure
     schema = {
         "type": "object",
         "properties": {
-            "results": {
+            "difficult_words": {
                 "type": "array",
                 "items": {
                     "type": "object",
                     "properties": {
-                        "id": {"type": "string"},
-                        "difficult_words": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "word": {
-                                        "type": "string",
-                                        "description": f"The difficult word in {language} exactly as it appears in the text",
-                                    },
-                                    "translation": {
-                                        "type": "string",
-                                        "description": "The English translation of the word",
-                                    },
-                                },
-                                "required": ["word", "translation"],
-                                "additionalProperties": False,
-                            },
+                        "word": {
+                            "type": "string",
+                            "description": f"The difficult word in {language} exactly as it appears in the text",
+                        },
+                        "base_form": {
+                            "type": "string",
+                            "description": "The dictionary base form. For nouns, include the definite article (der/die/das). For verbs, use the infinitive.",
+                        },
+                        "translation": {
+                            "type": "string",
+                            "description": "The English translation of the word in this context",
                         },
                     },
-                    "required": ["id", "difficult_words"],
+                    "required": ["word", "base_form", "translation"],
                     "additionalProperties": False,
                 },
             }
         },
-        "required": ["results"],
+        "required": ["difficult_words"],
         "additionalProperties": False,
     }
 
-    # Groq provides an OpenAI-compatible endpoint
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0",
     }
 
-    # Using Llama 3.3 70B Versatile for robust JSON Schema support
     data = {
         "model": "moonshotai/kimi-k2-instruct-0905",
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": json.dumps(batch)},
+            {"role": "user", "content": subtitle["text"]},
         ],
         "response_format": {
             "type": "json_schema",
@@ -77,7 +67,7 @@ Return ONLY the JSON object matching the required schema."""
                 "strict": True,
             },
         },
-        "temperature": 0.0,  # Deterministic output
+        "temperature": 0.0,
     }
 
     req = urllib.request.Request(
@@ -90,44 +80,36 @@ Return ONLY the JSON object matching the required schema."""
                 res_data = json.loads(response.read().decode())
                 content = res_data["choices"][0]["message"]["content"]
                 parsed = json.loads(content)
-                return parsed.get("results", [])
+                return parsed.get("difficult_words", [])
         except HTTPError as e:
-            error_body = e.read().decode("utf-8", errors="replace")
-            if e.code == 429:  # Rate limit hit
+            if e.code == 429:
                 wait_time = (2**attempt) * 2
-                print(
-                    f"\nRate limit hit (429). Retrying in {wait_time} seconds...",
-                    file=sys.stderr,
-                )
+                print(f"\nRate limit hit. Retrying in {wait_time}s...", file=sys.stderr)
                 time.sleep(wait_time)
             else:
                 print(f"\nHTTP Error {e.code}: {e.reason}", file=sys.stderr)
-                print(f"Error Body: {error_body}", file=sys.stderr)
                 time.sleep(2)
         except Exception as e:
             print(f"\nError: {type(e).__name__}: {str(e)}", file=sys.stderr)
             time.sleep(2)
 
-    return None  # Return None if all retries fail
+    return None
 
 
 def apply_translations(original_text, difficult_words):
     text = original_text
-
-    # We replace words one by one locally to ensure the original text structure is preserved.
     for item in difficult_words:
         word = item.get("word", "")
+        base_form = item.get("base_form", "")
         translation = item.get("translation", "")
-        if word and translation:
-            # Escape the word for regex to safely match it
-            escaped_word = re.escape(word)
 
-            # Use word boundaries (\b) and ignore case (?i) to find the word
+        if word and translation:
+            escaped_word = re.escape(word)
             pattern = r"(?i)\b" + escaped_word + r"\b"
 
-            # Using a lambda to preserve the original casing of the matched word found in the text
-            # E.g., if it matches "Apfel", it replaces with "Apfel [apple]"
-            text = re.sub(pattern, lambda m: f"{m.group(0)} [{translation}]", text)
+            # Format: Original [der Baseform: translation]
+            annotation = f"{base_form}: {translation}" if base_form else translation
+            text = re.sub(pattern, lambda m: f"{m.group(0)} [{annotation}]", text)
 
     return text
 
@@ -137,76 +119,44 @@ def process_srt(input_file, output_file, language, level, api_key):
         content = f.read().replace("\r\n", "\n")
 
     blocks = re.split(r"\n\n+", content.strip())
-
     parsed_blocks = []
+
     for block in blocks:
         lines = block.split("\n")
         if len(lines) >= 3:
             seq = lines[0]
             timing = lines[1]
             text = "\n".join(lines[2:])
-            parsed_blocks.append((seq, timing, text))
+            parsed_blocks.append({"id": seq, "timing": timing, "text": text})
         else:
-            parsed_blocks.append((None, None, block))
+            parsed_blocks.append({"raw": block})
 
-    subtitle_items = [
-        {"id": b[0], "text": b[2]} for b in parsed_blocks if b[0] is not None
-    ]
+    subtitle_items = [b for b in parsed_blocks if "id" in b]
     total_items = len(subtitle_items)
-    print(
-        f"Processing {total_items} subtitle blocks using Groq API with JSON Schema..."
-    )
+    print(f"Processing {total_items} subtitle blocks sequentially...")
 
-    batch_size = 20
-    augmented_texts = {}
+    for i, item in enumerate(subtitle_items):
+        print(f"Processing item {i + 1}/{total_items}...", end="\r")
 
-    # Process sequentially in batches to respect Groq rate limits
-    total_batches = (total_items + batch_size - 1) // batch_size
-    for i in range(0, total_items, batch_size):
-        batch = subtitle_items[i : i + batch_size]
-        print(
-            f"Processing batch {i // batch_size + 1}/{total_batches} (Items {i + 1} to {min(i + batch_size, total_items)})...",
-            end="\r",
-        )
+        difficult_words = process_subtitle(api_key, item, language, level)
 
-        results = process_batch(api_key, batch, language, level)
+        if difficult_words is None:
+            print(f"\nFailed to process subtitle ID: {item['id']}", file=sys.stderr)
+            continue
 
-        if results is None:
-            failed_ids = [item["id"] for item in batch]
-            print(
-                f"\nFailed to process batch. Giving up on subtitle IDs: {', '.join(failed_ids)}",
-                file=sys.stderr,
-            )
-            results = []
+        item["text"] = apply_translations(item["text"], difficult_words)
 
-        # Map results to a dictionary keyed by the subtitle ID
-        result_map = {
-            str(r.get("id")): r.get("difficult_words", [])
-            for r in results
-            if isinstance(r, dict)
-        }
-
-        for item in batch:
-            original_text = item["text"]
-            seq_id = item["id"]
-            diff_words = result_map.get(str(seq_id), [])
-
-            # Deterministically apply substitutions in Python
-            augmented_texts[seq_id] = apply_translations(original_text, diff_words)
-
-        # Groq free tier allows 30 requests per minute (1 request per 2 seconds).
-        # We wait 2.5 seconds here to guarantee we stay comfortably under the limit.
+        # Rate limit protection for sequential processing
         time.sleep(2.5)
 
     print("\nProcessing complete!")
 
     new_blocks = []
     for b in parsed_blocks:
-        if b[0] is not None:
-            new_text = augmented_texts.get(b[0], b[2])
-            new_blocks.append(f"{b[0]}\n{b[1]}\n{new_text}")
+        if "id" in b:
+            new_blocks.append(f"{b['id']}\n{b['timing']}\n{b['text']}")
         else:
-            new_blocks.append(b[2])
+            new_blocks.append(b["raw"])
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("\n\n".join(new_blocks) + "\n")
@@ -218,21 +168,11 @@ if __name__ == "__main__":
         print(
             "Usage: python augment_srt.py <input.srt> <output.srt> <language> <proficiency_level>"
         )
-        print("Example: python augment_srt.py movie.srt movie_augmented.srt German B1")
         sys.exit(1)
 
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         print("Error: GROQ_API_KEY environment variable is not set.", file=sys.stderr)
-        print(
-            "Please set it using: export GROQ_API_KEY='your_api_key_here'",
-            file=sys.stderr,
-        )
         sys.exit(1)
 
-    input_srt = sys.argv[1]
-    output_srt = sys.argv[2]
-    lang = sys.argv[3]
-    lvl = sys.argv[4]
-
-    process_srt(input_srt, output_srt, lang, lvl, api_key)
+    process_srt(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], api_key)
