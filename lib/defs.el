@@ -1403,5 +1403,12 @@ search keyword."
                      (shell-quote-argument language)
                      (shell-quote-argument proficiency-level)))))
 
+(defun my/launch-gastown ()
+  "Launch gastown in ~/code/gt using vterm."
+  (interactive)
+  (let ((default-directory (expand-file-name "~/code/gt")))
+    (vterm "gastown")
+    (vterm-send-string "gt mayor attach\n")))
+
 (provide 'defs)
 ;;; defs.el ends here

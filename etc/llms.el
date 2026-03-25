@@ -159,6 +159,8 @@ LLM is pending."
       ("cloudflare-dns"     . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/mcp")))
       ("cloudflare-radar"   . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/mcp")))
 
+      ("slack"   . (:command "bunx" :args ("mcp-remote" "https://mcp.slack.com/mcp")))
+
       ("deepwiki"   . (:url "https://mcp.deepwiki.com/sse"))
       ("context7"   . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
       ("nixos"      . (:command "uvx" :args ("--isolated" "mcp-nixos")))
