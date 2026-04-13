@@ -2503,6 +2503,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (vterm-send-key "n" nil nil t)))
 
+(use-package ghostel
+  :ensure t)
+
 (use-package exec-path-from-shell
   :ensure t
   :if (eq system-type 'darwin)
