@@ -755,6 +755,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("S-<return>"    . crux-switch-to-previous-buffer))
   :hook (after-init . crux-reopen-as-root-mode))
 
+
+(use-package pending
+  :vc (:url "https://github.com/jwiegley/pending")
+  :commands (pending-make pending-region pending-insert
+                          pending-finish pending-cancel pending-list
+                          pending-demo)
+  :config
+  (global-pending-lighter-mode 1))
+
 ;;; TEXT-EDITING, FOLDING and NAVIGATION
 ;; ─────────────────────────────────────────────────────────────────
 
