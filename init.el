@@ -2491,6 +2491,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package vterm
   :ensure t
   :custom (vterm-max-scrollback 100000)
+  :config (add-to-list 'vterm-keymap-exceptions "M-s")
   :bind ( :map vterm-mode-map
           ("M-p" . --vterm-ctrl-p)
           ("M-n" . --vterm-ctrl-n) )
