@@ -104,6 +104,22 @@ LLM is pending."
     ;; Return the function to shutdown the thread so that the caller can use it.
     shutdown-fn))
 
+
+(defun my/launch-gastown ()
+  "Launch gastown in ~/code/gt using vterm."
+  (interactive)
+  (let ((default-directory (expand-file-name "~/code/gt")))
+    (vterm "gastown")
+    (vterm-send-string "gt mayor attach\n")))
+
+(defun my/launch-pi ()
+  "Launch pi inside a ghostel buffer."
+  (interactive)
+  (let ((ghostel-buffer-name "*pi*"))
+    (ghostel)
+    (process-send-string ghostel--process "pi\n")))
+
+
 (use-package llms-chat
   :load-path "packages/rest/llms-chat"
   :demand t

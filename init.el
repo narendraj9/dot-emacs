@@ -4621,9 +4621,10 @@ buffer."
           ("i G"   . agent-shell-google-start-gemini)
           ("i g"   . agent-shell-anthropic-start-claude-code)
           ("i o"   . agent-shell-opencode-start-agent)
+          ("i p"   . my/launch-pi)
+
 
           ("i q"   . gptel-quick*)
-          ("i p"   . gptel-quick-proofread*)
           ("i Q"   . gptel-quick-comment*)
           ("i c"   . gptel)
           ("i m"   . gptel-menu)
