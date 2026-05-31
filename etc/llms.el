@@ -177,7 +177,7 @@ LLM is pending."
 
       ("slack"   . (:command "bunx" :args ("mcp-remote" "https://mcp.slack.com/mcp")))
       ("coda"    . ( :url "https://coda.io/apis/mcp/vbeta"
-                     :token ,(gptel-api-key-from-auth-source "coda.io")) )
+                     :token ,(ignore-errors (gptel-api-key-from-auth-source "coda.io"))) )
 
       ("deepwiki"   . (:url "https://mcp.deepwiki.com/sse"))
       ("context7"   . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
