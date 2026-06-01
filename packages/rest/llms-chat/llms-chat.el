@@ -140,15 +140,14 @@
   (gptel-make-openai "OpenAI"
     :key (or (and (boundp 'openai-secret-key) openai-secret-key)
              (llms-chat--api-key-from-auth-source "api.openai.com"))
-    :models '(gpt-5.2 gpt-5 gpt-3.5-turbo gpt-4.1 gpt-4o o1 o3 o3-pro o3-mini)
     :stream t))
 
 (defvar llms-chat-gptel-anthropic-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.anthropic.com")))
     (gptel-make-anthropic "Anthropic"
-      :models '(claude-opus-4-6 claude-sonnet-4-5 claude-opus-4-5 claude-haiku-4-5)
       :key api-key
-      :stream t)))
+      :stream t
+      :models '(claude-opus-4-8 claude-opus-4-7 claude-opus-4-7 claude-haiku-4-5))))
 
 (defvar llms-chat-gptel-groq-backend
   (gptel-make-openai "Groq"
@@ -199,8 +198,7 @@
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.x.ai")))
     (gptel-make-xai "Grok"
       :key api-key
-      :stream t
-      :models '(grok-4 grok-3))))
+      :stream t)))
 
 
 (defvar llms-chat-openrouter-models nil)

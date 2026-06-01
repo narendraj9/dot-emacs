@@ -709,9 +709,9 @@ Otherwise, limit to only `org-mode' files."
   (add-hook 'org-babel-after-execute-hook #'org-display-inline-images 'append)
 
   :config
-  :config
-  (org-babel-do-load-languages 'org-babel-load-languages
-                               org-babel-load-languages))
+  (eval-after-load 'org
+    '(org-babel-do-load-languages 'org-babel-load-languages
+                                  org-babel-load-languages)))
 
 
 (use-package org-habit

@@ -227,7 +227,7 @@ LLM is pending."
       (setq gptel-backend llms-chat-gptel-gemini-backend
             gptel-model 'gemini-pro-latest)
     (setq gptel-backend llms-chat-gptel-anthropic-backend
-          gptel-model 'claude-opus-4-6))
+          gptel-model 'claude-opus-4-8))
 
   (require 'gptel-integrations)
   ;;
