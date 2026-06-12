@@ -73,7 +73,9 @@
                            (format (if (eq 'current-tab (car tab))
                                        (propertize "[%s]" 'face 'mode-line-emphasis)
                                      "%s")
-                                   tab-index))
+                                   (if (assoc-default 'explicit-name tab)
+                                       (assoc-default 'name tab)
+                                     tab-index)))
                          (tab-bar-tabs)
                          " ")))))
 

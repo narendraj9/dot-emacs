@@ -2500,7 +2500,50 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package vterm
   :ensure t
   :custom (vterm-max-scrollback 100000)
-  :config (add-to-list 'vterm-keymap-exceptions "M-s")
+  :config
+  (add-to-list 'vterm-keymap-exceptions "M-s")
+
+  ;; `claude-code-ide' uses vterm and recent versions make copy-mode awkward to
+  ;; leave in those terminal buffers.  Give copy-mode explicit, high-priority
+  ;; exits that do not depend on the terminal/application keymap: q/Esc/C-g exit
+  ;; without copying, while RET keeps vterm's copy-and-exit behavior.
+  (defun my/vterm-copy-mode-quit ()
+    "Leave `vterm-copy-mode' without copying text."
+    (interactive)
+    (when (bound-and-true-p vterm-copy-mode)
+      (setq deactivate-mark t)
+      (vterm-copy-mode -1)))
+
+  (define-key vterm-copy-mode-map (kbd "q") #'my/vterm-copy-mode-quit)
+  (define-key vterm-copy-mode-map [escape] #'my/vterm-copy-mode-quit)
+  (define-key vterm-copy-mode-map (kbd "C-g") #'my/vterm-copy-mode-quit)
+  (define-key vterm-copy-mode-map (kbd "C-c C-t") #'my/vterm-copy-mode-quit)
+  (define-key vterm-copy-mode-map (kbd "RET") #'vterm-copy-mode-done)
+  (define-key vterm-copy-mode-map [return] #'vterm-copy-mode-done)
+
+  (defvar my/vterm-copy-mode-map
+    (let ((map (make-sparse-keymap)))
+      (set-keymap-parent map vterm-copy-mode-map)
+      (define-key map (kbd "q") #'my/vterm-copy-mode-quit)
+      (define-key map [escape] #'my/vterm-copy-mode-quit)
+      (define-key map (kbd "C-g") #'my/vterm-copy-mode-quit)
+      (define-key map (kbd "C-c C-t") #'my/vterm-copy-mode-quit)
+      map)
+    "High-priority keymap used while `vterm-copy-mode' is active.")
+
+  (defun my/vterm-copy-mode-prioritize-map ()
+    "Keep copy-mode exit keys above claude-code-ide/vterm buffer bindings."
+    (setq-local minor-mode-overriding-map-alist
+                (if vterm-copy-mode
+                    (cons (cons 'vterm-copy-mode my/vterm-copy-mode-map)
+                          (assq-delete-all
+                           'vterm-copy-mode
+                           (copy-sequence minor-mode-overriding-map-alist)))
+                  (assq-delete-all
+                   'vterm-copy-mode
+                   (copy-sequence minor-mode-overriding-map-alist)))))
+
+  (add-hook 'vterm-copy-mode-hook #'my/vterm-copy-mode-prioritize-map)
   :bind ( :map vterm-mode-map
           ("M-p" . --vterm-ctrl-p)
           ("M-n" . --vterm-ctrl-n) )
