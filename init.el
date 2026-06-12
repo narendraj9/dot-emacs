@@ -481,7 +481,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :config
   (setq ibuffer-formats
         '((mark modified read-only locked " "
-                (name 28 28 :left :elide) " "
+                (name 32 32 :left :elide) " "
                 (size 9 -1 :right) " "
                 (mode 16 -1 :left) " "
                 filename-and-process)
@@ -490,9 +490,13 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                 (filename-and-process 10 -1 :right)))))
 
 (use-package ibuf-ext
+  :hook (ibuffer . (lambda ()
+                     (ibuffer-switch-to-saved-filter-groups "Categorized")))
   :config
+  (setq ibuffer-show-empty-filter-groups nil)
   (setq ibuffer-saved-filter-groups
         '(("Categorized"
+           ("Claude" (name . "claude-code"))
            ("Org Mode" (mode . org-mode))
            ("IRC" (mode . erc-mode))
            ("*Auxiliary*" (name . "\\*.*\\*"))))))
