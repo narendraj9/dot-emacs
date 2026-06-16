@@ -396,7 +396,7 @@ LLM is pending."
   :custom
   (claude-code-ide-window-width 80)
   (claude-code-ide-use-ide-diff nil)
-  (claude-code-ide-terminal-backend 'vterm)
+  (claude-code-ide-terminal-backend 'eat)
   (claude-code-ide-use-side-window nil)
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
 
