@@ -113,9 +113,12 @@ LLM is pending."
     (vterm-send-string "gt mayor attach\n")))
 
 (defun my/launch-pi ()
-  "Launch pi inside a ghostel buffer."
+  "Launch pi in a per-project ghostel buffer."
   (interactive)
-  (let ((ghostel-buffer-name "*pi*"))
+  (let* ((root (when-let (proj (project-current)) (project-root proj)))
+         (ghostel-buffer-name (if root
+                                  (format "*pi[%s]*" (file-name-nondirectory (directory-file-name root)))
+                                "*pi*")))
     (ghostel)
     (process-send-string ghostel--process "pi\n")))
 
