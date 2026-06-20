@@ -403,8 +403,8 @@ LLM is pending."
   (claude-code-ide-use-side-window nil)
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
 
-  :config
-  (claude-code-ide-emacs-tools-setup)
+  ;; :config
+  ;; (claude-code-ide-emacs-tools-setup)
 
   :init
   (setenv "DISABLE_AUTOUPDATER" "true")
