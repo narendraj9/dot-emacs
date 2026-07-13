@@ -131,6 +131,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;;
 ;;  ─────────────────────────────────────────────────────────────────
 
+(use-package emacs-news
+  :hook (emacs-news-mode . org-mode))
+
 (use-package repeat
   :init
   ;; If a symbol property named `repeat-map' exists for a command and it's a

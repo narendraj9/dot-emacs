@@ -49,7 +49,6 @@ echo "=== Configuring ==="
 ./configure \
     --prefix=/usr/local \
     --with-ns \
-    --disable-ns-self-contained \
     --with-json \
     --with-tree-sitter \
     --with-native-compilation \
