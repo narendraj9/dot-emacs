@@ -4651,18 +4651,19 @@ buffer."
   :init
   ;; Set up autoloads to make sure `llms.el' is autoloaded after any of the the
   ;; following features are loaded.
-  (dolist (feature (list 'eca 'copilot 'gptel 'esi-dictate 'claude-code-ide))
+  (dolist (feature (list 'eca 'copilot 'gptel 'esi-dictate))
     (eval-after-load feature
       '(progn
          (require 'llms)
          (require 'llms-writing)
          (require 'llms-completion)
          (require 'llms-images))))
+  (require 'llms-coding)
 
   :bind ( :map ctl-m-map
           ("i RET" . gptel-send)
           ("i t"   . copilot-mode)
-          ("i a"   . claude-code-ide)
+          ("i a"   . llms-coding-claude)
 
           ("i b"   . llms-chat)
           ("i w"   . llms-writing-rewrite-inline)
@@ -4671,8 +4672,8 @@ buffer."
           ("i e"   . eca)
           ("i G"   . agent-shell-google-start-gemini)
           ("i g"   . agent-shell-anthropic-start-claude-code)
-          ("i o"   . agent-shell-opencode-start-agent)
-          ("i p"   . my/launch-pi)
+          ("i o"   . llms-coding-omni)
+          ("i p"   . llms-coding-pi)
 
 
           ("i q"   . gptel-quick*)

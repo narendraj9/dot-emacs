@@ -105,24 +105,6 @@ LLM is pending."
     shutdown-fn))
 
 
-(defun my/launch-gastown ()
-  "Launch gastown in ~/code/gt using vterm."
-  (interactive)
-  (let ((default-directory (expand-file-name "~/code/gt")))
-    (vterm "gastown")
-    (vterm-send-string "gt mayor attach\n")))
-
-(defun my/launch-pi ()
-  "Launch pi in a per-project ghostel buffer."
-  (interactive)
-  (let* ((root (when-let (proj (project-current)) (project-root proj)))
-         (ghostel-buffer-name (if root
-                                  (format "*pi[%s]*" (file-name-nondirectory (directory-file-name root)))
-                                "*pi*")))
-    (ghostel)
-    (process-send-string ghostel--process "pi\n")))
-
-
 (use-package llms-chat
   :load-path "packages/rest/llms-chat"
   :demand t
@@ -397,30 +379,17 @@ LLM is pending."
   :custom (macher-action-buffer-ui 'org)
   :config (macher-install))
 
-(use-package claude-code-ide
-  :vc ( :url "https://github.com/manzaltu/claude-code-ide.el"
-        :rev :newest )
-  :demand t
-  :custom
-  (claude-code-ide-window-width 80)
-  (claude-code-ide-use-ide-diff nil)
-  (claude-code-ide-terminal-backend 'vterm)
-  (claude-code-ide-use-side-window nil)
-  (claude-code-eat-read-only-mode-cursor-type '(bar nil nil))
-
-  ;; :config
-  ;; (claude-code-ide-emacs-tools-setup)
-
-  :init
-  (setenv "DISABLE_AUTOUPDATER" "true")
-  ;; Claude Code uses a few symbols that constantly change the line height in
-  ;; Emacs. This is an attempt to fix that.
-  ;; I am rescaling these fonts so that if they are used for unicode characters
-  ;; appearining in animations, the line height isn't increased temporarily.
-  (add-to-list 'face-font-rescale-alist
-               '(".*STIX Two Math.*" . 0.7))
-  (add-to-list 'face-font-rescale-alist
-               '(".*Arial Unicode MS.*" . 0.7)))
+;; Coding-agent TUIs (claude, ...) run in ghostel via `llms-coding'.  Keep the
+;; environment/font tweaks that keep those TUIs well-behaved in a terminal.
+(setenv "DISABLE_AUTOUPDATER" "true")
+;; Claude Code uses a few symbols that constantly change the line height in
+;; Emacs. This is an attempt to fix that.
+;; I am rescaling these fonts so that if they are used for unicode characters
+;; appearining in animations, the line height isn't increased temporarily.
+(add-to-list 'face-font-rescale-alist
+             '(".*STIX Two Math.*" . 0.7))
+(add-to-list 'face-font-rescale-alist
+             '(".*Arial Unicode MS.*" . 0.7))
 
 (use-package eca
   :ensure t
