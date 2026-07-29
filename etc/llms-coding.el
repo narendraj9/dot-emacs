@@ -85,8 +85,9 @@ With a prefix ARG, prompt for the directory to use." name)
          (interactive "P")
          (llms-coding--launch ,command ,(symbol-name name) arg)))))
 
-(llms-coding-define claude "claude")
-(llms-coding-define pi "pi")
+(llms-coding-define claude "omni claude")
+(llms-coding-define codex "omni codex")
+(llms-coding-define pi "omni pi")
 (llms-coding-define omni "omni run")
 
 (provide 'llms-coding)

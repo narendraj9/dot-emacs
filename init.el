@@ -4679,6 +4679,7 @@ buffer."
           ("i q"   . gptel-quick*)
           ("i Q"   . gptel-quick-comment*)
           ("i c"   . gptel)
+          ("i C"   . gptel-agent)
           ("i m"   . gptel-menu)
           ("i r"   . gptel-rewrite)
           ("i z"   . gptel-buffer-toggle*)
