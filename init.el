@@ -4108,16 +4108,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :after magit
   :hook (difftastic-mode . hl-line-mode)
-  :config
-  (define-key magit-mode-map (kbd "C-c d")
-              #'difftastic-magit-show)
-  (define-key magit-mode-map (kbd "C-c D")
-              #'difftastic-git-diff-current-branch*)
-
-  :preface
-  (defun difftastic-git-diff-current-branch* ()
-    (interactive)
-    (difftastic-git-diff-range (format "master..%s" (magit-get-current-branch)))))
+  :init
+  (difftastic-bindings-mode))
 
 (use-package autorevert
   :delight auto-revert-mode
