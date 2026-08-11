@@ -4111,6 +4111,20 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :init
   (difftastic-bindings-mode))
 
+(use-package magit-delta
+  :doc "Editor-style syntax colors in Magit's line diffs, via git-delta."
+  :ensure-system-package ((delta . "git-delta"))
+  :ensure t
+  :after magit
+  :config
+  (defun my/toggle-magit-delta ()
+    "Toggle `magit-delta-mode' and refresh, for when delta is too slow."
+    (interactive)
+    (magit-delta-mode (if magit-delta-mode -1 1))
+    (magit-refresh))
+  (transient-append-suffix 'magit-diff '(-1 -1 -1)
+    '("l" "Toggle magit-delta" my/toggle-magit-delta)))
+
 (use-package autorevert
   :delight auto-revert-mode
   :config
