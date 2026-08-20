@@ -2564,7 +2564,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (vterm-send-key "n" nil nil t)))
 
 (use-package ghostel
-  :ensure t)
+  :ensure t
+  :custom (ghostel-readonly-fast-exit t)
+  :bind ( :map ctl-m-map
+          ("t g" . ghostel) ))
 
 (use-package exec-path-from-shell
   :ensure t
