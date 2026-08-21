@@ -3515,6 +3515,36 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :ensure t
   :hook (python-ts-mode . py-autopep8-mode))
 
+;; Renders .ipynb files as `# %%'-delimited source via jupytext.  Databricks
+;; notebooks carry only `language_info.name', so jupytext's default `auto'
+;; extension can't be resolved and conversion fails -- pin it to `py'.
+(use-package code-cells
+  :ensure t
+  :hook (python-ts-mode . code-cells-mode-maybe)
+  :custom
+  (code-cells-convert-ipynb-style
+   '(("jupytext" "--to" "ipynb")
+     ("jupytext" "--to" "py:percent")
+     code-cells--guess-mode
+     code-cells-convert-ipynb-hook))
+  :config
+  ;; `code-cells--guess-mode' reads only `kernelspec.language' and
+  ;; `jupytext.main_language'.  Databricks notebooks carry neither, so the mode
+  ;; comes back void and the buffer lands in `fundamental-mode'.  Retry using
+  ;; `language_info.name'.
+  (defun my/code-cells-guess-mode (orig)
+    (let ((mode (funcall orig)))
+      (if (fboundp mode)
+          mode
+        (goto-char (point-min))
+        (let* ((json (json-parse-buffer :object-type 'alist))
+               (lang (let-alist json .metadata.language_info.name))
+               (guess (and lang (intern (concat lang "-mode")))))
+          (if (fboundp guess)
+              (alist-get guess (bound-and-true-p major-mode-remap-alist) guess)
+            mode)))))
+  (advice-add 'code-cells--guess-mode :around #'my/code-cells-guess-mode))
+
 (use-package prolog
   :mode ("\\.pl\\'" . prolog-mode)
   :custom (prolog-system 'gnu))

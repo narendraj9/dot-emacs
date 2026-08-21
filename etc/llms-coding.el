@@ -14,6 +14,28 @@
 (require 'project)
 (require 'ghostel)
 
+(defconst llms-coding--omnigent-env
+  '("OMNIGENT_RUNNER_ENV_PASSTHROUGH=OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S,OMNIGENT_HARNESS_IDLE_TIMEOUT_S"
+    "OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S=0"
+    "OMNIGENT_HARNESS_IDLE_TIMEOUT_S=0")
+  "Environment settings disabling omnigent's idle reapers.
+Omnigent reaps idle native tmux panes and idle harness subprocesses after
+one hour by default, which silently kills a session left sitting.  `0'
+disables each reaper.
+
+These reach the reapers over two hops, both of which filter the
+environment through an allowlist:
+
+- CLI to daemon: local mode allows the `OMNIGENT_' prefix, so all three
+  pass (`_build_host_daemon_env' in omnigent/cli.py).
+- Daemon to runner: the allowlist has no `OMNIGENT_' prefix, so the two
+  timeout variables only pass because `OMNIGENT_RUNNER_ENV_PASSTHROUGH'
+  names them (`_build_runner_env' in omnigent/host/connect.py).
+
+The daemon is spawned by the first `omni' command that finds no live one
+and is reused afterwards, so a change here takes effect on the next cold
+start, not in an already-running daemon.")
+
 (defun llms-coding--session-directory (arg)
   "Return the directory to key a coding session on.
 With prefix ARG, prompt for a directory; otherwise use the current
@@ -46,19 +68,35 @@ project, else DIRECTORY's own name."
 EVENT is the process sentinel string.  Keeping the buffer on failure
 leaves any startup error or traceback on screen instead of the buffer
 vanishing (see `ghostel-exit-functions')."
-  (when (string-prefix-p "finished" event)
-    (kill-buffer buffer)))
+  ;; TEMP DEBUG: keep the buffer on EVERY exit (clean or not) and record the
+  ;; sentinel event, so a session that quietly exits while you're away leaves a
+  ;; visible buffer showing why. Revert to the `finished'-only kill below once
+  ;; the crash is understood.
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (goto-char (point-max))
+        (insert (format "\n[llms-coding] process exited: %s (at %s)\n"
+                        (string-trim event)
+                        (format-time-string "%F %T"))))))
+  ;; Original behaviour (disabled while debugging):
+  ;; (when (string-prefix-p "finished" event)
+  ;;   (kill-buffer buffer))
+  )
 
 (defun llms-coding--launch (command name-prefix arg)
   "Start or switch to a ghostel session running COMMAND.
 NAME-PREFIX names the agent; ARG is the raw prefix argument.  Reuses a
-live session for the resolved directory.  COMMAND is exec'd directly as
-the terminal's process (no wrapping shell), so quitting the agent closes
-the terminal.  A clean exit kills the buffer; a failed launch leaves it
+live session for the resolved directory.  Runs with
+`llms-coding--omnigent-env' so omnigent's idle reapers stay disabled.
+COMMAND is exec'd directly as the terminal's process (no wrapping
+shell), so quitting the agent closes the terminal.  A clean exit kills the buffer; a failed launch leaves it
 visible so the error can be read."
   (let* ((directory (llms-coding--session-directory arg))
          (buffer-name (llms-coding--buffer-name name-prefix directory))
-         (existing (llms-coding--live-buffer buffer-name)))
+         (existing (llms-coding--live-buffer buffer-name))
+         (process-environment (append llms-coding--omnigent-env
+                                      process-environment)))
     (if existing
         (pop-to-buffer existing)
       (let* ((default-directory directory)
