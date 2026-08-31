@@ -38,6 +38,13 @@ export CFLAGS="-O2 -I$GCC_INCLUDE_DIR -L$GCC_LIB_DIR"
 export LDFLAGS="-L$GCC_LIB_DIR -Wl,-rpath,$GCC_LIB_DIR"
 export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/lib/pkgconfig:$HOMEBREW_PREFIX/opt/libxml2/lib/pkgconfig"
 
+# Clean slate: drop all build products so nothing stale survives into the app
+# bundle (a leftover Emacs.pdmp will not match the new binary and Emacs.app
+# refuses to start).
+echo "=== Cleaning previous build ==="
+[ -f Makefile ] && gmake distclean || true
+rm -rf nextstep/Emacs.app
+
 # Run autogen if needed
 if [ ! -f configure ] || [ configure.ac -nt configure ]; then
     echo "=== Running autogen.sh ==="
@@ -49,7 +56,6 @@ echo "=== Configuring ==="
 ./configure \
     --prefix=/usr/local \
     --with-ns \
-    --with-json \
     --with-tree-sitter \
     --with-native-compilation \
     --with-imagemagick \
@@ -61,5 +67,17 @@ NCPU=$(sysctl -n hw.ncpu)
 echo "=== Building with $NCPU cores ==="
 gmake -j"$NCPU"
 
+# Populate the app bundle. Plain `gmake` only copies the binary into
+# Emacs.app; `gmake install` is what puts Emacs.pdmp beside it. This build is
+# self-contained (--with-ns), so install writes into Emacs.app, not /usr/local.
+echo "=== Installing into Emacs.app ==="
+gmake install
+
+# Fail loudly here rather than at double-click time, where Emacs.app exits
+# silently if the dump file does not match the binary.
+echo "=== Verifying ==="
+./nextstep/Emacs.app/Contents/MacOS/Emacs --batch \
+    --eval '(message "Emacs %s starts cleanly" emacs-version)'
+
 echo "=== Done! ==="
-echo "Build complete. Emacs.app is at ./nextstep/Emacs.app"
+echo "Build complete. Emacs.app is at $EMACS_SRC_DIR/nextstep/Emacs.app"
