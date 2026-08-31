@@ -872,10 +872,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    (size-indication-mode t) )
 
   :preface
-  (defun exchange-point-and-mark* (arg)
-    (interactive "P")
-    (exchange-point-and-mark (not arg)))
-
   (defun shell-command-from-region (beg end)
     "Runs selected region as a shell command."
     (interactive "r")
@@ -891,16 +887,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq-default indent-tabs-mode nil)
   (delight 'visual-line-mode nil "simple")
 
-  ;; This BROKE multiple cursors! Multiple-cursor uses
-  ;; `exchange-point-and-mark' and creates overlays for active region around
-  ;; fake cursors. This advice was deactivating region after multiple-cursors
-  ;; called `exchange-point-and-mark' for the first time which resulted in
-  ;; strange behaviour when used after activating region.
-  ;;
-  ;; (add-function :after
-  ;;               (symbol-function #'exchange-point-and-mark)
-  ;;               (lambda (&rest _args) (deactivate-mark nil)))
-  (define-key global-map [remap exchange-point-and-mark] #'exchange-point-and-mark*)
   (add-hook 'activate-mark-hook (lambda () (setq cursor-type (cons 'bar 4))))
   (add-hook 'deactivate-mark-hook (lambda () (setq cursor-type t)))
 
@@ -2940,7 +2926,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package gnuplot
   :defer t
   :ensure t
-  :custom (gnuplot-program "gnuplot-wx"))
+  :custom (gnuplot-program "gnuplot"))
 
 (use-package graphviz-dot-mode
   :ensure t
