@@ -969,14 +969,6 @@ From: https://www.emacswiki.org/emacs/OverlaysToText"
   (interactive)
   (do-auto-fill))
 
-(defun unfill-paragraph ()
-  "Unfill paragraph removing hard newlines.
-From Emacs Wiki."
-  (interactive)
-  (let* ((inhibit-read-only t)
-         (fill-column (point-max)))
-    (fill-paragraph nil)))
-
 (def-lineup fill-or-unfill
             "Sequence filling/unfilling with the same biding."
             #'auto-fill-current-line
@@ -1048,9 +1040,11 @@ respective files."
                                              " "))))
        (with-temp-buffer
          (insert (shell-command-to-string curl-command))
-         ;; Remove  characters
+         ;; Remove 
+ characters
          (goto-char (point-min))
-         (replace-regexp "" "")
+         (replace-regexp "
+" "")
          (restclient-http-handle-response nil
                                           method
                                           url

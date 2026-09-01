@@ -798,23 +798,15 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :delight hs-minor-mode
   :hook (prog-mode . hs-minor-mode)
   :bind ( :map hs-minor-mode-map
-          ([backtab] . hs-toggle-hiding)
-          ("C-c @ a"  . my-toggle-hideshow-all)
+          ([backtab] . hs-cycle)
+          ("C-c @ a"  . hs-toggle-all)
           ("C-c @ s"  . hs-show-block)
-          ("C-c @ h"  . hs-hide-block) )
+          ("C-c @ h"  . hs-hide-block)
+          :map ctl-m-map
+          ("TAB" . hs-toggle-hiding) )
 
   :custom
-  (hs-display-lines-hidden t)
-
-  :preface
-  (defvar my-hs-hide nil "Current state of hideshow for toggling all.")
-  (defun my-toggle-hideshow-all ()
-    "Toggle hideshow all."
-    (interactive)
-    (setq my-hs-hide (not my-hs-hide))
-    (if my-hs-hide
-        (hs-hide-all)
-      (hs-show-all))))
+  (hs-display-lines-hidden t))
 
 (use-package selected
   :ensure t
@@ -2074,7 +2066,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
    installed is not configurable yet (fixed to tree-sitter under
    `user-emacs-directory'."
 
-  :custom (treesit-enabled-modes t)
+  :custom ( (treesit-enabled-modes t)
+            (treesit-auto-install-grammar t) )
   :init
   ;; Settings `treesit-enabled-modes' enables *-ts-mode for every possible
   ;; language in newer versions of Emacs. TBD: Remove it once Emacs is up to
@@ -2124,17 +2117,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
              ))
     (add-to-list 'treesit-language-source-alist source))
 
-  (dolist (source treesit-language-source-alist)
-    (install-tree-sitter-grammer-if-required (car source)))
-
   :preface
-  (defun install-tree-sitter-grammer-if-required (language)
-    "Given a language symbol install tree-sitter grammer if not
-    already avaialble."
-    (unless (treesit-language-available-p language)
-      (message "Installing tree-sitter grammar for %s" language)
-      (treesit-install-language-grammar language)))
-
   (defvar --treesit-highlight-overlay nil)
 
   ;; The following pattern where I add a function to a `{pre-post}-command-hook'
@@ -2166,14 +2149,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
       ;; Before executing the next command remove the overlay. Adding to
       ;; `post-command-hook' => execution right after this function returns.
       (add-hook 'pre-command-hook #'--treesit-remove-overlay-hook))))
-
-(use-package treesit-fold
-  :vc ( :url "https://github.com/emacs-tree-sitter/treesit-fold"
-        :rev :newest )
-  :bind ( :map ctl-m-map ("TAB" . treesit-fold-toggle) )
-  :delight treesit-fold-mode
-  :init
-  (global-treesit-fold-mode +1))
 
 (use-package combobulate
   :disabled t
