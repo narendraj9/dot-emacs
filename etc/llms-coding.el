@@ -2,126 +2,60 @@
 
 ;;; Commentary:
 
-;; Per-agent, per-project launchers for coding-agent CLIs (claude, pi,
-;; omni, ...) running in ghostel terminals.  Each agent gets its own
-;; interactive command `llms-coding-<name>' that starts a new session,
-;; or switches to the existing one, for the current project.  With a
-;; prefix argument the command prompts for a directory to use instead;
-;; the chosen directory becomes the session key.
+;; Per-agent, per-project launchers for coding-agent CLIs.  Each agent
+;; gets its own interactive command `llms-coding-<name>' that starts a
+;; new session, or switches to the existing one, for the current
+;; project.  With a prefix argument the command prompts for a directory
+;; to use instead; the chosen directory becomes the session key.
+;;
+;; Every agent currently runs through omnigent (`omni claude', ...).
+;; That mapping lives in one place, at the bottom of this file, so
+;; pointing an agent at a different CLI is a one-line change.
 
 ;;; Code:
 
+(require 'omnigent)
 (require 'project)
-(require 'ghostel)
 
-(defconst llms-coding--omnigent-env
-  '("OMNIGENT_RUNNER_ENV_PASSTHROUGH=OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S,OMNIGENT_HARNESS_IDLE_TIMEOUT_S"
-    "OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S=0"
-    "OMNIGENT_HARNESS_IDLE_TIMEOUT_S=0")
-  "Environment settings disabling omnigent's idle reapers.
-Omnigent reaps idle native tmux panes and idle harness subprocesses after
-one hour by default, which silently kills a session left sitting.  `0'
-disables each reaper.
-
-These reach the reapers over two hops, both of which filter the
-environment through an allowlist:
-
-- CLI to daemon: local mode allows the `OMNIGENT_' prefix, so all three
-  pass (`_build_host_daemon_env' in omnigent/cli.py).
-- Daemon to runner: the allowlist has no `OMNIGENT_' prefix, so the two
-  timeout variables only pass because `OMNIGENT_RUNNER_ENV_PASSTHROUGH'
-  names them (`_build_runner_env' in omnigent/host/connect.py).
-
-The daemon is spawned by the first `omni' command that finds no live one
-and is reused afterwards, so a change here takes effect on the next cold
-start, not in an already-running daemon.")
-
-(defun llms-coding--session-directory (arg)
+(defun llms-coding--directory (arg)
   "Return the directory to key a coding session on.
 With prefix ARG, prompt for a directory; otherwise use the current
 project root, falling back to `default-directory'."
-  (let ((default (or (when-let* ((proj (project-current)))
-                       (project-root proj))
+  (let ((default (or (when-let* ((project (project-current)))
+                       (project-root project))
                      default-directory)))
     (if arg
         (read-directory-name "Coding session directory: " default)
       default)))
 
-(defun llms-coding--buffer-name (name-prefix directory)
-  "Derive a ghostel buffer name for NAME-PREFIX rooted at DIRECTORY.
+(defun llms-coding--buffer-name (name directory)
+  "Return the terminal buffer name for agent NAME rooted at DIRECTORY.
 Uses the enclosing project's root name when DIRECTORY is inside a
 project, else DIRECTORY's own name."
-  (let* ((root (or (when-let* ((proj (project-current nil directory)))
-                     (project-root proj))
-                   directory))
-         (label (file-name-nondirectory (directory-file-name root))))
-    (format "*%s[%s]*" name-prefix label)))
-
-(defun llms-coding--live-buffer (buffer-name)
-  "Return the buffer named BUFFER-NAME if it hosts a live ghostel process."
-  (when-let* ((buffer (get-buffer buffer-name))
-              (proc (buffer-local-value 'ghostel--process buffer)))
-    (and (process-live-p proc) buffer)))
-
-(defun llms-coding--on-exit (buffer event)
-  "Kill BUFFER on a clean agent exit; keep it if the agent failed.
-EVENT is the process sentinel string.  Keeping the buffer on failure
-leaves any startup error or traceback on screen instead of the buffer
-vanishing (see `ghostel-exit-functions')."
-  ;; TEMP DEBUG: keep the buffer on EVERY exit (clean or not) and record the
-  ;; sentinel event, so a session that quietly exits while you're away leaves a
-  ;; visible buffer showing why. Revert to the `finished'-only kill below once
-  ;; the crash is understood.
-  (when (buffer-live-p buffer)
-    (with-current-buffer buffer
-      (let ((inhibit-read-only t))
-        (goto-char (point-max))
-        (insert (format "\n[llms-coding] process exited: %s (at %s)\n"
-                        (string-trim event)
-                        (format-time-string "%F %T"))))))
-  ;; Original behaviour (disabled while debugging):
-  ;; (when (string-prefix-p "finished" event)
-  ;;   (kill-buffer buffer))
-  )
-
-(defun llms-coding--launch (command name-prefix arg)
-  "Start or switch to a ghostel session running COMMAND.
-NAME-PREFIX names the agent; ARG is the raw prefix argument.  Reuses a
-live session for the resolved directory.  Runs with
-`llms-coding--omnigent-env' so omnigent's idle reapers stay disabled.
-COMMAND is exec'd directly as the terminal's process (no wrapping
-shell), so quitting the agent closes the terminal.  A clean exit kills the buffer; a failed launch leaves it
-visible so the error can be read."
-  (let* ((directory (llms-coding--session-directory arg))
-         (buffer-name (llms-coding--buffer-name name-prefix directory))
-         (existing (llms-coding--live-buffer buffer-name))
-         (process-environment (append llms-coding--omnigent-env
-                                      process-environment)))
-    (if existing
-        (pop-to-buffer existing)
-      (let* ((default-directory directory)
-             (buffer (get-buffer-create buffer-name))
-             (words (split-string-shell-command command)))
-        (with-current-buffer buffer
-          (unless (derived-mode-p 'ghostel-mode)
-            (ghostel-mode))
-          ;; Let our exit function decide whether to kill the buffer.
-          (setq-local ghostel-kill-buffer-on-exit nil)
-          (add-hook 'ghostel-exit-functions #'llms-coding--on-exit nil t))
-        (pop-to-buffer buffer)
-        (ghostel-exec buffer (car words) (cdr words))))))
+  (let ((root (or (when-let* ((project (project-current nil directory)))
+                    (project-root project))
+                  directory)))
+    (format "*%s[%s]*" name
+            (file-name-nondirectory (directory-file-name root)))))
 
 (defmacro llms-coding-define (name command)
   "Define an interactive command `llms-coding-NAME' running COMMAND.
-NAME is an unquoted symbol; COMMAND is a shell command string."
-  (let ((fn (intern (format "llms-coding-%s" name))))
+NAME is an unquoted symbol; COMMAND is a shell command string.  The
+terminal itself comes from `omnigent-terminal', which reuses a live
+session for the same agent and directory."
+  (let ((function (intern (format "llms-coding-%s" name))))
     `(progn
        ;;;###autoload
-       (defun ,fn (&optional arg)
+       (defun ,function (&optional arg)
          ,(format "Start or switch to a %s coding session in ghostel.
-With a prefix ARG, prompt for the directory to use." name)
+Runs `%s'.  With a prefix ARG, prompt for the directory to use instead."
+                  name command)
          (interactive "P")
-         (llms-coding--launch ,command ,(symbol-name name) arg)))))
+         (let ((directory (llms-coding--directory arg)))
+           (omnigent-terminal
+            (llms-coding--buffer-name ,(symbol-name name) directory)
+            directory
+            (split-string-shell-command ,command)))))))
 
 (llms-coding-define claude "omni claude")
 (llms-coding-define codex "omni codex")

@@ -186,7 +186,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("M-g b" . jump-to-previous-url)
 
           :map ctl-m-map
-          ("o" . run-in-other-window)
           ("S" . macos-fix-keyboard-modifiers)
 
           :map ctl-quote-map
@@ -4644,6 +4643,13 @@ buffer."
   :load-path "etc/"
   :bind-keymap ("<C-m> s" . sourcegraph-mode-map )
   :hook (sourcegraph-mode . goto-address-mode))
+
+(use-package omnigent
+  :load-path "packages/rest/omnigent"
+  :demand t
+  :bind-keymap ("<C-m> o" . omnigent-command-map)
+  :config
+  (omnigent-mode +1))
 
 (use-package llms
   :load-path "etc/"
