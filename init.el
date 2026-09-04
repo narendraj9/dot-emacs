@@ -4647,9 +4647,8 @@ buffer."
 (use-package omnigent
   :load-path "packages/rest/omnigent"
   :demand t
-  :bind-keymap ("<C-m> o" . omnigent-command-map)
-  :config
-  (omnigent-mode +1))
+  :custom (omnigent-command-prefix "<C-m> o")
+  :config (omnigent-mode +1))
 
 (use-package llms
   :load-path "etc/"

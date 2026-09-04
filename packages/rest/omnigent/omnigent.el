@@ -18,14 +18,15 @@
 ;;
 ;; Entry points:
 ;;
-;;   `omnigent-mode'           global minor mode that puts every command
-;;                             under `omnigent-command-prefix'
+;;   `omnigent-mode'           global minor mode that opens the menu on
+;;                             `omnigent-command-prefix'
 ;;   `omnigent-start'          create a session for a harness over the
 ;;                             API, filed under the current project,
 ;;                             then boot the harness onto it
 ;;   `omnigent-attach'         pick a session and bring it up
 ;;   `omnigent-switch-buffer'  pick one of the live Omnigent terminals
-;;   `omnigent-dispatch'       the menu, on \\`C-c C-o' inside a terminal
+;;   `omnigent-dispatch'       the menu, also on \\`C-c C-o' inside a
+;;                             terminal
 
 ;;; Code:
 
@@ -98,26 +99,20 @@ Bound on the \\`C-c' prefix, which ghostel passes through to Emacs.
 \\{omnigent-session-mode-map}"
   :lighter " Omni")
 
-(defvar-keymap omnigent-command-map
-  :doc "Keymap of Omnigent commands, reached via `omnigent-command-prefix'."
-  "a" #'omnigent-attach
-  "b" #'omnigent-switch-buffer
-  "o" #'omnigent-dispatch)
-
 (defvar-keymap omnigent-mode-map
   :doc "Keymap of `omnigent-mode'.  Holds `omnigent-command-prefix' alone.")
 
 (defun omnigent--bind-prefix (symbol prefix)
-  "Bind `omnigent-command-map' at PREFIX, and store PREFIX in SYMBOL."
+  "Bind `omnigent-dispatch' at PREFIX, and store PREFIX in SYMBOL."
   ;; `define-key', not `keymap-set': `key-valid-p' rejects the angle-bracket
   ;; spelling of a remapped key such as `<C-m>'.
   (when (boundp symbol)
     (define-key omnigent-mode-map (symbol-value symbol) nil t))
   (set-default symbol prefix)
-  (define-key omnigent-mode-map prefix omnigent-command-map))
+  (define-key omnigent-mode-map prefix #'omnigent-dispatch))
 
 (defcustom omnigent-command-prefix (kbd "<C-m> o")
-  "Key sequence `omnigent-mode' binds `omnigent-command-map' to."
+  "Key sequence `omnigent-mode' binds `omnigent-dispatch' to."
   :type 'key-sequence
   :set #'omnigent--bind-prefix)
 
@@ -126,9 +121,9 @@ Bound on the \\`C-c' prefix, which ghostel passes through to Emacs.
 
 ;;;###autoload
 (define-minor-mode omnigent-mode
-  "Global minor mode making the Omnigent commands reachable.
+  "Global minor mode binding `omnigent-dispatch' to reach the commands.
 
-\\{omnigent-command-map}"
+\\{omnigent-mode-map}"
   :global t
   :keymap omnigent-mode-map)
 
@@ -231,13 +226,12 @@ reply that carries no body, such as a 204."
 
 (defun omnigent-buffer-p (buffer)
   "Return non-nil if BUFFER is a live ghostel terminal running Omnigent.
-Terminals started outside this package count too: rather than rely on a
-buffer-local marker, look for `omnigent-program' in the command ghostel
-exec'd."
-  (when-let* ((process (buffer-local-value 'ghostel--process buffer)))
-    (and (process-live-p process)
-         (string-match-p (regexp-quote omnigent-program)
-                         (string-join (process-command process) " ")))))
+Recognised by its `omnigent-session-id'.  Not by the command ghostel
+exec\='d: ghostel talks to a pty connection rather than a subprocess, so
+`process-command' is nil and there is no command line to search."
+  (and (buffer-local-value 'omnigent-session-id buffer)
+       (when-let* ((process (buffer-local-value 'ghostel--process buffer)))
+         (process-live-p process))))
 
 (defun omnigent-buffers ()
   "Return the live Omnigent terminals, most recently used first."
@@ -474,16 +468,19 @@ terminal has to ask which session it is on."
 
 ;;;###autoload (autoload 'omnigent-dispatch "omnigent" nil t)
 (transient-define-prefix omnigent-dispatch ()
-  "Act on the Omnigent session of the current terminal."
+  "Bring up an Omnigent session, or act on the current terminal's one.
+Bound at `omnigent-command-prefix', and at \`C-c C-o' inside a session
+terminal.  The \"Session\" commands need a session, which they take from
+the current terminal or else ask for."
   [["Session"
     ("r" "Rename" omnigent-rename)
     ("k" "Archive" omnigent-archive)
     ("e" "Export transcript" omnigent-export)
     ("w" "Copy id" omnigent-copy-id)
-    ("b" "Open in browser" omnigent-browse)]
+    ("B" "Open in browser" omnigent-browse)]
    ["Go"
     ("a" "Attach to a session" omnigent-attach)
-    ("s" "Switch terminal" omnigent-switch-buffer)]])
+    ("b" "Switch terminal" omnigent-switch-buffer)]])
 
 
 (provide 'omnigent)
