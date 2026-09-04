@@ -23,8 +23,7 @@
 ;;   `omnigent-start'          create a session for a harness over the
 ;;                             API, filed under the current project,
 ;;                             then boot the harness onto it
-;;   `omnigent-attach'         pick a stored session and reopen it
-;;   `omnigent-attach-live'    join a session that is still running
+;;   `omnigent-attach'         pick a session and bring it up
 ;;   `omnigent-switch-buffer'  pick one of the live Omnigent terminals
 ;;   `omnigent-dispatch'       the menu, on \\`C-c C-o' inside a terminal
 
@@ -102,7 +101,6 @@ Bound on the \\`C-c' prefix, which ghostel passes through to Emacs.
 (defvar-keymap omnigent-command-map
   :doc "Keymap of Omnigent commands, reached via `omnigent-command-prefix'."
   "a" #'omnigent-attach
-  "A" #'omnigent-attach-live
   "b" #'omnigent-switch-buffer
   "o" #'omnigent-dispatch)
 
@@ -302,23 +300,14 @@ Runs with `omnigent-environment' prepended, and hands exits to
 
 ;;;###autoload
 (defun omnigent-attach (session)
-  "Reopen SESSION in a terminal with `omni resume'.
-Resuming restarts the session's harness.  To join a session that is
-still running, use `omnigent-attach-live'."
-  (interactive (list (omnigent-read-session "Resume session: ")))
+  "Bring SESSION up in a terminal with `omni resume'.
+Resume, not `omni attach': attaching only joins a session whose runner
+is still live, while resuming hands the session to its harness either
+way."
+  (interactive (list (omnigent-read-session "Attach to session: ")))
   (let-alist session
     (omnigent-terminal (omnigent--session-buffer-name session) .workspace
                        (list omnigent-program "resume" .id) .id)))
-
-;;;###autoload
-(defun omnigent-attach-live (session)
-  "Join the running SESSION with `omni attach', streaming its I/O.
-Fails when nothing is live for SESSION; `omnigent-attach' reopens a
-stored session instead."
-  (interactive (list (omnigent-read-session "Attach to live session: ")))
-  (let-alist session
-    (omnigent-terminal (omnigent--session-buffer-name session) .workspace
-                       (list omnigent-program "attach" .id) .id)))
 
 ;;;###autoload
 (defun omnigent-switch-buffer ()
@@ -493,8 +482,7 @@ terminal has to ask which session it is on."
     ("w" "Copy id" omnigent-copy-id)
     ("b" "Open in browser" omnigent-browse)]
    ["Go"
-    ("a" "Resume a session" omnigent-attach)
-    ("A" "Attach to a live session" omnigent-attach-live)
+    ("a" "Attach to a session" omnigent-attach)
     ("s" "Switch terminal" omnigent-switch-buffer)]])
 
 
