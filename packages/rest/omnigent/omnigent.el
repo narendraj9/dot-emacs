@@ -459,31 +459,6 @@ terminal has to ask which session it is on."
   (interactive (list (omnigent--id)))
   (omnigent--patch id 'archived t))
 
-(defun omnigent-set-permission-mode (id mode)
-  "Switch the running claude-native session ID to permission MODE.
-Only the modes Claude Code's shift+tab cycle reaches are accepted."
-  (interactive
-   (list (omnigent--id)
-         (completing-read "Permission mode: "
-                          '("default" "acceptEdits" "plan" "auto") nil t)))
-  (omnigent--patch id 'permission_mode mode))
-
-(defun omnigent-set-reasoning-effort (id effort)
-  "Set the per-session reasoning EFFORT of session ID."
-  (interactive
-   (list (omnigent--id)
-         (completing-read "Reasoning effort: "
-                          '("none" "minimal" "low" "medium" "high" "xhigh"
-                            "max" "default")
-                          nil t)))
-  (omnigent--patch id 'reasoning_effort effort))
-
-(defun omnigent-set-model (id model)
-  "Override the model of session ID with MODEL.
-\"default\" removes the override."
-  (interactive (list (omnigent--id) (read-string "Model (or default): ")))
-  (omnigent--patch id 'model_override model))
-
 (defun omnigent-browse (id)
   "Open session ID in the Omnigent web UI."
   (interactive (list (omnigent--id)))
@@ -517,10 +492,6 @@ Only the modes Claude Code's shift+tab cycle reaches are accepted."
     ("e" "Export transcript" omnigent-export)
     ("w" "Copy id" omnigent-copy-id)
     ("b" "Open in browser" omnigent-browse)]
-   ["Agent"
-    ("p" "Permission mode" omnigent-set-permission-mode)
-    ("m" "Model" omnigent-set-model)
-    ("R" "Reasoning effort" omnigent-set-reasoning-effort)]
    ["Go"
     ("a" "Resume a session" omnigent-attach)
     ("A" "Attach to a live session" omnigent-attach-live)
