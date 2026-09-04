@@ -8,10 +8,9 @@
 
 ;;; Commentary:
 
-;; Reattach to an existing Omnigent session in a terminal inside Emacs,
-;; switch between the terminals that result, and act on the session of
-;; the current terminal from a `transient' menu.  New sessions are
-;; started by etc/llms-coding.el, which builds on `omnigent-terminal'.
+;; Start an Omnigent session, or reattach to an existing one, in a
+;; terminal inside Emacs; switch between those terminals; act on
+;; the current terminal from a `transient' menu, or start a new one.
 ;;
 ;; Session state comes from the Omnigent server's HTTP API
 ;; (`omnigent-server-url'); terminals are `omni' processes run by
@@ -21,6 +20,9 @@
 ;;
 ;;   `omnigent-mode'           global minor mode that puts every command
 ;;                             under `omnigent-command-prefix'
+;;   `omnigent-start'          create a session for a harness over the
+;;                             API, filed under the current project,
+;;                             then boot the harness onto it
 ;;   `omnigent-attach'         pick a stored session and reopen it
 ;;   `omnigent-attach-live'    join a session that is still running
 ;;   `omnigent-switch-buffer'  pick one of the live Omnigent terminals
@@ -30,6 +32,7 @@
 
 (require 'ghostel)
 (require 'let-alist)
+(require 'project)
 (require 'request)
 (require 'seq)
 (require 'transient)
@@ -169,6 +172,21 @@ reply that carries no body, such as a 204."
              (omnigent--request
               "GET" (format "/sessions?limit=%d&sort_by=updated_at&order=desc"
                             omnigent-session-limit))))
+
+(defun omnigent--find-named (path name)
+  "Return the entry called NAME in the list the API serves at PATH."
+  (seq-find (lambda (entry) (equal (alist-get 'name entry) name))
+            (alist-get 'data (omnigent--request "GET" path))))
+
+(defun omnigent-agent-id (name)
+  "Return the id of the registered Omnigent agent called NAME."
+  (or (alist-get 'id (omnigent--find-named "/agents?limit=100" name))
+      (user-error "No Omnigent agent named %s" name)))
+
+(defun omnigent-project-id (name)
+  "Return the id of the Omnigent project called NAME, creating it if absent."
+  (or (alist-get 'id (omnigent--find-named "/projects?limit=100" name))
+      (alist-get 'id (omnigent--request "POST" "/projects" `((name . ,name))))))
 
 
 ;;; Reading a session
@@ -314,6 +332,99 @@ stored session instead."
                      (get-buffer (if (consp candidate)
                                      (car candidate)
                                    candidate))))))))
+
+
+;;; Starting a session
+
+(defcustom omnigent-harnesses
+  '(("claude" . "claude-native-ui")
+    ("codex" . "codex-native-ui")
+    ("pi" . "pi-native-ui"))
+  "Alist of `omni' subcommand to the registered agent it launches.
+`omnigent-start' creates a session bound to the agent, then hands the id
+to that subcommand's `--resume'."
+  :type '(alist :key-type string :value-type string))
+
+(defun omnigent--directory (arg)
+  "Return the directory to start a session in.
+With prefix ARG, prompt for a directory; otherwise use the current
+project root, falling back to `default-directory'."
+  (let ((default (or (when-let* ((project (project-current)))
+                       (project-root project))
+                     default-directory)))
+    (if arg
+        (read-directory-name "Session directory: " default)
+      default)))
+
+(defun omnigent--project-name (directory)
+  "Return the project name to file a session under for DIRECTORY.
+The enclosing project's root name when DIRECTORY is inside a project,
+else DIRECTORY's own name."
+  (let ((root (or (when-let* ((project (project-current nil directory)))
+                    (project-root project))
+                  directory)))
+    (file-name-nondirectory (directory-file-name root))))
+
+;;;###autoload
+(defun omnigent-start (harness &optional arg)
+  "Start a session for HARNESS in a terminal, and switch to it.
+HARNESS names an `omni' subcommand in `omnigent-harnesses'.  With a
+prefix ARG, prompt for the directory instead of using the project root.
+
+The session is created over the API first, with its workspace and
+Omnigent project taken from the Emacs project, and only then handed to
+`omni HARNESS --resume'.  So the session is filed correctly before the
+harness boots, and the terminal knows its `omnigent-session-id' straight
+away, which is what lets `omnigent-dispatch' act without asking.  No
+title is set: Omnigent titles a session from its first message, and that
+is what makes `omnigent-attach' readable."
+  (interactive (list (completing-read "Harness: " omnigent-harnesses nil t)
+                     current-prefix-arg))
+  (let* ((agent (or (cdr (assoc harness omnigent-harnesses))
+                    (user-error "No agent configured for harness %s" harness)))
+         (directory (omnigent--directory arg))
+         (name (omnigent--project-name directory))
+         (id (alist-get
+              'id (omnigent--request
+                   "POST" "/sessions"
+                   `((agent_id . ,(omnigent-agent-id agent))
+                     ;; Slashless, the way `omni' itself stores a workspace.
+                     (workspace . ,(directory-file-name
+                                    (expand-file-name directory)))
+                     (project_id . ,(omnigent-project-id name)))))))
+    (omnigent-terminal (format "*%s[%s]*" harness name) directory
+                       (list omnigent-program harness "--resume" id) id)))
+
+(defmacro omnigent-define-start (harness)
+  "Define `omnigent-HARNESS', which starts a session for HARNESS.
+HARNESS is a string naming an `omni' subcommand in `omnigent-harnesses'."
+  (let ((command (intern (format "omnigent-%s" harness))))
+    `(progn
+       ;;;###autoload
+       (defun ,command (&optional arg)
+         ,(format "Start or switch to an Omnigent %s session for this project.
+With a prefix ARG, prompt for the directory to use instead.
+See `omnigent-start', which does the work." harness)
+         (interactive "P")
+         (omnigent-start ,harness arg)))))
+
+(omnigent-define-start "claude")
+(omnigent-define-start "codex")
+(omnigent-define-start "pi")
+
+;;;###autoload
+(defun omnigent-run (&optional arg)
+  "Start or switch to an `omni run' session for this project.
+With a prefix ARG, prompt for the directory to use instead.
+
+Unlike `omnigent-start', nothing is created up front: `omni run' picks
+the agent itself, so there is no id to create a session for, and the
+terminal has to ask which session it is on."
+  (interactive "P")
+  (let ((directory (omnigent--directory arg)))
+    (omnigent-terminal (format "*omni[%s]*"
+                               (omnigent--project-name directory))
+                       directory (list omnigent-program "run"))))
 
 
 ;;; Acting on a session
