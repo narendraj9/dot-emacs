@@ -271,13 +271,19 @@ Runs with `omnigent-environment' prepended, and hands exits to
 `omnigent--on-exit'.  Also the launcher etc/llms-coding.el builds on."
   (if-let* ((live (omnigent--live-terminal name)))
       (pop-to-buffer live)
-    (let ((default-directory (or directory default-directory))
-          (process-environment (append omnigent-environment
-                                       process-environment))
-          (buffer (get-buffer-create name)))
+    (let* ((directory (file-name-as-directory
+                       (expand-file-name (or directory default-directory))))
+           (default-directory directory)
+           (process-environment (append omnigent-environment
+                                        process-environment))
+           (buffer (get-buffer-create name)))
       (with-current-buffer buffer
         (unless (derived-mode-p 'ghostel-mode)
           (ghostel-mode))
+        ;; Set it in the buffer, not just around its creation, so Emacs
+        ;; commands run where the session does.  See
+        ;; `omnigent-sync-directory' for keeping up when it moves.
+        (setq default-directory directory)
         (setq omnigent-session-id session-id)
         (omnigent-session-mode)
         ;; Let `omnigent--on-exit' decide whether the buffer survives.
@@ -447,6 +453,28 @@ terminal has to ask which session it is on."
   (interactive (list (omnigent--id)))
   (browse-url (format "%s/c/%s" omnigent-server-url id)))
 
+(defun omnigent-workspace (id)
+  "Return the directory session ID is working in, as the server has it."
+  (when-let* ((workspace
+               (alist-get 'workspace
+                          (omnigent--request
+                           "GET" (format "/sessions/%s?include_items=false" id)))))
+    (file-name-as-directory workspace)))
+
+(defun omnigent-sync-directory ()
+  "Point this terminal's `default-directory' at its session's directory.
+A session can be moved to another directory after it starts -- `omni'
+offers that on attach -- so ask the server where it is now instead of
+trusting the directory the terminal was launched in."
+  (interactive)
+  (unless omnigent-session-id
+    (user-error "Not in an Omnigent terminal"))
+  (let ((workspace (or (omnigent-workspace omnigent-session-id)
+                       (user-error "Session %s has no directory"
+                                   omnigent-session-id))))
+    (setq default-directory workspace)
+    (message "%s" workspace)))
+
 (defun omnigent-copy-id (id)
   "Copy session ID to the kill ring."
   (interactive (list (omnigent--id)))
@@ -479,6 +507,7 @@ the current terminal or else ask for."
     ("w" "Copy id" omnigent-copy-id)
     ("B" "Open in browser" omnigent-browse)]
    ["Go"
+    ("d" "Sync directory" omnigent-sync-directory)
     ("a" "Attach to a session" omnigent-attach)
     ("b" "Switch terminal" omnigent-switch-buffer)]])
 
