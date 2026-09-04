@@ -4667,34 +4667,30 @@ buffer."
   (require 'llms-coding)
 
   :bind ( :map ctl-m-map
-          ("i RET" . gptel-send)
-          ("i t"   . copilot-mode)
-          ("i a"   . llms-coding-claude)
 
-          ("i b"   . llms-chat)
-          ("i w"   . llms-writing-rewrite-inline)
-          ("i W"   . llms-writing-dismiss-inline-diff)
-
-          ("i e"   . eca)
-          ("i G"   . agent-shell-google-start-gemini)
-          ("i g"   . agent-shell-anthropic-start-claude-code)
-          ("i o"   . llms-coding-omni)
-          ("i p"   . llms-coding-pi)
-
-
-          ("i q"   . gptel-quick*)
-          ("i Q"   . gptel-quick-comment*)
-          ("i c"   . gptel)
-          ("i C"   . gptel-agent)
-          ("i m"   . gptel-menu)
-          ("i r"   . gptel-rewrite)
-          ("i z"   . gptel-buffer-toggle*)
           ("C-z"   . gptel-buffer-toggle*)
 
-          ("i M" . macher-action)
-          ("i I" . macher-implement)
-          ("i R" . macher-revise)
-          ("i A" . macher-abort)
+          ;; -----
+          ("i A"   . macher-abort)
+          ("i I"   . macher-implement)
+          ("i M"   . macher-action)
+          ("i Q"   . gptel-quick-comment*)
+          ("i R"   . macher-revise)
+          ("i RET" . gptel-send)
+          ("i W"   . llms-writing-dismiss-inline-diff)
+          ;; -----
+          ("i a" . llms-coding-claude)
+          ("i b" . gptel)
+          ("i c" . llms-coding-codex)
+          ("i e" . eca)
+          ("i m" . gptel-menu)
+          ("i o" . llms-coding-omni)
+          ("i p" . llms-coding-pi)
+          ("i q" . gptel-quick*)
+          ("i r" . gptel-rewrite)
+          ("i t" . copilot-mode)
+          ("i w" . llms-writing-rewrite-inline)
+          ("i z" . gptel-buffer-toggle*)
 
           :map ctl-period-map
           ("h" . gptel-quick*)

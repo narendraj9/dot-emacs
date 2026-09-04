@@ -261,6 +261,13 @@ and `ghostel-exit-functions'."
                         (string-trim event)
                         (format-time-string "%F %T"))))))))
 
+(defun omnigent--live-terminal (name)
+  "Return the live Omnigent terminal called NAME, if there is one."
+  (seq-find (lambda (buffer)
+              (and (equal (buffer-name buffer) name)
+                   (omnigent-buffer-p buffer)))
+            (buffer-list)))
+
 (defun omnigent-terminal (name directory command &optional session-id)
   "Show a ghostel terminal NAME running COMMAND in DIRECTORY.
 COMMAND is a list of a program and its arguments, exec'd directly as the
@@ -270,10 +277,7 @@ ask.  A live terminal called NAME is reused rather than started again.
 
 Runs with `omnigent-environment' prepended, and hands exits to
 `omnigent--on-exit'.  Also the launcher etc/llms-coding.el builds on."
-  (if-let* ((live (seq-find (lambda (buffer)
-                              (and (equal (buffer-name buffer) name)
-                                   (omnigent-buffer-p buffer)))
-                            (buffer-list))))
+  (if-let* ((live (omnigent--live-terminal name)))
       (pop-to-buffer live)
     (let ((default-directory (or directory default-directory))
           (process-environment (append omnigent-environment
@@ -384,16 +388,22 @@ is what makes `omnigent-attach' readable."
                     (user-error "No agent configured for harness %s" harness)))
          (directory (omnigent--directory arg))
          (name (omnigent--project-name directory))
-         (id (alist-get
-              'id (omnigent--request
-                   "POST" "/sessions"
-                   `((agent_id . ,(omnigent-agent-id agent))
-                     ;; Slashless, the way `omni' itself stores a workspace.
-                     (workspace . ,(directory-file-name
-                                    (expand-file-name directory)))
-                     (project_id . ,(omnigent-project-id name)))))))
-    (omnigent-terminal (format "*%s[%s]*" harness name) directory
-                       (list omnigent-program harness "--resume" id) id)))
+         (buffer-name (format "*%s[%s]*" harness name)))
+    ;; Switching has to come first: creating the session further down is not
+    ;; free, and a session created for a terminal we then decline to start
+    ;; would sit on the server unused.
+    (if-let* ((live (omnigent--live-terminal buffer-name)))
+        (pop-to-buffer live)
+      (let ((id (alist-get
+                 'id (omnigent--request
+                      "POST" "/sessions"
+                      `((agent_id . ,(omnigent-agent-id agent))
+                        ;; Slashless, the way `omni' itself stores a workspace.
+                        (workspace . ,(directory-file-name
+                                       (expand-file-name directory)))
+                        (project_id . ,(omnigent-project-id name)))))))
+        (omnigent-terminal buffer-name directory
+                           (list omnigent-program harness "--resume" id) id)))))
 
 (defmacro omnigent-define-start (harness)
   "Define `omnigent-HARNESS', which starts a session for HARNESS.
