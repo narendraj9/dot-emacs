@@ -164,6 +164,9 @@ LLM is pending."
       ("coda"    . ( :url "https://coda.io/apis/mcp/vbeta"
                      :token ,(ignore-errors (gptel-api-key-from-auth-source "coda.io"))) )
 
+      ("definity" . ( :command "bunx" :args ( "mcp-remote" "https://app.definity.run/api/mcp"
+                                              "--header" ,(format "Authorization: Bearer %s" (ignore-errors (gptel-api-key-from-auth-source "definity.ai"))) )))
+
       ("deepwiki"   . (:url "https://mcp.deepwiki.com/sse"))
       ("context7"   . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
       ("nixos"      . (:command "uvx" :args ("--isolated" "mcp-nixos")))
@@ -171,18 +174,8 @@ LLM is pending."
       ("playwright" . (:command "bunx" :args ("@playwright/mcp@latest" "--browser" "firefox" "--headless" "--isolated")))
       ("devtools"   . (:command "bunx" :args ("chrome-devtools-mcp@latest")))
 
-      ;; --
       ("globalping" . (:command "bunx" :args ("mcp-remote" "https://mcp.globalping.dev/sse")))
-      ("vantage-instances"       . (:command "bunx" :args ("mcp-remote" "https://instances-mcp.vantage.sh/mcp")))
-      ("local-sandbox"           . (:url "http://localhost:3000/mcp"))
-      ("smithery.ai/google-maps" .
-       ( :command "bunx"
-         :args ("mcp-remote"
-                ,(apply #'format
-                        "https://server.smithery.ai/@smithery-ai/google-maps/mcp?profile=%s&api_key=%s"
-                        (when-let ((user-password (auth-source-user-and-password "server.smithery.ai")))
-                          (list (car user-password)
-                                (cadr user-password)))))))))))
+      ("vantage-instances"       . (:command "bunx" :args ("mcp-remote" "https://instances-mcp.vantage.sh/mcp")))))))
 
 (use-package gptel
   :vc ( :url "https://github.com/karthink/gptel"
