@@ -18,6 +18,67 @@
 ;;; Code:
 
 (require 'omnigent)
+(require 'subr-x)
+
+;;; Omni server selection
+
+;; `llms-coding-omni-server', when bound (e.g. in a private init file), is
+;; the URL of a remote Omnigent server to connect to.  Left unbound,
+;; llms-coding starts a local Omni server and talks to it on the default
+;; localhost URL (`omnigent-server-url').
+(defvar llms-coding-omni-server)
+
+(defcustom llms-coding-omni-server-start-timeout 15
+  "Seconds to wait for a freshly started local Omni server to accept requests."
+  :type 'natnum
+  :group 'llms-coding)
+
+(defvar llms-coding-omni--server-ensured nil
+  "Non-nil once the local Omni server was started or confirmed this session.")
+
+(defun llms-coding-omni--server-running-p ()
+  "Return non-nil if the local Omni background server is up."
+  (with-temp-buffer
+    (and (zerop (call-process omnigent-program nil t nil
+                              "server" "status" "--json"))
+         (progn
+           (goto-char (point-min))
+           (eq t (ignore-errors
+                   (alist-get 'running
+                              (json-parse-buffer :object-type 'alist
+                                                 :null-object nil))))))))
+
+(defun llms-coding-omni--start-local-server ()
+  "Start the local Omni background server and wait until it accepts requests."
+  (message "Starting local Omni server...")
+  (with-temp-buffer
+    (unless (zerop (call-process omnigent-program nil t nil
+                                 "server" "--background"))
+      (user-error "Could not start local Omni server: %s"
+                  (string-trim (buffer-string)))))
+  (let ((deadline (+ (float-time) llms-coding-omni-server-start-timeout)))
+    (while (and (not (llms-coding-omni--server-running-p))
+                (< (float-time) deadline))
+      (sleep-for 0.2))
+    (unless (llms-coding-omni--server-running-p)
+      (user-error "Local Omni server did not come up within %ss"
+                  llms-coding-omni-server-start-timeout))
+    (message "Local Omni server is up at %s" omnigent-server-url)))
+
+(defun llms-coding-omni-ensure-server (&rest _)
+  "Point Omnigent at the server to use, starting a local one when needed.
+When `llms-coding-omni-server' is bound, connect to that URL and start
+nothing.  Otherwise start a local Omni server once and keep the default
+localhost `omnigent-server-url'.  Wired onto `omnigent--request', so it
+runs before every Omnigent API call."
+  (if (boundp 'llms-coding-omni-server)
+      (setq omnigent-server-url llms-coding-omni-server)
+    (unless llms-coding-omni--server-ensured
+      (unless (llms-coding-omni--server-running-p)
+        (llms-coding-omni--start-local-server))
+      (setq llms-coding-omni--server-ensured t))))
+
+(advice-add 'omnigent--request :before #'llms-coding-omni-ensure-server)
 
 ;;; Omni-wrapped agents
 
