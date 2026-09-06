@@ -224,14 +224,23 @@ reply that carries no body, such as a 204."
 (defvar-local omnigent-session-id nil
   "Identifier of the Omnigent session running in this buffer.")
 
-(defun omnigent-buffer-p (buffer)
-  "Return non-nil if BUFFER is a live ghostel terminal running Omnigent.
-Recognised by its `omnigent-session-id'.  Not by the command ghostel
-exec\='d: ghostel talks to a pty connection rather than a subprocess, so
-`process-command' is nil and there is no command line to search."
-  (and (buffer-local-value 'omnigent-session-id buffer)
+(defun omnigent-terminal-live-p (buffer)
+  "Return non-nil if BUFFER is a live ghostel terminal.
+The ghostel plumbing shared by Omnigent terminals and the vanilla
+launchers in etc/llms-coding.el: liveness is the buffer's own ghostel
+process, since ghostel talks to a pty connection rather than a
+subprocess, so `process-command' is nil and there is no command line to
+search."
+  (and (buffer-live-p buffer)
        (when-let* ((process (buffer-local-value 'ghostel--process buffer)))
          (process-live-p process))))
+
+(defun omnigent-buffer-p (buffer)
+  "Return non-nil if BUFFER is a live ghostel terminal running Omnigent.
+Recognised by its `omnigent-session-id' on top of a live ghostel
+process (`omnigent-terminal-live-p')."
+  (and (buffer-local-value 'omnigent-session-id buffer)
+       (omnigent-terminal-live-p buffer)))
 
 (defun omnigent-buffers ()
   "Return the live Omnigent terminals, most recently used first."
@@ -254,21 +263,23 @@ and `ghostel-exit-functions'."
                         (format-time-string "%F %T"))))))))
 
 (defun omnigent--live-terminal (name)
-  "Return the live Omnigent terminal called NAME, if there is one."
-  (seq-find (lambda (buffer)
-              (and (equal (buffer-name buffer) name)
-                   (omnigent-buffer-p buffer)))
-            (buffer-list)))
+  "Return the live ghostel terminal called NAME, if there is one.
+Matches on liveness alone (`omnigent-terminal-live-p'), so it also finds
+the vanilla terminals in etc/llms-coding.el, which carry no session id."
+  (when-let* ((buffer (get-buffer name)))
+    (and (omnigent-terminal-live-p buffer) buffer)))
 
-(defun omnigent-terminal (name directory command &optional session-id)
+(defun omnigent-exec-terminal (name directory command &optional setup)
   "Show a ghostel terminal NAME running COMMAND in DIRECTORY.
 COMMAND is a list of a program and its arguments, exec'd directly as the
-terminal's process so quitting it closes the terminal.  SESSION-ID, when
-known, goes into `omnigent-session-id' so `omnigent-dispatch' need not
-ask.  A live terminal called NAME is reused rather than started again.
+terminal's process so quitting it closes the terminal.  A live terminal
+called NAME is reused rather than started again.  SETUP, when non-nil, is
+called with no arguments in the new terminal buffer before the command is
+exec'd, for whatever buffer-local state the caller wants to attach.
 
 Runs with `omnigent-environment' prepended, and hands exits to
-`omnigent--on-exit'.  Also the launcher etc/llms-coding.el builds on."
+`omnigent--on-exit'.  The shared ghostel launcher that `omnigent-terminal'
+and the vanilla launchers in etc/llms-coding.el both build on."
   (if-let* ((live (omnigent--live-terminal name)))
       (pop-to-buffer live)
     (let* ((directory (file-name-as-directory
@@ -284,13 +295,23 @@ Runs with `omnigent-environment' prepended, and hands exits to
         ;; commands run where the session does.  See
         ;; `omnigent-sync-directory' for keeping up when it moves.
         (setq default-directory directory)
-        (setq omnigent-session-id session-id)
-        (omnigent-session-mode)
         ;; Let `omnigent--on-exit' decide whether the buffer survives.
         (setq-local ghostel-kill-buffer-on-exit nil)
-        (add-hook 'ghostel-exit-functions #'omnigent--on-exit nil t))
+        (add-hook 'ghostel-exit-functions #'omnigent--on-exit nil t)
+        (when setup (funcall setup)))
       (pop-to-buffer buffer)
       (ghostel-exec buffer (car command) (cdr command)))))
+
+(defun omnigent-terminal (name directory command &optional session-id)
+  "Show a ghostel terminal NAME running COMMAND for an Omnigent SESSION-ID.
+Like `omnigent-exec-terminal', but also puts the terminal in
+`omnigent-session-mode' and records SESSION-ID in `omnigent-session-id',
+so `omnigent-dispatch' can act on the session without asking."
+  (omnigent-exec-terminal
+   name directory command
+   (lambda ()
+     (setq omnigent-session-id session-id)
+     (omnigent-session-mode))))
 
 (defun omnigent--session-buffer-name (session)
   "Return the terminal buffer name to use for SESSION."
@@ -377,7 +398,7 @@ is what makes `omnigent-attach' readable."
                     (user-error "No agent configured for harness %s" harness)))
          (directory (omnigent--directory arg))
          (name (omnigent--project-name directory))
-         (buffer-name (format "*%s[%s]*" harness name)))
+         (buffer-name (format "*omni-%s[%s]*" harness name)))
     ;; Switching has to come first: creating the session further down is not
     ;; free, and a session created for a terminal we then decline to start
     ;; would sit on the server unused.
