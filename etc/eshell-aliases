@@ -1,3 +1,4 @@
+alias cdp cd (project-root (project-current))
 alias clear clear-scrollback
 alias sg src search -less=0 -- "context:global $@*"
 alias nu nu -c $@*

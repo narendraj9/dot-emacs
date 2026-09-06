@@ -1938,6 +1938,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :pin manual
   :load-path "packages/rest/hledger-mode/"
   :bind ( ("C-c e" . hledger-capture)
+          ("C-c I" . hledger-import-csv-capture)
           :map hledger-input-mode-map
           ("C-c +"     . hledger-increment-amount)
           ("C-c <tab>" . ledger-input-expand-xact)
@@ -1950,6 +1951,38 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq hledger-input-buffer-height 20)
 
   :preface
+  (defun hledger-import--journal-directory ()
+    "Return the directory of the configured main hledger journal file."
+    (file-name-directory (expand-file-name hledger-jfile)))
+
+  (defun hledger-import--rules-files ()
+    "Return CSV rules files next to the configured main journal."
+    (directory-files (hledger-import--journal-directory) nil "\\.csv\\.rules\\'"))
+
+  (defun hledger-import--read-rules-file ()
+    "Read a CSV rules file from the configured main journal directory."
+    (let ((rules-files (hledger-import--rules-files)))
+      (unless rules-files
+        (user-error "No *.csv.rules files found in %s"
+                    (hledger-import--journal-directory)))
+      (expand-file-name
+       (completing-read "Rules file: " rules-files nil t)
+       (hledger-import--journal-directory))))
+
+  (defun hledger-import-csv-capture (csv-file rules-file)
+    "Import new CSV transactions using RULES-FILE into an hledger capture buffer."
+    (interactive
+     (list (read-file-name "CSV export: " nil nil t)
+           (hledger-import--read-rules-file)))
+    (require 'hledger-input)
+    (let ((output (hledger-shell-command-to-string
+                   (format "import --dry-run --rules=%s %s"
+                           (shell-quote-argument (expand-file-name rules-file))
+                           (shell-quote-argument (expand-file-name csv-file))))))
+      (hledger-capture)
+      (insert output)
+      (goto-char (point-min))))
+
   (defun hledger-get-balance (account)
     (let ((balance-output (hledger-shell-command-to-string (format " balance -N %s " account))))
       (string-match "[0-9,]+\.?[0-9]*" balance-output)
@@ -3354,6 +3387,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package scala-mode
   :pin melpa
+  :disabled t
   :ensure t
   :defer t
   :mode  ("\\.sc\\'" . scala-mode)
@@ -3364,6 +3398,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     :pin melpa))
 
 (use-package scala-cli-repl
+  :disabled t
   :defer t
   :ensure t
   :vc ( :url "https://github.com/ag91/scala-cli-repl"
@@ -4661,6 +4696,7 @@ buffer."
       '(progn
          (require 'llms)
          (require 'llms-writing)
+         (require 'llms-langs)
          (require 'llms-completion)
          (require 'llms-images))))
   (require 'llms-coding)
@@ -4703,6 +4739,10 @@ buffer."
   ;; --- macOS issues:
   (when (eq system-type 'darwin)
     (setq llms-chat-show-in-progress-indicator nil)))
+
+(use-package llms-langs
+  :load-path "etc/"
+  :commands (llms-speaker-vocab llms-speaker-vocab-watch llms-speaker-vocab-watch-stop))
 
 
 (provide 'init)
