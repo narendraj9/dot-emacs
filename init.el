@@ -1223,7 +1223,11 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package ultra-scroll
   :bind ( :map ctl-m-map
           ("j" . --scroll-up-other-window)
-          ("k" . --scroll-down-other-window) )
+          ("k" . --scroll-down-other-window)
+          ;; This window, for a terminal that has point: `j' and `k' inside
+          ;; one are the terminal's own keys.
+          ("J" . --scroll-up)
+          ("K" . --scroll-down) )
   :vc ( :url "https://github.com/jdtsmith/ultra-scroll"
         :rev :newest )
 
@@ -1233,29 +1237,98 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq scroll-conservatively 3
         scroll-margin 0)
 
-  (defvar scroll-down-command #'pixel-scroll-down)
-  (defvar scroll-up-command #'pixel-up-down)
+  (dolist (command '(--scroll-up --scroll-down
+                     --scroll-up-other-window --scroll-down-other-window))
+    (put command 'repeat-exit-timeout 4))
 
-  (put '--scroll-down-other-window 'repeat-exit-timeout 4)
-  (put '--scroll-up-other-window 'repeat-exit-timeout 4)
-
+  ;; Same case convention as the `ctl-m-map' keys above: lower case is the
+  ;; other window, upper case is this one.
   (defvar-keymap repeat/scroll-window
     :repeat t
-    "J" #'--scroll-up-other-window
-    "K" #'--scroll-down-other-window
-    "j" #'pixel-scroll-up
-    "k" #'pixel-scroll-down)
+    "j" #'--scroll-up-other-window
+    "k" #'--scroll-down-other-window
+    "J" #'--scroll-up
+    "K" #'--scroll-down)
+
+  (add-hook 'ghostel-mode-hook #'--scroll-through-terminal)
+  ;; The hook only fires for a buffer entering the mode, so re-evaluating this
+  ;; form would otherwise leave the terminals already open scrolling the wrong
+  ;; way.
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (derived-mode-p 'ghostel-mode)
+        (--scroll-through-terminal))))
 
   :preface
-  (defun --scroll-down-other-window ()
+  (defvar --scroll-up-command #'pixel-scroll-up
+    "Command scrolling the selected window towards the end of its buffer.
+Buffer-local wherever the window is not scrolled by moving `window-start',
+which is every ghostel terminal.  See `--scroll-through-terminal'.")
+
+  (defvar --scroll-down-command #'pixel-scroll-down
+    "Command scrolling the selected window towards the beginning of its buffer.
+See `--scroll-up-command'.")
+
+  (defun --scroll-up ()
+    "Scroll this window towards the end of its buffer."
     (interactive)
-    (with-selected-window (next-window (selected-window))
-      (funcall scroll-down-command*)))
+    (funcall --scroll-up-command))
+
+  (defun --scroll-down ()
+    "Scroll this window towards the beginning of its buffer."
+    (interactive)
+    (funcall --scroll-down-command))
 
   (defun --scroll-up-other-window ()
+    "Scroll the next window towards the end of its buffer."
     (interactive)
     (with-selected-window (next-window (selected-window))
-      (funcall scroll-up-command)))  )
+      (--scroll-up)))
+
+  (defun --scroll-down-other-window ()
+    "Scroll the next window towards the beginning of its buffer."
+    (interactive)
+    (with-selected-window (next-window (selected-window))
+      (--scroll-down)))
+
+  (defun --scroll-through-terminal ()
+    "Scroll this ghostel buffer through the terminal rather than the window."
+    (setq-local --scroll-up-command   #'--ghostel-scroll-up
+                --scroll-down-command #'--ghostel-scroll-down))
+
+  (defun --ghostel-wheel (button)
+    "Send one wheel click of BUTTON to the terminal, aimed at mid-window.
+BUTTON is 4 for older output and 5 for newer, the way
+`ghostel--scroll-intercept-up' and its down counterpart encode a real
+wheel event.  A full-screen program keeps its own viewport, so this is
+the only scrolling it honors; the click carries a position because that
+is what decides which of its panes moves.  Returns nil when nothing is
+tracking the mouse, which is the caller's cue to scroll the window
+instead.  Guarded: these are ghostel internals, and a rename should cost
+terminal-native scrolling, not signal an error."
+    (and (fboundp 'ghostel--forward-scroll-event)
+         (ghostel--forward-scroll-event
+          (list 'wheel-up (posn-at-x-y (/ (window-body-width nil t) 2)
+                                       (/ (window-body-height nil t) 2)))
+          button)))
+
+  (defun --ghostel-scroll-up ()
+    "Scroll a ghostel terminal towards its newest output."
+    (interactive)
+    (unless (--ghostel-wheel 5)
+      (pixel-scroll-up)
+      (ghostel-maybe-leave-input)))
+
+  (defun --ghostel-scroll-down ()
+    "Scroll a ghostel terminal towards its oldest output.
+Falling back to the window, `ghostel-maybe-leave-input' takes the buffer
+out of semi-char mode so the new view survives: ghostel re-anchors any
+window still following the live output.  \`q' or \`C-g' hands the
+terminal back."
+    (interactive)
+    (unless (--ghostel-wheel 4)
+      (pixel-scroll-down)
+      (ghostel-maybe-leave-input)))  )
 
 (use-package window
   :bind ( :map window-prefix-map

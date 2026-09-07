@@ -57,12 +57,17 @@ The local server that `omni start' brings up listens on port 6767."
 
 (defcustom omnigent-environment
   '("OMNIGENT_RUNNER_ENV_PASSTHROUGH=OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S,OMNIGENT_HARNESS_IDLE_TIMEOUT_S"
-    "OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S=0"
+    "OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S=172800"
     "OMNIGENT_HARNESS_IDLE_TIMEOUT_S=0")
   "Environment entries prepended to `process-environment' for terminals.
-The default disables Omnigent's two idle reapers, which otherwise kill
-an idle native pane or harness subprocess after one hour.  `0' disables
-each reaper.
+These set Omnigent's two idle reapers, which otherwise kill an idle
+native pane or harness subprocess after one hour.  Seconds; `0' disables
+a reaper.
+
+The native pane keeps for 2 days.  That reaper spares a pane with an attached
+tmux client, an in-flight turn, or a working CLI, so a day means a day
+with nobody watching -- and it tears down the pane alone, leaving the
+session and its transcript, which `omnigent-attach' resumes.
 
 The settings reach the reapers over two hops, both of which filter the
 environment through an allowlist:
