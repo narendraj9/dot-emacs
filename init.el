@@ -1237,8 +1237,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   (setq scroll-conservatively 3
         scroll-margin 0)
 
-  (dolist (command '(--scroll-up --scroll-down
-                     --scroll-up-other-window --scroll-down-other-window))
+  (dolist (command '( --scroll-up --scroll-down
+                      --scroll-up-other-window --scroll-down-other-window ))
     (put command 'repeat-exit-timeout 4))
 
   ;; Same case convention as the `ctl-m-map' keys above: lower case is the
@@ -4755,7 +4755,7 @@ buffer."
 (use-package omnigent
   :load-path "packages/rest/omnigent"
   :demand t
-  :custom (omnigent-command-prefix "<C-m> o")
+  :custom (omnigent-command-prefix [C-m ?o])
   :config (omnigent-mode +1))
 
 (use-package llms

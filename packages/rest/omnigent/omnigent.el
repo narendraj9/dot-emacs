@@ -1,4 +1,4 @@
-;;; omnigent.el --- Work with Omnigent sessions from Emacs  -*- lexical-binding: t; -*-
+;;; omnigent.el --- Omnigent sessions from Emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2026  Narendra Joshi
 
@@ -8,21 +8,20 @@
 
 ;;; Commentary:
 
-;; Start an Omnigent session, or reattach to an existing one, in a
-;; terminal inside Emacs; switch between those terminals; act on
-;; the current terminal from a `transient' menu, or start a new one.
+;; Start an Omnigent session, or reattach to one, in a terminal inside
+;; Emacs, and act on it from a `transient' menu.
 ;;
 ;; Session state comes from the Omnigent server's HTTP API
-;; (`omnigent-server-url'); terminals are `omni' processes run by
+;; (`omnigent-server-url').  Terminals are `omni' processes run by
 ;; ghostel.
 ;;
 ;; Entry points:
 ;;
-;;   `omnigent-mode'           global minor mode that opens the menu on
+;;   `omnigent-mode'           global minor mode; opens the menu on
 ;;                             `omnigent-command-prefix'
-;;   `omnigent-start'          create a session for a harness over the
-;;                             API, filed under the current project,
-;;                             then boot the harness onto it
+;;   `omnigent-start'          create a session for a harness, filed
+;;                             under the current project, and boot the
+;;                             harness onto it
 ;;   `omnigent-attach'         pick a session and bring it up
 ;;   `omnigent-switch-buffer'  pick one of the live Omnigent terminals
 ;;   `omnigent-dispatch'       the menu, also on \\`C-c C-o' inside a
@@ -55,32 +54,36 @@ The local server that `omni start' brings up listens on port 6767."
   "How many recent sessions to ask the server for."
   :type 'natnum)
 
+(defcustom omnigent-data-directory "~/.omnigent"
+  "Directory Omnigent keeps its state in on this machine.
+`omnigent-list-sessions' reads the server's and the daemon's own records
+of themselves from here."
+  :type 'directory)
+
 (defcustom omnigent-environment
   '("OMNIGENT_RUNNER_ENV_PASSTHROUGH=OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S,OMNIGENT_HARNESS_IDLE_TIMEOUT_S"
     "OMNIGENT_NATIVE_PANE_IDLE_TIMEOUT_S=172800"
     "OMNIGENT_HARNESS_IDLE_TIMEOUT_S=0")
   "Environment entries prepended to `process-environment' for terminals.
-These set Omnigent's two idle reapers, which otherwise kill an idle
-native pane or harness subprocess after one hour.  Seconds; `0' disables
-a reaper.
+They set Omnigent's two idle reapers, which otherwise kill an idle
+native pane or harness subprocess after an hour.  Values are seconds;
+`0' disables a reaper.
 
-The native pane keeps for 2 days.  That reaper spares a pane with an attached
-tmux client, an in-flight turn, or a working CLI, so a day means a day
-with nobody watching -- and it tears down the pane alone, leaving the
-session and its transcript, which `omnigent-attach' resumes.
+The pane here keeps for two days.  That reaper spares a pane with an
+attached tmux client, an in-flight turn, or a working CLI, and it tears
+down the pane alone -- the session and its transcript stay, and
+`omnigent-attach' resumes them.
 
-The settings reach the reapers over two hops, both of which filter the
-environment through an allowlist:
+Each setting crosses two allowlists on its way down:
 
-- CLI to daemon: local mode allows the `OMNIGENT_' prefix, so all three
-  pass (`_build_host_daemon_env' in omnigent/cli.py).
-- Daemon to runner: that allowlist has no `OMNIGENT_' prefix, so the two
-  timeouts only pass because `OMNIGENT_RUNNER_ENV_PASSTHROUGH' names
-  them (`_build_runner_env' in omnigent/host/connect.py).
+- CLI to daemon allows the `OMNIGENT_' prefix, so all three pass
+  (`_build_host_daemon_env' in omnigent/cli.py).
+- Daemon to runner does not, so the two timeouts pass only because
+  `OMNIGENT_RUNNER_ENV_PASSTHROUGH' names them (`_build_runner_env' in
+  omnigent/host/connect.py).
 
-The daemon is spawned by the first `omni' command that finds no live
-one and is reused afterwards, so a change here takes effect on the next
-cold start, not in an already-running daemon."
+A change takes effect on the next cold daemon start.  The first `omni'
+command that finds no live daemon spawns one; the rest reuse it."
   :type '(repeat string))
 
 (defcustom omnigent-keep-buffer-on-exit t
@@ -108,7 +111,7 @@ Bound on the \\`C-c' prefix, which ghostel passes through to Emacs.
   :doc "Keymap of `omnigent-mode'.  Holds `omnigent-command-prefix' alone.")
 
 (defun omnigent--bind-prefix (symbol prefix)
-  "Bind `omnigent-dispatch' at PREFIX, and store PREFIX in SYMBOL."
+  "Set SYMBOL to PREFIX, and bind `omnigent-dispatch' at PREFIX."
   ;; `define-key', not `keymap-set': `key-valid-p' rejects the angle-bracket
   ;; spelling of a remapped key such as `<C-m>'.
   (when (boundp symbol)
@@ -140,15 +143,15 @@ Bound on the \\`C-c' prefix, which ghostel passes through to Emacs.
 PATH is relative to the API root, e.g. \"/sessions\".  BODY, when
 non-nil, is an alist sent as the JSON request body.  Returns nil for a
 reply that carries no body, such as a 204."
-  (let* (;; We report failures ourselves, below; request.el's own messages
-         ;; would only duplicate them.
+  (let* (;; Failures are reported below; request.el's own messages would
+         ;; only duplicate them.
          (request-message-level -1)
          (response
           (request (concat omnigent-server-url "/v1" path)
-            ;; Sync because `omnigent-read-session' runs in an `interactive'
-            ;; form, which has no way to await.  The wait polls with
-            ;; `accept-process-output', so C-g still works.  Five seconds
-            ;; instead of request.el's implicit 30 for a local server.
+            ;; Sync: `omnigent-read-session' runs in an `interactive'
+            ;; form, which cannot await.  The wait polls with
+            ;; `accept-process-output', so C-g still works, and five
+            ;; seconds is long for a local server.
             :sync t
             :timeout 5
             :type method
@@ -164,15 +167,17 @@ reply that carries no body, such as a 204."
                       (format "%s unreachable" omnigent-server-url))))
     (request-response-data response)))
 
-(defun omnigent-sessions ()
-  "Return the recent unarchived sessions, most recently active first."
+(defun omnigent-sessions (&optional limit)
+  "Return the recent unarchived sessions, most recently active first.
+LIMIT caps how many the server returns, defaulting to
+`omnigent-session-limit'."
   (alist-get 'data
              (omnigent--request
               "GET" (format "/sessions?limit=%d&sort_by=updated_at&order=desc"
-                            omnigent-session-limit))))
+                            (or limit omnigent-session-limit)))))
 
 (defun omnigent--find-named (path name)
-  "Return the entry called NAME in the list the API serves at PATH."
+  "Return the entry in the list the API serves at PATH whose name is NAME."
   (seq-find (lambda (entry) (equal (alist-get 'name entry) name))
             (alist-get 'data (omnigent--request "GET" path))))
 
@@ -231,19 +236,17 @@ reply that carries no body, such as a 204."
 
 (defun omnigent-terminal-live-p (buffer)
   "Return non-nil if BUFFER is a live ghostel terminal.
-The ghostel plumbing shared by Omnigent terminals and the vanilla
-launchers in etc/llms-coding.el: liveness is the buffer's own ghostel
-process, since ghostel talks to a pty connection rather than a
-subprocess, so `process-command' is nil and there is no command line to
-search."
+Liveness is the buffer's own ghostel process: ghostel talks to a pty
+connection rather than a subprocess, so `process-command' is nil and
+there is no command line to match on.  Shared with the vanilla launchers
+in etc/llms-coding.el."
   (and (buffer-live-p buffer)
        (when-let* ((process (buffer-local-value 'ghostel--process buffer)))
          (process-live-p process))))
 
 (defun omnigent-buffer-p (buffer)
   "Return non-nil if BUFFER is a live ghostel terminal running Omnigent.
-Recognised by its `omnigent-session-id' on top of a live ghostel
-process (`omnigent-terminal-live-p')."
+That is an `omnigent-session-id' on top of a live ghostel process."
   (and (buffer-local-value 'omnigent-session-id buffer)
        (omnigent-terminal-live-p buffer)))
 
@@ -251,15 +254,104 @@ process (`omnigent-terminal-live-p')."
   "Return the live Omnigent terminals, most recently used first."
   (seq-filter #'omnigent-buffer-p (buffer-list)))
 
+(defun omnigent--exec (buffer command)
+  "In BUFFER, run COMMAND as its terminal process.
+COMMAND is a list of a program and its arguments.  `omnigent-environment'
+is bound here, not around the buffer's creation, so a relaunch gets it
+too."
+  (with-current-buffer buffer
+    (let ((process-environment (append omnigent-environment
+                                       process-environment)))
+      (ghostel-exec buffer (car command) (cdr command)))))
+
+
+;;; Surviving a stale runner binding
+
+(defconst omnigent--stale-runner-error " is offline for conversation "
+  "Fragment of the server error that says a session's runner is gone.
+`omni' matches on the same fragment (`_is_stale_runner_message' in its
+codex_native.py).")
+
+(defcustom omnigent-stale-runner-retry-delay 2
+  "Seconds to wait before relaunching a terminal that hit a stale runner.
+Nil never retries, leaving the error on screen.
+
+Resuming a session, `omni' looks that session's terminal up first.  The
+lookup fails with a 400 when the runner is gone while this machine still
+counts as online -- a tunnel that dropped without the host record
+catching up, after sleep or a daemon being replaced.  The Claude wrapper
+recovers from the 404, 409, 502 and 503 the same lookup can return, but
+not from the 400.
+
+The condition clears as soon as the tunnel re-registers or the host
+record goes offline, so the relaunch takes the ordinary cold-resume
+path.  The web UI never trips on it: it skips the lookup and leaves
+rebinding to the server, which does it on the next message."
+  :type '(choice (const :tag "Do not retry" nil) number))
+
+(defvar-local omnigent--command nil
+  "The command this terminal ran, for relaunching it after a failure.")
+
+(defvar-local omnigent--retried nil
+  "Non-nil once this terminal has been relaunched after a stale runner.
+One retry only: a second failure is the real thing, and belongs on
+screen.")
+
+(defun omnigent--stale-runner-failure-p (buffer)
+  "Return non-nil if BUFFER's terminal died on a stale runner binding.
+Reads the buffer's tail, where `omni' leaves the error before exiting."
+  ;; ponytail: ghostel renders into a buffer only while it has a window,
+  ;; which a terminal you just launched has.  One hidden for its whole
+  ;; short life renders nothing and gets no retry.  Ask the server
+  ;; instead -- `GET /sessions/ID/resources' returns the same 400 -- if
+  ;; that stops holding.
+  (with-current-buffer buffer
+    (save-excursion
+      (goto-char (point-max))
+      (and (search-backward omnigent--stale-runner-error
+                            (max (point-min) (- (point-max) 4000)) t)
+           t))))
+
+(defun omnigent--retry-stale-runner (buffer)
+  "Relaunch BUFFER's command once `omnigent-stale-runner-retry-delay' is up.
+The wait is the point, and re-execing from `ghostel-exit-functions'
+would race ghostel's teardown of the old process."
+  (with-current-buffer buffer
+    (setq omnigent--retried t)
+    (let ((inhibit-read-only t))
+      (goto-char (point-max))
+      (insert "\n[omnigent] runner was offline; relaunching...\n")))
+  ;; The relaunch erases the buffer, so leave the reason where it lasts.
+  (message "omnigent: %s hit an offline runner; relaunching" (buffer-name buffer))
+  (run-at-time
+   omnigent-stale-runner-retry-delay nil
+   (lambda ()
+     (when (and (buffer-live-p buffer)
+                (not (omnigent-terminal-live-p buffer)))
+       (omnigent--exec buffer (buffer-local-value 'omnigent--command buffer))))))
+
 (defun omnigent--on-exit (buffer event)
-  "Note EVENT in BUFFER, or kill BUFFER after a clean exit.
+  "Hand BUFFER's exit to `omnigent--handle-exit', once it is rendered.
+EVENT is the process sentinel string.  See `ghostel-exit-functions'.
+Deferred because the decision reads the terminal's last output, and the
+sentinel can beat ghostel's final redraw."
+  (run-at-time 0.3 nil #'omnigent--handle-exit buffer event))
+
+(defun omnigent--handle-exit (buffer event)
+  "Retry BUFFER, note EVENT in it, or kill it after a clean exit.
 EVENT is the process sentinel string.  See `omnigent-keep-buffer-on-exit'
-and `ghostel-exit-functions'."
+and `omnigent-stale-runner-retry-delay'."
   (cond
+   ((not (buffer-live-p buffer)))
+   ((and omnigent-stale-runner-retry-delay
+         (not (buffer-local-value 'omnigent--retried buffer))
+         (buffer-local-value 'omnigent--command buffer)
+         (omnigent--stale-runner-failure-p buffer))
+    (omnigent--retry-stale-runner buffer))
    ((and (not omnigent-keep-buffer-on-exit)
          (string-prefix-p "finished" event))
     (kill-buffer buffer))
-   ((buffer-live-p buffer)
+   (t
     (with-current-buffer buffer
       (let ((inhibit-read-only t))
         (goto-char (point-max))
@@ -269,46 +361,45 @@ and `ghostel-exit-functions'."
 
 (defun omnigent--live-terminal (name)
   "Return the live ghostel terminal called NAME, if there is one.
-Matches on liveness alone (`omnigent-terminal-live-p'), so it also finds
-the vanilla terminals in etc/llms-coding.el, which carry no session id."
+Matches on liveness alone, so it finds the vanilla terminals in
+etc/llms-coding.el too, which carry no session id."
   (when-let* ((buffer (get-buffer name)))
     (and (omnigent-terminal-live-p buffer) buffer)))
 
 (defun omnigent-exec-terminal (name directory command &optional setup)
-  "Show a ghostel terminal NAME running COMMAND in DIRECTORY.
+  "Show a ghostel terminal NAME in DIRECTORY, running COMMAND.
 COMMAND is a list of a program and its arguments, exec'd directly as the
-terminal's process so quitting it closes the terminal.  A live terminal
-called NAME is reused rather than started again.  SETUP, when non-nil, is
-called with no arguments in the new terminal buffer before the command is
-exec'd, for whatever buffer-local state the caller wants to attach.
+terminal's process, so quitting it closes the terminal.  A live terminal
+called NAME is reused rather than started again.  SETUP, when non-nil,
+runs in the new buffer before the exec, for whatever buffer-local state
+the caller wants to attach.
 
-Runs with `omnigent-environment' prepended, and hands exits to
-`omnigent--on-exit'.  The shared ghostel launcher that `omnigent-terminal'
-and the vanilla launchers in etc/llms-coding.el both build on."
+Exits go to `omnigent--on-exit'.  The shared launcher that
+`omnigent-terminal' and the vanilla ones in etc/llms-coding.el build on."
   (if-let* ((live (omnigent--live-terminal name)))
       (pop-to-buffer live)
     (let* ((directory (file-name-as-directory
                        (expand-file-name (or directory default-directory))))
            (default-directory directory)
-           (process-environment (append omnigent-environment
-                                        process-environment))
            (buffer (get-buffer-create name)))
       (with-current-buffer buffer
         (unless (derived-mode-p 'ghostel-mode)
           (ghostel-mode))
-        ;; Set it in the buffer, not just around its creation, so Emacs
-        ;; commands run where the session does.  See
-        ;; `omnigent-sync-directory' for keeping up when it moves.
+        ;; In the buffer, not just around its creation, so Emacs
+        ;; commands run where the session does.
+        ;; `omnigent-sync-directory' keeps up when it moves.
         (setq default-directory directory)
         ;; Let `omnigent--on-exit' decide whether the buffer survives.
         (setq-local ghostel-kill-buffer-on-exit nil)
+        (setq omnigent--command command
+              omnigent--retried nil)
         (add-hook 'ghostel-exit-functions #'omnigent--on-exit nil t)
         (when setup (funcall setup)))
       (pop-to-buffer buffer)
-      (ghostel-exec buffer (car command) (cdr command)))))
+      (omnigent--exec buffer command))))
 
 (defun omnigent-terminal (name directory command &optional session-id)
-  "Show a ghostel terminal NAME running COMMAND for an Omnigent SESSION-ID.
+  "Show a ghostel terminal NAME in DIRECTORY running COMMAND, for SESSION-ID.
 Like `omnigent-exec-terminal', but also puts the terminal in
 `omnigent-session-mode' and records SESSION-ID in `omnigent-session-id',
 so `omnigent-dispatch' can act on the session without asking."
@@ -328,8 +419,7 @@ so `omnigent-dispatch' can act on the session without asking."
 (defun omnigent-attach (session)
   "Bring SESSION up in a terminal with `omni resume'.
 Resume, not `omni attach': attaching only joins a session whose runner
-is still live, while resuming hands the session to its harness either
-way."
+is still live, while resuming hands it to its harness either way."
   (interactive (list (omnigent-read-session "Attach to session: ")))
   (let-alist session
     (omnigent-terminal (omnigent--session-buffer-name session) .workspace
@@ -390,13 +480,13 @@ else DIRECTORY's own name."
 HARNESS names an `omni' subcommand in `omnigent-harnesses'.  With a
 prefix ARG, prompt for the directory instead of using the project root.
 
-The session is created over the API first, with its workspace and
-Omnigent project taken from the Emacs project, and only then handed to
-`omni HARNESS --resume'.  So the session is filed correctly before the
-harness boots, and the terminal knows its `omnigent-session-id' straight
-away, which is what lets `omnigent-dispatch' act without asking.  No
-title is set: Omnigent titles a session from its first message, and that
-is what makes `omnigent-attach' readable."
+The session is created over the API first -- workspace and Omnigent
+project taken from the Emacs project -- and only then handed to
+`omni HARNESS --resume'.  Two things follow: it is filed correctly
+before the harness boots, and the terminal knows its
+`omnigent-session-id' straight away, which is what lets
+`omnigent-dispatch' act without asking.  No title is set, because
+Omnigent titles a session from its first message."
   (interactive (list (completing-read "Harness: " omnigent-harnesses nil t)
                      current-prefix-arg))
   (let* ((agent (or (cdr (assoc harness omnigent-harnesses))
@@ -404,9 +494,8 @@ is what makes `omnigent-attach' readable."
          (directory (omnigent--directory arg))
          (name (omnigent--project-name directory))
          (buffer-name (format "*omni-%s[%s]*" harness name)))
-    ;; Switching has to come first: creating the session further down is not
-    ;; free, and a session created for a terminal we then decline to start
-    ;; would sit on the server unused.
+    ;; Switch first: a session created for a terminal we then decline to
+    ;; start would sit on the server unused.
     (if-let* ((live (omnigent--live-terminal buffer-name)))
         (pop-to-buffer live)
       (let ((id (alist-get
@@ -443,8 +532,8 @@ See `omnigent-start', which does the work." harness)
 With a prefix ARG, prompt for the directory to use instead.
 
 Unlike `omnigent-start', nothing is created up front: `omni run' picks
-the agent itself, so there is no id to create a session for, and the
-terminal has to ask which session it is on."
+the agent itself, so there is no id to bind, and the terminal has to ask
+which session it is on."
   (interactive "P")
   (let ((directory (omnigent--directory arg)))
     (omnigent-terminal (format "*omni[%s]*"
@@ -460,7 +549,7 @@ terminal has to ask which session it is on."
       (alist-get 'id (omnigent-read-session "Session: "))))
 
 (defun omnigent--patch (id field value)
-  "Set FIELD of session ID to VALUE and report it."
+  "Set session ID's FIELD to VALUE, and report it."
   (omnigent--request "PATCH" (format "/sessions/%s" id) (list (cons field value)))
   (message "%s: %s" field value))
 
@@ -489,9 +578,8 @@ terminal has to ask which session it is on."
 
 (defun omnigent-sync-directory ()
   "Point this terminal's `default-directory' at its session's directory.
-A session can be moved to another directory after it starts -- `omni'
-offers that on attach -- so ask the server where it is now instead of
-trusting the directory the terminal was launched in."
+A session can move after it starts -- `omni' offers that on attach -- so
+ask the server where it is now rather than trust the launch directory."
   (interactive)
   (unless omnigent-session-id
     (user-error "Not in an Omnigent terminal"))
@@ -520,6 +608,12 @@ trusting the directory the terminal was launched in."
         (user-error "%s" (string-trim (buffer-string)))))
     (message "Exported to %s" file)))
 
+;; Loaded on demand, so its requires cost nothing until asked for.
+;; Spelled out as well as cookied: this package is loaded from a
+;; directory, with no generated autoloads.
+;;;###autoload (autoload 'omnigent-list-sessions "omnigent-list" nil t)
+(autoload 'omnigent-list-sessions "omnigent-list" nil t)
+
 ;;;###autoload (autoload 'omnigent-dispatch "omnigent" nil t)
 (transient-define-prefix omnigent-dispatch ()
   "Bring up an Omnigent session, or act on the current terminal's one.
@@ -535,7 +629,8 @@ the current terminal or else ask for."
    ["Go"
     ("d" "Sync directory" omnigent-sync-directory)
     ("a" "Attach to a session" omnigent-attach)
-    ("b" "Switch terminal" omnigent-switch-buffer)]])
+    ("b" "Switch terminal" omnigent-switch-buffer)
+    ("l" "List running sessions" omnigent-list-sessions)]])
 
 
 (provide 'omnigent)
