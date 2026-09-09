@@ -187,6 +187,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
           :map ctl-m-map
           ("S" . macos-fix-keyboard-modifiers)
+          ("C-d" . cd)
 
           :map ctl-quote-map
           ("g"   . websearch-it)
