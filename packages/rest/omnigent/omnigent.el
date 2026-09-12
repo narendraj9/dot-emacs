@@ -161,7 +161,7 @@ reply that carries no body, such as a 204."
                       (json-parse-buffer :object-type 'alist :array-type 'list
                                          :null-object nil)))))
     (unless (<= 200 (or (request-response-status-code response) 0) 299)
-      (user-error "Omnigent %s %s: %s" method path
+      (user-error "Omnigent[%s] %s %s: %s" omnigent-server-url method path
                   (or (request-response-status-code response)
                       ;; No status code at all: the request never landed.
                       (format "%s unreachable" omnigent-server-url))))
