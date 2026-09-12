@@ -101,7 +101,8 @@ runs before every Omnigent API call."
 (defcustom llms-coding-agents
   '(("claude" . ("claude"))
     ("codex" . ("codex"))
-    ("pi" . ("pi")))
+    ("pi" . ("pi"))
+    ("agy" . ("agy")))
   "Alist of plain coding-agent names to argv lists.
 The car is the agent name used for completion and buffer naming; the cdr
 is exec'd directly as a ghostel terminal's PROGRAM plus ARGS."
@@ -140,6 +141,7 @@ See `llms-coding', which does the work." agent)
 (llms-coding-define "claude")
 (llms-coding-define "codex")
 (llms-coding-define "pi")
+(llms-coding-define "agy")
 
 (provide 'llms-coding)
 ;;; llms-coding.el ends here

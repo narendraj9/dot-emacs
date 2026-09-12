@@ -4783,6 +4783,7 @@ buffer."
           ("i A"   . llms-coding-claude)
           ("i C"   . llms-coding-codex)
           ("i I"   . macher-implement)
+          ("i g"   . llms-coding-agy)
           ("i M"   . macher-action)
           ("i O"   . llms-coding)
           ("i P"   . llms-coding-pi)
