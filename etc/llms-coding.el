@@ -88,8 +88,11 @@ runs before every Omnigent API call."
 (defalias 'llms-coding-omni-codex #'omnigent-codex)
 ;;;###autoload (defalias 'llms-coding-omni-pi #'omnigent-pi)
 (defalias 'llms-coding-omni-pi #'omnigent-pi)
+;;;###autoload (defalias 'llms-coding-omni-agy #'omnigent-agy)
+(defalias 'llms-coding-omni-agy #'omnigent-agy)
 ;;;###autoload (defalias 'llms-coding-omni #'omnigent-run)
 (defalias 'llms-coding-omni #'omnigent-run)
+
 
 ;;; Plain agents
 
