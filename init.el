@@ -1223,12 +1223,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
 (use-package ultra-scroll
   :bind ( :map ctl-m-map
-          ("j" . --scroll-up-other-window)
-          ("k" . --scroll-down-other-window)
+          ("J" . --scroll-up-other-window)
+          ("K" . --scroll-down-other-window)
           ;; This window, for a terminal that has point: `j' and `k' inside
           ;; one are the terminal's own keys.
-          ("J" . --scroll-up)
-          ("K" . --scroll-down) )
+          ("j" . --scroll-up)
+          ("k" . --scroll-down) )
   :vc ( :url "https://github.com/jdtsmith/ultra-scroll"
         :rev :newest )
 
@@ -1242,14 +1242,12 @@ Argument STATE is maintained by `use-package' as it processes symbols."
                       --scroll-up-other-window --scroll-down-other-window ))
     (put command 'repeat-exit-timeout 4))
 
-  ;; Same case convention as the `ctl-m-map' keys above: lower case is the
-  ;; other window, upper case is this one.
   (defvar-keymap repeat/scroll-window
     :repeat t
-    "j" #'--scroll-up-other-window
-    "k" #'--scroll-down-other-window
-    "J" #'--scroll-up
-    "K" #'--scroll-down)
+    "J" #'--scroll-up-other-window
+    "K" #'--scroll-down-other-window
+    "j" #'--scroll-up
+    "k" #'--scroll-down)
 
   (add-hook 'ghostel-mode-hook #'--scroll-through-terminal)
   ;; The hook only fires for a buffer entering the mode, so re-evaluating this
