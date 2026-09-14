@@ -264,6 +264,17 @@ too."
                                        process-environment)))
       (ghostel-exec buffer (car command) (cdr command)))))
 
+(defun omnigent--server-command (&rest arguments)
+  "Return an `omni' command running ARGUMENTS against `omnigent-server-url'.
+Without `--server', `omni' starts a throwaway server of its own on a free
+port.  That server shares the database but not the runner registry, so a
+session whose runner is registered with the long-running server looks
+offline to it, and the lookup fails with the 400 the wrapper treats as
+fatal.  Naming the server is what the web UI effectively does."
+  (append (list omnigent-program (car arguments)
+                "--server" omnigent-server-url)
+          (cdr arguments)))
+
 
 ;;; Surviving a stale runner binding
 
@@ -423,7 +434,7 @@ is still live, while resuming hands it to its harness either way."
   (interactive (list (omnigent-read-session "Attach to session: ")))
   (let-alist session
     (omnigent-terminal (omnigent--session-buffer-name session) .workspace
-                       (list omnigent-program "resume" .id) .id)))
+                       (omnigent--server-command "resume" .id) .id)))
 
 ;;;###autoload
 (defun omnigent-switch-buffer ()
@@ -508,7 +519,8 @@ Omnigent titles a session from its first message."
                                        (expand-file-name directory)))
                         (project_id . ,(omnigent-project-id name)))))))
         (omnigent-terminal buffer-name directory
-                           (list omnigent-program harness "--resume" id) id)))))
+                           (omnigent--server-command harness "--resume" id)
+                           id)))))
 
 (defmacro omnigent-define-start (harness)
   "Define `omnigent-HARNESS', which starts a session for HARNESS.
