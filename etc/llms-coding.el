@@ -86,6 +86,8 @@ runs before every Omnigent API call."
 (defalias 'llms-coding-omni-claude #'omnigent-claude)
 ;;;###autoload (defalias 'llms-coding-omni-codex #'omnigent-codex)
 (defalias 'llms-coding-omni-codex #'omnigent-codex)
+;;;###autoload (defalias 'llms-coding-omni-cursor #'omnigent-cursor)
+(defalias 'llms-coding-omni-cursor #'omnigent-cursor)
 ;;;###autoload (defalias 'llms-coding-omni-pi #'omnigent-pi)
 (defalias 'llms-coding-omni-pi #'omnigent-pi)
 ;;;###autoload (defalias 'llms-coding-omni-agy #'omnigent-agy)
@@ -104,6 +106,7 @@ runs before every Omnigent API call."
 (defcustom llms-coding-agents
   '(("claude" . ("claude"))
     ("codex" . ("codex"))
+    ("cursor" . ("cursor-agent"))
     ("pi" . ("pi"))
     ("agy" . ("agy")))
   "Alist of plain coding-agent names to argv lists.
@@ -143,6 +146,7 @@ See `llms-coding', which does the work." agent)
 
 (llms-coding-define "claude")
 (llms-coding-define "codex")
+(llms-coding-define "cursor")
 (llms-coding-define "pi")
 (llms-coding-define "agy")
 

@@ -4780,6 +4780,7 @@ buffer."
           ;; -----
           ("i A"   . llms-coding-claude)
           ("i C"   . llms-coding-codex)
+          ("i U"   . llms-coding-cursor)
           ("i I"   . macher-implement)
           ("i G"   . llms-coding-agy)
           ("i M"   . macher-action)
@@ -4794,6 +4795,7 @@ buffer."
           ("i a" . llms-coding-omni-claude)
           ("i b" . gptel)
           ("i c" . llms-coding-omni-codex)
+          ("i u" . llms-coding-omni-cursor)
           ("i e" . eca)
           ("i g" . llms-coding-omni-agy)
           ("i m" . gptel-menu)

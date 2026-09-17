@@ -459,6 +459,7 @@ is still live, while resuming hands it to its harness either way."
 (defcustom omnigent-harnesses
   '(("claude" . "claude-native-ui")
     ("codex" . "codex-native-ui")
+    ("cursor" . "cursor-native-ui")
     ("pi" . "pi-native-ui")
     ("agy" . "antigravity-native-ui"))
   "Alist of `omni' subcommand to the registered agent it launches.
@@ -537,6 +538,7 @@ See `omnigent-start', which does the work." harness)
 
 (omnigent-define-start "claude")
 (omnigent-define-start "codex")
+(omnigent-define-start "cursor")
 (omnigent-define-start "pi")
 (omnigent-define-start "agy")
 
