@@ -35,6 +35,7 @@
 (require 'request)
 (require 'seq)
 (require 'transient)
+(require 'url-util)
 
 (defgroup omnigent nil
   "Drive Omnigent sessions from Emacs."
@@ -167,14 +168,19 @@ reply that carries no body, such as a 204."
                       (format "%s unreachable" omnigent-server-url))))
     (request-response-data response)))
 
-(defun omnigent-sessions (&optional limit)
+(defun omnigent-sessions (&optional limit query)
   "Return the recent unarchived sessions, most recently active first.
 LIMIT caps how many the server returns, defaulting to
-`omnigent-session-limit'."
+`omnigent-session-limit'.  QUERY, when non-nil, keeps only the sessions
+whose title or transcript contains it, ignoring case."
   (alist-get 'data
              (omnigent--request
-              "GET" (format "/sessions?limit=%d&sort_by=updated_at&order=desc"
-                            (or limit omnigent-session-limit)))))
+              "GET" (format "/sessions?limit=%d&sort_by=updated_at&order=desc%s"
+                            (or limit omnigent-session-limit)
+                            (if query
+                                (concat "&search_query="
+                                        (url-hexify-string query))
+                              "")))))
 
 (defun omnigent--find-named (path name)
   "Return the entry in the list the API serves at PATH whose name is NAME."
@@ -611,6 +617,35 @@ ask the server where it is now rather than trust the launch directory."
   (kill-new id)
   (message "%s" id))
 
+(defun omnigent--search-line (session)
+  "Format SESSION for completion, next to the text that matched the search."
+  (let-alist session
+    (concat (string-pad (truncate-string-to-width
+                         (or .title "(untitled)") 40 nil nil t)
+                        40)
+            "  " (propertize
+                  (string-trim
+                   (replace-regexp-in-string "[ \t\n\r]+" " "
+                                             (or .search_snippet "")))
+                  'face 'shadow))))
+
+;;;###autoload
+(defun omnigent-search (query)
+  "Attach to a session whose title or transcript contains QUERY.
+The server scans whole transcripts, ignoring case, and returns the text
+that matched as a snippet -- shown next to each title here."
+  (interactive (list (read-string "Search sessions: ")))
+  (let* ((sessions (omnigent-sessions nil query))
+         (table (mapcar (lambda (session)
+                          (cons (omnigent--search-line session) session))
+                        sessions)))
+    (unless table
+      (user-error "No Omnigent session matches %s" query))
+    (omnigent-attach
+     (cdr (assoc (completing-read "Session: " (omnigent--ordered-table table)
+                                  nil t)
+                 table)))))
+
 (defun omnigent-export (id file)
   "Export the transcript of session ID to FILE as JSONL."
   (interactive (list (omnigent--id)
@@ -646,7 +681,8 @@ the current terminal or else ask for."
     ("d" "Sync directory" omnigent-sync-directory)
     ("a" "Attach to a session" omnigent-attach)
     ("b" "Switch terminal" omnigent-switch-buffer)
-    ("l" "List running sessions" omnigent-list-sessions)]])
+    ("l" "List running sessions" omnigent-list-sessions)
+    ("s" "Search transcripts" omnigent-search)]])
 
 
 (provide 'omnigent)
