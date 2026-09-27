@@ -2630,7 +2630,7 @@ terminal back."
 
 (use-package ghostel
   :ensure t
-  :custom (ghostel-readonly-fast-exit t)
+  :custom (ghostel-readonly-fast-exit nil)
   :bind ( :map ctl-m-map
           ("t g" . ghostel) ))
 
