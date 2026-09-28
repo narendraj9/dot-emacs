@@ -669,6 +669,24 @@ Otherwise, limit to only `org-mode' files."
   :after org
   :defer t
   :init
+  (setq org-babel-python-command "python"
+        org-confirm-babel-evaluate nil)
+
+  ;; Make tab indent according to source blocks major mode
+  ;; Disabled for now: Enabling it causes the blinker to disappear after
+  ;; hitting [Tab] sometimes.
+  (setq org-src-tab-acts-natively nil)
+
+  ;; Fontify quote and verse blocks
+  (setq org-fontify-quote-and-verse-blocks t)
+
+  ;; I usually do not look at the org file while editing code. So, reorganizing
+  ;; the windows in the current frame isn't useful for me.
+  (setq org-src-window-setup 'current-window)
+
+  (add-hook 'org-babel-after-execute-hook #'org-display-inline-images 'append)
+
+  :config
   (setq org-babel-load-languages
         `((emacs-lisp . t)
           (sqlite     . t)
@@ -690,28 +708,8 @@ Otherwise, limit to only `org-mode' files."
           (verb       . t)
           (scala-cli  . t)
           (plantuml   . t)))
-
-  (setq org-babel-python-command "python"
-        org-confirm-babel-evaluate nil)
-
-  ;; Make tab indent according to source blocks major mode
-  ;; Disabled for now: Enabling it causes the blinker to disappear after
-  ;; hitting [Tab] sometimes.
-  (setq org-src-tab-acts-natively nil)
-
-  ;; Fontify quote and verse blocks
-  (setq org-fontify-quote-and-verse-blocks t)
-
-  ;; I usually do not look at the org file while editing code. So, reorganizing
-  ;; the windows in the current frame isn't useful for me.
-  (setq org-src-window-setup 'current-window)
-
-  (add-hook 'org-babel-after-execute-hook #'org-display-inline-images 'append)
-
-  :config
-  (eval-after-load 'org
-    '(org-babel-do-load-languages 'org-babel-load-languages
-                                  org-babel-load-languages)))
+  (org-babel-do-load-languages 'org-babel-load-languages
+                                org-babel-load-languages))
 
 
 (use-package org-habit
