@@ -198,8 +198,8 @@ Otherwise, limit to only `org-mode' files."
         org-todo-keyword-faces
         '(("TODO"        (:foreground "red" :weight bold))
           ("IN PROGRESS" (:foreground "blue" :weight bold))
-          ("PARKED"      (:foreground "IndianRed" :weight bold))
           ("NEXT"        (:foreground "OrangeRed" :weight bold))
+          ("PARKED"      (:foreground "IndianRed" :weight bold))
           ("BLOCKED"     (:foreground "orange" :weight bold))
           ("DONE"        (:foreground "forest green" :weight bold))
           ("NOT_DONE"    (:foreground "indian red" :weight bold))
@@ -355,10 +355,10 @@ Otherwise, limit to only `org-mode' files."
                                                  '("ONGOING" "NEXT" "PARKED" "BLOCKED")))))
             (todo "IN PROGRESS"
                   ((org-agenda-overriding-header "  IN PROGRESS:\n  ═══════════")))
-            (todo "PARKED"
-                  ((org-agenda-overriding-header "  Parked Tasks:\n  ════════════")))
             (todo "NEXT"
-                  ((org-agenda-overriding-header "  Next Tasks:\n  ══════════")))))
+                  ((org-agenda-overriding-header "  Next Tasks:\n  ══════════")))
+            (todo "PARKED"
+                  ((org-agenda-overriding-header "  Parked Tasks:\n  ════════════")))))
           ("o" "All Tasks"
            ((agenda "TODO"
                     ((org-agenda-skip-function
