@@ -1397,5 +1397,15 @@ search keyword."
                      (shell-quote-argument language)
                      (shell-quote-argument proficiency-level)))))
 
+(defun gh-my-pullreqs ()
+  "Open my pull requests in the browser."
+  (interactive)
+  (call-process "gh" nil 0 nil "pr" "list" "--web" "--author" "@me"))
+
+(defun gh-review-requests ()
+  "Open pull requests awaiting my review in the browser."
+  (interactive)
+  (call-process "gh" nil 0 nil "pr" "list" "--web" "--search" "review-requested:@me"))
+
 (provide 'defs)
 ;;; defs.el ends here

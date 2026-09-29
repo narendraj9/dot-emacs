@@ -207,7 +207,9 @@ Argument STATE is maintained by `use-package' as it processes symbols."
           ("K"   . recompile)
           ("$"   . selective-display-beyond-col)
           ("u"   . underline-text)
-          ("s"   . surround-symbol-with) ))
+          ("s"   . surround-symbol-with)
+          ("C-p" . gh-my-pullreqs)
+          ("C-r" . gh-review-requests) ))
 
 
 (use-package custom-registers
