@@ -709,18 +709,18 @@ Otherwise, limit to only `org-mode' files."
           (scala-cli  . t)
           (plantuml   . t)))
   (org-babel-do-load-languages 'org-babel-load-languages
-                                org-babel-load-languages))
+                               org-babel-load-languages))
 
 
 (use-package org-habit
   :after org-agenda
-  :init
-  (setq org-habit-graph-column 80
-        ;; Use `customize-variable' depending on the screen size and
-        ;; resolution.
-        org-habit-preceding-days 21
-        org-habit-following-days 14
-        org-habit-show-done-always-green t))
+  :custom
+  ( org-habit-graph-column 80
+    org-habit-preceding-days 21
+    org-habit-following-days 14
+    org-habit-show-done-always-green t
+    org-habit-show-habits nil
+    ))
 
 
 (use-package org-clock
