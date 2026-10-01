@@ -872,6 +872,18 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (shell-command (buffer-substring-no-properties beg end)))
 
   :config
+  ;; Disabling `shift-select-mode' is not sufficient to solve the problems that
+  ;; come up when both `shift-select-mode' and `multiple-cursors' are
+  ;; active. `transient-mark-mode' is disabled on movement commands,
+  ;; e.g. `next-line', because of a bug in `handle-shift-selection' and the
+  ;; advice below tries to add a workaround. Eventually, this shouldn't be
+  ;; needed once the bug is fixed in Emacs core.
+  (advice-add 'handle-shift-selection
+              :around (lambda (orig-fun &rest args)
+                        (when shift-select-mode
+                          (apply orig-fun args))))
+
+
   (defvar-keymap repeat/deletion
     :repeat t
     "C-u" #'delete-indentation)
