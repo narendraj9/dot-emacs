@@ -87,12 +87,10 @@ A change takes effect on the next cold daemon start.  The first `omni'
 command that finds no live daemon spawns one; the rest reuse it."
   :type '(repeat string))
 
-(defcustom omnigent-keep-buffer-on-exit t
-  "Whether a terminal buffer survives its Omnigent process exiting.
-Non-nil appends the sentinel event to the buffer instead of killing it,
-so a session that dies while you are away leaves the reason on screen.
-A failed launch is kept either way."
-  :type 'boolean)
+(defcustom omnigent-error-output-limit 16000
+  "Maximum characters of rendered terminal output saved for each failure.
+Failures are appended to and displayed in `*Omnigent Errors*'."
+  :type 'natnum)
 
 
 ;;; Keymaps
@@ -291,7 +289,7 @@ codex_native.py).")
 
 (defcustom omnigent-stale-runner-retry-delay 2
   "Seconds to wait before relaunching a terminal that hit a stale runner.
-Nil never retries, leaving the error on screen.
+Nil never retries, displaying the failure in `*Omnigent Errors*'.
 
 Resuming a session, `omni' looks that session's terminal up first.  The
 lookup fails with a 400 when the runner is gone while this machine still
@@ -354,28 +352,51 @@ Deferred because the decision reads the terminal's last output, and the
 sentinel can beat ghostel's final redraw."
   (run-at-time 0.3 nil #'omnigent--handle-exit buffer event))
 
+(defun omnigent--log-exit-error (buffer event)
+  "Record BUFFER's failed exit EVENT and return the error log buffer."
+  (let ((name (buffer-name buffer))
+        (id (buffer-local-value 'omnigent-session-id buffer))
+        (directory (buffer-local-value 'default-directory buffer))
+        (output (with-current-buffer buffer
+                  (save-restriction
+                    (widen)
+                    (buffer-substring-no-properties
+                     (max (point-min) (- (point-max) omnigent-error-output-limit))
+                     (point-max))))))
+    (with-current-buffer (get-buffer-create "*Omnigent Errors*")
+      (unless (derived-mode-p 'special-mode)
+        (special-mode))
+      (let ((inhibit-read-only t))
+        (goto-char (point-max))
+        (let ((start (point)))
+          (insert (format "\n[%s] %s\nSession: %s\nDirectory: %s\nExit: %s\n\n%s\n"
+                          (format-time-string "%F %T") name (or id "none")
+                          directory (string-trim event)
+                          (if (string-empty-p output)
+                              "[No rendered terminal output available.]" output)))
+          (goto-char start)))
+      (current-buffer))))
+
 (defun omnigent--handle-exit (buffer event)
-  "Retry BUFFER, note EVENT in it, or kill it after a clean exit.
-EVENT is the process sentinel string.  See `omnigent-keep-buffer-on-exit'
-and `omnigent-stale-runner-retry-delay'."
+  "Retry BUFFER or close it, displaying a log entry for failed EVENT.
+Automatic cleanup does not stop the persistent session again."
   (cond
    ((not (buffer-live-p buffer)))
    ((buffer-local-value 'omnigent--stopping buffer))
+   ((omnigent-terminal-live-p buffer))
    ((and omnigent-stale-runner-retry-delay
          (not (buffer-local-value 'omnigent--retried buffer))
          (buffer-local-value 'omnigent--command buffer)
          (omnigent--stale-runner-failure-p buffer))
     (omnigent--retry-stale-runner buffer))
-   ((and (not omnigent-keep-buffer-on-exit)
-         (string-prefix-p "finished" event))
-    (kill-buffer buffer))
    (t
-    (with-current-buffer buffer
-      (let ((inhibit-read-only t))
-        (goto-char (point-max))
-        (insert (format "\n[omnigent] process exited: %s (at %s)\n"
-                        (string-trim event)
-                        (format-time-string "%F %T"))))))))
+    (let ((log (unless (string-prefix-p "finished" event)
+                 (omnigent--log-exit-error buffer event))))
+      (with-current-buffer buffer
+        (remove-hook 'kill-buffer-query-functions #'omnigent--stop-before-kill t)
+        (kill-buffer buffer))
+      (when log
+        (pop-to-buffer log))))))
 
 (defun omnigent--live-terminal (name)
   "Return the live ghostel terminal called NAME, if there is one.
