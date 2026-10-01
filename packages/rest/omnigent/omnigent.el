@@ -360,6 +360,7 @@ EVENT is the process sentinel string.  See `omnigent-keep-buffer-on-exit'
 and `omnigent-stale-runner-retry-delay'."
   (cond
    ((not (buffer-live-p buffer)))
+   ((buffer-local-value 'omnigent--stopping buffer))
    ((and omnigent-stale-runner-retry-delay
          (not (buffer-local-value 'omnigent--retried buffer))
          (buffer-local-value 'omnigent--command buffer)
@@ -415,6 +416,30 @@ Exits go to `omnigent--on-exit'.  The shared launcher that
       (pop-to-buffer buffer)
       (omnigent--exec buffer command))))
 
+(defvar-local omnigent--stopping nil
+  "Non-nil while intentionally stopping this buffer's session.")
+
+(defun omnigent-stop-session (id)
+  "Stop session ID's resources, retaining its conversation for resume.
+Signal an error if the stop fails."
+  (with-temp-buffer
+    (unless (eq 0 (call-process omnigent-program nil t nil
+                               "host" "stop-session" "--server"
+                               omnigent-server-url id))
+      (user-error "Could not stop Omnigent session %s: %s"
+                  id (string-trim (buffer-string))))))
+
+(defun omnigent--stop-before-kill ()
+  "Stop this buffer's session before allowing `kill-buffer' to proceed."
+  (when omnigent-session-id
+    (when omnigent--stopping
+      (user-error "Omnigent session stop already in progress"))
+    (setq omnigent--stopping t)
+    (unwind-protect
+        (omnigent-stop-session omnigent-session-id)
+      (setq omnigent--stopping nil)))
+  t)
+
 (defun omnigent-terminal (name directory command &optional session-id)
   "Show a ghostel terminal NAME in DIRECTORY running COMMAND, for SESSION-ID.
 Like `omnigent-exec-terminal', but also puts the terminal in
@@ -424,6 +449,7 @@ so `omnigent-dispatch' can act on the session without asking."
    name directory command
    (lambda ()
      (setq omnigent-session-id session-id)
+     (add-hook 'kill-buffer-query-functions #'omnigent--stop-before-kill t t)
      (omnigent-session-mode))))
 
 (defun omnigent--session-buffer-name (session)

@@ -219,10 +219,7 @@ stored, and `omnigent-attach' resumes it."
   (interactive (list (omnigent-list--session)) omnigent-list-mode)
   (let-alist session
     (when (yes-or-no-p (format "Stop session %s? " (or .title .id)))
-      (with-temp-buffer
-        (unless (zerop (call-process omnigent-program nil t nil
-                                     "host" "stop-session" .id))
-          (user-error "%s" (string-trim (buffer-string)))))
+      (omnigent-stop-session .id)
       (message "Stopped %s" (or .title .id))
       (revert-buffer))))
 
