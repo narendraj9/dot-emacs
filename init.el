@@ -880,8 +880,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   ;; needed once the bug is fixed in Emacs core.
   (advice-add 'handle-shift-selection
               :around (lambda (orig-fun &rest args)
-                        (when shift-select-mode
-                          (apply orig-fun args))))
+                        (if (and shift-select-mode this-command-keys-shift-translated)
+                            (apply orig-fun args)
+                          (unless (eq (car-safe transient-mark-mode) 'only)
+                            (apply orig-fun args)))))
 
 
   (defvar-keymap repeat/deletion
