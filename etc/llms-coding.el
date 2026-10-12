@@ -19,6 +19,7 @@
 
 (require 'omnigent)
 (require 'subr-x)
+(require 'transient)
 
 ;;; Omni server selection
 
@@ -149,6 +150,25 @@ See `llms-coding', which does the work." agent)
 (llms-coding-define "cursor")
 (llms-coding-define "pi")
 (llms-coding-define "agy")
+
+;;; Agent menu
+
+(transient-define-prefix llms-coding-menu ()
+  "Choose a coding agent to launch for this project."
+  [["Omni"
+    ("c" "Claude" llms-coding-omni-claude)
+    ("u" "Cursor" llms-coding-omni-cursor)
+    ("g" "Antigravity" llms-coding-omni-agy)
+    ("p" "Pi" llms-coding-omni-pi)
+    ("o" "Omni default" llms-coding-omni)]
+   ["Plain CLI"
+    ("C" "Claude" llms-coding-claude)
+    ("U" "Cursor" llms-coding-cursor)
+    ("G" "Antigravity" llms-coding-agy)
+    ("P" "Pi" llms-coding-pi)
+    ("O" "Choose agent" llms-coding)]
+   ["Emacs"
+    ("e" "ECA" eca)]])
 
 (provide 'llms-coding)
 ;;; llms-coding.el ends here
