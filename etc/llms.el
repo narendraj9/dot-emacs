@@ -393,12 +393,13 @@ LLM is pending."
 
   :custom
   (eca-chat-use-side-window nil)
-  (eca-chat-prompt-prefix-loading "◾ ")
-  (eca-chat-expandable-block-open-symbol "➕")
-  (eca-chat-expandable-block-close-symbol "➖")
-  (eca-chat-mcp-tool-call-loading-symbol "⏳")
-  (eca-chat-mcp-tool-call-error-symbol "✖")
-  (eca-chat-mcp-tool-call-success-symbol "✓")
+
+  ;; (eca-chat-prompt-prefix-loading "◾ ")
+  ;; (eca-chat-expandable-block-open-symbol "➕")
+  ;; (eca-chat-expandable-block-close-symbol "➖")
+  ;; (eca-chat-mcp-tool-call-loading-symbol "⏳")
+  ;; (eca-chat-mcp-tool-call-error-symbol "✖")
+  ;; (eca-chat-mcp-tool-call-success-symbol "✓")
 
   :config
   (when-let (api-key (and (eq system-type 'gnu/linux)
