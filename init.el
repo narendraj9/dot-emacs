@@ -4845,6 +4845,7 @@ buffer."
           ;; -----
           ("i a" . llms-coding-omni-codex)
           ("i b" . gptel)
+          ("i e" . eca)
           ("i g" . llms-coding-menu)
           ("i m" . gptel-menu)
           ("i q" . gptel-quick*)
