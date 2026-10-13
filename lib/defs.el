@@ -1401,20 +1401,23 @@ search keyword."
 (defun gh-pr-list-web (&rest filters)
   "Open the current repository's pull requests using FILTERS.
 If gh cannot resolve the repository, show its error and prompt for
-an explicit OWNER/REPO or repository URL."
+a local project directory, then retry from that directory."
   (unless (executable-find "gh")
     (user-error "GitHub CLI (gh) is not installed"))
   (with-temp-buffer
-    (let* ((status (call-process "gh" nil '(t t) nil
-                                 "repo" "view" "--json" "url" "--jq" ".url"))
-           (output (string-trim (buffer-string)))
-           (repo (if (equal status 0)
-                     output
-                   (message "gh could not resolve this repository: %s" output)
-                   (string-trim
-                    (read-string "GitHub repository (OWNER/REPO or URL): ")))))
-      (when (string-empty-p repo)
-        (user-error "No GitHub repository specified"))
+    (let (repo)
+      (while (not repo)
+        (erase-buffer)
+        (if (equal 0 (call-process "gh" nil '(t t) nil
+                                   "repo" "view" "--json" "url" "--jq" ".url"))
+            (setq repo (string-trim (buffer-string)))
+          (message "gh could not resolve this repository: %s"
+                   (string-trim (buffer-string)))
+          (setq default-directory
+                (file-name-as-directory
+                 (expand-file-name
+                  (read-directory-name "Local project directory: "
+                                       nil nil t))))))
       (erase-buffer)
       (unless (equal 0 (apply #'call-process "gh" nil '(t t) nil
                              "pr" "list" "--web" "--repo" repo filters))
