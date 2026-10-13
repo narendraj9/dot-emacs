@@ -28,6 +28,7 @@
 (require 'ffap)
 (require 'repeat)
 (require 'seq)
+(require 'subr-x)
 (require 's)
 (require 'cl-lib)
 (require 'treesit)
@@ -1397,15 +1398,38 @@ search keyword."
                      (shell-quote-argument language)
                      (shell-quote-argument proficiency-level)))))
 
+(defun gh-pr-list-web (&rest filters)
+  "Open the current repository's pull requests using FILTERS.
+If gh cannot resolve the repository, show its error and prompt for
+an explicit OWNER/REPO or repository URL."
+  (unless (executable-find "gh")
+    (user-error "GitHub CLI (gh) is not installed"))
+  (with-temp-buffer
+    (let* ((status (call-process "gh" nil '(t t) nil
+                                 "repo" "view" "--json" "url" "--jq" ".url"))
+           (output (string-trim (buffer-string)))
+           (repo (if (equal status 0)
+                     output
+                   (message "gh could not resolve this repository: %s" output)
+                   (string-trim
+                    (read-string "GitHub repository (OWNER/REPO or URL): ")))))
+      (when (string-empty-p repo)
+        (user-error "No GitHub repository specified"))
+      (erase-buffer)
+      (unless (equal 0 (apply #'call-process "gh" nil '(t t) nil
+                             "pr" "list" "--web" "--repo" repo filters))
+        (user-error "Could not open pull requests: %s"
+                    (string-trim (buffer-string)))))))
+
 (defun gh-my-pullreqs ()
   "Open my pull requests in the browser."
   (interactive)
-  (call-process "gh" nil 0 nil "pr" "list" "--web" "--author" "@me"))
+  (gh-pr-list-web "--author" "@me"))
 
 (defun gh-review-requests ()
   "Open pull requests awaiting my review in the browser."
   (interactive)
-  (call-process "gh" nil 0 nil "pr" "list" "--web" "--search" "review-requested:@me"))
+  (gh-pr-list-web "--search" "review-requested:@me"))
 
 (provide 'defs)
 ;;; defs.el ends here
