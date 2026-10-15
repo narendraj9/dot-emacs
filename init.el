@@ -594,50 +594,22 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 ;; KEY BINDINGS
 ;; ──────────────────────────────────────────────────────────────────
 
-(ffap-bindings)
+(use-package ffap
+  :bind ( :map ctl-period-map ("C-f" . ffap) )
+  :init
+  (ffap-bindings))
 
-(defun --consult-ffap-menu ()
-  "Like `ffap-menu', but previews each file or URL in the buffer.
-Candidates come from the same scan as `ffap-menu', done afresh each
-time: `ffap-menu' only validates its cache against the first entry,
-which goes stale in buffers that keep changing, such as terminals."
-  (interactive)
-  (require 'consult)
-  (let (candidates guess)
-    (save-excursion
-      (goto-char (point-min))
-      (while (setq guess (ffap-next-guess))
-        (let ((beg (car ffap-string-at-point-region)))
-          (unless (assoc guess candidates)
-            (push (cons guess (cons (copy-marker beg)
-                                    (list (cons 0 (- (point) beg)))))
-                  candidates)))))
-    (unless candidates
-      (user-error "No files or URLs in this buffer"))
-    (setq candidates (nreverse candidates))
-    (when-let* ((choice (consult--read candidates
-                                       :prompt "Find file or URL: "
-                                       :category 'ffap-menu
-                                       :require-match t
-                                       :sort nil
-                                       :lookup #'consult--lookup-cdr
-                                       :state (consult--jump-state)
-                                       :preview-key 'any)))
-      (find-file-at-point (car (rassq choice candidates))))))
+(use-package link-hint
+  :ensure t
+  :bind (:map ctl-period-map
+              ("C-o" . link-hint-open-link-at-point))
+  :config
+  (link-hint-define-type
+    'markdown-link
+    :vars (cl-adjoin 'ghostel-mode (get 'link-hint-markdown-link :vars)))
+  (setq link-hint-action-fallback-commands
+        (list :open #'link-hint-open-link)))
 
-(defun --goto-address-or-ffap-menu ()
-  "Open the URL or e-mail address at point, else pick one in the buffer.
-The test is strict: `goto-address-at-point' searches the rest of the
-line for an e-mail address, and `browse-url-url-at-point' turns any
-word into an http URL."
-  (interactive)
-  (if (or (thing-at-point 'email) (thing-at-point 'url))
-      (call-interactively #'goto-address-at-point)
-    (--consult-ffap-menu)))
-
-(bind-keys :map ctl-period-map
-           ("C-o" . --goto-address-or-ffap-menu)
-           ("C-f" . ffap))
 
 ;; ──────────────────────────────────────────────────────────────────
 

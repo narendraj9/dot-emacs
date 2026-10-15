@@ -95,9 +95,25 @@ Failures are appended to and displayed in `*Omnigent Errors*'."
 
 ;;; Keymaps
 
+(defun omnigent-scroll-page-down ()
+  "Scroll the terminal or the Ghostel buffer forward by one page."
+  (interactive)
+  (if (eq ghostel--input-mode 'semi-char)
+      (ghostel-send-key "next")
+    (scroll-up-command)))
+
+(defun omnigent-scroll-page-up ()
+  "Scroll the terminal or the Ghostel buffer backward by one page."
+  (interactive)
+  (if (eq ghostel--input-mode 'semi-char)
+      (ghostel-send-key "prior")
+    (scroll-down-command)))
+
 (defvar-keymap omnigent-session-mode-map
   :doc "Keymap active in ghostel terminals running Omnigent."
-  "C-c C-o" #'omnigent-dispatch)
+  "C-c C-o" #'omnigent-dispatch
+  "C-v" #'omnigent-scroll-page-down
+  "M-v" #'omnigent-scroll-page-up)
 
 (define-minor-mode omnigent-session-mode
   "Minor mode offering `omnigent-dispatch' in an Omnigent terminal.

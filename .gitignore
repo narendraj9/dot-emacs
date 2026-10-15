@@ -62,3 +62,5 @@ tmp/backups/*
 
 !setup/
 !setup/*.md
+!setup/codex/
+!setup/codex/*.md
