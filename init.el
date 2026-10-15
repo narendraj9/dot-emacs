@@ -1284,7 +1284,9 @@ word into an http URL."
           ;; This window, for a terminal that has point: `j' and `k' inside
           ;; one are the terminal's own keys.
           ("j" . --scroll-up)
-          ("k" . --scroll-down) )
+          ("k" . --scroll-down)
+          ("C-v" . --scroll-page-up)
+          ("M-v" . --scroll-page-down) )
   :vc ( :url "https://github.com/jdtsmith/ultra-scroll"
         :rev :newest )
 
@@ -1294,16 +1296,14 @@ word into an http URL."
   (setq scroll-conservatively 3
         scroll-margin 0)
 
-  (dolist (command '( --scroll-up --scroll-down
-                      --scroll-up-other-window --scroll-down-other-window ))
-    (put command 'repeat-exit-timeout 4))
-
   (defvar-keymap repeat/scroll-window
     :repeat t
     "J" #'--scroll-up-other-window
     "K" #'--scroll-down-other-window
     "j" #'--scroll-up
-    "k" #'--scroll-down)
+    "k" #'--scroll-down
+    "C-v" #'--scroll-page-up
+    "M-v" #'--scroll-page-down)
 
   (add-hook 'ghostel-mode-hook #'--scroll-through-terminal)
   ;; The hook only fires for a buffer entering the mode, so re-evaluating this
@@ -1323,6 +1323,24 @@ which is every ghostel terminal.  See `--scroll-through-terminal'.")
   (defvar --scroll-down-command #'pixel-scroll-down
     "Command scrolling the selected window towards the beginning of its buffer.
 See `--scroll-up-command'.")
+
+  (defvar --scroll-page-up-command #'scroll-up-command
+    "Command paging the selected window towards newer text.
+Buffer-local in ghostel terminals; see `--scroll-through-terminal'.")
+
+  (defvar --scroll-page-down-command #'scroll-down-command
+    "Command paging the selected window towards older text.
+See `--scroll-page-up-command'.")
+
+  (defun --scroll-page-up ()
+    "Page this window towards newer text."
+    (interactive)
+    (funcall --scroll-page-up-command))
+
+  (defun --scroll-page-down ()
+    "Page this window towards older text."
+    (interactive)
+    (funcall --scroll-page-down-command))
 
   (defun --scroll-up ()
     "Scroll this window towards the end of its buffer."
@@ -1348,8 +1366,10 @@ See `--scroll-up-command'.")
 
   (defun --scroll-through-terminal ()
     "Scroll this ghostel buffer through the terminal rather than the window."
-    (setq-local --scroll-up-command   #'--ghostel-scroll-up
-                --scroll-down-command #'--ghostel-scroll-down))
+    (setq-local --scroll-up-command        #'--ghostel-scroll-up
+                --scroll-down-command      #'--ghostel-scroll-down
+                --scroll-page-up-command   #'--ghostel-scroll-page-up
+                --scroll-page-down-command #'--ghostel-scroll-page-down))
 
   (defun --ghostel-wheel (button)
     "Send one wheel click of BUTTON to the terminal, aimed at mid-window.
@@ -1383,7 +1403,28 @@ terminal back."
     (interactive)
     (unless (--ghostel-wheel 4)
       (pixel-scroll-down)
-      (ghostel-maybe-leave-input)))  )
+      (ghostel-maybe-leave-input)))
+
+  (defun --ghostel-scroll-page (button fallback)
+    "Page ghostel via wheel BUTTON or Emacs FALLBACK.
+A mouse-tracking TUI often moves about three rows per wheel click;
+issue enough clicks for approximately one window of output.  If no TUI
+is tracking the mouse, scroll the Emacs buffer one page instead."
+    (if (--ghostel-wheel button)
+        (dotimes (_ (1- (max 1 (/ (+ (window-body-height) 2) 3))))
+          (--ghostel-wheel button))
+      (funcall fallback)
+      (ghostel-maybe-leave-input)))
+
+  (defun --ghostel-scroll-page-up ()
+    "Page a ghostel terminal towards newer text."
+    (interactive)
+    (--ghostel-scroll-page 5 #'scroll-up-command))
+
+  (defun --ghostel-scroll-page-down ()
+    "Page a ghostel terminal towards older text."
+    (interactive)
+    (--ghostel-scroll-page 4 #'scroll-down-command))  )
 
 (use-package window
   :bind ( :map window-prefix-map
