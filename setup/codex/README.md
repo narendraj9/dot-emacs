@@ -22,3 +22,25 @@ Documentation:
 - [Developer commands](https://learn.chatgpt.com/docs/developer-commands)
 - [Configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
 - [Status-line field definitions](https://github.com/openai/codex/blob/main/codex-rs/tui/src/bottom_pane/status_line_setup.rs)
+
+## Tool-call keyboard navigation
+
+Replace `Ctrl+O`'s copy action with activity focus:
+
+```toml
+[tui.keymap.global]
+copy = []
+focus_activity = "ctrl-o"
+```
+
+With an activity focused, use `Enter` to expand or collapse it, `Up` and `Down`
+to select another activity, `Left` and `Right` to collapse or expand it, and
+`Esc` to leave activity focus. Codex does not currently provide one action that
+toggles every tool call at once. `Ctrl+T` opens the full transcript.
+
+Run `/keymap` to manage these bindings interactively.
+
+Documentation:
+
+- [Codex keymap actions](https://github.com/openai/codex/blob/main/codex-rs/tui/src/keymap_setup/actions.rs)
+- [Codex activity disclosure controls](https://github.com/openai/codex/blob/main/codex-rs/tui/src/transcript_view/disclosure.rs)

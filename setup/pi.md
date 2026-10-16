@@ -1,4 +1,18 @@
-# Pi keybindings
+# Pi setup
+
+## Hardware cursor
+
+On a new machine, merge this into `${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/settings.json` (preserve other settings), then run `/reload`:
+
+```json
+{
+  "showHardwareCursor": true
+}
+```
+
+This makes Pi use the terminal's hardware cursor instead of its drawn cursor.
+
+## Keybindings
 
 On a new machine, merge these into `${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/keybindings.json` (preserve other bindings), then run `/reload`.
 
