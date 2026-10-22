@@ -1080,6 +1080,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 (use-package markdown-mode
   :defer t
   :ensure t
+  :commands (markdown-next-link markdown-wiki-link-p)
   :hook ( markdown-mode . visual-line-mode ) )
 
 (use-package cdlatex :ensure t :hook (Latex-Mode-Hook . turn-on-cdlatex))

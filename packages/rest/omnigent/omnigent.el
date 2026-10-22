@@ -648,6 +648,15 @@ which session it is on."
   (interactive (list (omnigent--id)))
   (omnigent--patch id 'archived t))
 
+(defun omnigent-pin (id)
+  "Pin session ID in Omnigent."
+  (interactive (list (omnigent--id)))
+  (let ((pinned-at (number-to-string (truncate (* 1000 (float-time))))))
+    (omnigent--request
+     "PATCH" (format "/sessions/%s" id)
+     `((labels . (("omnigent.pinned" . ,pinned-at))))))
+  (message "Pinned session %s" id))
+
 (defun omnigent-browse (id)
   "Open session ID in the Omnigent web UI."
   (interactive (list (omnigent--id)))
@@ -736,6 +745,7 @@ terminal.  The \"Session\" commands need a session, which they take from
 the current terminal or else ask for."
   [["Session"
     ("r" "Rename" omnigent-rename)
+    ("p" "Pin" omnigent-pin)
     ("k" "Archive" omnigent-archive)
     ("e" "Export transcript" omnigent-export)
     ("w" "Copy id" omnigent-copy-id)
