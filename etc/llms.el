@@ -143,6 +143,9 @@ LLM is pending."
   :custom
   ((mcp-hub-servers
     `(
+      ;; OpenBB
+      ("openbb-mcp" . (:command "bunx" :args ("mcp-remote" "http://127.0.0.1:8001/mcp")) )
+
       ;; Anthropic's reference servers
       ("sequential-thinking" . (:command "bunx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
       ("time"                . (:command "uvx" :args ("--isolated" "mcp-server-time" "--local-timezone=Europe/Berlin")))
@@ -155,6 +158,7 @@ LLM is pending."
       ("motherduck" . (:command "uvx" :args ("mcp-server-motherduck" "--db-path" ":memory:")))
 
       ;; -- Using `mcp-remote' because these require OAuth support
+      ("superhuman-mail"    . (:command "bunx" :args ("mcp-remote" "https://mcp.mail.superhuman.com/mcp")))
       ("cloudflare-docs"    . (:command "bunx" :args ("mcp-remote" "https://docs.mcp.cloudflare.com/mcp")))
       ("cloudflare-browser" . (:command "bunx" :args ("mcp-remote" "https://browser.mcp.cloudflare.com/mcp")))
       ("cloudflare-dns"     . (:command "bunx" :args ("mcp-remote" "https://dns-analytics.mcp.cloudflare.com/mcp")))

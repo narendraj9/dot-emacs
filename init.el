@@ -605,8 +605,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               ("C-o" . link-hint-open-link-at-point))
   :config
   (link-hint-define-type
-    'markdown-link
-    :vars (cl-adjoin 'ghostel-mode (get 'link-hint-markdown-link :vars)))
+   'markdown-link
+   :vars (cl-adjoin 'ghostel-mode (get 'link-hint-markdown-link :vars)))
   (setq link-hint-action-fallback-commands
         (list :open #'link-hint-open-link)))
 
@@ -4844,34 +4844,12 @@ buffer."
   (require 'llms-coding)
 
   :bind ( :map ctl-m-map
-
           ("C-z"   . gptel-buffer-toggle*)
-
-          ;; -----
           ("i A"   . llms-coding-codex)
-          ("i I"   . macher-implement)
-          ("i M"   . macher-action)
-          ("i Q"   . gptel-quick-comment*)
-          ("i R"   . macher-revise)
-          ("i RET" . gptel-send)
-          ("i W"   . llms-writing-dismiss-inline-diff)
-          ("i X"   . macher-abort)
-          ;; -----
           ("i a" . llms-coding-omni-codex)
-          ("i b" . gptel)
-          ("i e" . eca)
           ("i g" . llms-coding-menu)
-          ("i m" . gptel-menu)
-          ("i q" . gptel-quick*)
-          ("i r" . gptel-rewrite)
-          ("i t" . copilot-mode)
-          ("i w" . llms-writing-rewrite-inline)
-          ("i z" . gptel-buffer-toggle*)
 
           :map ctl-period-map
-          ("h" . gptel-quick*)
-          ("H" . gptel-quick-comment*)
-          ("z" . gptel-buffer-toggle*)
           ("c" . gptel))
 
   :config
