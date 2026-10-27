@@ -1377,7 +1377,8 @@ search keyword."
     (unless (file-directory-p default-directory)
       (user-error "Emacs source not found at %s" build-emacs-source-dir))
     (compile (format "%s && cp -r ./nextstep/Emacs.app /Applications/"
-                     (expand-file-name "~/.emacs.d/etc/build-emacs-macos.sh")))))
+                     (expand-file-name "~/.emacs.d/etc/build-emacs-macos.sh"))
+             t)))
 
 (defun augment-srt-file (input-srt output-srt anki-output-tsv language proficiency-level)
   "Augment INPUT-SRT with translations using Groq API and save to OUTPUT-SRT."

@@ -605,8 +605,8 @@ Argument STATE is maintained by `use-package' as it processes symbols."
               ("C-o" . link-hint-open-link-at-point))
   :config
   (link-hint-define-type
-   'markdown-link
-   :vars (cl-adjoin 'ghostel-mode (get 'link-hint-markdown-link :vars)))
+    'markdown-link
+    :vars (cl-adjoin 'ghostel-mode (get 'link-hint-markdown-link :vars)))
   (setq link-hint-action-fallback-commands
         (list :open #'link-hint-open-link)))
 
@@ -4850,7 +4850,8 @@ buffer."
           ("i g" . llms-coding-menu)
 
           :map ctl-period-map
-          ("c" . gptel))
+          ("G" . gptel)
+          ("g" . gptel-agent))
 
   :config
   (ensure-windows-on-right "\\*chatgpt .*\\*" "\\*Anthropic\\*")
@@ -4861,7 +4862,9 @@ buffer."
 
 (use-package llms-langs
   :load-path "etc/"
-  :commands (llms-speaker-vocab llms-speaker-vocab-watch llms-speaker-vocab-watch-stop))
+  :commands ( llms-speaker-vocab
+              llms-speaker-vocab-watch
+              llms-speaker-vocab-watch-stop ))
 
 
 (provide 'init)
