@@ -137,10 +137,13 @@
                 "google/palm-2-codechat-bison-32k"))))
 
 (defvar llms-chat-gptel-openai-backend
-  (gptel-make-openai "OpenAI"
-    :key (or (and (boundp 'openai-secret-key) openai-secret-key)
-             (llms-chat--api-key-from-auth-source "api.openai.com"))
-    :stream t))
+  (if-let ((openai-api-key (or (and (boundp 'openai-secret-key) openai-secret-key)
+                               (llms-chat--api-key-from-auth-source "api.openai.com"))))
+      (gptel-make-openai "OpenAI"
+        :key openai-api-key
+        :stream t)
+    (progn (require 'gptel-openai-oauth)
+           (gptel-make-openai-oauth "OpenAI Subscription"))))
 
 (defvar llms-chat-gptel-anthropic-backend
   (when-let* ((api-key (llms-chat--api-key-from-auth-source "api.anthropic.com")))

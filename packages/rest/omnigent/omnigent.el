@@ -654,7 +654,7 @@ which session it is on."
   (let ((pinned-at (number-to-string (truncate (* 1000 (float-time))))))
     (omnigent--request
      "PATCH" (format "/sessions/%s" id)
-     `((labels . (("omnigent.pinned" . ,pinned-at))))))
+     `((labels . ((omnigent.pinned . ,pinned-at))))))
   (message "Pinned session %s" id))
 
 (defun omnigent-browse (id)

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (setq mc/cmds-to-run-for-all
       '(
         dired-do-touch

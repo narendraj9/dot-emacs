@@ -165,12 +165,6 @@ LLM is pending."
       ("cloudflare-radar"   . (:command "bunx" :args ("mcp-remote" "https://radar.mcp.cloudflare.com/mcp")))
 
       ("slack"   . (:command "bunx" :args ("mcp-remote" "https://mcp.slack.com/mcp")))
-      ("coda"    . ( :url "https://coda.io/apis/mcp/vbeta"
-                     :token ,(ignore-errors (gptel-api-key-from-auth-source "coda.io"))) )
-
-      ("definity" . ( :command "bunx" :args ( "mcp-remote" "https://app.definity.run/api/mcp"
-                                              "--header" ,(format "Authorization: Bearer %s" (ignore-errors (gptel-api-key-from-auth-source "definity.ai"))) )))
-
       ("deepwiki"   . (:url "https://mcp.deepwiki.com/sse"))
       ("context7"   . (:command "bunx" :args ("-y" "@upstash/context7-mcp")))
       ("nixos"      . (:command "uvx" :args ("--isolated" "mcp-nixos")))
@@ -208,8 +202,8 @@ LLM is pending."
   (if (eq system-type 'gnu/linux)
       (setq gptel-backend llms-chat-gptel-gemini-backend
             gptel-model 'gemini-pro-latest)
-    (setq gptel-backend llms-chat-gptel-anthropic-backend
-          gptel-model 'claude-opus-4-8))
+    (setq gptel-backend llms-chat-gptel-openai-backend
+          gptel-model 'gpt-6-sol))
 
   (require 'gptel-integrations)
   ;;

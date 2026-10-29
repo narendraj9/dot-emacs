@@ -4844,10 +4844,12 @@ buffer."
   (require 'llms-coding)
 
   :bind ( :map ctl-m-map
-          ("C-z"   . gptel-buffer-toggle*)
-          ("i A"   . llms-coding-codex)
+          ("C-z" . gptel-buffer-toggle*)
+          ("i A" . llms-coding-codex)
           ("i a" . llms-coding-omni-codex)
           ("i g" . llms-coding-menu)
+          ("i k" . gptel)
+          ("i K" . gptel-agent)
 
           :map ctl-period-map
           ("G" . gptel)
