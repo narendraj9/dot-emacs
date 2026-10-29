@@ -400,12 +400,12 @@ LLM is pending."
   ;; (eca-chat-mcp-tool-call-success-symbol "✓")
 
   :config
-  (when-let (api-key (and (eq system-type 'gnu/linux)
-                          (gptel-api-key-from-auth-source "api.openai.com")))
+  (when-let* ((api-key (and (eq system-type 'gnu/linux)
+                            (gptel-api-key-from-auth-source "api.openai.com"))))
     (setenv "OPENAI_API_KEY" api-key))
 
-  (when-let (api-key (and (eq system-type 'darwin)
-                          (gptel-api-key-from-auth-source "api.anthropic.com")))
+  (when-let* ((api-key (and (eq system-type 'darwin)
+                            (gptel-api-key-from-auth-source "api.anthropic.com"))))
     (setenv "ANTHROPIC_API_KEY" api-key)))
 
 (use-package esi-dictate

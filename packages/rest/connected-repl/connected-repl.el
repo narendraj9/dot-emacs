@@ -89,7 +89,7 @@
 (defun connected-repl--back-to-input ()
   (interactive)
   (save-excursion
-    (if-let ((active-window
+    (if-let* ((active-window
               (car (seq-filter (lambda (w) (eq connected-repl--input-buffer
                                                (window-buffer w)))
                                (window-list)))))
@@ -102,7 +102,7 @@
 (defun connected-repl-display-buffer ()
   (interactive)
   (save-excursion
-    (if-let ((active-window
+    (if-let* ((active-window
               (car (seq-filter (lambda (w) (eq connected-repl--buffer
                                                (window-buffer w)))
                                (window-list)))))
@@ -200,7 +200,7 @@
   "Send an interrupt signal to the REPL process connected to the
    current buffer."
   (interactive)
-  (if-let ((p (get-buffer-process connected-repl--buffer)))
+  (if-let* ((p (get-buffer-process connected-repl--buffer)))
       (progn (interrupt-process p)
              (kill-buffer connected-repl--buffer))
     (message "No process to interrupt.")))

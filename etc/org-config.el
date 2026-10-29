@@ -419,7 +419,7 @@ Otherwise, limit to only `org-mode' files."
 
   (defun org-entry-age ()
     "Return age of the current entry."
-    (if-let ((created-at (cdr (assoc "CREATED" (org-entry-properties)))))
+    (if-let* ((created-at (cdr (assoc "CREATED" (org-entry-properties)))))
         (format " <%d> " (- 0 (org-time-stamp-to-now created-at)))
       ""))
 
@@ -526,7 +526,7 @@ Otherwise, limit to only `org-mode' files."
   (defun org-cliplink-at-point ()
     "Change URL at point by querying its title."
     (interactive)
-    (when-let ((bounds (bounds-of-thing-at-point 'url))
+    (when-let* ((bounds (bounds-of-thing-at-point 'url))
                (url (thing-at-point 'url)))
       (delete-region (car bounds) (cdr bounds))
       (insert (org-make-link-string url (org-cliplink-retrieve-title-synchronously url)))))

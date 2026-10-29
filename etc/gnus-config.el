@@ -89,7 +89,7 @@
 (setq gnus-auto-center-summary nil)
 
 (defun gnus-user-format-function-a (header)
-  (when-let ((date-str (mail-header-date header))
+  (when-let* ((date-str (mail-header-date header))
              (time (ignore-errors (date-to-time date-str))))
     (let* ((now (float-time (current-time)))
            (seconds-elapsed (if time (- now (float-time time)) 0)))

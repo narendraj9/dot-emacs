@@ -258,7 +258,7 @@ the default English language page."
 
 (defun tldr-completion-annotation(command)
   "Add description for command COMMAND in the *Completions* buffer."
-  (when-let ((file-path (and tldr-enable-annotations (tldr-get-file-path-from-command-name command))))
+  (when-let* ((file-path (and tldr-enable-annotations (tldr-get-file-path-from-command-name command))))
     (with-temp-buffer
       (insert-file-contents file-path)
       (and (search-forward "> " (point-max) t 1)

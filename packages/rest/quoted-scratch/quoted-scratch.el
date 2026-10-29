@@ -326,7 +326,7 @@ Optional argument POP-TO-BUFFERP makes the window pop to the buffer if non-nil."
 (defun quoted-scratch-jump-to-scratch-buffer ()
   "Refresh and jump to scratch buffer."
   (interactive)
-  (if-let ((b (get-buffer "*scratch*")))
+  (if-let* ((b (get-buffer "*scratch*")))
       (progn (switch-to-buffer b)
              (delete-other-windows))
     (quoted-scratch-refresh-scratch-buffer t)))

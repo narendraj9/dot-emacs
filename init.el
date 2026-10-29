@@ -460,7 +460,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
 
   (defun battery-protection-resume ()
     (interactive)
-    (when-let ((timer (get 'battery-protection-notifications :enabler-timer)))
+    (when-let* ((timer (get 'battery-protection-notifications :enabler-timer)))
       (cancel-timer timer)
       (put 'battery-protection-notifications :enabler-timer nil)))
 
@@ -757,7 +757,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
      after doing `symbol-overlay-put'."
     (interactive)
     (symbol-overlay-put)
-    (when-let ((command (lookup-key symbol-overlay-map
+    (when-let* ((command (lookup-key symbol-overlay-map
                                     (this-command-keys))))
       (call-interactively command)))
 
@@ -1559,7 +1559,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   (defun isearch-yank-symbol ()
     "Yank symbol from buffer into `minibuffer'."
     (interactive)
-    (when-let ((sym-name (thing-at-point 'symbol)))
+    (when-let* ((sym-name (thing-at-point 'symbol)))
       (isearch-yank-string sym-name)))
 
   (defun isearch-exit-other-end ()
@@ -2133,7 +2133,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   (defun popup-balance-at-point ()
     "Show balance for account at point in a popup."
     (interactive)
-    (if-let ((account (thing-at-point 'hledger-account)))
+    (if-let* ((account (thing-at-point 'hledger-account)))
         (message (hledger-shell-command-to-string (format " balance -N %s "
                                                           account)))
       (message "No account at point")))
@@ -2220,7 +2220,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   (defun --eglot-ensure ()
     (if (derived-mode-p 'text-mode)     ; harper-ls
         (eglot-ensure)
-      (when-let ((project-root (project-current)))
+      (when-let* ((project-root (project-current)))
         (eglot-ensure)))))
 
 
@@ -2417,7 +2417,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   (defun toggle-eldoc-doc-buffer ()
     "Depends upon internal details of `eldoc-mode'."
     (interactive)
-    (if-let ((w (some-window (lambda (w) (eq (window-buffer w)
+    (if-let* ((w (some-window (lambda (w) (eq (window-buffer w)
                                              eldoc--doc-buffer)))))
         (progn (delete-window w)
                (when-let* ((last-window-configuration (get this-command :window-configuration)))

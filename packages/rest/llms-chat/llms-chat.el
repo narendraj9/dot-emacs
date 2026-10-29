@@ -137,7 +137,7 @@
                 "google/palm-2-codechat-bison-32k"))))
 
 (defvar llms-chat-gptel-openai-backend
-  (if-let ((openai-api-key (or (and (boundp 'openai-secret-key) openai-secret-key)
+  (if-let* ((openai-api-key (or (and (boundp 'openai-secret-key) openai-secret-key)
                                (llms-chat--api-key-from-auth-source "api.openai.com"))))
       (gptel-make-openai "OpenAI"
         :key openai-api-key
