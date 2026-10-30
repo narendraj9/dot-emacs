@@ -758,7 +758,7 @@ Argument STATE is maintained by `use-package' as it processes symbols."
     (interactive)
     (symbol-overlay-put)
     (when-let* ((command (lookup-key symbol-overlay-map
-                                    (this-command-keys))))
+                                     (this-command-keys))))
       (call-interactively command)))
 
   (defun flash-current-symbol (&rest _)
@@ -1765,7 +1765,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
 (use-package completion-preview
   :delight completion-preview-mode
   :after corfu
-  :hook (after-init. global-completion-preview-mode)
+  :hook (after-init . global-completion-preview-mode)
 
   :bind ( :map completion-preview-active-mode-map
           ("TAB" . indent-for-tab-command)
@@ -2226,7 +2226,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
 
 (use-package dape
   :vc ( :url "https://github.com/svaante/dape.git"
-        :rev :neweset)
+        :rev :newest)
   :commands dape
   :defer t)
 
@@ -2418,7 +2418,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
     "Depends upon internal details of `eldoc-mode'."
     (interactive)
     (if-let* ((w (some-window (lambda (w) (eq (window-buffer w)
-                                             eldoc--doc-buffer)))))
+                                              eldoc--doc-buffer)))))
         (progn (delete-window w)
                (when-let* ((last-window-configuration (get this-command :window-configuration)))
                  (set-window-configuration last-window-configuration)))
@@ -3544,7 +3544,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   :defer t
   :ensure t
   :vc ( :url "https://github.com/ag91/scala-cli-repl"
-        :rev :neweset )
+        :rev :newest )
   :custom (scala-cli-load-repl-in-sbt-context t))
 
 (use-package spark
