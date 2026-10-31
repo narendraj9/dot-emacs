@@ -3539,14 +3539,6 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
     :ensure t
     :pin melpa))
 
-(use-package scala-cli-repl
-  :disabled t
-  :defer t
-  :ensure t
-  :vc ( :url "https://github.com/ag91/scala-cli-repl"
-        :rev :newest )
-  :custom (scala-cli-load-repl-in-sbt-context t))
-
 (use-package spark
   :load-path "etc/"
   :commands (spark-connect!))
