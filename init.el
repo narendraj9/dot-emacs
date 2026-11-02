@@ -3410,11 +3410,28 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
 
 (use-package embark
   :ensure t
+  :preface
+  (defun embark-run-key-command-in-directory (directory)
+    "Run the command bound to a key with DIRECTORY as `default-directory'."
+    (interactive "DDirectory: ")
+    (unless (file-directory-p directory)
+      (user-error "Not a directory: %s" directory))
+    (let* ((default-directory
+            (file-name-as-directory (expand-file-name directory)))
+           (keys (read-key-sequence-vector "Run key: "))
+           (command (key-binding keys t)))
+      (unless (commandp command)
+        (user-error "%s is not bound to a command" (key-description keys)))
+      (command-execute command)))
+
   :bind ( ("C-c x" . embark-act)
 
           :map minibuffer-mode-map
           ("C-c C-o" . embark-collect)
-          ("C-c C-e" . embark-export)) )
+          ("C-c C-e" . embark-export)
+
+          :map embark-file-map
+          ("k" . embark-run-key-command-in-directory)) )
 
 (use-package consult
   :ensure t

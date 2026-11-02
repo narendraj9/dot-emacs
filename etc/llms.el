@@ -260,7 +260,8 @@ LLM is pending."
 (use-package gptel-agent
   :vc ( :url "https://github.com/karthink/gptel-agent"
         :rev :newest )
-  :config (gptel-agent-update))
+  :config
+  (gptel-agent-update) )
 
 (use-package gptel-custom-tools :after gptel :load-path "etc/")
 (use-package gptel-ext :after gptel :load-path "etc/")
