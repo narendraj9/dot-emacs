@@ -527,7 +527,7 @@ Otherwise, limit to only `org-mode' files."
     "Change URL at point by querying its title."
     (interactive)
     (when-let* ((bounds (bounds-of-thing-at-point 'url))
-               (url (thing-at-point 'url)))
+                (url (thing-at-point 'url)))
       (delete-region (car bounds) (cdr bounds))
       (insert (org-make-link-string url (org-cliplink-retrieve-title-synchronously url)))))
 
@@ -706,7 +706,6 @@ Otherwise, limit to only `org-mode' files."
           (haskell    . t)
           (ditaa      . t)
           (verb       . t)
-          (scala-cli  . t)
           (plantuml   . t)))
   (org-babel-do-load-languages 'org-babel-load-languages
                                org-babel-load-languages))
