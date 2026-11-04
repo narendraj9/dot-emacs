@@ -252,7 +252,37 @@ whose title or transcript contains it, ignoring case."
 ;;; Terminals
 
 (defvar-local omnigent-session-id nil
-  "Identifier of the Omnigent session running in this buffer.")
+  "Stable identifier of the Omnigent session bridge in this buffer.
+For native harnesses, switching threads can move the terminal to a new
+session.  The new session keeps this identifier in its bridge-id label.")
+
+(defconst omnigent--bridge-id-labels
+  '(omnigent.claude_native.bridge_id
+    omnigent.codex_native.bridge_id
+    omnigent.antigravity_native.bridge_id
+    omnigent.opencode_native.bridge_id)
+  "Session labels that link a native thread to its terminal bridge.
+These mirror the bridge label constants in Omnigent's native harnesses.")
+
+(defun omnigent--session-matches-id-p (session id)
+  "Return non-nil when SESSION is ID or currently uses ID's bridge."
+  (or (equal (alist-get 'id session) id)
+      (let ((labels (alist-get 'labels session)))
+        (seq-some (lambda (label)
+                    (equal (alist-get label labels) id))
+                  omnigent--bridge-id-labels))))
+
+(defun omnigent--current-session-id (id)
+  "Return the current session id for stable session or bridge ID.
+Native harnesses can switch threads without replacing their terminal.
+The current session retains the terminal's original ID in a bridge-id
+label.  `omnigent-sessions' returns newest sessions first, so the first
+match is the thread currently occupying the bridge."
+  (or (alist-get 'id
+                 (seq-find (lambda (session)
+                             (omnigent--session-matches-id-p session id))
+                           (omnigent-sessions)))
+      id))
 
 (defun omnigent-terminal-live-p (buffer)
   "Return non-nil if BUFFER is a live ghostel terminal.
@@ -473,7 +503,8 @@ Signal an error if the stop fails."
       (user-error "Omnigent session stop already in progress"))
     (setq omnigent--stopping t)
     (unwind-protect
-        (omnigent-stop-session omnigent-session-id)
+        (omnigent-stop-session (omnigent--current-session-id
+                                omnigent-session-id))
       (setq omnigent--stopping nil)))
   t)
 
@@ -629,8 +660,9 @@ which session it is on."
 ;;; Acting on a session
 
 (defun omnigent--id ()
-  "Return the session id of the current terminal, prompting when unknown."
-  (or omnigent-session-id
+  "Return the current session id, prompting outside an Omnigent terminal."
+  (or (and omnigent-session-id
+           (omnigent--current-session-id omnigent-session-id))
       (alist-get 'id (omnigent-read-session "Session: "))))
 
 (defun omnigent--patch (id field value)
@@ -677,9 +709,10 @@ ask the server where it is now rather than trust the launch directory."
   (interactive)
   (unless omnigent-session-id
     (user-error "Not in an Omnigent terminal"))
-  (let ((workspace (or (omnigent-workspace omnigent-session-id)
+  (let* ((id (omnigent--current-session-id omnigent-session-id))
+         (workspace (or (omnigent-workspace id)
                        (user-error "Session %s has no directory"
-                                   omnigent-session-id))))
+                                   id))))
     (setq default-directory workspace)
     (message "%s" workspace)))
 
@@ -727,7 +760,8 @@ that matched as a snippet -- shown next to each title here."
     (with-temp-buffer
       (unless (zerop (call-process omnigent-program nil t nil
                                    "session" "export" "--id" id
-                                   "--output" file))
+                                   "--output" file
+                                   "--server" omnigent-server-url))
         (user-error "%s" (string-trim (buffer-string)))))
     (message "Exported to %s" file)))
 

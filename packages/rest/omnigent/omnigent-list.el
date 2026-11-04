@@ -68,10 +68,11 @@ the online set, not the field's presence, that marks one as running."
   (alist-get 'data (omnigent--request
                     "GET" (format "/sessions/%s/resources/terminals" id))))
 
-(defun omnigent-list--session-buffer (id)
-  "Return the live Omnigent terminal running session ID, if there is one."
+(defun omnigent-list--session-buffer (session)
+  "Return the live Omnigent terminal running SESSION, if there is one."
   (seq-find (lambda (buffer)
-              (equal (buffer-local-value 'omnigent-session-id buffer) id))
+              (omnigent--session-matches-id-p
+               session (buffer-local-value 'omnigent-session-id buffer)))
             (omnigent-buffers)))
 
 
@@ -162,7 +163,7 @@ A part whose source is missing is dropped, not guessed at."
     (vector (omnigent-list--status .status)
             (or .agent_name "")
             (omnigent-list--terminal-names terminals)
-            (if (omnigent-list--session-buffer .id) "*" "")
+            (if (omnigent-list--session-buffer session) "*" "")
             (if .workspace (abbreviate-file-name .workspace) "")
             (or .title "(untitled)"))))
 
@@ -207,7 +208,7 @@ acting on a line needs no request of its own."
 (defun omnigent-list-visit (session)
   "Switch to SESSION's terminal, attaching it when none is live."
   (interactive (list (omnigent-list--session)) omnigent-list-mode)
-  (if-let* ((buffer (omnigent-list--session-buffer (alist-get 'id session))))
+  (if-let* ((buffer (omnigent-list--session-buffer session)))
       (pop-to-buffer buffer)
     (omnigent-attach session)))
 
