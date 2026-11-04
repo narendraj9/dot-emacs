@@ -2154,17 +2154,23 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   :ensure t
   :defer t)
 
+(use-package refactor
+  :ensure nil
+  :defer t
+  :custom
+  (refactor-indications '(eldoc-hint)))
+
 (use-package eglot
   :ensure t
   :defer t
   :bind ( :map eglot-mode-map
           ("C-c C-j" . eglot-reconnect)
-          ("C-c r g" . eglot-code-actions)
-          ("C-c r r" . eglot-rename)
+          ("C-c r g" . refactor)
+          ("C-c r r" . refactor-rename)
           ("C-c r f" . eglot-format)
 
           :map ctl-m-map
-          ("g" . eglot-code-actions) )
+          ("g" . refactor) )
   :init
   ;; Default: 4KB is too low for LSP servers.
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
@@ -2195,7 +2201,6 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   (setq eglot-inlay-hints-mode nil)
   (setq eglot-connect-timeout 300)
   (setq eglot-autoshutdown t)
-  (setq eglot-code-action-indications '(eldoc-hint))
 
   ;; Harper-ls: disable noisy linters for org/text/markdown files
   (setq-default eglot-workspace-configuration
