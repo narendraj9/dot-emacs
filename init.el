@@ -855,6 +855,10 @@ Argument STATE is maintained by `use-package' as it processes symbols."
          ("s &" . async-shell-command)
          ("s ." . shell-command-from-region) )
   :hook ((prog-mode hledger-mode)  . comment-auto-fill)
+  :init
+  ;; Emacs 32 can preview the original and replacement while typing.
+  (when (>= emacs-major-version 32)
+    (setopt query-replace-show-preview 'both))
   :custom
   (
    ;; Multiple-cursors changes transient-mark-mode to (only only .. t),
@@ -2802,6 +2806,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
 
   (add-hook 'eshell-mode-hook
             (lambda ()
+              (setq-local corfu-auto nil)
               ;; `orderless' doesn't make much sense for shell completion.
               (setq-local completion-styles '(basic partial-completion emacs22))
               ;; Disable pixel scrolling to make sure that prompt is always
