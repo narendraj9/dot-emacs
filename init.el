@@ -2239,23 +2239,16 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   :defer t
   :when (treesit-available-p)
   :bind (("M-g u" . --treesit-backward-up) )
-  :doc
-  "[2023-02-08 Wed 22:48] Tree-sitter support is now built into Emacs.
-   The directory where shared libraries for language grammars are
-   installed is not configurable yet (fixed to tree-sitter under
-   `user-emacs-directory'."
-
   :custom ( (treesit-enabled-modes t)
-            (treesit-auto-install-grammar t) )
+            (treesit-auto-install-grammar 'ask) )
   :init
-  ;; Settings `treesit-enabled-modes' enables *-ts-mode for every possible
-  ;; language in newer versions of Emacs. TBD: Remove it once Emacs is up to
-  ;; date on every machine.
-  (dolist (lang '( bash c c++ css elixir go html java js json lua markdown
-                   python ruby rust typescript ))
-    (add-to-list 'major-mode-remap-alist
-                 (cons (intern (format "%s-mode" lang))
-                       (intern (format "%s-ts-mode" lang)))))
+  ;; Emacs 31 maintains these mappings; retain the old fallback on older hosts.
+  (when (< emacs-major-version 31)
+    (dolist (lang '( bash c c++ css elixir go html java js json lua markdown
+                     python ruby rust typescript ))
+      (add-to-list 'major-mode-remap-alist
+                   (cons (intern (format "%s-mode" lang))
+                         (intern (format "%s-ts-mode" lang))))))
 
   (defvar-keymap repeat/treesit-backward-up
     :repeat t
@@ -3707,6 +3700,9 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
 (use-package emacs-lisp-mode
   :bind (:map emacs-lisp-mode-map
               ("C-c C-k" . eval-buffer*))
+  :custom
+  (elisp-fontify-semantically t)
+
   :preface
   (defun eval-buffer* ()
     "Eval current buffer with some logging for feedback."
@@ -3955,7 +3951,8 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
               ;; 1. Graphics in `ob-ipython' do not work if we remove trailing
               ;;    newlines. So, this should be excluded for buffers in
               ;;    `image-mode'.
-              (when (not (memq major-mode '(markdown-mode image-mode pdf-view-mode)))
+              ;; Preserve Markdown whitespace in both traditional and TS modes.
+              (when (not (memq major-mode '(markdown-mode markdown-ts-mode image-mode pdf-view-mode)))
                 (whitespace-cleanup)
                 (delete-trailing-whitespace)))))
 
@@ -4408,12 +4405,10 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   ;; Honor remote PATH variable
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
-  ;; Assume directories are changed only through tramp in a session
-  (setq tramp-completion-reread-directory-timeout nil)
+  ;; The old controlmaster option was renamed in Emacs 30; nil keeps ssh config in control.
+  (setq tramp-use-connection-share nil)
 
-  ;; Use control master options for ssh_config file
-  (setq tramp-use-ssh-controlmaster-options nil)
-
+  ;; The removed TRAMP directory timeout is replaced by this remote file cache.
   ;; Cache file attributes for remote files for 5 minutes.
   (setq remote-file-name-inhibit-cache 300)
   ;; Make `vc-mode' ignore remote files
