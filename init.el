@@ -1095,16 +1095,6 @@ Argument STATE is maintained by `use-package' as it processes symbols."
   :demand t
   :custom (TeX-master 'dwim)
   :init
-  (use-package company-math
-    :ensure t
-    :defer t
-    :init
-    (add-hook 'TeX-mode-hook
-              (lambda ()
-                (setq-local company-backends
-                            (append '((company-math-symbols-latex company-latex-commands))
-                                    company-backends)))))
-
   (use-package tex
     :defer t
     :init
@@ -1751,7 +1741,6 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   :hook
   (after-init . global-corfu-mode)
   (after-init . corfu-history-mode)
-  (prog-mode . (lambda () (setq-local corfu-auto t)))
 
   :init
   (add-hook 'corfu-history-mode-hook
@@ -1787,30 +1776,6 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
     (interactive)
     (completion-preview-insert)
     (newline-and-indent)))
-
-(use-package company
-  :ensure t
-  :delight company-mode
-  ;; :hook (after-init . global-company-mode)
-  :custom
-  (company-idle-delay 1.0)
-  (company-tooltip-align-annotations t)
-  (company-tooltip-flip-when-above t)
-  (company-tooltip-offset-display 'lines)
-  (company-format-margin-function nil)
-
-  :bind ( :map company-active-map
-          ("C-j"   . company-complete-selection)
-          ("C-n"   . company-select-next-or-abort)
-          ("C-p"   . company-select-previous-or-abort) )
-
-  :config
-  ;; https://www.reddit.com/r/emacs/comments/nichkl/how_to_use_different_completion_styles_in_the/
-  (advice-add 'company-capf
-              :around
-              (lambda (capf-fn &rest args)
-                (let ((completion-styles '(basic partial-completion)))
-                  (apply capf-fn args)))))
 
 ;; ──────────────────────────────────────────────────────────────────
 
@@ -2052,13 +2017,10 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
 
   (add-hook 'hledger-mode-hook
             (lambda ()
-              (require 'company)
-              (make-local-variable 'company-backends)
-              (add-to-list 'company-backends 'hledger-company)
               (setq-local completion-styles '(basic partial-completion orderless))
-              (setq corfu-auto-delay 0.1)
-              (add-to-list 'completion-at-point-functions
-                           (cape-company-to-capf 'hledger-company))))
+              (setq-local corfu-auto-delay 0.1)
+              (add-hook 'completion-at-point-functions
+                        #'hledger-completion-at-point nil t)))
 
   (add-hook 'hledger-view-mode-hook #'hl-line-mode)
   (add-hook 'hledger-view-mode-hook
@@ -3011,65 +2973,6 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
                 (holes-mode -1)
                 (abbrev-mode -1)
                 (sub-paredit-mode -1)))))
-
-
-(use-package company-coq
-  :after coq
-  :ensure t
-  :commands company-coq-mode
-  :bind (:map company-coq-map
-              ;; ("<tab>" . company-complete)
-              ("M-<return>"))
-  :bind (:map coq-mode-map
-              ("C-M-h" . company-coq-toggle-definition-overlay))
-  :hook (coq-mode . company-coq-mode)
-  :custom
-  (company-coq-disabled-features
-   '(hello prettify-symbols smart-subscripts dynamic-symbols-backend))
-  (company-coq-prettify-symbols-alist
-   '(("|-"     . 8866)
-     ("True"   . 8868)
-     ("False"  . 8869)
-     ("->"     . 8594)
-     ("-->"    . 10230)
-     ("<-"     . 8592)
-     ("<--"    . 10229)
-     ("<->"    . 8596)
-     ("<-->"   . 10231)
-     ("==>"    . 10233)
-     ("<=="    . 10232)
-     ("++>"    . 10239)
-     ("<++"    . 11059)
-     ("fun"    . 955)
-     ("forall" . 8704)
-     ("exists" . 8707)
-     ("/\\"    . 8743)
-     ("\\/"    . 8744)
-     ("~"      . 172)
-     ("+-"     . 177)
-     ("<="     . 8804)
-     (">="     . 8805)
-     ("<>"     . 8800)
-     ("*"      . 215)
-     ("++"     . 10746)
-     ("nat"    . 120029)
-     ("Z"      . 8484)
-     ("N"      . 8469)
-     ("Q"      . 8474)
-     ("Real"   . 8477)
-     ("bool"   . 120121)
-     ("Prop"   . 120031)))
-  :custom-face
-  (company-coq-features/code-folding-bullet-face ((t (:weight bold))))
-  :functions (cape-company-to-capf)
-  :config
-  (add-hook 'company-coq-mode-hook
-            #'(lambda ()
-                ;; (company-mode -1)
-                (require 'cape)
-                (setq-local completion-at-point-functions
-                            (mapcar #'cape-company-to-capf
-                                    company-coq-enabled-backends)))))
 
 
 ;;; GRAPHICS
@@ -4039,26 +3942,6 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
 
 (use-package mix :ensure t)
 
-(use-package alchemist
-  :ensure t
-  :after elixir-ts-mode
-  ;; :hook (elixir-ts-mode . alchemist-mode)
-  :bind (:map elixir-ts-mode-map
-              ("C-x C-e" . alchemist-eval-current-line))
-  :init
-  (setq alchemist-key-command-prefix (kbd "C-;")
-        alchemist-goto-elixir-source-dir (expand-file-name "~/code/elixir/")
-        alchemist-goto-erlang-source-dir (expand-file-name "~/code/otp/"))
-
-  (ensure-windows-on-right "\\*alchemist-eval-mode\\*")
-
-  (add-hook 'alchemist-help-minor-mode-hook
-            (lambda ()
-              (bind-keys :map alchemist-help-minor-mode-map
-                         ("RET" . alchemist-help-search-at-point)
-                         ("l" . alchemist-help-last)
-                         ("TAB" . alchemist-next-overlay)))))
-
 ;;; RUBY MODE
 ;;  ─────────────────────────────────────────────────────────────────
 
@@ -4205,14 +4088,7 @@ is tracking the mouse, scroll the Emacs buffer one page instead."
   :defer t
   :config
   (use-package nix-sandbox   :disabled t :ensure t)
-  (use-package nixos-options :disabled t :ensure t)
-  (use-package company-nixos-options
-    :doc "I have disabled it as there are exceptions in eshell
-    because of the backend."
-    :disabled t
-    :ensure t
-    :config
-    (add-to-list 'company-backends 'company-nixos-options)))
+  (use-package nixos-options :disabled t :ensure t))
 
 ;;; Grammars, Parsers and Compilers
 ;; ──────────────────────────────────────────────────────────────────
