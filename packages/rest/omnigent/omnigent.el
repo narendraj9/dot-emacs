@@ -29,6 +29,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'ghostel)
 (require 'let-alist)
 (require 'project)
@@ -434,7 +435,6 @@ sentinel can beat ghostel's final redraw."
 Automatic cleanup does not stop the persistent session again."
   (cond
    ((not (buffer-live-p buffer)))
-   ((buffer-local-value 'omnigent--stopping buffer))
    ((omnigent-terminal-live-p buffer))
    ((and omnigent-stale-runner-retry-delay
          (not (buffer-local-value 'omnigent--retried buffer))
@@ -489,9 +489,6 @@ Exits go to `omnigent--on-exit'.  The shared launcher that
       (pop-to-buffer buffer)
       (omnigent--exec buffer command))))
 
-(defvar-local omnigent--stopping nil
-  "Non-nil while intentionally stopping this buffer's session.")
-
 (defun omnigent-stop-session (id)
   "Stop session ID's resources, retaining its conversation for resume.
 Signal an error if the stop fails."
@@ -502,16 +499,57 @@ Signal an error if the stop fails."
       (user-error "Could not stop Omnigent session %s: %s"
                   id (string-trim (buffer-string))))))
 
+(defun omnigent--run-stop-async (id server)
+  "Stop session ID on SERVER without waiting for the CLI."
+  (let ((output (generate-new-buffer " *omnigent-stop*")))
+    (condition-case err
+        (make-process
+         :name "omnigent-stop" :buffer output :noquery t
+         :command (list omnigent-program "host" "stop-session" "--server" server id)
+         :sentinel
+         (lambda (process _event)
+           (when (memq (process-status process) '(exit signal))
+             (unwind-protect
+                 (unless (and (eq (process-status process) 'exit)
+                              (zerop (process-exit-status process)))
+                   (message "Could not stop Omnigent session %s: %s" id
+                            (with-current-buffer output
+                              (string-trim (buffer-string)))))
+               (kill-buffer output)))))
+      (error
+       (kill-buffer output)
+       (message "Could not start Omnigent session stop for %s: %s"
+                id (error-message-string err))))))
+
+(defun omnigent--stop-session-async (id server)
+  "Resolve bridge ID on SERVER, then stop its session in the background."
+  (condition-case err
+      (let ((request-message-level -1))
+        (request (format "%s/v1/sessions?limit=%d&sort_by=updated_at&order=desc"
+                         server omnigent-session-limit)
+          :timeout 5
+          :parser (lambda ()
+                    (json-parse-buffer :object-type 'alist :array-type 'list
+                                       :null-object nil))
+          :success (cl-function
+                    (lambda (&key data &allow-other-keys)
+                      (let ((current (seq-find
+                                      (lambda (session)
+                                        (omnigent--session-matches-id-p session id))
+                                      (alist-get 'data data))))
+                        (omnigent--run-stop-async
+                         (or (alist-get 'id current) id) server))))
+          :error (cl-function
+                  (lambda (&key error-thrown &allow-other-keys)
+                    (message "Could not find current Omnigent session for %s: %S"
+                             id error-thrown)))))
+    (error (message "Could not look up Omnigent session %s: %s"
+                    id (error-message-string err)))))
+
 (defun omnigent--stop-before-kill ()
-  "Stop this buffer's session before allowing `kill-buffer' to proceed."
+  "Start stopping this buffer's session and allow `kill-buffer' to proceed."
   (when omnigent-session-id
-    (when omnigent--stopping
-      (user-error "Omnigent session stop already in progress"))
-    (setq omnigent--stopping t)
-    (unwind-protect
-        (omnigent-stop-session (omnigent--current-session-id
-                                omnigent-session-id))
-      (setq omnigent--stopping nil)))
+    (omnigent--stop-session-async omnigent-session-id omnigent-server-url))
   t)
 
 (defun omnigent-terminal (name directory command &optional session-id)
