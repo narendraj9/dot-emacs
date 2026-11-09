@@ -182,18 +182,22 @@ reply that carries no body, such as a 204."
                       (format "%s unreachable" omnigent-server-url))))
     (request-response-data response)))
 
-(defun omnigent-sessions (&optional limit query)
+(defun omnigent-sessions (&optional limit query project)
   "Return the recent unarchived sessions, most recently active first.
 LIMIT caps how many the server returns, defaulting to
 `omnigent-session-limit'.  QUERY, when non-nil, keeps only the sessions
-whose title or transcript contains it, ignoring case."
+whose title or transcript contains it, ignoring case.  PROJECT, when
+non-nil, restricts results to that project name."
   (alist-get 'data
              (omnigent--request
-              "GET" (format "/sessions?limit=%d&sort_by=updated_at&order=desc%s"
+              "GET" (format "/sessions?limit=%d&sort_by=updated_at&order=desc%s%s"
                             (or limit omnigent-session-limit)
                             (if query
                                 (concat "&search_query="
                                         (url-hexify-string query))
+                              "")
+                            (if project
+                                (concat "&project=" (url-hexify-string project))
                               "")))))
 
 (defun omnigent--find-named (path name)
@@ -232,9 +236,9 @@ whose title or transcript contains it, ignoring case."
             "  " (propertize (if .workspace (abbreviate-file-name .workspace) "")
                              'face 'completions-annotations))))
 
-(defun omnigent-read-session (prompt)
-  "Read a session with PROMPT and return it as an alist."
-  (let* ((sessions (omnigent-sessions))
+(defun omnigent-read-session (prompt &optional project)
+  "Read a session with PROMPT, optionally restricted to PROJECT."
+  (let* ((sessions (omnigent-sessions nil nil project))
          (width (min 60 (apply #'max 20
                                (mapcar (lambda (session)
                                          (string-width
@@ -244,7 +248,9 @@ whose title or transcript contains it, ignoring case."
                           (cons (omnigent--session-line session width) session))
                         sessions)))
     (unless table
-      (user-error "No Omnigent sessions on %s" omnigent-server-url))
+      (user-error "No Omnigent sessions%s on %s"
+                  (if project (format " in project %s" project) "")
+                  omnigent-server-url))
     (cdr (assoc (completing-read prompt (omnigent--ordered-table table) nil t)
                 table))))
 
@@ -536,6 +542,13 @@ is still live, while resuming hands it to its harness either way."
     (omnigent-terminal (omnigent--session-buffer-name session) .workspace
                        (omnigent--server-command "resume" .id) .id)))
 
+(defun omnigent-attach-project ()
+  "Attach to a session in the current directory's project."
+  (interactive)
+  (let ((project (omnigent--project-name default-directory)))
+    (omnigent-attach (omnigent-read-session
+                      (format "Attach to session in %s: " project) project))))
+
 ;;;###autoload
 (defun omnigent-switch-buffer ()
   "Switch to one of the live Omnigent terminals."
@@ -735,12 +748,13 @@ ask the server where it is now rather than trust the launch directory."
                   'face 'shadow))))
 
 ;;;###autoload
-(defun omnigent-search (query)
+(defun omnigent-search (query &optional project)
   "Attach to a session whose title or transcript contains QUERY.
 The server scans whole transcripts, ignoring case, and returns the text
-that matched as a snippet -- shown next to each title here."
+that matched as a snippet -- shown next to each title here.  When PROJECT
+is non-nil, search only that project."
   (interactive (list (read-string "Search sessions: ")))
-  (let* ((sessions (omnigent-sessions nil query))
+  (let* ((sessions (omnigent-sessions nil query project))
          (table (mapcar (lambda (session)
                           (cons (omnigent--search-line session) session))
                         sessions)))
@@ -750,6 +764,11 @@ that matched as a snippet -- shown next to each title here."
      (cdr (assoc (completing-read "Session: " (omnigent--ordered-table table)
                                   nil t)
                  table)))))
+
+(defun omnigent-search-project (query)
+  "Search for QUERY in sessions in the current directory's project."
+  (interactive (list (read-string "Search project sessions: ")))
+  (omnigent-search query (omnigent--project-name default-directory)))
 
 (defun omnigent-export (id file)
   "Export the transcript of session ID to FILE as JSONL."
@@ -787,9 +806,11 @@ the current terminal or else ask for."
    ["Go"
     ("d" "Sync directory" omnigent-sync-directory)
     ("a" "Attach to a session" omnigent-attach)
+    ("A" "Attach in project" omnigent-attach-project)
     ("b" "Switch terminal" omnigent-switch-buffer)
     ("l" "List running sessions" omnigent-list-sessions)
-    ("s" "Search transcripts" omnigent-search)]])
+    ("s" "Search transcripts" omnigent-search)
+    ("S" "Search project transcripts" omnigent-search-project)]])
 
 
 (provide 'omnigent)
